@@ -15,6 +15,7 @@ export interface User {
   subscription: Subscription;
   settings: UserSettings;
   encryptionHint?: string;
+  googleDriveConnected?: boolean;
 }
 
 export interface UserSettings {
@@ -30,12 +31,13 @@ export interface UserSettings {
 
 // Subscription types
 export interface Subscription {
-  type: 'free' | 'premium' | 'family';
+  type: 'free' | 'premium' | 'enterprise';
   status: 'active' | 'expired' | 'cancelled';
-  startDate: Date;
+  startDate?: Date;
   endDate?: Date;
-  features: string[];
-  accountLimit: number;
+  expiresAt?: Date;
+  features?: string[];
+  accountLimit?: number;
 }
 
 // Device types

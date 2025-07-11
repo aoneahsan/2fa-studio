@@ -78,6 +78,14 @@ const authSlice = createSlice({
       state.error = null;
       state.encryptionKey = null;
     },
+    updateUserSubscription: (state, action: PayloadAction<Partial<User['subscription']>>) => {
+      if (state.user) {
+        state.user.subscription = {
+          ...state.user.subscription,
+          ...action.payload
+        };
+      }
+    },
   },
   extraReducers: (builder) => {
     // Sign In
@@ -128,6 +136,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setLoading, setError, setEncryptionKey, clearAuth } = authSlice.actions;
+export const { setUser, setLoading, setError, setEncryptionKey, clearAuth, updateUserSubscription } = authSlice.actions;
 
 export default authSlice.reducer;

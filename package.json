@@ -14,11 +14,16 @@
     "cap:ios": "npx cap open ios",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist node_modules .turbo",
-    "postinstall": "test -f .env || cp .env.example .env"
+    "postinstall": "test -f .env || cp .env.example .env",
+    "cap:run:ios": "npx cap run ios",
+    "cap:run:android": "npx cap run android",
+    "ext:build": "cd chrome-extension && zip -r ../2fa-studio-extension.zip .",
+    "ext:watch": "cd chrome-extension && echo 'Load unpacked extension in Chrome developer mode'"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.2",
     "@capacitor/app": "^7.0.1",
+    "@capacitor/barcode-scanner": "^2.0.3",
     "@capacitor/camera": "^7.0.1",
     "@capacitor/cli": "^7.4.2",
     "@capacitor/core": "^7.4.2",
@@ -37,6 +42,7 @@
     "capacitor-native-update": "^0.0.3",
     "firebase": "^11.10.0",
     "otpauth": "^9.4.0",
+    "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

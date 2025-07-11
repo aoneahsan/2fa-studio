@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2FA Studio</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <img src="../assets/icon-48.png" alt="2FA Studio" class="logo">
+        <h1>2FA Studio</h1>
+      </div>
+      <button id="settingsBtn" class="icon-btn" title="Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6m11-11h-6m-6 0H1"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Search -->
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search accounts..."
+      >
+    </div>
+
+    <!-- Account List -->
+    <div id="accountsList" class="accounts-list">
+      <!-- Accounts will be populated here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state hidden">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" opacity="0.5">
+        <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"></path>
+      </svg>
+      <p>No accounts found</p>
+      <button id="addAccountBtn" class="btn btn-primary">
+        Add Account
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading accounts...</p>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <button id="openAppBtn" class="btn btn-secondary">
+        Open App
+      </button>
+      <button id="addNewBtn" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add
+      </button>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
