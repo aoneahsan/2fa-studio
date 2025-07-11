@@ -90,7 +90,8 @@
       "Bash(twine:*)",
       "Bash(yarn create:*)",
       "Bash(true)",
-      "Bash(npx cap init:*)"
+      "Bash(npx cap init:*)",
+      "Bash(yarn dev)"
     ],
     "deny": []
   }
