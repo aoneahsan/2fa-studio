@@ -15,6 +15,7 @@ export interface User {
   phoneNumber?: string;
   createdAt: Date;
   updatedAt: Date;
+  lastLogin?: Date;
   subscription: Subscription;
   settings: UserSettings;
   encryptionHint?: string;
@@ -22,6 +23,10 @@ export interface User {
   lastBackup: Date | null;
   backupEnabled: boolean;
   deviceCount: number;
+  accountCount?: number;
+  storageUsed?: number;
+  role?: UserRole;
+  disabled?: boolean;
 }
 
 export interface UserSettings {
@@ -44,10 +49,13 @@ export interface UserSettings {
 }
 
 // Subscription types
+export type SubscriptionTier = 'free' | 'premium' | 'enterprise' | 'family';
+export type SubscriptionStatus = 'active' | 'expired' | 'cancelled' | 'past_due' | 'trialing';
+
 export interface Subscription {
-  tier: 'free' | 'premium' | 'enterprise' | 'family';
+  tier: SubscriptionTier;
   type?: 'free' | 'premium' | 'enterprise'; // For backward compatibility
-  status: 'active' | 'expired' | 'cancelled';
+  status: SubscriptionStatus;
   startDate: Date;
   endDate: Date | null;
   expiresAt?: Date; // For backward compatibility
@@ -58,7 +66,15 @@ export interface Subscription {
     prioritySupport: boolean;
     advancedSecurity: boolean;
     noAds: boolean;
+    familySharing?: boolean;
   };
+  // Stripe data
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripePriceId?: string;
+  currentPeriodStart?: Date;
+  currentPeriodEnd?: Date;
+  cancelAtPeriodEnd?: boolean;
 }
 
 // Device types
@@ -151,4 +167,40 @@ export interface Route {
   icon?: string;
   requiresAuth: boolean;
   requiredPlan?: ('free' | 'premium' | 'family')[];
+}
+
+// Admin types
+export type UserRole = 'user' | 'admin' | 'super_admin';
+
+export interface AdminUser extends User {
+  role: UserRole;
+  permissions?: string[];
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalAccounts: number;
+  subscriptions: {
+    free: number;
+    premium: number;
+    family: number;
+  };
+  revenue: {
+    daily: number;
+    monthly: number;
+    yearly: number;
+  };
+  churnRate: number;
+  conversionRate: number;
+}
+
+export interface AdminAction {
+  id: string;
+  adminId: string;
+  action: string;
+  targetUserId?: string;
+  metadata: Record<string, any>;
+  timestamp: Date;
+  ipAddress?: string;
 }

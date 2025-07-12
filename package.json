@@ -39,6 +39,7 @@
 		"docs:write-heading-ids": "cd docs-site && yarn write-heading-ids"
 	},
 	"dependencies": {
+		"@capacitor-community/admob": "^7.0.3",
 		"@capacitor-community/barcode-scanner": "^4.0.1",
 		"@capacitor/android": "^7.4.2",
 		"@capacitor/app": "^7.0.1",
@@ -54,6 +55,8 @@
 		"@headlessui/react": "^2.2.4",
 		"@heroicons/react": "^2.2.0",
 		"@reduxjs/toolkit": "^2.8.2",
+		"@stripe/react-stripe-js": "^3.7.0",
+		"@stripe/stripe-js": "^7.4.0",
 		"@types/bcryptjs": "^3.0.0",
 		"@types/node": "^24.0.13",
 		"bcryptjs": "^3.0.2",
@@ -72,6 +75,7 @@
 		"react-onesignal": "^3.2.3",
 		"react-redux": "^9.2.0",
 		"react-router-dom": "^7.6.3",
+		"stripe": "^18.3.0",
 		"tailwindcss": "^4.1.11"
 	},
 	"devDependencies": {

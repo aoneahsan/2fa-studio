@@ -15,6 +15,8 @@ import {
   CloudArrowUpIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
+import AdBanner from '../components/ads/AdBanner';
+import AdInterstitialTrigger from '../components/ads/AdInterstitialTrigger';
 
 /**
  * Main dashboard page
@@ -69,7 +71,12 @@ const DashboardPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <>
+      {/* Ad Components for Free Users */}
+      <AdBanner position="bottom" />
+      <AdInterstitialTrigger triggerAfterActions={5} triggerAfterSeconds={180} />
+      
+      <div className="space-y-6">
       {/* Welcome Section */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
@@ -168,6 +175,7 @@ const DashboardPage: React.FC = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

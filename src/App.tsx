@@ -27,6 +27,12 @@ const AccountsPage = lazy(() => import('./pages/AccountsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const BackupPage = lazy(() => import('./pages/BackupPage'));
 
+// Admin pages
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const AdminRoute = lazy(() => import('./components/admin/AdminRoute'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+
 
 /**
  * App content component (wrapped with Redux)
@@ -84,6 +90,18 @@ const AppContent: React.FC = () => {
               <Route path="/accounts" element={<AccountsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/backup" element={<BackupPage />} />
+            </Route>
+          </Route>
+
+          {/* Admin routes */}
+          <Route element={<AdminRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/subscriptions" element={<AdminUsers />} />
+              <Route path="/admin/analytics" element={<AdminDashboard />} />
+              <Route path="/admin/security" element={<AdminDashboard />} />
+              <Route path="/admin/settings" element={<AdminDashboard />} />
             </Route>
           </Route>
 
