@@ -1,0 +1,26 @@
+# Compiled TypeScript
+lib/
+
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+firebase-debug.log*
+firebase-debug.*.log
+
+# Firebase cache
+.firebase/
+
+# Environment files
+.env
+.env.local
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# TypeScript cache
+*.tsbuildinfo

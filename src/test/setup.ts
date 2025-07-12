@@ -107,3 +107,86 @@ vi.mock('firebase/performance', () => ({
   getPerformance: vi.fn(() => ({ app: { name: '[DEFAULT]' } })),
   trace: vi.fn(),
 }));
+
+// Mock OTPAuth
+vi.mock('otpauth', () => ({
+  TOTP: vi.fn().mockImplementation((config) => ({
+    generate: vi.fn(() => '123456'),
+    period: 30,
+    digits: 6,
+    algorithm: 'SHA1',
+    issuer: config.issuer,
+    label: config.label
+  })),
+  HOTP: vi.fn().mockImplementation((config) => ({
+    generate: vi.fn(() => '123456'),
+    counter: 0,
+    digits: 6,
+    algorithm: 'SHA1',
+    issuer: config.issuer,
+    label: config.label
+  })),
+  URI: {
+    parse: vi.fn((uri) => ({
+      issuer: 'Test',
+      label: 'test@example.com',
+      secret: 'JBSWY3DPEHPK3PXP',
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30
+    }))
+  }
+}));
+
+// Mock QR Scanner
+vi.mock('qr-scanner', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    destroy: vi.fn(),
+    setCamera: vi.fn()
+  }))
+}));
+
+// Mock Capacitor plugins
+vi.mock('@capacitor/preferences', () => ({
+  Preferences: {
+    get: vi.fn(() => Promise.resolve({ value: null })),
+    set: vi.fn(() => Promise.resolve()),
+    remove: vi.fn(() => Promise.resolve()),
+    clear: vi.fn(() => Promise.resolve())
+  }
+}));
+
+vi.mock('capacitor-biometric-auth', () => ({
+  BiometricAuth: {
+    isAvailable: vi.fn(() => Promise.resolve({ isAvailable: false })),
+    verify: vi.fn(() => Promise.resolve({ isVerified: true }))
+  }
+}));
+
+// Mock crypto for testing
+Object.defineProperty(global, 'crypto', {
+  value: {
+    getRandomValues: vi.fn((arr) => {
+      for (let i = 0; i < arr.length; i++) {
+        arr[i] = Math.floor(Math.random() * 256);
+      }
+      return arr;
+    }),
+    subtle: {
+      encrypt: vi.fn(),
+      decrypt: vi.fn(),
+      generateKey: vi.fn(),
+      importKey: vi.fn(),
+      exportKey: vi.fn()
+    }
+  }
+});
+
+// Console mocks for cleaner test output
+global.console = {
+  ...console,
+  warn: vi.fn(),
+  error: vi.fn()
+};

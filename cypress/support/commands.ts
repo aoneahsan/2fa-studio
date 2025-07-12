@@ -9,21 +9,21 @@ declare global {
     interface Chainable {
       /**
        * Custom command to login to the application
-       * @example cy.login('test@example.com', 'password123', 'encryptionPassword')
+       * @example cy.login('test@example.com', 'password123')
        */
-      login(email: string, password: string, encryptionPassword: string): Chainable<void>;
+      login(email: string, password: string): Chainable<void>;
       
       /**
        * Custom command to register a new user
-       * @example cy.register('test@example.com', 'password123', 'encryptionPassword')
+       * @example cy.register('test@example.com', 'password123', 'Test User')
        */
-      register(email: string, password: string, encryptionPassword: string): Chainable<void>;
+      register(email: string, password: string, name: string): Chainable<void>;
       
       /**
        * Custom command to add a 2FA account manually
-       * @example cy.addAccount('Google', 'john@gmail.com', 'JBSWY3DPEHPK3PXP')
+       * @example cy.addAccount({ issuer: 'Google', label: 'john@gmail.com', secret: 'JBSWY3DPEHPK3PXP' })
        */
-      addAccount(issuer: string, label: string, secret: string): Chainable<void>;
+      addAccount(account: { issuer: string; label: string; secret: string; type?: 'totp' | 'hotp' }): Chainable<void>;
       
       /**
        * Custom command to verify TOTP code is displayed
@@ -36,72 +36,109 @@ declare global {
        * @example cy.cleanup()
        */
       cleanup(): Chainable<void>;
+      
+      /**
+       * Mock biometric authentication
+       */
+      mockBiometric(success?: boolean): Chainable<void>;
+      
+      /**
+       * Setup Firebase emulator
+       */
+      setupEmulator(): Chainable<void>;
     }
   }
 }
 
 // Login command
-Cypress.Commands.add('login', (email: string, password: string, encryptionPassword: string) => {
+Cypress.Commands.add('login', (email: string, password: string) => {
   cy.visit('/login');
-  cy.get('input[type="email"]').type(email);
-  cy.get('input[type="password"]').type(password);
-  cy.get('button[type="submit"]').click();
-  
-  // Handle encryption password
-  cy.get('input[placeholder*="encryption password"]', { timeout: 10000 }).should('be.visible');
-  cy.get('input[placeholder*="encryption password"]').type(encryptionPassword);
-  cy.get('button[type="submit"]').click();
+  cy.get('[data-cy=login-email]').type(email);
+  cy.get('[data-cy=login-password]').type(password);
+  cy.get('[data-cy=login-submit]').click();
   
   // Wait for redirect to dashboard
   cy.url().should('include', '/dashboard');
+  cy.get('[data-cy=loading]').should('not.exist');
 });
 
 // Register command
-Cypress.Commands.add('register', (email: string, password: string, encryptionPassword: string) => {
+Cypress.Commands.add('register', (email: string, password: string, name: string) => {
   cy.visit('/register');
-  cy.get('input[type="email"]').type(email);
-  cy.get('input[type="password"]').first().type(password);
-  cy.get('input[type="password"]').eq(1).type(password); // Confirm password
-  cy.get('input[placeholder*="encryption password"]').first().type(encryptionPassword);
-  cy.get('input[placeholder*="encryption password"]').eq(1).type(encryptionPassword); // Confirm
-  cy.get('button[type="submit"]').click();
+  cy.get('[data-cy=register-email]').type(email);
+  cy.get('[data-cy=register-password]').type(password);
+  cy.get('[data-cy=register-name]').type(name);
+  cy.get('[data-cy=register-submit]').click();
   
   // Wait for redirect to dashboard
   cy.url().should('include', '/dashboard');
+  cy.get('[data-cy=loading]').should('not.exist');
 });
 
 // Add account command
-Cypress.Commands.add('addAccount', (issuer: string, label: string, secret: string) => {
-  cy.visit('/accounts');
-  cy.get('button').contains('Add Account').click();
-  cy.get('button').contains('Enter Manually').click();
+Cypress.Commands.add('addAccount', (account) => {
+  cy.get('[data-cy=add-account-btn]').click();
+  cy.get('[data-cy=manual-entry-tab]').click();
   
-  cy.get('input[name="issuer"]').type(issuer);
-  cy.get('input[name="label"]').type(label);
-  cy.get('input[name="secret"]').type(secret);
-  cy.get('button').contains('Add Account').click();
+  cy.get('[data-cy=account-issuer]').type(account.issuer);
+  cy.get('[data-cy=account-label]').type(account.label);
+  cy.get('[data-cy=account-secret]').type(account.secret);
   
-  // Verify account was added
-  cy.contains(issuer).should('be.visible');
+  if (account.type === 'hotp') {
+    cy.get('[data-cy=account-type]').select('hotp');
+    cy.get('[data-cy=account-counter]').type('0');
+  }
+  
+  cy.get('[data-cy=save-account-btn]').click();
+  cy.get('[data-cy=toast-success]').should('contain', 'Account added');
+  cy.get('[data-cy=account-card]').should('exist');
 });
 
 // Verify TOTP code command
 Cypress.Commands.add('verifyTOTPCode', (issuer: string) => {
-  cy.contains(issuer).parent().parent().within(() => {
+  cy.get('[data-cy=account-card]').contains(issuer).parent().within(() => {
     // Check that a 6-digit code is displayed
-    cy.get('[data-testid="totp-code"]').should('match', /^\d{6}$/);
+    cy.get('[data-cy=account-code]').should('match', /^\d{6}$/);
     
-    // Check that countdown is visible
-    cy.get('[data-testid="countdown"]').should('be.visible');
+    // Check that countdown is visible for TOTP
+    cy.get('[data-cy=countdown-timer]').should('be.visible');
   });
 });
 
 // Cleanup command
 Cypress.Commands.add('cleanup', () => {
-  // This would typically call an API to clean up test data
-  // For now, we'll just clear local storage
   cy.clearLocalStorage();
   cy.clearCookies();
+  
+  // Clear IndexedDB if available
+  cy.window().then((win) => {
+    if (win.indexedDB) {
+      win.indexedDB.deleteDatabase('firebaseLocalStorageDb');
+    }
+  });
+});
+
+// Mock biometric authentication
+Cypress.Commands.add('mockBiometric', (success = true) => {
+  cy.window().then((win) => {
+    win.BiometricAuth = {
+      isAvailable: () => Promise.resolve({ isAvailable: true }),
+      verify: () => Promise.resolve({ isVerified: success })
+    };
+  });
+});
+
+// Setup Firebase emulator
+Cypress.Commands.add('setupEmulator', () => {
+  cy.window().then((win) => {
+    // Initialize Firebase with emulator settings
+    if (win.firebase) {
+      win.firebase.auth().useEmulator('http://localhost:9099');
+      win.firebase.firestore().useEmulator('localhost', 8080);
+      win.firebase.storage().useEmulator('localhost', 9199);
+      win.firebase.functions().useEmulator('localhost', 5001);
+    }
+  });
 });
 
 export {};
