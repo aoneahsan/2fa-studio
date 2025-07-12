@@ -93,7 +93,11 @@
       "Bash(npx cap init:*)",
       "Bash(yarn dev)",
       "Bash(yarn outdated)",
-      "Bash(yarn type-check)"
+      "Bash(yarn type-check)",
+      "Bash(yarn test:*)",
+      "Bash(npx cap add:*)",
+      "Bash(npx cap:*)",
+      "Bash(pod install:*)"
     ],
     "deny": []
   }

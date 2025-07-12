@@ -5,6 +5,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import QrScanner from 'qr-scanner';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { Capacitor } from '@capacitor/core';
 import { XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { OTPService } from '../../services/otp.service';
 
@@ -24,38 +26,73 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
 
   useEffect(() => {
     const initScanner = async () => {
-      if (!videoRef.current) return;
+      // Check if we're on a native platform
+      const isNative = Capacitor.isNativePlatform();
 
-      try {
-        // Check if camera is available
-        const hasCamera = await QrScanner.hasCamera();
-        if (!hasCamera) {
-          setError('No camera found on this device');
-          return;
-        }
-
-        // Create scanner instance
-        const scanner = new QrScanner(
-          videoRef.current,
-          (result) => {
-            handleScanResult(result.data);
-          },
-          {
-            preferredCamera: 'environment',
-            highlightScanRegion: true,
-            highlightCodeOutline: true,
-            maxScansPerSecond: 5,
+      if (isNative) {
+        // Use Capacitor barcode scanner for native platforms
+        try {
+          // Check permission
+          const status = await BarcodeScanner.checkPermission({ force: true });
+          
+          if (!status.granted) {
+            setError('Camera permission denied. Please grant camera access.');
+            return;
           }
-        );
 
-        scannerRef.current = scanner;
+          // Prepare the scanner
+          await BarcodeScanner.prepare();
+          
+          // Hide background for scanner
+          document.querySelector('body')?.classList.add('scanner-active');
+          
+          // Start scanning
+          setIsScanning(true);
+          
+          const result = await BarcodeScanner.startScan();
+          
+          if (result.hasContent) {
+            handleScanResult(result.content!);
+          }
+        } catch (err) {
+          console.error('Native scanner error:', err);
+          setError('Failed to access camera. Please check permissions.');
+        }
+      } else {
+        // Use web-based QR scanner for web platform
+        if (!videoRef.current) return;
 
-        // Start scanning
-        await scanner.start();
-        setIsScanning(true);
-      } catch (err) {
-        console.error('Scanner initialization error:', err);
-        setError('Failed to access camera. Please check permissions.');
+        try {
+          // Check if camera is available
+          const hasCamera = await QrScanner.hasCamera();
+          if (!hasCamera) {
+            setError('No camera found on this device');
+            return;
+          }
+
+          // Create scanner instance
+          const scanner = new QrScanner(
+            videoRef.current,
+            (result) => {
+              handleScanResult(result.data);
+            },
+            {
+              preferredCamera: 'environment',
+              highlightScanRegion: true,
+              highlightCodeOutline: true,
+              maxScansPerSecond: 5,
+            }
+          );
+
+          scannerRef.current = scanner;
+
+          // Start scanning
+          await scanner.start();
+          setIsScanning(true);
+        } catch (err) {
+          console.error('Scanner initialization error:', err);
+          setError('Failed to access camera. Please check permissions.');
+        }
       }
     };
 
@@ -63,7 +100,13 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
 
     // Cleanup
     return () => {
-      if (scannerRef.current) {
+      const isNative = Capacitor.isNativePlatform();
+      
+      if (isNative) {
+        BarcodeScanner.stopScan();
+        BarcodeScanner.showBackground();
+        document.querySelector('body')?.classList.remove('scanner-active');
+      } else if (scannerRef.current) {
         scannerRef.current.destroy();
       }
     };
@@ -96,6 +139,42 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
     }
   };
 
+  const isNative = Capacitor.isNativePlatform();
+
+  // For native platforms, the barcode scanner takes over the whole screen
+  if (isNative) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black">
+        <div className="absolute top-safe left-0 right-0 z-10 p-4">
+          <button
+            onClick={() => {
+              BarcodeScanner.stopScan();
+              onClose();
+            }}
+            className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-colors float-right"
+          >
+            <XMarkIcon className="w-6 h-6 text-white" />
+          </button>
+        </div>
+        
+        {error && (
+          <div className="absolute top-1/2 left-4 right-4 -mt-20">
+            <div className="bg-red-500/90 text-white rounded-lg p-4 text-center">
+              <p className="text-sm">{error}</p>
+              <button
+                onClick={onClose}
+                className="mt-3 px-4 py-2 bg-white/20 rounded-lg"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Web platform UI
   return (
     <div className="fixed inset-0 z-50 bg-black">
       <div className="relative h-full">

@@ -1,0 +1,64 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasValidSubscription() {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.subscription.status == 'active';
+    }
+    
+    // User profile pictures
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) && 
+        request.resource.size < 5 * 1024 * 1024 && // Max 5MB
+        request.resource.contentType.matches('image/.*');
+    }
+    
+    // User backups (encrypted)
+    match /users/{userId}/backups/{backupId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+        hasValidSubscription() &&
+        request.resource.size < 10 * 1024 * 1024 && // Max 10MB
+        request.resource.contentType == 'application/octet-stream';
+      allow update: if false; // Backups are immutable
+      allow delete: if isOwner(userId);
+    }
+    
+    // Account icons cache
+    match /icons/{domain}/{icon} {
+      allow read: if true; // Public read for cached icons
+      allow write: if false; // Only server can write
+    }
+    
+    // Temporary QR code uploads (for scanning)
+    match /temp/{userId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+        request.resource.size < 1 * 1024 * 1024 && // Max 1MB
+        request.resource.contentType.matches('image/.*');
+      allow update: if false;
+      allow delete: if isOwner(userId);
+    }
+    
+    // App assets (public)
+    match /assets/{asset=**} {
+      allow read: if true;
+      allow write: if false; // Only server can modify
+    }
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

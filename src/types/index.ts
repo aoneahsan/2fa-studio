@@ -3,12 +3,15 @@
  * @module types
  */
 
+export * from './account';
+
 // User types
 export interface User {
-  uid: string;
+  id: string;
+  uid?: string; // For backward compatibility
   email: string;
-  displayName?: string;
-  photoURL?: string;
+  displayName: string;
+  photoURL: string;
   phoneNumber?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -16,41 +19,60 @@ export interface User {
   settings: UserSettings;
   encryptionHint?: string;
   googleDriveConnected?: boolean;
+  lastBackup: Date | null;
+  backupEnabled: boolean;
+  deviceCount: number;
 }
 
 export interface UserSettings {
   theme: 'light' | 'dark' | 'system';
-  biometricEnabled: boolean;
-  autoLockTimeout: number; // in minutes
-  showNotifications: boolean;
   language: string;
-  backupEnabled: boolean;
-  backupFrequency: 'daily' | 'weekly' | 'monthly';
-  lastBackup?: Date;
+  autoLock: boolean;
+  autoLockTimeout: number; // in seconds
+  biometricAuth: boolean;
+  biometricEnabled?: boolean; // For backward compatibility
+  showAccountIcons: boolean;
+  copyOnTap: boolean;
+  sortOrder: 'manual' | 'alphabetical' | 'issuer';
+  groupByIssuer: boolean;
+  hideTokens: boolean;
+  fontSize: 'small' | 'medium' | 'large';
+  showNotifications?: boolean; // For backward compatibility
+  backupEnabled?: boolean; // For backward compatibility
+  backupFrequency?: 'daily' | 'weekly' | 'monthly'; // For backward compatibility
+  lastBackup?: Date; // For backward compatibility
 }
 
 // Subscription types
 export interface Subscription {
-  type: 'free' | 'premium' | 'enterprise';
+  tier: 'free' | 'premium' | 'enterprise' | 'family';
+  type?: 'free' | 'premium' | 'enterprise'; // For backward compatibility
   status: 'active' | 'expired' | 'cancelled';
-  startDate?: Date;
-  endDate?: Date;
-  expiresAt?: Date;
-  features?: string[];
-  accountLimit?: number;
+  startDate: Date;
+  endDate: Date | null;
+  expiresAt?: Date; // For backward compatibility
+  accountLimit: number | null; // null means unlimited
+  features: {
+    cloudBackup: boolean;
+    browserExtension: boolean;
+    prioritySupport: boolean;
+    advancedSecurity: boolean;
+    noAds: boolean;
+  };
 }
 
 // Device types
 export interface Device {
   id: string;
-  userId: string;
   name: string;
-  type: 'mobile' | 'desktop' | 'extension';
   platform: string;
-  lastActive: Date;
-  createdAt: Date;
-  fingerprint: string;
+  type?: 'mobile' | 'desktop' | 'extension'; // For backward compatibility
+  lastSeen: Date;
+  lastActive?: Date; // For backward compatibility
   trusted: boolean;
+  userId?: string; // For backward compatibility
+  createdAt?: Date; // For backward compatibility
+  fingerprint?: string; // For backward compatibility
 }
 
 // Session types

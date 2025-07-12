@@ -239,7 +239,18 @@ export class GoogleDriveService {
         orderBy: 'createdTime desc',
       });
 
-      return response.result.files || [];
+      const files = response.result.files || [];
+      // Map and filter to ensure all required properties exist
+      return files
+        .filter((file: any) => file.id && file.name)
+        .map((file: any) => ({
+          id: file.id,
+          name: file.name,
+          mimeType: file.mimeType || 'application/json',
+          createdTime: file.createdTime || new Date().toISOString(),
+          modifiedTime: file.modifiedTime || new Date().toISOString(),
+          size: file.size || '0'
+        }));
     } catch (error) {
       console.error('Failed to list backups:', error);
       throw error;
@@ -261,7 +272,7 @@ export class GoogleDriveService {
         alt: 'media',
       });
 
-      let data = response.result;
+      let data: any = response.result;
       
       // Check if data is encrypted
       if (typeof data === 'string') {
@@ -273,7 +284,7 @@ export class GoogleDriveService {
       }
 
       // Decrypt if needed
-      if (data.salt && data.iterations && encryptionPassword) {
+      if (data && typeof data === 'object' && data.salt && data.iterations && encryptionPassword) {
         const decryptedJson = await EncryptionService.decrypt({
           encryptedData: data,
           password: encryptionPassword,
@@ -323,8 +334,8 @@ export class GoogleDriveService {
 
       const quota = response.result.storageQuota;
       return {
-        used: parseInt(quota.usage || '0'),
-        limit: parseInt(quota.limit || '0'),
+        used: parseInt(quota?.usage || '0'),
+        limit: parseInt(quota?.limit || '0'),
       };
     } catch (error) {
       console.error('Failed to get storage quota:', error);

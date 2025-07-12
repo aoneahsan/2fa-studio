@@ -38,7 +38,12 @@ const ProfileSettings: React.FC = () => {
       });
 
       // Update Firestore document
-      await updateDoc(doc(db, 'users', user.uid), {
+      const userId = user.uid || user.id;
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+      
+      await updateDoc(doc(db, 'users', userId), {
         displayName,
         photoURL,
         updatedAt: new Date()

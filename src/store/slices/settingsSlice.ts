@@ -13,12 +13,20 @@ interface SettingsState extends UserSettings {
 
 const initialState: SettingsState = {
   theme: 'system',
-  biometricEnabled: false,
-  autoLockTimeout: 5, // 5 minutes
-  showNotifications: true,
   language: 'en',
-  backupEnabled: false,
-  backupFrequency: 'weekly',
+  autoLock: true,
+  autoLockTimeout: 60, // 60 seconds
+  biometricAuth: false,
+  biometricEnabled: false, // For backward compatibility
+  showAccountIcons: true,
+  copyOnTap: true,
+  sortOrder: 'manual',
+  groupByIssuer: false,
+  hideTokens: false,
+  fontSize: 'medium',
+  showNotifications: true, // For backward compatibility
+  backupEnabled: false, // For backward compatibility
+  backupFrequency: 'weekly', // For backward compatibility
   isLoading: false,
   error: null,
 };

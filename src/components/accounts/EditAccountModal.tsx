@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { updateAccount } from '../../store/slices/accountsSlice';
 import { closeModal, addToast } from '../../store/slices/uiSlice';
-import { OTPAccount } from '../../types/otp';
+import { OTPAccount } from '../../services/otp.service';
 import { 
   XMarkIcon,
   BuildingOfficeIcon,
@@ -32,11 +32,11 @@ const EditAccountModal: React.FC = () => {
   
   const [formData, setFormData] = useState({
     issuer: '',
-    accountName: '',
+    label: '',
     tags: [] as string[],
     period: 30,
     digits: 6,
-    algorithm: 'SHA1' as const,
+    algorithm: 'SHA1' as 'SHA1' | 'SHA256' | 'SHA512',
     counter: 0
   });
   
@@ -47,7 +47,7 @@ const EditAccountModal: React.FC = () => {
     if (account) {
       setFormData({
         issuer: account.issuer,
-        accountName: account.accountName,
+        label: account.label,
         tags: account.tags || [],
         period: account.period || 30,
         digits: account.digits || 6,
@@ -103,7 +103,7 @@ const EditAccountModal: React.FC = () => {
       const updatedAccount: OTPAccount = {
         ...account,
         issuer: formData.issuer,
-        accountName: formData.accountName,
+        label: formData.label,
         tags: formData.tags,
         period: formData.period,
         digits: formData.digits,
@@ -175,8 +175,8 @@ const EditAccountModal: React.FC = () => {
             </label>
             <input
               type="text"
-              name="accountName"
-              value={formData.accountName}
+              name="label"
+              value={formData.label}
               onChange={handleChange}
               className="input"
               placeholder="e.g., user@example.com"

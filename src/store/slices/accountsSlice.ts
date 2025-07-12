@@ -89,4 +89,7 @@ export const {
   incrementHOTPCounter,
 } = accountsSlice.actions;
 
+// Selectors
+export const selectAllAccounts = (state: { accounts: AccountsState }) => state.accounts.accounts;
+
 export default accountsSlice.reducer;

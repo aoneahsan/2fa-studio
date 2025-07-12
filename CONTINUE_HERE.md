@@ -2,26 +2,46 @@
 
 ## Current Status
 ✅ **What's Working:**
-- Full authentication system
+- Full authentication system with Firebase Auth ✅
+- Real Firebase integration with auth service ✅
+- Firestore security rules configured ✅
 - Account management (add, view, delete, edit)
 - Settings page with all features
 - Chrome extension ready
 - Backup/Restore UI
-- Google Drive service implemented
+- Google Drive service with real OAuth implementation ✅
 - Import/Export service implemented
-- Import/Export UI modals ✅
-- Google Drive UI integration ✅
+- Import/Export UI modals
+- Google Drive UI integration
+- QR code scanning implementation
+- Vitest testing framework setup
+- Android platform added and syncs successfully ✅
+- iOS platform added (buildkit-ui pod temporarily disabled)
+- Project builds successfully with 0 errors ✅
 
 ⏳ **What Needs Work:**
-- Testing setup
-- Mobile platforms
-- Biometric auth fix
-- QR code scanning implementation
+- Fix buildkit-ui iOS pod validation (missing homepage in package.json)
+- Complete test coverage
+- Performance optimization
+- PWA configuration
+- App store preparations
 
 ## To Run the Project
 ```bash
 cd /Volumes/Personal/01-code-work/claude-projects/02-apps/01-2fa-studio
 yarn dev
+```
+
+## To Build & Deploy
+```bash
+# Build for production
+yarn build
+
+# Deploy to Firebase Hosting
+firebase deploy --only hosting
+
+# Deploy security rules
+firebase deploy --only firestore:rules,storage:rules
 ```
 
 ## To Test Chrome Extension
@@ -31,29 +51,34 @@ yarn dev
 4. Select the `chrome-extension` folder
 
 ## Next Tasks (In Order)
-1. ✅ **Import/Export Modals** - COMPLETED
-   - Created `ImportAccountsModal.tsx` and `ExportAccountsModal.tsx`
-   - Connected to AccountsPage
-   - Support for multiple formats and encryption
+1. **Testing & QA**
+   - Complete unit test coverage with Vitest
+   - Add E2E tests with Cypress
+   - Test on real devices
+   - Test Google Drive backup/restore flow
 
-2. ✅ **Google Drive Integration** - COMPLETED
-   - Updated `BackupSettings.tsx` with GoogleDriveBackup component
-   - Full Google Drive backup/restore functionality
+2. **Performance Optimization**
+   - Implement code splitting for large components
+   - Lazy load routes
+   - Optimize bundle size
+   - Add service worker for offline support
 
-3. **QR Code Scanning**
-   - Install `@capacitor/barcode-scanner`
-   - Update AddAccountModal with QR scanning
-   - Test on mobile devices
+3. **PWA Configuration**
+   - Create manifest.json with app icons
+   - Implement service worker
+   - Add offline functionality
+   - Test installability
 
-4. **Testing Setup**
-   - Configure Vitest or Cypress
-   - Write unit tests for services
-   - Add component tests
+4. **iOS Build Fix**
+   - Report issue to buildkit-ui package author
+   - Or create a fork with the fix
+   - Test on iOS simulator
 
-5. **Mobile Platform Setup**
-   - Add Android/iOS platforms
-   - Configure Capacitor
-   - Test biometric authentication
+5. **Production Preparation**
+   - Add app icons and splash screens
+   - Configure app store metadata
+   - Create privacy policy and terms
+   - Prepare screenshots for stores
 
 ## Key Files to Know
 - **Import/Export Service**: `src/services/importExport.service.ts`

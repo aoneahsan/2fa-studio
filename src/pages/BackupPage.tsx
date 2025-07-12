@@ -102,7 +102,7 @@ const BackupPage: React.FC = () => {
       
       dispatch(addToast({
         type: 'success',
-        message: `Successfully backed up ${accounts.accounts.length} accounts`
+        message: `Successfully backed up ${accounts.length} accounts`
       }));
     } catch (error) {
       dispatch(addToast({
@@ -212,12 +212,12 @@ const BackupPage: React.FC = () => {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Accounts to backup</span>
-              <span className="text-foreground font-medium">{accounts.accounts.length}</span>
+              <span className="text-foreground font-medium">{accounts.length}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Estimated size</span>
               <span className="text-foreground font-medium">
-                {formatFileSize(accounts.accounts.length * 1024 * 50)}
+                {formatFileSize(accounts.length * 1024 * 50)}
               </span>
             </div>
           </div>

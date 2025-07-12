@@ -81,7 +81,7 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    if (!passwordStrength.isValid) {
+    if (passwordStrength.score < 3) {
       dispatch(addToast({
         type: 'error',
         message: 'Please choose a stronger password',
@@ -89,7 +89,7 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    if (!encryptionStrength.isValid) {
+    if (encryptionStrength.score < 3) {
       dispatch(addToast({
         type: 'error',
         message: 'Please choose a stronger encryption password',

@@ -86,4 +86,8 @@ export const {
   setLoading,
 } = uiSlice.actions;
 
+// Alias for backward compatibility
+export const showToast = addToast;
+export const setAppLocked = setLocked;
+
 export default uiSlice.reducer;

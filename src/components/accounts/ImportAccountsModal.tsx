@@ -5,7 +5,7 @@ import { ImportExportService, ImportFormat } from '../../services/importExport.s
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { showToast } from '../../store/slices/uiSlice';
 import { addAccount } from '../../store/slices/accountsSlice';
-import { Account } from '../../types';
+import { OTPAccount } from '../../services/otp.service';
 
 interface ImportAccountsModalProps {
   isOpen: boolean;
@@ -62,9 +62,8 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
 
       // Add imported accounts to the store
       for (const account of importedAccounts) {
-        const newAccount: Account = {
+        const newAccount: OTPAccount = {
           id: crypto.randomUUID(),
-          userId: '', // Will be set by the store
           issuer: account.issuer,
           label: account.label,
           secret: account.secret,
@@ -72,14 +71,13 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
           digits: account.digits || 6,
           period: account.period || 30,
           type: account.type || 'totp',
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          lastUsed: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
           tags: account.tags || [],
-          icon: account.icon,
-          color: account.color,
-          isFavorite: false,
-          backupCodes: [],
+          iconUrl: account.iconUrl,
+          notes: account.notes,
+          counter: account.counter,
+          backupCodes: account.backupCodes || [],
         };
         dispatch(addAccount(newAccount));
       }

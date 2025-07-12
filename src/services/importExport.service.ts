@@ -3,11 +3,21 @@
  * @module services/importExport
  */
 
-import { OTPAccount } from '../types/otp';
+import { OTPAccount } from './otp.service';
 import { EncryptionService } from './encryption.service';
 import { OTPService } from './otp.service';
 
-export interface ExportFormat {
+export type ExportFormat = 
+  | 'json' 
+  | 'google_authenticator' 
+  | 'authy' 
+  | '2fas' 
+  | 'aegis' 
+  | 'raivo';
+
+export type ImportFormat = ExportFormat;
+
+export interface ExportData {
   version: string;
   exported: string;
   encrypted: boolean;
@@ -32,19 +42,19 @@ export class ImportExportService {
    */
   static async exportAccounts(
     accounts: OTPAccount[],
-    format: string = '2fas',
+    format: ExportFormat = 'json',
     password?: string
   ): Promise<string> {
     switch (format) {
+      case 'json':
       case '2fas':
         return this.exportTo2FAS(accounts, password);
       case 'aegis':
         return this.exportToAegis(accounts, password);
-      case 'andotp':
-        return this.exportToAndOTP(accounts, password);
-      case 'google':
+      case 'google_authenticator':
         return this.exportToGoogleAuth(accounts);
-      case 'plain':
+      case 'authy':
+      case 'raivo':
         return this.exportToPlainText(accounts);
       default:
         throw new Error(`Unsupported export format: ${format}`);
@@ -56,40 +66,52 @@ export class ImportExportService {
    */
   static async importAccounts(
     data: string,
-    format: string = 'auto',
+    format: ImportFormat = 'json',
     password?: string
-  ): Promise<ImportResult> {
-    // Auto-detect format if needed
-    if (format === 'auto') {
-      format = this.detectFormat(data);
-    }
+  ): Promise<OTPAccount[]> {
+    // For now, we don't support auto-detect
+    // Later we can implement detectFormat method
 
+    let result: ImportResult;
+    
     switch (format) {
       case '2fas':
-        return this.importFrom2FAS(data, password);
+        result = await this.importFrom2FAS(data, password);
+        break;
       case 'aegis':
-        return this.importFromAegis(data, password);
-      case 'andotp':
-        return this.importFromAndOTP(data, password);
-      case 'google':
-        return this.importFromGoogleAuth(data);
-      case 'plain':
-        return this.importFromPlainText(data);
+        result = await this.importFromAegis(data, password);
+        break;
+      case 'json':
+      case 'google_authenticator':
+        result = await this.importFromGoogleAuth(data);
+        break;
+      case 'authy':
+        result = await this.importFromPlainText(data);
+        break;
+      case 'raivo':
+        result = await this.importFromPlainText(data);
+        break;
       default:
         throw new Error(`Unsupported import format: ${format}`);
     }
+    
+    if (!result.success) {
+      throw new Error(result.errors.join(', '));
+    }
+    
+    return result.accounts;
   }
 
   /**
    * Export to 2FAS format
    */
   private static async exportTo2FAS(accounts: OTPAccount[], password?: string): Promise<string> {
-    const exportData: ExportFormat = {
+    const exportData: ExportData = {
       version: this.EXPORT_VERSION,
       exported: new Date().toISOString(),
       encrypted: !!password,
       accounts: accounts.map(account => ({
-        name: account.accountName,
+        name: account.label,
         secret: account.secret,
         issuer: account.issuer,
         type: account.type.toUpperCase(),
@@ -131,7 +153,7 @@ export class ImportExportService {
         entries: accounts.map(account => ({
           type: account.type.toLowerCase(),
           uuid: crypto.randomUUID(),
-          name: account.accountName,
+          name: account.label,
           issuer: account.issuer,
           note: '',
           icon: null,
@@ -164,7 +186,7 @@ export class ImportExportService {
     const andOTPData = accounts.map(account => ({
       secret: account.secret,
       issuer: account.issuer,
-      label: account.accountName,
+      label: account.label,
       digits: account.digits,
       type: account.type.toUpperCase(),
       algorithm: account.algorithm,
@@ -203,7 +225,7 @@ export class ImportExportService {
     return accounts.map(account => {
       const parts = [
         `Issuer: ${account.issuer}`,
-        `Account: ${account.accountName}`,
+        `Account: ${account.label}`,
         `Secret: ${account.secret}`,
         `Type: ${account.type.toUpperCase()}`,
         `Algorithm: ${account.algorithm}`,
@@ -268,7 +290,7 @@ export class ImportExportService {
             id: crypto.randomUUID(),
             type: (accountData.type || 'TOTP').toLowerCase() as 'totp' | 'hotp',
             issuer: accountData.issuer || accountData.name || 'Unknown',
-            accountName: accountData.name || accountData.account || '',
+            label: accountData.name || accountData.account || '',
             secret: accountData.secret,
             algorithm: accountData.algorithm || 'SHA1',
             digits: accountData.digits || 6,
@@ -287,14 +309,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (error) {
+        } catch (error: any) {
           result.failed++;
           result.errors.push(`Failed to import ${accountData.name}: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (error) {
+    } catch (error: any) {
       result.errors.push(`Failed to parse 2FAS data: ${error.message}`);
     }
 
@@ -334,7 +356,7 @@ export class ImportExportService {
             id: crypto.randomUUID(),
             type: entry.type as 'totp' | 'hotp',
             issuer: entry.issuer || 'Unknown',
-            accountName: entry.name,
+            label: entry.name,
             secret: entry.info.secret,
             algorithm: entry.info.algo || 'SHA1',
             digits: entry.info.digits || 6,
@@ -347,14 +369,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (error) {
+        } catch (error: any) {
           result.failed++;
           result.errors.push(`Failed to import ${entry.name}: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (error) {
+    } catch (error: any) {
       result.errors.push(`Failed to parse Aegis data: ${error.message}`);
     }
 
@@ -386,7 +408,7 @@ export class ImportExportService {
             id: crypto.randomUUID(),
             type: (entry.type || 'TOTP').toLowerCase() as 'totp' | 'hotp',
             issuer: entry.issuer || entry.label || 'Unknown',
-            accountName: entry.label || '',
+            label: entry.label || '',
             secret: entry.secret,
             algorithm: entry.algorithm || 'SHA1',
             digits: entry.digits || 6,
@@ -399,14 +421,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (error) {
+        } catch (error: any) {
           result.failed++;
           result.errors.push(`Failed to import account: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (error) {
+    } catch (error: any) {
       result.errors.push(`Failed to parse andOTP data: ${error.message}`);
     }
 
@@ -442,8 +464,8 @@ export class ImportExportService {
           id: crypto.randomUUID(),
           type: parsed.type as 'totp' | 'hotp',
           issuer: parsed.issuer || 'Unknown',
-          accountName: parsed.accountName || '',
-          secret: parsed.secret,
+          label: parsed.label || (parsed as any).accountName || (parsed as any).name || '',
+          secret: parsed.secret || '',
           algorithm: parsed.algorithm || 'SHA1',
           digits: parsed.digits || 6,
           period: parsed.period || 30,
@@ -455,7 +477,7 @@ export class ImportExportService {
 
         result.accounts.push(account);
         result.imported++;
-      } catch (error) {
+      } catch (error: any) {
         result.failed++;
         result.errors.push(`Failed to import URI: ${error.message}`);
       }
@@ -501,7 +523,7 @@ export class ImportExportService {
             case 'account':
             case 'label':
             case 'name':
-              account.accountName = value;
+              account.label = value;
               break;
             case 'secret':
             case 'key':
@@ -512,7 +534,7 @@ export class ImportExportService {
               break;
             case 'algorithm':
             case 'algo':
-              account.algorithm = value.toUpperCase();
+              account.algorithm = value.toUpperCase() as 'SHA1' | 'SHA256' | 'SHA512';
               break;
             case 'digits':
               account.digits = parseInt(value) || 6;
@@ -537,7 +559,7 @@ export class ImportExportService {
         // Set defaults
         account.type = account.type || 'totp';
         account.issuer = account.issuer || 'Unknown';
-        account.accountName = account.accountName || '';
+        account.label = account.label || '';
         account.algorithm = account.algorithm || 'SHA1';
         account.digits = account.digits || 6;
         account.period = account.period || 30;
@@ -546,7 +568,7 @@ export class ImportExportService {
 
         result.accounts.push(account as OTPAccount);
         result.imported++;
-      } catch (error) {
+      } catch (error: any) {
         result.failed++;
         result.errors.push(`Failed to import entry: ${error.message}`);
       }

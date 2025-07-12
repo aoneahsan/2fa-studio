@@ -3,7 +3,7 @@
  * @module services/otp
  */
 
-import { OTPAuth } from 'otpauth';
+import * as OTPAuth from 'otpauth';
 
 export interface OTPAccount {
   id: string;
@@ -180,9 +180,30 @@ export class OTPService {
    * Generates a random secret
    */
   static generateSecret(length: number = 20): string {
-    return OTPAuth.Secret.fromBase32(
-      OTPAuth.Secret.fromRaw(crypto.getRandomValues(new Uint8Array(length))).base32
-    ).base32;
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    
+    // Convert to base32
+    const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let base32 = '';
+    
+    for (let i = 0; i < array.length; i += 5) {
+      const chunk = array.slice(i, i + 5);
+      let bits = 0;
+      let value = 0;
+      
+      for (let j = 0; j < chunk.length; j++) {
+        value = (value << 8) | chunk[j];
+        bits += 8;
+      }
+      
+      while (bits >= 5) {
+        bits -= 5;
+        base32 += base32Chars[(value >> bits) & 0x1f];
+      }
+    }
+    
+    return base32;
   }
 
   /**

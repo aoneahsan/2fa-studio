@@ -52,8 +52,18 @@ export const useAccounts = () => {
             
             const account: OTPAccount = {
               id: doc.id,
-              ...encryptedData,
+              issuer: encryptedData.issuer || 'Unknown',
+              label: encryptedData.label || 'Unknown',
               secret: decryptedSecret,
+              algorithm: encryptedData.algorithm || 'SHA1',
+              digits: encryptedData.digits || 6,
+              period: encryptedData.period || 30,
+              type: encryptedData.type || 'totp',
+              counter: encryptedData.counter,
+              iconUrl: encryptedData.iconUrl,
+              tags: encryptedData.tags || [],
+              notes: encryptedData.notes,
+              backupCodes: encryptedData.backupCodes || [],
               createdAt: encryptedData.createdAt?.toDate() || new Date(),
               updatedAt: encryptedData.updatedAt?.toDate() || new Date(),
             };
