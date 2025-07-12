@@ -27,7 +27,8 @@ class PopupManager {
       openAppBtn: document.getElementById('openAppBtn'),
       addNewBtn: document.getElementById('addNewBtn'),
       addAccountBtn: document.getElementById('addAccountBtn'),
-      settingsBtn: document.getElementById('settingsBtn')
+      settingsBtn: document.getElementById('settingsBtn'),
+      scanQRBtn: document.getElementById('scanQRBtn')
     };
 
     // Set up event listeners
@@ -66,9 +67,21 @@ class PopupManager {
       chrome.tabs.create({ url: chrome.runtime.getURL('../index.html#/settings') });
     });
 
+    // Scan QR button
+    this.elements.scanQRBtn.addEventListener('click', () => {
+      this.handleScanQR();
+    });
+
     // Listen for account updates
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === 'local' && changes.accounts) {
+        this.loadAccounts();
+      }
+    });
+
+    // Listen for messages from background
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === 'accountsUpdated') {
         this.loadAccounts();
       }
     });
@@ -282,6 +295,39 @@ class PopupManager {
     this.elements.loadingState.classList.add('hidden');
     this.elements.accountsList.classList.add('hidden');
     this.elements.emptyState.classList.remove('hidden');
+  }
+
+  async handleScanQR() {
+    try {
+      // Get active tab
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      // First, try to detect QR codes automatically
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'scanQRCodes'
+      });
+      
+      if (response && response.count > 0) {
+        // QR codes found and buttons added
+        window.close(); // Close popup to let user interact with page
+      } else {
+        // No QR codes found automatically, enable manual selection
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'enableQRSelection'
+        });
+        window.close();
+      }
+    } catch (error) {
+      console.error('Failed to scan QR codes:', error);
+      
+      // Show notification
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: '../assets/icon-48.png',
+        title: 'QR Scan Failed',
+        message: 'Unable to scan QR codes on this page'
+      });
+    }
   }
 }
 

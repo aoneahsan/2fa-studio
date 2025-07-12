@@ -6,10 +6,13 @@
 import { StorageService } from '../src/storage.js';
 import { MessageService } from '../src/message.js';
 import { NotificationService } from '../src/notification.js';
+import { OTPService } from '../src/otp.js';
+import { QRScanner } from '../src/qr-scanner-lib.js';
 
 class BackgroundService {
   constructor() {
     this.init();
+    this.qrCodeCache = new Map();
   }
 
   init() {
@@ -25,6 +28,11 @@ class BackgroundService {
     // Initialize on install
     chrome.runtime.onInstalled.addListener((details) => {
       this.handleInstall(details);
+    });
+
+    // Set up command listeners
+    chrome.commands.onCommand.addListener((command) => {
+      this.handleCommand(command);
     });
   }
 
@@ -53,6 +61,26 @@ class BackgroundService {
 
         case 'openApp':
           this.handleOpenApp();
+          break;
+
+        case 'scanQRCode':
+          this.handleScanQRCode(request.imageData, sendResponse);
+          return true;
+
+        case 'addOTPFromURL':
+          this.handleAddOTPFromURL(request.url, sendResponse);
+          return true;
+
+        case 'requestCode':
+          this.handleRequestCode(request.pageInfo, sendResponse);
+          return true;
+
+        case 'openPopup':
+          chrome.action.openPopup();
+          break;
+
+        case 'qrCodesDetected':
+          this.handleQRCodesDetected(request.count, sender.tab);
           break;
 
         default:
@@ -131,11 +159,140 @@ class BackgroundService {
     });
   }
 
+  async handleScanQRCode(imageData, sendResponse) {
+    try {
+      // Convert array back to Uint8Array
+      const data = new Uint8Array(imageData.data);
+      
+      // Create ImageData object
+      const imgData = new ImageData(
+        new Uint8ClampedArray(data),
+        imageData.width,
+        imageData.height
+      );
+
+      // Use QR scanner
+      const result = await QRScanner.scanImage(imgData);
+      sendResponse({ success: true, data: result.data });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleAddOTPFromURL(url, sendResponse) {
+    try {
+      // Parse OTP URL
+      const otpData = this.parseOTPAuthURL(url);
+      if (!otpData) {
+        throw new Error('Invalid OTP URL');
+      }
+
+      // Save account
+      await StorageService.saveAccount(otpData);
+      
+      // Update badge
+      this.updateBadge();
+      
+      // Show notification
+      NotificationService.show({
+        title: 'Account Added',
+        message: `${otpData.issuer} has been added to 2FA Studio`,
+        iconUrl: chrome.runtime.getURL('assets/icon-128.png')
+      });
+
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  parseOTPAuthURL(url) {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'otpauth:') return null;
+
+      const type = parsed.host; // 'totp' or 'hotp'
+      const label = decodeURIComponent(parsed.pathname.slice(1));
+      const params = new URLSearchParams(parsed.search);
+
+      const [accountName, issuer] = label.includes(':') 
+        ? label.split(':', 2) 
+        : ['', label];
+
+      return {
+        type: type.toUpperCase(),
+        issuer: params.get('issuer') || issuer || accountName,
+        accountName: accountName || params.get('issuer') || issuer,
+        secret: params.get('secret'),
+        algorithm: params.get('algorithm') || 'SHA1',
+        digits: parseInt(params.get('digits') || '6'),
+        period: parseInt(params.get('period') || '30'),
+        counter: parseInt(params.get('counter') || '0')
+      };
+    } catch (error) {
+      console.error('Failed to parse OTP URL:', error);
+      return null;
+    }
+  }
+
+  async handleRequestCode(pageInfo, sendResponse) {
+    try {
+      const accounts = await StorageService.getAccounts();
+      const domain = pageInfo.domain;
+      
+      // Find matching accounts
+      const matches = accounts.filter(account => {
+        const issuerLower = account.issuer.toLowerCase();
+        const domainLower = domain.toLowerCase();
+        const domainParts = domainLower.split('.');
+        
+        return domainParts.some(part => 
+          issuerLower.includes(part) || part.includes(issuerLower)
+        );
+      });
+
+      if (matches.length === 1) {
+        // Auto-return code for single match
+        const code = OTPService.generateCode(matches[0]);
+        sendResponse({ success: true, code: code.code });
+      } else {
+        // Multiple or no matches - need user selection
+        sendResponse({ success: false, needsSelection: true });
+      }
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  handleQRCodesDetected(count, tab) {
+    // Update badge to show QR codes detected
+    chrome.action.setBadgeText({ 
+      text: `QR`, 
+      tabId: tab.id 
+    });
+    chrome.action.setBadgeBackgroundColor({ 
+      color: '#28a745',
+      tabId: tab.id 
+    });
+
+    // Clear badge after 5 seconds
+    setTimeout(() => {
+      chrome.action.setBadgeText({ text: '', tabId: tab.id });
+    }, 5000);
+  }
+
   setupContextMenu() {
     chrome.contextMenus.create({
       id: 'fill-2fa-code',
       title: 'Fill 2FA Code',
       contexts: ['editable'],
+      documentUrlPatterns: ['https://*/*', 'http://*/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'scan-qr-code',
+      title: 'Scan QR Code on Page',
+      contexts: ['page', 'image'],
       documentUrlPatterns: ['https://*/*', 'http://*/*']
     });
 
@@ -150,10 +307,20 @@ class BackgroundService {
         case 'fill-2fa-code':
           this.handleFillCode(tab);
           break;
+        case 'scan-qr-code':
+          this.handleScanQRMenuItem(tab);
+          break;
         case 'open-2fa-studio':
           this.handleOpenApp();
           break;
       }
+    });
+  }
+
+  async handleScanQRMenuItem(tab) {
+    // Send message to content script to enable QR selection mode
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'enableQRSelection'
     });
   }
 
@@ -253,6 +420,27 @@ class BackgroundService {
       }
     } catch (error) {
       console.error('Failed to update badge:', error);
+    }
+  }
+
+  // Handle keyboard commands
+  async handleCommand(command) {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      switch (command) {
+        case 'fill-code':
+          this.handleFillCode(tab);
+          break;
+          
+        case 'scan-qr':
+          chrome.tabs.sendMessage(tab.id, {
+            action: 'enableQRSelection'
+          });
+          break;
+      }
+    } catch (error) {
+      console.error('Failed to handle command:', error);
     }
   }
 }

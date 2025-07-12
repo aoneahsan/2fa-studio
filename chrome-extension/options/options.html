@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2FA Studio - Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="../assets/icon-48.png" alt="2FA Studio" class="logo">
+      <h1>2FA Studio Settings</h1>
+    </header>
+
+    <section class="settings-section">
+      <h2>Auto-Fill Settings</h2>
+      
+      <div class="setting">
+        <label class="toggle">
+          <input type="checkbox" id="autoFillEnabled">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Enable Auto-Fill</span>
+        </label>
+        <p class="setting-description">Automatically fill 2FA codes when copying</p>
+      </div>
+
+      <div class="setting">
+        <label class="toggle">
+          <input type="checkbox" id="autoSubmit">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Auto-Submit Forms</span>
+        </label>
+        <p class="setting-description">Automatically submit forms after filling the code</p>
+      </div>
+
+      <div class="setting">
+        <label class="toggle">
+          <input type="checkbox" id="detectQRCodes">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Auto-Detect QR Codes</span>
+        </label>
+        <p class="setting-description">Automatically detect QR codes on web pages</p>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Security</h2>
+      
+      <div class="setting">
+        <label class="toggle">
+          <input type="checkbox" id="lockOnClose">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Lock on Close</span>
+        </label>
+        <p class="setting-description">Require authentication when reopening the extension</p>
+      </div>
+
+      <div class="setting">
+        <label for="autoLockTime">Auto-Lock Time</label>
+        <select id="autoLockTime" class="select">
+          <option value="0">Never</option>
+          <option value="60">1 minute</option>
+          <option value="300">5 minutes</option>
+          <option value="900">15 minutes</option>
+          <option value="1800">30 minutes</option>
+        </select>
+        <p class="setting-description">Automatically lock the extension after inactivity</p>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Appearance</h2>
+      
+      <div class="setting">
+        <label for="theme">Theme</label>
+        <select id="theme" class="select">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <p class="setting-description">Choose your preferred color theme</p>
+      </div>
+
+      <div class="setting">
+        <label class="toggle">
+          <input type="checkbox" id="showAccountIcons">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Show Account Icons</span>
+        </label>
+        <p class="setting-description">Display service icons in the account list</p>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Keyboard Shortcuts</h2>
+      
+      <div class="shortcuts-list">
+        <div class="shortcut">
+          <span class="shortcut-action">Open Extension</span>
+          <span class="shortcut-key" id="shortcut-open">Cmd+Shift+L</span>
+        </div>
+        <div class="shortcut">
+          <span class="shortcut-action">Fill Code</span>
+          <span class="shortcut-key" id="shortcut-fill">Cmd+Shift+F</span>
+        </div>
+        <div class="shortcut">
+          <span class="shortcut-action">Scan QR Code</span>
+          <span class="shortcut-key" id="shortcut-scan">Cmd+Shift+Q</span>
+        </div>
+      </div>
+      
+      <button id="configureShortcuts" class="btn btn-secondary">
+        Configure Shortcuts
+      </button>
+    </section>
+
+    <section class="settings-section">
+      <h2>Sync</h2>
+      
+      <div class="setting">
+        <label class="toggle">
+          <input type="checkbox" id="syncEnabled">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Enable Sync</span>
+        </label>
+        <p class="setting-description">Sync accounts with the 2FA Studio app</p>
+      </div>
+
+      <div class="sync-status" id="syncStatus">
+        <div class="status-icon"></div>
+        <span class="status-text">Not connected</span>
+      </div>
+
+      <button id="connectApp" class="btn btn-primary">
+        Connect to App
+      </button>
+    </section>
+
+    <section class="settings-section">
+      <h2>About</h2>
+      
+      <div class="about-info">
+        <p><strong>Version:</strong> <span id="version">1.0.0</span></p>
+        <p><strong>Developer:</strong> 2FA Studio Team</p>
+        <div class="links">
+          <a href="#" id="privacyLink">Privacy Policy</a>
+          <a href="#" id="supportLink">Support</a>
+          <a href="#" id="githubLink">GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="saveBtn" class="btn btn-primary">Save Changes</button>
+      <button id="resetBtn" class="btn btn-secondary">Reset to Defaults</button>
+    </div>
+  </div>
+
+  <script src="options.js" type="module"></script>
+</body>
+</html>

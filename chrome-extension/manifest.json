@@ -27,6 +27,7 @@
     "clipboardWrite",
     "notifications"
   ],
+  "options_page": "options/options.html",
   "host_permissions": [
     "https://*/*",
     "http://localhost/*"
@@ -45,11 +46,34 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["assets/*", "src/injected.js"],
+      "resources": ["assets/*", "src/injected.js", "src/qr-detector.js"],
       "matches": ["https://*/*", "http://localhost/*"]
     }
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "Open 2FA Studio popup"
+    },
+    "fill-code": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Fill 2FA code in current field"
+    },
+    "scan-qr": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Q",
+        "mac": "Command+Shift+Q"
+      },
+      "description": "Scan QR code on page"
+    }
   }
 }
