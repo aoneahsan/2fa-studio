@@ -98,7 +98,9 @@
       "Bash(npx cap add:*)",
       "Bash(npx cap:*)",
       "Bash(pod install:*)",
-      "Bash(yarn preview)"
+      "Bash(yarn preview)",
+      "Bash(npx cypress open:*)",
+      "Bash(npx patch-package:*)"
     ],
     "deny": []
   }
