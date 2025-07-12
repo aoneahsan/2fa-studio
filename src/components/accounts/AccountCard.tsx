@@ -185,6 +185,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete }) 
               isCopying ? 'text-green-500' : 'text-foreground hover:text-primary'
             }`}
             disabled={!otpCode || otpCode === 'ERROR'}
+            data-testid="totp-code"
           >
             <span>{formatCode(otpCode)}</span>
             <ClipboardDocumentIcon className="w-5 h-5" />
@@ -216,7 +217,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete }) 
                     className="text-primary transition-all duration-1000"
                   />
                 </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-medium">
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-medium" data-testid="countdown">
                   {remainingTime}
                 </span>
               </div>
