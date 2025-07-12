@@ -4,100 +4,108 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAppSelector } from '../store/hooks';
 import { adMobService } from '../services/admob.service';
 import { Capacitor } from '@capacitor/core';
+import { useAppSelector } from './useAppSelector';
 
 interface UseAdsReturn {
-  showBanner: (position?: 'top' | 'bottom') => Promise<void>;
-  hideBanner: () => Promise<void>;
-  showInterstitial: () => Promise<boolean>;
-  showRewardedAd: () => Promise<{ completed: boolean; reward?: any }>;
-  shouldShowAds: boolean;
-  isInitialized: boolean;
+	showBanner: (position?: 'top' | 'bottom') => Promise<void>;
+	hideBanner: () => Promise<void>;
+	showInterstitial: () => Promise<boolean>;
+	showRewardedAd: () => Promise<{ completed: boolean; reward?: any }>;
+	shouldShowAds: boolean;
+	isInitialized: boolean;
 }
 
 export function useAds(): UseAdsReturn {
-  const user = useAppSelector((state) => state.auth.user);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [shouldShowAds, setShouldShowAds] = useState(false);
+	const user = useAppSelector((state) => state.auth.user);
+	const [isInitialized, setIsInitialized] = useState(false);
+	const [shouldShowAds, setShouldShowAds] = useState(false);
 
-  useEffect(() => {
-    const initializeAds = async () => {
-      if (!Capacitor.isNativePlatform()) {
-        return;
-      }
+	useEffect(() => {
+		const initializeAds = async () => {
+			if (!Capacitor.isNativePlatform()) {
+				return;
+			}
 
-      // Check if user should see ads
-      const showAds = await adMobService.shouldShowAds(user?.subscription?.tier);
-      setShouldShowAds(showAds);
+			// Check if user should see ads
+			const showAds = await adMobService.shouldShowAds(
+				user?.subscription?.tier
+			);
+			setShouldShowAds(showAds);
 
-      if (showAds) {
-        await adMobService.initialize();
-        setIsInitialized(true);
-        
-        // Prepare ads
-        await adMobService.prepareInterstitial();
-        await adMobService.prepareRewardedVideo();
-      }
-    };
+			if (showAds) {
+				await adMobService.initialize();
+				setIsInitialized(true);
 
-    initializeAds();
-  }, [user?.subscription?.tier]);
+				// Prepare ads
+				await adMobService.prepareInterstitial();
+				await adMobService.prepareRewardedVideo();
+			}
+		};
 
-  // App lifecycle handlers
-  useEffect(() => {
-    if (!isInitialized) return;
+		initializeAds();
+	}, [user?.subscription?.tier]);
 
-    const handleAppStateChange = async (state: { isActive: boolean }) => {
-      if (state.isActive) {
-        await adMobService.resume();
-      } else {
-        await adMobService.pause();
-      }
-    };
+	// App lifecycle handlers
+	useEffect(() => {
+		if (!isInitialized) return;
 
-    // Listen for app state changes
-    const { App } = Capacitor.Plugins;
-    App.addListener('appStateChange', handleAppStateChange);
+		const handleAppStateChange = async (state: { isActive: boolean }) => {
+			if (state.isActive) {
+				await adMobService.resume();
+			} else {
+				await adMobService.pause();
+			}
+		};
 
-    return () => {
-      App.removeAllListeners();
-    };
-  }, [isInitialized]);
+		// Listen for app state changes
+		const { App } = Capacitor.Plugins;
+		App.addListener('appStateChange', handleAppStateChange);
 
-  const showBanner = useCallback(async (position: 'top' | 'bottom' = 'bottom') => {
-    if (shouldShowAds && isInitialized) {
-      await adMobService.showBanner(position);
-    }
-  }, [shouldShowAds, isInitialized]);
+		return () => {
+			App.removeAllListeners();
+		};
+	}, [isInitialized]);
 
-  const hideBanner = useCallback(async () => {
-    if (isInitialized) {
-      await adMobService.hideBanner();
-    }
-  }, [isInitialized]);
+	const showBanner = useCallback(
+		async (position: 'top' | 'bottom' = 'bottom') => {
+			if (shouldShowAds && isInitialized) {
+				await adMobService.showBanner(position);
+			}
+		},
+		[shouldShowAds, isInitialized]
+	);
 
-  const showInterstitial = useCallback(async (): Promise<boolean> => {
-    if (shouldShowAds && isInitialized) {
-      return await adMobService.showInterstitial();
-    }
-    return false;
-  }, [shouldShowAds, isInitialized]);
+	const hideBanner = useCallback(async () => {
+		if (isInitialized) {
+			await adMobService.hideBanner();
+		}
+	}, [isInitialized]);
 
-  const showRewardedAd = useCallback(async (): Promise<{ completed: boolean; reward?: any }> => {
-    if (shouldShowAds && isInitialized) {
-      return await adMobService.showRewardedVideo();
-    }
-    return { completed: false };
-  }, [shouldShowAds, isInitialized]);
+	const showInterstitial = useCallback(async (): Promise<boolean> => {
+		if (shouldShowAds && isInitialized) {
+			return await adMobService.showInterstitial();
+		}
+		return false;
+	}, [shouldShowAds, isInitialized]);
 
-  return {
-    showBanner,
-    hideBanner,
-    showInterstitial,
-    showRewardedAd,
-    shouldShowAds,
-    isInitialized,
-  };
+	const showRewardedAd = useCallback(async (): Promise<{
+		completed: boolean;
+		reward?: any;
+	}> => {
+		if (shouldShowAds && isInitialized) {
+			return await adMobService.showRewardedVideo();
+		}
+		return { completed: false };
+	}, [shouldShowAds, isInitialized]);
+
+	return {
+		showBanner,
+		hideBanner,
+		showInterstitial,
+		showRewardedAd,
+		shouldShowAds,
+		isInitialized,
+	};
 }
