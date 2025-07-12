@@ -9,13 +9,14 @@
 - Backup/Restore UI
 - Google Drive service implemented
 - Import/Export service implemented
+- Import/Export UI modals ✅
+- Google Drive UI integration ✅
 
 ⏳ **What Needs Work:**
-- Import/Export UI modals
-- Google Drive UI integration
 - Testing setup
 - Mobile platforms
 - Biometric auth fix
+- QR code scanning implementation
 
 ## To Run the Project
 ```bash
@@ -30,24 +31,29 @@ yarn dev
 4. Select the `chrome-extension` folder
 
 ## Next Tasks (In Order)
-1. **Create Import Modal**
-   - File: `src/components/accounts/ImportAccountsModal.tsx`
-   - Use `ImportExportService.importAccounts()`
-   - Support file upload and format selection
+1. ✅ **Import/Export Modals** - COMPLETED
+   - Created `ImportAccountsModal.tsx` and `ExportAccountsModal.tsx`
+   - Connected to AccountsPage
+   - Support for multiple formats and encryption
 
-2. **Create Export Modal**
-   - File: `src/components/accounts/ExportAccountsModal.tsx`
-   - Use `ImportExportService.exportAccounts()`
-   - Support format selection and encryption
+2. ✅ **Google Drive Integration** - COMPLETED
+   - Updated `BackupSettings.tsx` with GoogleDriveBackup component
+   - Full Google Drive backup/restore functionality
 
-3. **Integrate Google Drive**
-   - Update: `src/components/settings/BackupSettings.tsx`
-   - Import and use `GoogleDriveBackup` component
-   - Add to the Google Drive section
+3. **QR Code Scanning**
+   - Install `@capacitor/barcode-scanner`
+   - Update AddAccountModal with QR scanning
+   - Test on mobile devices
 
-4. **Connect Import/Export**
-   - Update: `src/pages/AccountsPage.tsx`
-   - Wire up Import/Export buttons to open modals
+4. **Testing Setup**
+   - Configure Vitest or Cypress
+   - Write unit tests for services
+   - Add component tests
+
+5. **Mobile Platform Setup**
+   - Add Android/iOS platforms
+   - Configure Capacitor
+   - Test biometric authentication
 
 ## Key Files to Know
 - **Import/Export Service**: `src/services/importExport.service.ts`
@@ -80,4 +86,4 @@ yarn cap:ios          # Open Xcode
 ```
 
 ---
-**Last Updated**: January 11, 2024 - Evening Session
+**Last Updated**: July 12, 2025 - Morning Session

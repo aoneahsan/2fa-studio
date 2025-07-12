@@ -16,6 +16,7 @@ import {
   FolderIcon,
   KeyIcon
 } from '@heroicons/react/24/outline';
+import GoogleDriveBackup from '../backup/GoogleDriveBackup';
 
 interface BackupInfo {
   lastBackup: Date | null;
@@ -199,77 +200,7 @@ const BackupSettings: React.FC = () => {
       {/* Google Drive Backup */}
       <div className="border-b border-border pb-6">
         <h3 className="text-sm font-medium text-foreground mb-4">Google Drive Backup</h3>
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <CloudArrowUpIcon className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-foreground">Auto-backup to Google Drive</p>
-                <p className="text-sm text-muted-foreground">
-                  Automatically sync your encrypted backups
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={backupInfo.isAutoBackupEnabled}
-                onChange={handleAutoBackupToggle}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          {/* Backup Frequency */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <ClockIcon className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-foreground">Backup Frequency</p>
-                <p className="text-sm text-muted-foreground">
-                  How often to create automatic backups
-                </p>
-              </div>
-            </div>
-            <select
-              value={backupInfo.backupFrequency}
-              onChange={handleFrequencyChange}
-              disabled={!backupInfo.isAutoBackupEnabled}
-              className="input w-32"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </div>
-
-          {/* Encryption Status */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <ShieldCheckIcon className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-foreground">End-to-End Encryption</p>
-                <p className="text-sm text-muted-foreground">
-                  All backups are encrypted before upload
-                </p>
-              </div>
-            </div>
-            <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-              Enabled
-            </span>
-          </div>
-        </div>
-
-        {!user?.googleDriveConnected && (
-          <div className="mt-4">
-            <button className="btn btn-outline w-full">
-              <img src="/google-drive-icon.svg" alt="Google Drive" className="w-5 h-5" />
-              Connect Google Drive
-            </button>
-          </div>
-        )}
+        <GoogleDriveBackup />
       </div>
 
       {/* Local Backup */}

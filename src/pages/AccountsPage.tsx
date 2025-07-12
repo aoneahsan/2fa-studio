@@ -14,6 +14,8 @@ import AccountFilters from '../components/accounts/AccountFilters';
 import AddAccountModal from '../components/accounts/AddAccountModal';
 import DeleteAccountDialog from '../components/accounts/DeleteAccountDialog';
 import EditAccountModal from '../components/accounts/EditAccountModal';
+import { ImportAccountsModal } from '../components/accounts/ImportAccountsModal';
+import { ExportAccountsModal } from '../components/accounts/ExportAccountsModal';
 import { 
   PlusIcon, 
   AdjustmentsHorizontalIcon,
@@ -167,6 +169,14 @@ const AccountsPage: React.FC = () => {
       {modal.type === 'addAccount' && <AddAccountModal />}
       {modal.type === 'deleteAccount' && <DeleteAccountDialog />}
       {modal.type === 'editAccount' && <EditAccountModal />}
+      <ImportAccountsModal 
+        isOpen={modal.type === 'import'} 
+        onClose={() => dispatch(openModal({ type: null }))} 
+      />
+      <ExportAccountsModal 
+        isOpen={modal.type === 'export'} 
+        onClose={() => dispatch(openModal({ type: null }))} 
+      />
     </div>
   );
 };

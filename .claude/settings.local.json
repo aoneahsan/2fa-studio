@@ -91,7 +91,9 @@
       "Bash(yarn create:*)",
       "Bash(true)",
       "Bash(npx cap init:*)",
-      "Bash(yarn dev)"
+      "Bash(yarn dev)",
+      "Bash(yarn outdated)",
+      "Bash(yarn type-check)"
     ],
     "deny": []
   }
