@@ -102,7 +102,9 @@
       "Bash(npx cypress open:*)",
       "Bash(npx patch-package:*)",
       "Bash(cp:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(npm audit:*)",
+      "Bash(yarn audit)"
     ],
     "deny": []
   }

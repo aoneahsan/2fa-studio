@@ -3,6 +3,8 @@
  * @module services/encryption
  */
 
+import bcrypt from 'bcryptjs';
+
 interface EncryptionParams {
   data: string;
   password: string;
@@ -188,14 +190,18 @@ export class EncryptionService {
   }
 
   /**
-   * Hashes a password using SHA-256
+   * Hashes a password using bcrypt
    */
   static async hashPassword(password: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const saltRounds = 10;
+    return bcrypt.hash(password, saltRounds);
+  }
+
+  /**
+   * Verifies a password against a hash
+   */
+  static async verifyPassword(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
   }
 
   /**

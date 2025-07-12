@@ -28,20 +28,25 @@
     "notifications"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "https://*/*",
+    "http://localhost/*"
   ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "https://*/*",
+        "http://localhost/*"
+      ],
       "js": ["src/content-script.js"],
       "css": ["src/content-styles.css"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": false
     }
   ],
   "web_accessible_resources": [
     {
       "resources": ["assets/*", "src/injected.js"],
-      "matches": ["<all_urls>"]
+      "matches": ["https://*/*", "http://localhost/*"]
     }
   ],
   "content_security_policy": {

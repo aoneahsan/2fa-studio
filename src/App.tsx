@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { store } from './store';
 import { useAuth } from './hooks/useAuth';
 import { useBiometric } from './hooks/useBiometric';
+import { notificationService } from './services/notification-service';
 
 // Components (loaded immediately)
 import Layout from './components/common/Layout';
@@ -34,7 +35,7 @@ const AppContent: React.FC = () => {
   const { isLoading: authLoading, isAuthenticated } = useAuth();
   const { biometricEnabled } = useBiometric();
 
-  // Apply theme
+  // Apply theme and initialize services
   useEffect(() => {
     const theme = store.getState().settings.theme;
     if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -42,6 +43,22 @@ const AppContent: React.FC = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    // Initialize OneSignal
+    const initializeNotifications = async () => {
+      const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
+      const safariWebId = import.meta.env.VITE_ONESIGNAL_SAFARI_WEB_ID;
+      
+      if (appId) {
+        try {
+          await notificationService.initialize({ appId, safariWebId });
+        } catch (error) {
+          console.error('Failed to initialize notifications:', error);
+        }
+      }
+    };
+
+    initializeNotifications();
   }, []);
 
   if (authLoading) {
