@@ -97,7 +97,8 @@
       "Bash(yarn test:*)",
       "Bash(npx cap add:*)",
       "Bash(npx cap:*)",
-      "Bash(pod install:*)"
+      "Bash(pod install:*)",
+      "Bash(yarn preview)"
     ],
     "deny": []
   }

@@ -7,6 +7,11 @@ import { OTPAccount } from '../../../services/otp.service';
 // Mock the OTP service
 vi.mock('../../../services/otp.service', () => ({
   OTPService: {
+    generateCode: vi.fn(() => ({
+      code: '123456',
+      remainingTime: 25,
+      progress: 83,
+    })),
     generateTOTP: vi.fn(() => ({
       code: '123456',
       remainingTime: 25,
@@ -15,6 +20,7 @@ vi.mock('../../../services/otp.service', () => ({
     generateHOTP: vi.fn(() => ({
       code: '654321',
     })),
+    formatCode: vi.fn((code) => `${code.slice(0, 3)} ${code.slice(3)}`),
   },
 }));
 

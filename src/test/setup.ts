@@ -50,21 +50,22 @@ vi.mock('@capacitor/core', () => ({
 
 // Mock Firebase
 vi.mock('firebase/app', () => ({
-  initializeApp: vi.fn(),
-  getApps: vi.fn(() => []),
-  getApp: vi.fn(),
+  initializeApp: vi.fn(() => ({ name: '[DEFAULT]' })),
+  getApps: vi.fn(() => [{ name: '[DEFAULT]' }]),
+  getApp: vi.fn(() => ({ name: '[DEFAULT]' })),
 }));
 
 vi.mock('firebase/auth', () => ({
-  getAuth: vi.fn(),
+  getAuth: vi.fn(() => ({ app: { name: '[DEFAULT]' } })),
   signInWithEmailAndPassword: vi.fn(),
   createUserWithEmailAndPassword: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChanged: vi.fn(),
+  connectAuthEmulator: vi.fn(),
 }));
 
 vi.mock('firebase/firestore', () => ({
-  getFirestore: vi.fn(),
+  getFirestore: vi.fn(() => ({ app: { name: '[DEFAULT]' } })),
   collection: vi.fn(),
   doc: vi.fn(),
   getDoc: vi.fn(),
@@ -76,4 +77,33 @@ vi.mock('firebase/firestore', () => ({
   orderBy: vi.fn(),
   limit: vi.fn(),
   onSnapshot: vi.fn(),
+  connectFirestoreEmulator: vi.fn(),
+  enableIndexedDbPersistence: vi.fn(() => Promise.resolve()),
+  serverTimestamp: vi.fn(() => new Date()),
+}));
+
+vi.mock('firebase/storage', () => ({
+  getStorage: vi.fn(() => ({ app: { name: '[DEFAULT]' } })),
+  ref: vi.fn(),
+  uploadBytes: vi.fn(),
+  getDownloadURL: vi.fn(),
+  deleteObject: vi.fn(),
+  connectStorageEmulator: vi.fn(),
+}));
+
+vi.mock('firebase/functions', () => ({
+  getFunctions: vi.fn(() => ({ app: { name: '[DEFAULT]' } })),
+  httpsCallable: vi.fn(),
+  connectFunctionsEmulator: vi.fn(),
+}));
+
+vi.mock('firebase/analytics', () => ({
+  getAnalytics: vi.fn(() => ({ app: { name: '[DEFAULT]' } })),
+  isSupported: vi.fn(() => Promise.resolve(false)),
+  logEvent: vi.fn(),
+}));
+
+vi.mock('firebase/performance', () => ({
+  getPerformance: vi.fn(() => ({ app: { name: '[DEFAULT]' } })),
+  trace: vi.fn(),
 }));

@@ -3,27 +3,28 @@
  * @module App
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { store } from './store';
 import { useAuth } from './hooks/useAuth';
 import { useBiometric } from './hooks/useBiometric';
 
-// Pages
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import AccountsPage from './pages/AccountsPage';
-import SettingsPage from './pages/SettingsPage';
-import BackupPage from './pages/BackupPage';
-
-// Components
+// Components (loaded immediately)
 import Layout from './components/common/Layout';
 import PrivateRoute from './components/auth/PrivateRoute';
 import LockScreen from './components/auth/LockScreen';
 import LoadingScreen from './components/common/LoadingScreen';
 import ToastContainer from './components/common/ToastContainer';
+import InstallBanner from './components/common/InstallBanner';
+
+// Lazy load pages for better performance
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const AccountsPage = lazy(() => import('./pages/AccountsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const BackupPage = lazy(() => import('./pages/BackupPage'));
 
 
 /**
@@ -49,33 +50,36 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={
-          isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
-        } />
-        <Route path="/register" element={
-          isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />
-        } />
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+          } />
+          <Route path="/register" element={
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />
+          } />
 
-        {/* Private routes */}
-        <Route element={<PrivateRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/accounts" element={<AccountsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/backup" element={<BackupPage />} />
+          {/* Private routes */}
+          <Route element={<PrivateRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/accounts" element={<AccountsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/backup" element={<BackupPage />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </Suspense>
 
       {/* Global components */}
       <LockScreen />
       <ToastContainer />
+      <InstallBanner />
     </>
   );
 };
