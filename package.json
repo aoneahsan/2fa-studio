@@ -29,7 +29,14 @@
 		"deploy": "./scripts/deploy.sh",
 		"deploy:hosting": "firebase deploy --only hosting",
 		"deploy:rules": "firebase deploy --only firestore:rules,storage:rules",
-		"deploy:all": "firebase deploy"
+		"deploy:all": "firebase deploy",
+		"docs:start": "cd docs-site && yarn start",
+		"docs:build": "cd docs-site && yarn build",
+		"docs:serve": "cd docs-site && yarn serve",
+		"docs:deploy": "cd docs-site && yarn deploy",
+		"docs:clear": "cd docs-site && yarn clear",
+		"docs:write-translations": "cd docs-site && yarn write-translations",
+		"docs:write-heading-ids": "cd docs-site && yarn write-heading-ids"
 	},
 	"dependencies": {
 		"@capacitor-community/barcode-scanner": "^4.0.1",

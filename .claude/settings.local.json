@@ -100,7 +100,9 @@
       "Bash(pod install:*)",
       "Bash(yarn preview)",
       "Bash(npx cypress open:*)",
-      "Bash(npx patch-package:*)"
+      "Bash(npx patch-package:*)",
+      "Bash(cp:*)",
+      "Bash(tree:*)"
     ],
     "deny": []
   }

@@ -174,9 +174,10 @@ Follow the standard iOS and Android deployment processes:
 Full documentation is available at [docs/](./docs/) or visit our [documentation site](#).
 
 ### Key Documentation
-- [Development Guide](./docs/DEVELOPMENT_PLAN.md)
+- [Getting Started](./docs/development/getting-started.md)
+- [Development Plan](./docs/development/development-plan.md)
+- [Architecture Overview](./docs/architecture/overview.md)
 - [API Reference](./docs/api/)
-- [Security Architecture](./docs/security/)
 - [Contributing Guide](./CONTRIBUTING.md)
 
 ## 🤝 Contributing
