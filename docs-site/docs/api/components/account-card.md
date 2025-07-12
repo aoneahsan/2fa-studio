@@ -244,6 +244,5 @@ it('should update TOTP code every second', async () => {
 
 ## Related Components
 
-- [AccountsList](./accounts-list.md) - Container for multiple cards
-- [EditAccountModal](./edit-account-modal.md) - Edit account details
-- [DeleteAccountDialog](./delete-account-dialog.md) - Confirmation dialog
+- [QRScanner](./qr-scanner.md) - For importing new accounts
+- [OTPService](../services/otp-service.md) - Service used for code generation

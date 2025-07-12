@@ -23,18 +23,13 @@ Custom hooks for state management and functionality:
 - **[useAuth](./hooks/use-auth.md)** - Authentication state and operations
 - **[useAccounts](./hooks/use-accounts.md)** - 2FA account management
 - **[useBiometric](./hooks/use-biometric.md)** - Biometric authentication
-- **[useGoogleDrive](./hooks/use-google-drive.md)** - Google Drive backup operations
-- **[useAppDispatch & useAppSelector](./hooks/use-app-store.md)** - Redux store access
 
 ## Key Components
 
 Reusable UI components:
 
 - **[AccountCard](./components/account-card.md)** - Displays 2FA account with code generation
-- **[AccountsList](./components/accounts-list.md)** - Manages list of 2FA accounts
 - **[QRScanner](./components/qr-scanner.md)** - QR code scanning for account import
-- **[GoogleDriveBackup](./components/google-drive-backup.md)** - Backup management UI
-- **[LockScreen](./components/lock-screen.md)** - App security screen
 
 ## Architecture Notes
 

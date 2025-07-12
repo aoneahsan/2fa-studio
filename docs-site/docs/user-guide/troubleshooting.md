@@ -512,3 +512,92 @@ A: Yes, use folders, tags, custom icons, and search to organize any number of ac
 
 **Q: What about business use?**
 A: We offer 2FA Studio Business with centralized management, policies, and compliance features.
+
+## FAQ
+
+### General Questions
+
+**Q: What is two-factor authentication (2FA)?**
+A: 2FA adds an extra security layer beyond passwords. It requires something you know (password) and something you have (authenticator app).
+
+**Q: Why use 2FA Studio over other authenticators?**
+A: 2FA Studio offers cross-platform sync, encrypted backups, browser extension, biometric protection, and a clean interface - all with privacy-first design.
+
+**Q: Does 2FA Studio work offline?**
+A: Yes! Code generation works entirely offline. Only sync and backup features require internet.
+
+**Q: What platforms are supported?**
+A: iOS, Android, Web app, and Chrome extension. All platforms sync seamlessly.
+
+**Q: Is 2FA Studio free?**
+A: Yes, with up to 10 accounts. Premium offers unlimited accounts and advanced features.
+
+### Setup Questions
+
+**Q: How do I transfer from Google Authenticator?**
+A: Unfortunately, Google Authenticator doesn't support bulk export. You'll need to re-add each account manually or use the QR codes from each service.
+
+**Q: Can I use 2FA Studio on multiple devices?**
+A: Yes! Create an account and enable sync. All your 2FA codes will be available on all devices.
+
+**Q: Do I need to create an account?**
+A: No, you can use 2FA Studio locally without an account. Create one only if you want sync and backup features.
+
+**Q: How do I enable biometric unlock?**
+A: Go to Settings > Security > Enable Biometric Unlock. Your device must support biometric authentication.
+
+### Technical Questions
+
+**Q: What algorithms are supported?**
+A: TOTP (SHA1, SHA256, SHA512) with 6-8 digits and 30/60 second periods. HOTP with configurable counter.
+
+**Q: Can I export my data?**
+A: Yes, export as encrypted backup, QR codes, or plain text (careful with security).
+
+**Q: What's the difference between TOTP and HOTP?**
+A: TOTP codes change based on time (every 30 seconds). HOTP codes change based on a counter (each use).
+
+**Q: Are my secrets stored securely?**
+A: Yes, all secrets are encrypted with AES-256-GCM using keys derived from your master password or biometrics.
+
+### Troubleshooting Questions
+
+**Q: My codes don't work - what should I do?**
+A: Check your device time is correct and synced. 2FA codes are time-sensitive and require accurate time.
+
+**Q: I forgot my master password - can you help?**
+A: We cannot recover passwords due to zero-knowledge encryption. Restore from a backup if available.
+
+**Q: The app crashes on startup - help!**
+A: Try clearing app data/cache, reinstalling, or contact support with crash logs.
+
+**Q: Sync isn't working between devices?**
+A: Ensure you're logged into the same account on all devices and have internet connectivity.
+
+### Privacy & Security Questions
+
+**Q: Do you track or collect analytics?**
+A: No tracking, no analytics, no ads (in premium). We're privacy-first.
+
+**Q: Where is my data stored?**
+A: Locally on your device. If sync is enabled, encrypted data is stored in Firebase (Google Cloud).
+
+**Q: Can government/hackers access my codes?**
+A: No. Zero-knowledge encryption means only you can decrypt your data, even if servers are compromised.
+
+**Q: What happens if I lose all my devices?**
+A: Restore from your encrypted cloud backup using your backup password.
+
+### Billing Questions
+
+**Q: How much is premium?**
+A: Check current pricing in-app. We offer monthly and yearly subscriptions with family plans.
+
+**Q: Can I try premium features first?**
+A: Yes, we offer a 7-day free trial for new premium subscribers.
+
+**Q: How do I cancel my subscription?**
+A: Cancel through your app store (iOS/Android) or account settings (web).
+
+**Q: Do you offer educational discounts?**
+A: Yes, contact support with your .edu email for special pricing.

@@ -156,8 +156,6 @@ function ProtectedRoute({ children }) {
 ## Related APIs
 
 - [AuthService](../services/auth-service.md) - For authentication operations
-- [useAppSelector](./use-app-store.md) - For accessing other Redux state
-- [authSlice](../store/auth-slice.md) - Redux slice containing auth state
 
 ## Best Practices
 
