@@ -17,8 +17,10 @@ service cloud.firestore {
     
     function canAddAccount() {
       let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      let currentCount = get(/databases/$(database)/documents/users/$(request.auth.uid)/accounts).size();
-      return user.subscription.accountLimit == null || currentCount < user.subscription.accountLimit;
+      // Check if user has accountCount field and it's under the limit
+      return user.subscription.accountLimit == null || 
+        !('accountCount' in user) || 
+        user.accountCount < user.subscription.accountLimit;
     }
     
     // User document rules

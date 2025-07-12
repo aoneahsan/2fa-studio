@@ -38,6 +38,7 @@ import {
 import { auth, db } from '../config/firebase';
 import { User, Device, Subscription } from '../types';
 import { Capacitor } from '@capacitor/core';
+import { authRateLimiter } from '../utils/rate-limiter';
 
 export interface AuthCredentials {
   email: string;
@@ -147,6 +148,15 @@ export class AuthService {
    * Sign in with email and password
    */
   static async signIn(credentials: AuthCredentials): Promise<User> {
+    const rateLimitKey = `auth:${credentials.email}`;
+    
+    // Check rate limit
+    if (!authRateLimiter.isAllowed(rateLimitKey)) {
+      const blockedTime = authRateLimiter.getBlockedTime(rateLimitKey);
+      const minutes = Math.ceil(blockedTime / 60000);
+      throw new Error(`Too many login attempts. Please try again in ${minutes} minutes.`);
+    }
+    
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -164,9 +174,20 @@ export class AuthService {
       // Register/update device
       await this.registerDevice(user.id);
 
+      // Reset rate limit on successful login
+      authRateLimiter.reset(rateLimitKey);
+
       return user;
     } catch (error: any) {
-      throw new Error(this.getErrorMessage(error.code));
+      // Record failed attempt
+      authRateLimiter.recordAttempt(rateLimitKey);
+      
+      const remainingAttempts = authRateLimiter.getRemainingAttempts(rateLimitKey);
+      if (remainingAttempts > 0) {
+        throw new Error(`${this.getErrorMessage(error.code)} (${remainingAttempts} attempts remaining)`);
+      } else {
+        throw new Error(this.getErrorMessage(error.code));
+      }
     }
   }
 
