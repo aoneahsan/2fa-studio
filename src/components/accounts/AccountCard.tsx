@@ -6,18 +6,23 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { OTPAccount, OTPService } from '@services/otp.service';
+import { BiometricAccountService } from '@services/biometric-account.service';
+import { AnalyticsService } from '@services/analytics.service';
 import { addToast } from '@store/slices/uiSlice';
 import { incrementHOTPCounter } from '@store/slices/accountsSlice';
 import { useAppSelector } from '@hooks/useAppSelector';
 import { selectTagById } from '@store/slices/tagsSlice';
 import { selectFolderById } from '@store/slices/foldersSlice';
+import { RootState } from '@src/store';
 import { 
   ClipboardDocumentIcon, 
   PencilIcon, 
   TrashIcon,
   ArrowPathIcon,
   StarIcon as StarOutlineIcon,
-  FolderIcon
+  FolderIcon,
+  FingerPrintIcon,
+  LockClosedIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import TagPill from '@components/tags/TagPill';
@@ -34,13 +39,37 @@ interface AccountCardProps {
  */
 const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, onToggleFavorite }) => {
   const dispatch = useDispatch();
+  const { user } = useAppSelector((state: RootState) => state.auth);
   const [otpCode, setOtpCode] = useState('');
   const [remainingTime, setRemainingTime] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isCopying, setIsCopying] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [hasTrackedView, setHasTrackedView] = useState(false);
+  
+  const biometricStatus = BiometricAccountService.getBiometricStatus(account);
+
+  // Check if account needs biometric unlock
+  useEffect(() => {
+    setIsLocked(BiometricAccountService.isBiometricRequired(account));
+  }, [account]);
+
+  // Track view analytics
+  useEffect(() => {
+    if (!hasTrackedView && user && !isLocked && otpCode && otpCode !== '••••••') {
+      AnalyticsService.trackUsage(user.id, account.id, 'view');
+      setHasTrackedView(true);
+    }
+  }, [hasTrackedView, user, account.id, isLocked, otpCode]);
 
   // Generate OTP code
   const generateCode = useCallback(() => {
+    if (isLocked) {
+      setOtpCode('••••••');
+      return;
+    }
+    
     try {
       const result = OTPService.generateCode(account);
       setOtpCode(result.code || '');
@@ -53,7 +82,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
       console.error('Failed to generate code:', error);
       setOtpCode('ERROR');
     }
-  }, [account]);
+  }, [account, isLocked]);
 
   // Initial code generation
   useEffect(() => {
@@ -71,13 +100,52 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
     return () => clearInterval(interval);
   }, [account.type, generateCode]);
 
+  // Handle biometric unlock
+  const handleBiometricUnlock = async () => {
+    setIsAuthenticating(true);
+    
+    try {
+      const result = await BiometricAccountService.authenticateAccount(
+        account,
+        `Unlock ${account.label}`
+      );
+      
+      if (result.success) {
+        setIsLocked(false);
+        generateCode();
+      } else {
+        dispatch(addToast({
+          type: 'error',
+          message: result.error || 'Biometric authentication failed',
+        }));
+      }
+    } catch (error) {
+      dispatch(addToast({
+        type: 'error',
+        message: 'Failed to authenticate',
+      }));
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
   // Copy code to clipboard
   const handleCopyCode = async () => {
-    if (!otpCode || otpCode === 'ERROR') return;
+    if (!otpCode || otpCode === 'ERROR' || isLocked) {
+      if (isLocked) {
+        await handleBiometricUnlock();
+      }
+      return;
+    }
 
     try {
       await navigator.clipboard.writeText(otpCode);
       setIsCopying(true);
+      
+      // Track copy analytics
+      if (user) {
+        AnalyticsService.trackUsage(user.id, account.id, 'copy');
+      }
       
       dispatch(addToast({
         type: 'success',
@@ -101,6 +169,11 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
     
     dispatch(incrementHOTPCounter(account.id));
     generateCode();
+    
+    // Track generation analytics
+    if (user) {
+      AnalyticsService.trackUsage(user.id, account.id, 'generate');
+    }
   };
 
   // Format code for display
@@ -167,6 +240,11 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
 
         {/* Actions */}
         <div className="flex items-center gap-1">
+          {biometricStatus.isEnabled && (
+            <div className="p-1.5 text-primary" title="Biometric protected">
+              <FingerPrintIcon className="w-4 h-4" />
+            </div>
+          )}
           {onToggleFavorite && (
             <button
               onClick={() => onToggleFavorite(account)}
@@ -199,21 +277,40 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
 
       {/* OTP Code Display */}
       <div className="mt-4">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handleCopyCode}
-            className={`flex items-center gap-2 text-2xl font-mono font-bold transition-all ${
-              isCopying ? 'text-green-500' : 'text-foreground hover:text-primary'
-            }`}
-            disabled={!otpCode || otpCode === 'ERROR'}
-            data-testid="totp-code"
-          >
-            <span>{formatCode(otpCode)}</span>
-            <ClipboardDocumentIcon className="w-5 h-5" />
-          </button>
+        {isLocked ? (
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBiometricUnlock}
+              disabled={isAuthenticating}
+              className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+            >
+              <LockClosedIcon className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">
+                {isAuthenticating ? 'Authenticating...' : 'Unlock with biometric'}
+              </span>
+            </button>
+            {biometricStatus.remainingMinutes && (
+              <span className="text-xs text-muted-foreground">
+                {biometricStatus.remainingMinutes}m remaining
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleCopyCode}
+              className={`flex items-center gap-2 text-2xl font-mono font-bold transition-all ${
+                isCopying ? 'text-green-500' : 'text-foreground hover:text-primary'
+              }`}
+              disabled={!otpCode || otpCode === 'ERROR'}
+              data-testid="totp-code"
+            >
+              <span>{formatCode(otpCode)}</span>
+              <ClipboardDocumentIcon className="w-5 h-5" />
+            </button>
 
-          {/* Timer or Counter */}
-          {account.type === 'totp' ? (
+            {/* Timer or Counter */}
+            {account.type === 'totp' ? (
             <div className="flex items-center gap-2">
               <div className="relative w-8 h-8">
                 <svg className="w-8 h-8 transform -rotate-90">
@@ -257,10 +354,11 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
               </button>
             </div>
           )}
-        </div>
+          </div>
+        )}
 
         {/* Progress bar for TOTP */}
-        {account.type === 'totp' && (
+        {account.type === 'totp' && !isLocked && (
           <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-1000"

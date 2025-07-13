@@ -179,6 +179,63 @@
 - **Secure Sessions**: 30-day session duration with activity updates
 - **Integration**: Sync hooks integrated with accounts, tags, and folders
 
+### ✅ Backup Scheduling System
+- **Backup Scheduler Service**: Comprehensive automated backup management
+- **Schedule Types**: Support for daily, weekly, and monthly backup schedules
+- **Flexible Timing**: Configurable time, day of week, or day of month
+- **Multiple Destinations**: Backup to Google Drive, local storage, or both
+- **Encryption Options**: Optional AES-256-GCM encryption for backups
+- **Settings Inclusion**: Option to include app settings in backups
+- **Schedule Management UI**: Visual interface to create, edit, and delete schedules
+- **Enable/Disable Toggle**: Temporarily disable schedules without deleting
+- **Manual Execution**: Run any scheduled backup immediately on demand
+- **Backup History Tracking**: Complete history of all backup operations
+- **Status Tracking**: Success, failed, or partial status for each backup
+- **Performance Metrics**: Duration and file size tracking for backups
+- **Error Logging**: Detailed error messages for failed backups
+- **Notification Integration**: Success and failure notifications via OneSignal
+- **Next Run Calculation**: Smart calculation of next backup time
+- **Background Execution**: Uses setTimeout for scheduled execution
+- **Firestore Integration**: Schedules and history stored in Firestore
+
+### ✅ Biometric Lock for Individual Accounts
+- **Biometric Account Service**: Per-account biometric protection management
+- **Individual Protection**: Enable biometric lock for sensitive accounts only
+- **Timeout Configuration**: Customizable timeout period (1-60 minutes)
+- **Authentication Caching**: Accounts remain unlocked for timeout duration
+- **Visual Indicators**: Fingerprint icon shows protected accounts
+- **Locked State UI**: Protected accounts show lock screen until authenticated
+- **Unlock Interface**: Dedicated unlock button with biometric prompt
+- **Fallback Support**: Device PIN/password fallback on biometric failure
+- **Settings Component**: Dedicated UI for managing biometric settings per account
+- **Edit Modal Integration**: Biometric settings included in account edit modal
+- **Auto-lock on App Lock**: All biometric sessions cleared when app locks
+- **Native Platform Support**: Full support for iOS Face ID/Touch ID and Android biometrics
+- **Web Fallback**: Confirmation dialog on web platform for testing
+- **Session Tracking**: Last authentication time tracked per account
+- **Status Display**: Shows remaining time until re-authentication required
+- **Database Integration**: Biometric settings stored in Firestore
+
+### ✅ Account Usage Analytics
+- **Analytics Service**: Comprehensive usage tracking and statistics
+- **Action Tracking**: Track view, copy, and generate actions per account
+- **Usage Statistics**: Calculate total views, copies, and generations
+- **Daily Usage Chart**: Visual representation of usage over last 7 days
+- **Hourly Distribution**: 24-hour heatmap showing peak usage times
+- **Device Distribution**: Track usage across different devices
+- **Global Statistics**: Dashboard-level analytics for all accounts
+- **Most Used Accounts**: Top 5 most frequently used accounts
+- **Inactive Accounts**: Identify accounts not used in 7+ days
+- **Peak Usage Hours**: Identify the 3 most active hours of the day
+- **Average Daily Usage**: Calculate average actions per day
+- **Account Analytics Tab**: View detailed analytics in edit modal
+- **Visual Charts**: Bar charts, progress bars, and heatmaps
+- **Real-time Updates**: Analytics update as accounts are used
+- **Analytics Integration**: Automatic tracking in AccountCard component
+- **Data Cleanup**: Service to remove old analytics data
+- **Firestore Integration**: Usage data stored in Firestore subcollection
+- **Performance Optimized**: Batch queries and efficient data structures
+
 ---
 
 *This document tracks all completed features for 2FA Studio. For upcoming features and development plans, see what-next.md*

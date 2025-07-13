@@ -21,6 +21,11 @@ export interface OTPAccount {
   updatedAt: Date;
   backupCodes?: string[];
   notes?: string;
+  isFavorite?: boolean;
+  folderId?: string | null;
+  requiresBiometric?: boolean;
+  biometricTimeout?: number;
+  lastBiometricAuth?: Date;
 }
 
 export interface OTPGenerationResult {

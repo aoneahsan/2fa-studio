@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { useAccounts } from '@hooks/useAccounts';
+import GlobalUsageStats from '@components/analytics/GlobalUsageStats';
 import { 
   PlusIcon,
   KeyIcon,
@@ -174,6 +175,11 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Usage Analytics */}
+      <div className="mt-8">
+        <GlobalUsageStats />
+      </div>
     </div>
     </>
   );

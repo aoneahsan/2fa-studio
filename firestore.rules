@@ -70,6 +70,28 @@ service cloud.firestore {
         allow update: if false; // Backups are immutable
         allow delete: if isOwner(userId);
       }
+      
+      // User's usage analytics subcollection
+      match /usage/{usageId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update: if false; // Usage records are immutable
+        allow delete: if isOwner(userId); // Allow cleanup of old data
+      }
+      
+      // User's backup schedules subcollection
+      match /backupSchedules/{scheduleId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+      
+      // User's backup history subcollection
+      match /backupHistory/{historyId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update: if false; // History records are immutable
+        allow delete: if isOwner(userId);
+      }
     }
     
     // Admin access rules

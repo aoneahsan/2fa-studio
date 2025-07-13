@@ -161,6 +161,11 @@ export class NotificationService {
     console.log('Backup reminder would be scheduled from backend:', { userId, days });
   }
 
+  async sendBackupReminder(userId: string, message: string): Promise<void> {
+    // This would typically be called from your backend
+    console.log('Backup reminder would be sent from backend:', { userId, message });
+  }
+
   // Preferences
   async updateNotificationPreferences(preferences: {
     securityAlerts: boolean;
@@ -205,3 +210,4 @@ export class NotificationService {
 }
 
 export const notificationService = NotificationService.getInstance();
+export { NotificationService };

@@ -82,6 +82,9 @@ export const useAccounts = () => {
               updatedAt: encryptedData.updatedAt?.toDate() || new Date(),
               isFavorite: encryptedData.isFavorite || false,
               folderId: encryptedData.folderId || null,
+              requiresBiometric: encryptedData.requiresBiometric || false,
+              biometricTimeout: encryptedData.biometricTimeout,
+              lastBiometricAuth: encryptedData.lastBiometricAuth?.toDate(),
             };
             
             decryptedAccounts.push(account);

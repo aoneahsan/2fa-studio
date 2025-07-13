@@ -7,6 +7,9 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@src/store';
 import { addToast } from '@store/slices/uiSlice';
+import BackupScheduler from '@components/backup/BackupScheduler';
+import BackupHistory from '@components/backup/BackupHistory';
+import { BackupService } from '@services/backup.service';
 import { 
   CloudArrowUpIcon, 
   ArrowDownTrayIcon,
@@ -94,15 +97,20 @@ const BackupPage: React.FC = () => {
   };
 
   const handleBackupNow = async () => {
+    if (!user) return;
+    
     setIsBackingUp(true);
     
     try {
-      // Simulate backup process
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      const result = await BackupService.backupToGoogleDrive(
+        user.id,
+        true, // encrypted
+        true  // include settings
+      );
       
       dispatch(addToast({
         type: 'success',
-        message: `Successfully backed up ${accounts.length} accounts`
+        message: `Successfully backed up ${result.accountsCount} accounts`
       }));
     } catch (error) {
       dispatch(addToast({
@@ -274,105 +282,11 @@ const BackupPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Auto-backup Status */}
-      {backupStats.autoBackupEnabled && (
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <ClockIcon className="w-5 h-5 text-primary" />
-              <div>
-                <p className="font-medium text-foreground">Automatic Backup Enabled</p>
-                <p className="text-sm text-muted-foreground">
-                  Next backup scheduled for {backupStats.nextBackupDate?.toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={() => dispatch(addToast({ type: 'info', message: 'Configure in Settings > Backup' }))}
-              className="text-sm text-primary hover:underline"
-            >
-              Configure
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Backup Scheduler */}
+      <BackupScheduler />
 
       {/* Backup History */}
-      <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Backup History</h2>
-        
-        <div className="space-y-3">
-          {backupHistory.map((backup) => (
-            <div 
-              key={backup.id}
-              className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                    <FolderIcon className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  
-                  <div>
-                    <p className="font-medium text-foreground">
-                      Backup - {backup.date.toLocaleDateString()}
-                    </p>
-                    <div className="flex items-center gap-4 mt-1">
-                      <span className="text-sm text-muted-foreground">
-                        {backup.accountCount} accounts
-                      </span>
-                      <span className="text-sm text-muted-foreground">•</span>
-                      <span className="text-sm text-muted-foreground">
-                        {formatFileSize(backup.size)}
-                      </span>
-                      <span className="text-sm text-muted-foreground">•</span>
-                      <span className="text-sm text-muted-foreground capitalize">
-                        {backup.type}
-                      </span>
-                      {backup.provider === 'google_drive' && (
-                        <>
-                          <span className="text-sm text-muted-foreground">•</span>
-                          <span className="text-sm text-green-600 dark:text-green-400">
-                            Google Drive
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleExportBackup(backup.id)}
-                    className="btn btn-ghost btn-sm"
-                    title="Download backup"
-                  >
-                    <ArrowDownTrayIcon className="w-4 h-4" />
-                  </button>
-                  
-                  <button
-                    onClick={() => handleRestore(backup.id)}
-                    disabled={isRestoring}
-                    className="btn btn-outline btn-sm"
-                  >
-                    {isRestoring && selectedBackup === backup.id ? 'Restoring...' : 'Restore'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {backupHistory.length === 0 && (
-          <div className="text-center py-12">
-            <FolderIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">No backups found</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Create your first backup to protect your accounts
-            </p>
-          </div>
-        )}
-      </div>
+      <BackupHistory />
 
       {/* Storage Info */}
       <div className="border-t border-border pt-6">

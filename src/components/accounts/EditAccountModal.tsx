@@ -13,8 +13,12 @@ import { selectTags, fetchTags } from '@store/slices/tagsSlice';
 import { selectFolders } from '@store/slices/foldersSlice';
 import TagSelector from '@components/tags/TagSelector';
 import FolderSelector from '@components/folders/FolderSelector';
+import BiometricSettings from '@components/accounts/BiometricSettings';
+import AccountUsageChart from '@components/analytics/AccountUsageChart';
 import { TagService } from '@services/tag.service';
+import { AnalyticsService } from '@services/analytics.service';
 import { useAccounts } from '@hooks/useAccounts';
+import { UsageStats } from '@types/analytics.types';
 import { 
   XMarkIcon,
   BuildingOfficeIcon,
@@ -23,7 +27,9 @@ import {
   ClockIcon,
   HashtagIcon,
   KeyIcon,
-  FolderIcon
+  FolderIcon,
+  FingerPrintIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 
 /**
@@ -54,6 +60,8 @@ const EditAccountModal: React.FC = () => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+  const [activeTab, setActiveTab] = useState<'details' | 'analytics'>('details');
 
   useEffect(() => {
     if (account) {
@@ -68,8 +76,15 @@ const EditAccountModal: React.FC = () => {
         algorithm: account.algorithm || 'SHA1',
         counter: account.counter || 0
       });
+      
+      // Load usage stats
+      if (user) {
+        AnalyticsService.getAccountUsageStats(user.id, account.id)
+          .then(setUsageStats)
+          .catch(console.error);
+      }
     }
-  }, [account]);
+  }, [account, user]);
 
   // Load tags on mount
   useEffect(() => {
@@ -143,8 +158,36 @@ const EditAccountModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Tabs */}
+        <div className="flex border-b border-border">
+          <button
+            type="button"
+            onClick={() => setActiveTab('details')}
+            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'details'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Details
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('analytics')}
+            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'analytics'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <ChartBarIcon className="w-4 h-4 inline mr-1" />
+            Analytics
+          </button>
+        </div>
+
+        {/* Content */}
+        {activeTab === 'details' ? (
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Issuer */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
@@ -331,6 +374,23 @@ const EditAccountModal: React.FC = () => {
             </p>
           </div>
 
+          {/* Biometric Settings */}
+          <div className="pt-4 border-t border-border">
+            <h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+              <FingerPrintIcon className="w-4 h-4" />
+              Biometric Protection
+            </h3>
+            {account && (
+              <BiometricSettings 
+                account={account} 
+                onUpdate={() => {
+                  // Refresh the account data
+                  // This will be handled by the Firestore listener
+                }}
+              />
+            )}
+          </div>
+
           {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
@@ -349,6 +409,18 @@ const EditAccountModal: React.FC = () => {
             </button>
           </div>
         </form>
+        ) : (
+          <div className="p-6">
+            {usageStats ? (
+              <AccountUsageChart stats={usageStats} />
+            ) : (
+              <div className="text-center py-8">
+                <ChartBarIcon className="w-12 h-12 mx-auto text-muted-foreground mb-3 animate-pulse" />
+                <p className="text-muted-foreground">Loading analytics...</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

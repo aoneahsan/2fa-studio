@@ -12,6 +12,7 @@ import { RootState } from '@src/store';
 import { setBiometricEnabled } from '@store/slices/settingsSlice';
 import { addToast } from '@store/slices/uiSlice';
 import { setLocked } from '@store/slices/uiSlice';
+import { BiometricAccountService } from '@services/biometric-account.service';
 
 interface BiometricStatus {
   isAvailable: boolean;
@@ -173,6 +174,8 @@ export const useBiometric = () => {
 
   // Lock app
   const lockApp = useCallback(() => {
+    // Clear all authenticated biometric sessions
+    BiometricAccountService.clearAuthenticatedAccounts();
     dispatch(setLocked(true));
   }, [dispatch]);
 
