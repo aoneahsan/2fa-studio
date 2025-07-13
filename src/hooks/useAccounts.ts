@@ -21,6 +21,7 @@ import { FirestoreService } from '@services/firestore.service';
 import { MobileEncryptionService } from '@services/mobile-encryption.service';
 import { RealtimeSyncService } from '@services/realtime-sync.service';
 import { Preferences } from '@capacitor/preferences';
+import { AuditLogService } from '@services/audit-log.service';
 
 /**
  * Hook for managing OTP accounts
@@ -152,6 +153,23 @@ export const useAccounts = () => {
         type: 'success',
         message: 'Account added successfully',
       }));
+      
+      // Log account creation
+      await AuditLogService.log({
+        userId: user.uid,
+        action: 'account.created',
+        resource: `account/${documentId}`,
+        severity: 'info',
+        success: true,
+        details: {
+          issuer: account.issuer,
+          label: account.label,
+          type: account.type,
+          hasTags: (account.tags?.length || 0) > 0,
+          hasFolderId: !!account.folderId,
+          requiresBiometric: account.requiresBiometric || false
+        }
+      });
     } catch (error) {
       console.error('Error adding account:', error);
       dispatch(addToast({
@@ -205,6 +223,22 @@ export const useAccounts = () => {
         type: 'success',
         message: 'Account updated successfully',
       }));
+      
+      // Log account update
+      await AuditLogService.log({
+        userId: user.uid,
+        action: 'account.updated',
+        resource: `account/${account.id}`,
+        severity: 'info',
+        success: true,
+        details: {
+          issuer: account.issuer,
+          label: account.label,
+          fieldsUpdated: Object.keys(accountData).filter(key => 
+            key !== 'updatedAt' && key !== 'encryptedSecret' && key !== 'secret'
+          )
+        }
+      });
     } catch (error) {
       console.error('Error updating account:', error);
       dispatch(addToast({
@@ -243,6 +277,18 @@ export const useAccounts = () => {
         type: 'success',
         message: 'Account deleted successfully',
       }));
+      
+      // Log account deletion
+      await AuditLogService.log({
+        userId: user.uid,
+        action: 'account.deleted',
+        resource: `account/${accountId}`,
+        severity: 'warning',
+        success: true,
+        details: {
+          permanentDeletion: true
+        }
+      });
     } catch (error) {
       console.error('Error deleting account:', error);
       dispatch(addToast({

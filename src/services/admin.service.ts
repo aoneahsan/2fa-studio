@@ -30,6 +30,7 @@ import {
   AdminAction,
   UserRole 
 } from '@src/types';
+import { AuditLogService } from '@services/audit-log.service';
 
 export interface UserSearchParams {
   searchTerm?: string;
@@ -179,6 +180,19 @@ export class AdminService {
       if (!userDoc.exists()) {
         return null;
       }
+      
+      // Log admin accessing user data
+      await AuditLogService.log({
+        userId: auth.currentUser?.uid || 'unknown',
+        action: 'admin.user_data_accessed',
+        resource: `user/${userId}`,
+        severity: 'info',
+        success: true,
+        details: {
+          targetUserId: userId
+        }
+      });
+      
       return { id: userDoc.id, ...userDoc.data() } as User;
     } catch (error) {
       console.error('Error getting user details:', error);
@@ -245,11 +259,40 @@ export class AdminService {
           ipAddress: null // Would be set by Cloud Function
         });
       });
+      
+      // Log to audit service
+      await AuditLogService.log({
+        userId: auth.currentUser?.uid || 'unknown',
+        action: 'admin.subscription_changed',
+        resource: `user/${params.userId}`,
+        severity: 'warning',
+        success: true,
+        details: {
+          targetUserId: params.userId,
+          changes: params.updates,
+          reason: params.reason
+        }
+      });
 
       // If role was updated, refresh the user's custom claims
       if (params.updates.role !== undefined) {
         const updateClaims = httpsCallable(this.functions, 'updateUserClaims');
         await updateClaims({ userId: params.userId, role: params.updates.role });
+      }
+      
+      // Log disable/enable actions
+      if (params.updates.disabled !== undefined) {
+        await AuditLogService.log({
+          userId: auth.currentUser?.uid || 'unknown',
+          action: params.updates.disabled ? 'admin.user_disabled' : 'admin.user_enabled',
+          resource: `user/${params.userId}`,
+          severity: 'critical',
+          success: true,
+          details: {
+            targetUserId: params.userId,
+            reason: params.reason
+          }
+        });
       }
     } catch (error) {
       console.error('Error updating user subscription:', error);

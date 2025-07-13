@@ -7,7 +7,8 @@ import { BiometricAuth } from 'capacitor-biometric-auth';
 import { Capacitor } from '@capacitor/core';
 import { OTPAccount } from '@services/otp.service';
 import { updateDoc, doc } from 'firebase/firestore';
-import { db } from '@src/config/firebase';
+import { db, auth } from '@src/config/firebase';
+import { AuditLogService } from '@services/audit-log.service';
 
 export interface BiometricAuthResult {
   success: boolean;
@@ -93,8 +94,34 @@ export class BiometricAccountService {
         // Update in database
         await this.updateLastBiometricAuth(account.id, account.userId);
         
+        // Log successful biometric auth
+        await AuditLogService.log({
+          userId: account.userId || auth.currentUser?.uid || 'unknown',
+          action: 'security.biometric_auth_success',
+          resource: `account/${account.id}`,
+          severity: 'info',
+          success: true,
+          details: {
+            accountIssuer: account.issuer,
+            accountLabel: account.label
+          }
+        });
+        
         return { success: true, account };
       } else {
+        // Log failed biometric auth
+        await AuditLogService.log({
+          userId: account.userId || auth.currentUser?.uid || 'unknown',
+          action: 'security.biometric_auth_failed',
+          resource: `account/${account.id}`,
+          severity: 'warning',
+          success: false,
+          details: {
+            accountIssuer: account.issuer,
+            accountLabel: account.label
+          }
+        });
+        
         return { 
           success: false, 
           error: 'Authentication failed' 
@@ -149,8 +176,35 @@ export class BiometricAccountService {
 
       // Update local cache
       this.authenticatedAccounts.set(accountId, new Date());
+      
+      // Log biometric enabled
+      await AuditLogService.log({
+        userId,
+        action: 'security.biometric_enabled',
+        resource: `account/${accountId}`,
+        severity: 'info',
+        success: true,
+        details: {
+          timeout,
+          platform: Capacitor.getPlatform()
+        }
+      });
     } catch (error) {
       console.error('Error enabling biometric:', error);
+      
+      // Log failed attempt
+      await AuditLogService.log({
+        userId,
+        action: 'security.biometric_enabled',
+        resource: `account/${accountId}`,
+        severity: 'warning',
+        success: false,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        details: {
+          timeout
+        }
+      });
+      
       throw error;
     }
   }
@@ -188,8 +242,31 @@ export class BiometricAccountService {
 
       // Remove from local cache
       this.authenticatedAccounts.delete(accountId);
+      
+      // Log biometric disabled
+      await AuditLogService.log({
+        userId,
+        action: 'security.biometric_disabled',
+        resource: `account/${accountId}`,
+        severity: 'warning',
+        success: true,
+        details: {
+          platform: Capacitor.getPlatform()
+        }
+      });
     } catch (error) {
       console.error('Error disabling biometric:', error);
+      
+      // Log failed attempt
+      await AuditLogService.log({
+        userId,
+        action: 'security.biometric_disabled',
+        resource: `account/${accountId}`,
+        severity: 'warning',
+        success: false,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
       throw error;
     }
   }

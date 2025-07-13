@@ -44,6 +44,7 @@ import { auth, db } from '@src/config/firebase';
 import { User, Device, Subscription } from '@src/types';
 import { Capacitor } from '@capacitor/core';
 import { authRateLimiter } from '@utils/rate-limiter';
+import { AuditLogService } from '@services/audit-log.service';
 
 export interface AuthCredentials {
   email: string;
@@ -191,9 +192,36 @@ export class AuthService {
       // Initialize default tags
       const { TagService } = await import('@services/tag.service');
       await TagService.initializeDefaultTags(userData.id);
+      
+      // Log successful signup
+      await AuditLogService.log({
+        userId: userData.id,
+        action: 'auth.signup',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: {
+          email: userData.email,
+          authProvider: 'email'
+        }
+      });
 
       return userData;
     } catch (error: any) {
+      // Log failed signup attempt
+      await AuditLogService.log({
+        userId: credentials.email,
+        action: 'auth.signup',
+        resource: 'auth',
+        severity: 'warning',
+        success: false,
+        errorMessage: error.code,
+        details: {
+          email: credentials.email,
+          errorCode: error.code
+        }
+      });
+      
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -208,6 +236,21 @@ export class AuthService {
     if (!authRateLimiter.isAllowed(rateLimitKey)) {
       const blockedTime = authRateLimiter.getBlockedTime(rateLimitKey);
       const minutes = Math.ceil(blockedTime / 60000);
+      
+      // Log account locked due to rate limiting
+      await AuditLogService.log({
+        userId: credentials.email,
+        action: 'auth.account_locked',
+        resource: 'auth',
+        severity: 'critical',
+        success: false,
+        details: {
+          email: credentials.email,
+          reason: 'rate_limit_exceeded',
+          blockedMinutes: minutes
+        }
+      });
+      
       throw new Error(`Too many login attempts. Please try again in ${minutes} minutes.`);
     }
     
@@ -230,11 +273,41 @@ export class AuthService {
 
       // Reset rate limit on successful login
       authRateLimiter.reset(rateLimitKey);
+      
+      // Log successful login
+      await AuditLogService.log({
+        userId: user.id,
+        action: 'auth.login',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: {
+          email: user.email,
+          authProvider: 'email'
+        }
+      });
+      
+      // Check for suspicious activity
+      await AuditLogService.detectSuspiciousActivity(user.id);
 
       return user;
     } catch (error: any) {
       // Record failed attempt
       authRateLimiter.recordAttempt(rateLimitKey);
+      
+      // Log failed login
+      await AuditLogService.log({
+        userId: credentials.email,
+        action: 'auth.failed_login',
+        resource: 'auth',
+        severity: 'warning',
+        success: false,
+        errorMessage: error.code,
+        details: {
+          email: credentials.email,
+          errorCode: error.code
+        }
+      });
       
       const remainingAttempts = authRateLimiter.getRemainingAttempts(rateLimitKey);
       if (remainingAttempts > 0) {
@@ -319,6 +392,19 @@ export class AuthService {
         lastLogin: serverTimestamp()
       });
       
+      // Log social login
+      await AuditLogService.log({
+        userId: user.id,
+        action: 'auth.login',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: {
+          email: user.email,
+          authProvider: provider
+        }
+      });
+      
       return user;
     } else {
       // New user - create profile
@@ -374,6 +460,19 @@ export class AuthService {
       const { TagService } = await import('@services/tag.service');
       await TagService.initializeDefaultTags(userData.id);
       
+      // Log social signup
+      await AuditLogService.log({
+        userId: userData.id,
+        action: 'auth.signup',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: {
+          email: userData.email,
+          authProvider: provider
+        }
+      });
+      
       return userData;
     }
   }
@@ -390,6 +489,16 @@ export class AuthService {
       
       await signOut(auth);
       this.currentUser = null;
+      
+      // Log signout
+      await AuditLogService.log({
+        userId: this.currentUser?.id || 'unknown',
+        action: 'auth.logout',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: {}
+      });
     } catch (error: any) {
       throw new Error(this.getErrorMessage(error.code));
     }
@@ -401,6 +510,16 @@ export class AuthService {
   static async sendPasswordResetEmail(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(auth, email);
+      
+      // Log password reset request
+      await AuditLogService.log({
+        userId: email,
+        action: 'auth.password_reset',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: { email }
+      });
     } catch (error: any) {
       throw new Error(this.getErrorMessage(error.code));
     }
@@ -447,6 +566,16 @@ export class AuthService {
 
       // Update password
       await updatePassword(auth.currentUser, newPassword);
+      
+      // Log password change
+      await AuditLogService.log({
+        userId: auth.currentUser.uid,
+        action: 'auth.password_changed',
+        resource: 'auth',
+        severity: 'warning',
+        success: true,
+        details: {}
+      });
     } catch (error: any) {
       throw new Error(this.getErrorMessage(error.code));
     }
@@ -637,6 +766,16 @@ export class AuthService {
     
     try {
       await sendEmailVerification(auth.currentUser);
+      
+      // Log email verification sent
+      await AuditLogService.log({
+        userId: auth.currentUser.uid,
+        action: 'auth.email_verified',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: { email: auth.currentUser.email }
+      });
     } catch (error: any) {
       throw new Error(this.getErrorMessage(error.code));
     }
@@ -662,6 +801,16 @@ export class AuthService {
         'subscription.features.cloudBackup': true,
         updatedAt: serverTimestamp()
       });
+      
+      // Log provider linked
+      await AuditLogService.log({
+        userId: auth.currentUser.uid,
+        action: 'auth.provider_linked',
+        resource: 'auth',
+        severity: 'info',
+        success: true,
+        details: { provider: 'google' }
+      });
     } catch (error: any) {
       throw new Error(this.getErrorMessage(error.code));
     }
@@ -684,6 +833,16 @@ export class AuthService {
           updatedAt: serverTimestamp()
         });
       }
+      
+      // Log provider unlinked
+      await AuditLogService.log({
+        userId: auth.currentUser.uid,
+        action: 'auth.provider_unlinked',
+        resource: 'auth',
+        severity: 'warning',
+        success: true,
+        details: { provider: providerId }
+      });
     } catch (error: any) {
       throw new Error(this.getErrorMessage(error.code));
     }
@@ -712,6 +871,16 @@ export class AuthService {
       
       // Delete Firebase Auth user
       await deleteUser(auth.currentUser);
+      
+      // Log account deletion
+      await AuditLogService.log({
+        userId: userId,
+        action: 'auth.account_deleted',
+        resource: 'auth',
+        severity: 'critical',
+        success: true,
+        details: { permanent: true }
+      });
       
       this.currentUser = null;
     } catch (error: any) {

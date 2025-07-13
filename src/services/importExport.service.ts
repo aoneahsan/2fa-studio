@@ -6,6 +6,8 @@
 import { OTPAccount } from '@services/otp.service';
 import { EncryptionService } from '@services/encryption.service';
 import { OTPService } from '@services/otp.service';
+import { AuditLogService } from '@services/audit-log.service';
+import { auth } from '@src/config/firebase';
 
 export type ExportFormat = 
   | 'json' 
@@ -45,19 +47,61 @@ export class ImportExportService {
     format: ExportFormat = 'json',
     password?: string
   ): Promise<string> {
-    switch (format) {
+    const userId = auth.currentUser?.uid || 'unknown';
+    
+    try {
+      let result: string;
+      
+      switch (format) {
       case 'json':
       case '2fas':
-        return this.exportTo2FAS(accounts, password);
+        result = await this.exportTo2FAS(accounts, password);
+        break;
       case 'aegis':
-        return this.exportToAegis(accounts, password);
+        result = await this.exportToAegis(accounts, password);
+        break;
       case 'google_authenticator':
-        return this.exportToGoogleAuth(accounts);
+        result = await this.exportToGoogleAuth(accounts);
+        break;
       case 'authy':
       case 'raivo':
-        return this.exportToPlainText(accounts);
+        result = await this.exportToPlainText(accounts);
+        break;
       default:
         throw new Error(`Unsupported export format: ${format}`);
+      }
+      
+      // Log successful export
+      await AuditLogService.log({
+        userId,
+        action: 'account.exported',
+        resource: 'accounts',
+        severity: 'info',
+        success: true,
+        details: {
+          format,
+          accountCount: accounts.length,
+          encrypted: !!password
+        }
+      });
+      
+      return result;
+    } catch (error) {
+      // Log failed export
+      await AuditLogService.log({
+        userId,
+        action: 'account.exported',
+        resource: 'accounts',
+        severity: 'warning',
+        success: false,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        details: {
+          format,
+          accountCount: accounts.length
+        }
+      });
+      
+      throw error;
     }
   }
 
@@ -95,9 +139,42 @@ export class ImportExportService {
         throw new Error(`Unsupported import format: ${format}`);
     }
     
+    const userId = auth.currentUser?.uid || 'unknown';
+    
     if (!result.success) {
+      // Log failed import
+      await AuditLogService.log({
+        userId,
+        action: 'account.imported',
+        resource: 'accounts',
+        severity: 'warning',
+        success: false,
+        errorMessage: result.errors.join(', '),
+        details: {
+          format,
+          attemptedCount: result.imported + result.failed,
+          failedCount: result.failed,
+          errors: result.errors
+        }
+      });
+      
       throw new Error(result.errors.join(', '));
     }
+    
+    // Log successful import
+    await AuditLogService.log({
+      userId,
+      action: 'account.imported',
+      resource: 'accounts',
+      severity: 'info',
+      success: true,
+      details: {
+        format,
+        importedCount: result.imported,
+        failedCount: result.failed,
+        encrypted: !!password
+      }
+    });
     
     return result.accounts;
   }
