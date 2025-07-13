@@ -3,6 +3,8 @@
  * @module utils/bundle-optimizer
  */
 
+import React from 'react';
+
 /**
  * Lazy load components with retry mechanism
  */
@@ -214,79 +216,10 @@ export class ImageOptimizer {
   }
 
   /**
-   * Create responsive image with lazy loading
+   * Get responsive image component
    */
-  static createResponsiveImage(
-    src: string,
-    alt: string,
-    sizes?: { width: number; height: number }[]
-  ): React.ReactElement {
-    const [isLoaded, setIsLoaded] = React.useState(false);
-    const [isInView, setIsInView] = React.useState(false);
-    const imgRef = React.useRef<HTMLImageElement>(null);
-
-    React.useEffect(() => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsInView(true);
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.1 }
-      );
-
-      if (imgRef.current) {
-        observer.observe(imgRef.current);
-      }
-
-      return () => observer.disconnect();
-    }, []);
-
-    const handleLoad = () => {
-      setIsLoaded(true);
-    };
-
-    return React.createElement('div', {
-      style: {
-        position: 'relative',
-        overflow: 'hidden',
-        backgroundColor: '#f0f0f0'
-      }
-    }, [
-      // Placeholder while loading
-      !isLoaded && React.createElement('div', {
-        key: 'placeholder',
-        style: {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#e0e0e0',
-          animation: 'pulse 2s infinite'
-        }
-      }),
-      
-      // Actual image
-      React.createElement('img', {
-        key: 'image',
-        ref: imgRef,
-        src: isInView ? src : undefined,
-        alt,
-        onLoad: handleLoad,
-        style: {
-          width: '100%',
-          height: 'auto',
-          transition: 'opacity 0.3s ease',
-          opacity: isLoaded ? 1 : 0
-        },
-        loading: 'lazy'
-      })
-    ]);
+  static getResponsiveImageComponent() {
+    return ResponsiveImage;
   }
 }
 
@@ -298,7 +231,7 @@ export const registerServiceWorker = (): void => {
     window.addEventListener('load', async () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', _registration);
+        console.log('Service Worker registered:', registration);
         
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
@@ -312,7 +245,7 @@ export const registerServiceWorker = (): void => {
           }
         });
       } catch (_error) {
-        console.log('Service Worker registration failed:', error);
+        console.error('Service Worker registration failed:', _error);
       }
     });
   }
@@ -376,8 +309,86 @@ export class MemoryManager {
    * Force garbage collection (for debugging)
    */
   static forceGC(): void {
-    if ('gc' in window && typeof (window as unknown).gc === 'function') {
-      (window as unknown).gc();
+    if ('gc' in window && typeof (window as any).gc === 'function') {
+      (window as any).gc();
     }
   }
 }
+
+/**
+ * Responsive Image Component with lazy loading
+ */
+export const ResponsiveImage: React.FC<{
+  src: string;
+  alt: string;
+  sizes?: { width: number; height: number }[];
+}> = ({ src, alt, sizes }) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isInView, setIsInView] = React.useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleLoad = () => {
+    setIsLoaded(true);
+  };
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: '#f0f0f0'
+      }}
+    >
+      {/* Placeholder while loading */}
+      {!isLoaded && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#e0e0e0',
+            animation: 'pulse 2s infinite'
+          }}
+        />
+      )}
+      
+      {/* Actual image */}
+      <img
+        ref={imgRef}
+        src={isInView ? src : undefined}
+        alt={alt}
+        onLoad={handleLoad}
+        style={{
+          width: '100%',
+          height: 'auto',
+          transition: 'opacity 0.3s ease',
+          opacity: isLoaded ? 1 : 0
+        }}
+        loading="lazy"
+      />
+    </div>
+  );
+};

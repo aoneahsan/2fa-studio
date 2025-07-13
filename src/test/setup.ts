@@ -110,7 +110,7 @@ vi.mock('firebase/performance', () => ({
 
 // Mock OTPAuth
 vi.mock('otpauth', () => ({
-  TOTP: vi.fn().mockImplementation((_config) => ({
+  TOTP: vi.fn().mockImplementation((config) => ({
     generate: vi.fn(() => '123456'),
     period: 30,
     digits: 6,
@@ -118,7 +118,7 @@ vi.mock('otpauth', () => ({
     issuer: config.issuer,
     label: config.label
   })),
-  HOTP: vi.fn().mockImplementation((_config) => ({
+  HOTP: vi.fn().mockImplementation((config) => ({
     generate: vi.fn(() => '123456'),
     counter: 0,
     digits: 6,
@@ -188,5 +188,5 @@ Object.defineProperty(global, 'crypto', {
 global.console = {
   ...console,
   warn: vi.fn(),
-  _error: vi.fn()
+  error: vi.fn()
 };
