@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useAds } from '../../hooks/useAds';
+import { useAds } from '@hooks/useAds';
 
 interface AdBannerProps {
   position?: 'top' | 'bottom';

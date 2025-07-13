@@ -13,8 +13,8 @@ import {
   ClockIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import { User } from '../../types';
-import { Button } from '../ui/button';
+import { User } from '@src/types';
+import { Button } from '@components/ui/button';
 
 interface UserDetailsModalProps {
   user: User;

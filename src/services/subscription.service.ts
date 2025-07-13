@@ -15,8 +15,8 @@ import {
   addDoc,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db, auth } from '../config/firebase';
-import { User, SubscriptionTier, SubscriptionStatus } from '../types';
+import { db, auth } from '@src/config/firebase';
+import { User, SubscriptionTier, SubscriptionStatus } from '@src/types';
 
 // Initialize Stripe
 let stripePromise: Promise<Stripe | null>;

@@ -4,9 +4,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { adMobService } from '../services/admob.service';
+import { adMobService } from '@services/admob.service';
 import { Capacitor } from '@capacitor/core';
-import { useAppSelector } from './useAppSelector';
+import { useAppSelector } from '@hooks/useAppSelector';
 
 interface UseAdsReturn {
 	showBanner: (position?: 'top' | 'bottom') => Promise<void>;

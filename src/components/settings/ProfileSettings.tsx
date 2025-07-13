@@ -5,12 +5,12 @@
 
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
-import { setUser } from '../../store/slices/authSlice';
-import { addToast } from '../../store/slices/uiSlice';
+import { RootState } from '@src/store';
+import { setUser } from '@store/slices/authSlice';
+import { addToast } from '@store/slices/uiSlice';
 import { updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../../config/firebase';
+import { auth, db } from '@src/config/firebase';
 import { CameraIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 /**

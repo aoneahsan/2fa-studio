@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store';
+import { RootState } from '@src/store';
 import { 
   UserCircleIcon, 
   PaintBrushIcon, 
@@ -17,13 +17,13 @@ import {
 } from '@heroicons/react/24/outline';
 
 // Import settings components
-import ProfileSettings from '../components/settings/ProfileSettings';
-import AppearanceSettings from '../components/settings/AppearanceSettings';
-import SecuritySettings from '../components/settings/SecuritySettings';
-import BackupSettings from '../components/settings/BackupSettings';
-import SubscriptionSettings from '../components/settings/SubscriptionSettings';
-import AboutSettings from '../components/settings/AboutSettings';
-import NotificationSettings from '../components/settings/NotificationSettings';
+import ProfileSettings from '@components/settings/ProfileSettings';
+import AppearanceSettings from '@components/settings/AppearanceSettings';
+import SecuritySettings from '@components/settings/SecuritySettings';
+import BackupSettings from '@components/settings/BackupSettings';
+import SubscriptionSettings from '@components/settings/SubscriptionSettings';
+import AboutSettings from '@components/settings/AboutSettings';
+import NotificationSettings from '@components/settings/NotificationSettings';
 
 type SettingsTab = 'profile' | 'appearance' | 'security' | 'backup' | 'notifications' | 'subscription' | 'about';
 

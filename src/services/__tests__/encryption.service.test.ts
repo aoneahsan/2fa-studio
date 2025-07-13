@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { EncryptionService } from '../encryption.service';
+import { EncryptionService } from '@services/encryption.service';
 
 describe('EncryptionService', () => {
   const testPassword = 'testPassword123!';

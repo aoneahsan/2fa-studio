@@ -6,7 +6,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { RootState } from '@src/store';
 
 /**
  * Component that protects routes requiring authentication

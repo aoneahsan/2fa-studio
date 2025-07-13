@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon, DocumentArrowUpIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
-import { ImportExportService, ImportFormat } from '../../services/importExport.service';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { showToast } from '../../store/slices/uiSlice';
-import { addAccount } from '../../store/slices/accountsSlice';
-import { OTPAccount } from '../../services/otp.service';
+import { ImportExportService, ImportFormat } from '@services/importExport.service';
+import { useAppDispatch } from '@hooks/useAppDispatch';
+import { showToast } from '@store/slices/uiSlice';
+import { addAccount } from '@store/slices/accountsSlice';
+import { OTPAccount } from '@services/otp.service';
 
 interface ImportAccountsModalProps {
   isOpen: boolean;

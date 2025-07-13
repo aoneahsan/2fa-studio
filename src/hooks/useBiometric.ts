@@ -8,10 +8,10 @@ import { useDispatch, useSelector } from 'react-redux';
 // Temporarily disable BiometricAuth due to compatibility issues
 // import { BiometricAuth } from 'capacitor-biometric-auth';
 import { Device } from '@capacitor/device';
-import { RootState } from '../store';
-import { setBiometricEnabled } from '../store/slices/settingsSlice';
-import { addToast } from '../store/slices/uiSlice';
-import { setLocked } from '../store/slices/uiSlice';
+import { RootState } from '@src/store';
+import { setBiometricEnabled } from '@store/slices/settingsSlice';
+import { addToast } from '@store/slices/uiSlice';
+import { setLocked } from '@store/slices/uiSlice';
 
 interface BiometricStatus {
   isAvailable: boolean;

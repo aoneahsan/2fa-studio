@@ -5,9 +5,9 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { OTPAccount, OTPService } from '../../services/otp.service';
-import { addToast } from '../../store/slices/uiSlice';
-import { incrementHOTPCounter } from '../../store/slices/accountsSlice';
+import { OTPAccount, OTPService } from '@services/otp.service';
+import { addToast } from '@store/slices/uiSlice';
+import { incrementHOTPCounter } from '@store/slices/accountsSlice';
 import { 
   ClipboardDocumentIcon, 
   PencilIcon, 

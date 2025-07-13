@@ -12,10 +12,10 @@ import {
   ArrowUpIcon,
   ArrowDownIcon
 } from '@heroicons/react/24/outline';
-import { adminService } from '../../services/admin.service';
-import { AdminStats } from '../../types';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { adminService } from '@services/admin.service';
+import { AdminStats } from '@src/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
+import LoadingSpinner from '@components/common/LoadingSpinner';
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);

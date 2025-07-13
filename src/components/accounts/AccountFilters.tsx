@@ -5,8 +5,8 @@
 
 import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { setSelectedTags, setSortBy, setSortOrder } from '../../store/slices/accountsSlice';
+import { RootState } from '@src/store';
+import { setSelectedTags, setSortBy, setSortOrder } from '@store/slices/accountsSlice';
 import { 
   FunnelIcon, 
   TagIcon,

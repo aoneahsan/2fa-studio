@@ -21,7 +21,23 @@
     "noUnusedParameters": false,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["*"],
+      "@src/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
+      "@services/*": ["src/services/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@utils/*": ["src/utils/*"],
+      "@store/*": ["src/store/*"],
+      "@types/*": ["src/types/*"],
+      "@constants/*": ["src/constants/*"],
+      "@assets/*": ["src/assets/*"]
+    }
   },
   "include": ["src"],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**/*"]

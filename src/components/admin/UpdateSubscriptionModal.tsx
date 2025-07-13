@@ -6,10 +6,10 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { User, SubscriptionTier, SubscriptionStatus } from '../../types';
-import { adminService, UserUpdateParams } from '../../services/admin.service';
-import { Button } from '../ui/button';
-import { showToast } from '../../utils/toast';
+import { User, SubscriptionTier, SubscriptionStatus } from '@src/types';
+import { adminService, UserUpdateParams } from '@services/admin.service';
+import { Button } from '@components/ui/button';
+import { showToast } from '@utils/toast';
 
 interface UpdateSubscriptionModalProps {
   user: User;

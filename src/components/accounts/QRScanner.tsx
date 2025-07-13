@@ -8,7 +8,7 @@ import QrScanner from 'qr-scanner';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Capacitor } from '@capacitor/core';
 import { XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
-import { OTPService } from '../../services/otp.service';
+import { OTPService } from '@services/otp.service';
 
 interface QRScannerProps {
   onScanSuccess: (data: any) => void;

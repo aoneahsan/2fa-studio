@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { addToast } from '../../store/slices/uiSlice';
+import { addToast } from '@store/slices/uiSlice';
 import { 
   DocumentTextIcon,
   ShieldCheckIcon,

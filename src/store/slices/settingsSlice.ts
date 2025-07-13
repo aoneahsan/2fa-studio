@@ -4,7 +4,7 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserSettings } from '../../types';
+import { UserSettings } from '@src/types';
 
 interface SettingsState extends UserSettings {
   isLoading: boolean;

@@ -6,10 +6,10 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Device } from '@capacitor/device';
-import { closeModal, addToast } from '../../store/slices/uiSlice';
-import { useAccounts } from '../../hooks/useAccounts';
-import { OTPService } from '../../services/otp.service';
-import QRScanner from './QRScanner';
+import { closeModal, addToast } from '@store/slices/uiSlice';
+import { useAccounts } from '@hooks/useAccounts';
+import { OTPService } from '@services/otp.service';
+import QRScanner from '@components/accounts/QRScanner';
 import { 
   XMarkIcon, 
   CameraIcon, 

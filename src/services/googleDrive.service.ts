@@ -3,7 +3,7 @@
  * @module services/googleDrive
  */
 
-import { EncryptionService } from './encryption.service';
+import { EncryptionService } from '@services/encryption.service';
 
 interface GoogleDriveFile {
   id: string;

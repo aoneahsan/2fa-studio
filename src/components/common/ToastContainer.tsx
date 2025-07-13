@@ -5,8 +5,8 @@
 
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../store';
-import { removeToast } from '../../store/slices/uiSlice';
+import { RootState, AppDispatch } from '@src/store';
+import { removeToast } from '@store/slices/uiSlice';
 import {
   CheckCircleIcon,
   XCircleIcon,

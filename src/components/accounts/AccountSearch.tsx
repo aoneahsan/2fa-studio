@@ -5,8 +5,8 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { setSearchQuery } from '../../store/slices/accountsSlice';
+import { RootState } from '@src/store';
+import { setSearchQuery } from '@store/slices/accountsSlice';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 /**

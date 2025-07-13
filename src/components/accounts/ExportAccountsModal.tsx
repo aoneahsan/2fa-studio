@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon, DocumentArrowDownIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
-import { ImportExportService, ExportFormat } from '../../services/importExport.service';
-import { useAppSelector } from '../../hooks/useAppSelector';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { showToast } from '../../store/slices/uiSlice';
-import { selectAllAccounts } from '../../store/slices/accountsSlice';
+import { ImportExportService, ExportFormat } from '@services/importExport.service';
+import { useAppSelector } from '@hooks/useAppSelector';
+import { useAppDispatch } from '@hooks/useAppDispatch';
+import { showToast } from '@store/slices/uiSlice';
+import { selectAllAccounts } from '@store/slices/accountsSlice';
 
 interface ExportAccountsModalProps {
   isOpen: boolean;

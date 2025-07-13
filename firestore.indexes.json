@@ -29,6 +29,48 @@
       ]
     },
     {
+      "collectionGroup": "accounts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "accounts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "folderId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "accounts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isFavorite",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "devices",
       "queryScope": "COLLECTION",
       "fields": [
@@ -95,6 +137,48 @@
         {
           "fieldPath": "timestamp",
           "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "folders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "parentId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "name",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "subscription.tier",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "role",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "email",
+          "order": "ASCENDING"
         }
       ]
     }

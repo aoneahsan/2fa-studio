@@ -4,8 +4,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useAds } from '../../hooks/useAds';
-import { useAppSelector } from '../../store/hooks';
+import { useAds } from '@hooks/useAds';
+import { useAppSelector } from '@store/hooks';
 
 interface AdInterstitialTriggerProps {
   triggerAfterActions?: number; // Show ad after X actions

@@ -5,8 +5,8 @@
 
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store';
-import { addToast } from '../store/slices/uiSlice';
+import { RootState } from '@src/store';
+import { addToast } from '@store/slices/uiSlice';
 import { 
   CloudArrowUpIcon, 
   ArrowDownTrayIcon,

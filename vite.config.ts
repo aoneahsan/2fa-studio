@@ -3,9 +3,25 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { securityHeaders } from './vite-plugin-security-headers'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+      '@src': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@services': path.resolve(__dirname, './src/services'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@store': path.resolve(__dirname, './src/store'),
+      '@types': path.resolve(__dirname, './src/types'),
+      '@constants': path.resolve(__dirname, './src/constants'),
+      '@assets': path.resolve(__dirname, './src/assets')
+    }
+  },
   plugins: [
     react(),
     tailwindcss(),

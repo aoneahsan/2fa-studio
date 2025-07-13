@@ -3,9 +3,9 @@
  * @module services/importExport
  */
 
-import { OTPAccount } from './otp.service';
-import { EncryptionService } from './encryption.service';
-import { OTPService } from './otp.service';
+import { OTPAccount } from '@services/otp.service';
+import { EncryptionService } from '@services/encryption.service';
+import { OTPService } from '@services/otp.service';
 
 export type ExportFormat = 
   | 'json' 
@@ -168,7 +168,7 @@ export class ImportExportService {
       }
     };
 
-    let jsonString = JSON.stringify(aegisData);
+    const jsonString = JSON.stringify(aegisData);
 
     // Aegis uses its own encryption format
     if (password) {
@@ -198,7 +198,7 @@ export class ImportExportService {
       tags: account.tags
     }));
 
-    let jsonString = JSON.stringify(andOTPData);
+    const jsonString = JSON.stringify(andOTPData);
 
     // andOTP uses its own encryption format
     if (password) {

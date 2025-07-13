@@ -5,8 +5,8 @@
 
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
-import { addToast } from '../../store/slices/uiSlice';
+import { RootState } from '@src/store';
+import { addToast } from '@store/slices/uiSlice';
 import { 
   CloudArrowUpIcon, 
   ArrowDownTrayIcon,
@@ -16,7 +16,7 @@ import {
   FolderIcon,
   KeyIcon
 } from '@heroicons/react/24/outline';
-import GoogleDriveBackup from '../backup/GoogleDriveBackup';
+import GoogleDriveBackup from '@components/backup/GoogleDriveBackup';
 
 interface BackupInfo {
   lastBackup: Date | null;

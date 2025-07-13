@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { AuthService } from '../auth.service'
+import { AuthService } from '@services/auth.service'
 
 // Mock Firebase Auth
 const mockAuth = {

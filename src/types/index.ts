@@ -3,7 +3,7 @@
  * @module types
  */
 
-export * from './account';
+export * from '@types/account';
 
 // User types
 export interface User {

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { useGoogleDrive } from '../../hooks/useGoogleDrive';
+import { useGoogleDrive } from '@hooks/useGoogleDrive';
 import { 
   CloudArrowUpIcon,
   ArrowDownTrayIcon,

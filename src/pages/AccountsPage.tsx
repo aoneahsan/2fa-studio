@@ -5,17 +5,17 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { openModal } from '../store/slices/uiSlice';
-import { useAccounts } from '../hooks/useAccounts';
-import AccountsList from '../components/accounts/AccountsList';
-import AccountSearch from '../components/accounts/AccountSearch';
-import AccountFilters from '../components/accounts/AccountFilters';
-import AddAccountModal from '../components/accounts/AddAccountModal';
-import DeleteAccountDialog from '../components/accounts/DeleteAccountDialog';
-import EditAccountModal from '../components/accounts/EditAccountModal';
-import { ImportAccountsModal } from '../components/accounts/ImportAccountsModal';
-import { ExportAccountsModal } from '../components/accounts/ExportAccountsModal';
+import { RootState } from '@src/store';
+import { openModal } from '@store/slices/uiSlice';
+import { useAccounts } from '@hooks/useAccounts';
+import AccountsList from '@components/accounts/AccountsList';
+import AccountSearch from '@components/accounts/AccountSearch';
+import AccountFilters from '@components/accounts/AccountFilters';
+import AddAccountModal from '@components/accounts/AddAccountModal';
+import DeleteAccountDialog from '@components/accounts/DeleteAccountDialog';
+import EditAccountModal from '@components/accounts/EditAccountModal';
+import { ImportAccountsModal } from '@components/accounts/ImportAccountsModal';
+import { ExportAccountsModal } from '@components/accounts/ExportAccountsModal';
 import { 
   PlusIcon, 
   AdjustmentsHorizontalIcon,

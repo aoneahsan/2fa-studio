@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { render } from '../../../test/utils';
-import AccountCard from '../AccountCard';
-import { OTPAccount } from '../../../services/otp.service';
+import { render } from '@src/test/utils';
+import AccountCard from '@components/accounts/AccountCard';
+import { OTPAccount } from '@services/otp.service';
 
 // Mock the OTP service
 vi.mock('../../../services/otp.service', () => ({

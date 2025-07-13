@@ -6,8 +6,8 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { RootState, AppDispatch } from '../store';
+import { db } from '@src/config/firebase';
+import { RootState, AppDispatch } from '@src/store';
 import { 
   setAccounts, 
   addAccount as addAccountAction, 
@@ -15,10 +15,10 @@ import {
   deleteAccount as deleteAccountAction,
   setLoading,
   setError,
-} from '../store/slices/accountsSlice';
-import { addToast } from '../store/slices/uiSlice';
-import { OTPAccount } from '../services/otp.service';
-import { EncryptionService } from '../services/encryption.service';
+} from '@store/slices/accountsSlice';
+import { addToast } from '@store/slices/uiSlice';
+import { OTPAccount } from '@services/otp.service';
+import { EncryptionService } from '@services/encryption.service';
 import { Preferences } from '@capacitor/preferences';
 
 /**

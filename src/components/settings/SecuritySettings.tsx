@@ -5,14 +5,14 @@
 
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
+import { RootState } from '@src/store';
 import { 
   setBiometricEnabled, 
   setAutoLockTimeout,
   setShowNotifications 
-} from '../../store/slices/settingsSlice';
-import { addToast } from '../../store/slices/uiSlice';
-import { useBiometric } from '../../hooks/useBiometric';
+} from '@store/slices/settingsSlice';
+import { addToast } from '@store/slices/uiSlice';
+import { useBiometric } from '@hooks/useBiometric';
 import { 
   FingerPrintIcon, 
   LockClosedIcon, 

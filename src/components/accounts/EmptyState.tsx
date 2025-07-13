@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { openModal } from '../../store/slices/uiSlice';
+import { openModal } from '@store/slices/uiSlice';
 import { KeyIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 /**

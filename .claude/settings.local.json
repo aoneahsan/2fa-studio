@@ -104,7 +104,12 @@
       "Bash(cp:*)",
       "Bash(tree:*)",
       "Bash(npm audit:*)",
-      "Bash(yarn audit)"
+      "Bash(yarn audit)",
+      "Bash(npx firebase deploy:*)",
+      "Bash(yarn firebase deploy:*)",
+      "Bash(yarn deploy:rules:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(yarn lint:*)"
     ],
     "deny": []
   }

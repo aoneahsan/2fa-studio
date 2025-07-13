@@ -6,8 +6,8 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { useAccounts } from '../hooks/useAccounts';
+import { RootState } from '@src/store';
+import { useAccounts } from '@hooks/useAccounts';
 import { 
   PlusIcon,
   KeyIcon,
@@ -15,8 +15,8 @@ import {
   CloudArrowUpIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
-import AdBanner from '../components/ads/AdBanner';
-import AdInterstitialTrigger from '../components/ads/AdInterstitialTrigger';
+import AdBanner from '@components/ads/AdBanner';
+import AdInterstitialTrigger from '@components/ads/AdInterstitialTrigger';
 
 /**
  * Main dashboard page

@@ -64,7 +64,7 @@ export function getSafeAreaInsets(): {
   right: number;
 } {
   // Default insets
-  let insets = { top: 0, bottom: 0, left: 0, right: 0 };
+  const insets = { top: 0, bottom: 0, left: 0, right: 0 };
   
   if (isPlatform('ios') && hasNotch()) {
     insets.top = 44; // Status bar + notch

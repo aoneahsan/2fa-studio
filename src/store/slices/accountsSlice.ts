@@ -4,7 +4,7 @@
  */
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { OTPAccount } from '../../services/otp.service';
+import { OTPAccount } from '@services/otp.service';
 
 interface AccountsState {
   accounts: OTPAccount[];

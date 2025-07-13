@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { OTPService, OTPAccount } from '../otp.service';
+import { OTPService, OTPAccount } from '@services/otp.service';
 
 describe('OTPService', () => {
   const mockAccount: OTPAccount = {

@@ -21,7 +21,7 @@ import {
   runTransaction
 } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { db, auth } from '../config/firebase';
+import { db, auth } from '@src/config/firebase';
 import { 
   User, 
   AdminStats, 
@@ -29,7 +29,7 @@ import {
   SubscriptionStatus,
   AdminAction,
   UserRole 
-} from '../types';
+} from '@src/types';
 
 export interface UserSearchParams {
   searchTerm?: string;
@@ -112,7 +112,7 @@ export class AdminService {
     hasMore: boolean;
   }> {
     try {
-      let q = collection(db, 'users');
+      const q = collection(db, 'users');
       const constraints: any[] = [];
 
       // Add filters

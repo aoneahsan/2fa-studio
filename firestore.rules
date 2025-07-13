@@ -16,20 +16,29 @@ service cloud.firestore {
     }
     
     function canAddAccount() {
-      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      // Check if user has accountCount field and it's under the limit
-      return user.subscription.accountLimit == null || 
-        !('accountCount' in user) || 
-        user.accountCount < user.subscription.accountLimit;
+      let userDoc = exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data 
+        : null;
+      
+      // If user document doesn't exist yet, allow (for initial setup)
+      return userDoc == null || 
+        userDoc.subscription.accountLimit == null || 
+        !('accountCount' in userDoc) || 
+        userDoc.accountCount < userDoc.subscription.accountLimit;
     }
     
     // User document rules
     match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+        // Ensure required fields are present
+        request.resource.data.keys().hasAll(['email', 'subscription', 'settings']) &&
+        // Ensure subscription is set to free tier for new users
+        request.resource.data.subscription.tier == 'free';
       allow update: if isOwner(userId) && 
-        // Prevent users from modifying their subscription
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscription']));
+        // Prevent users from modifying their subscription unless they're updating from initial setup
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscription']) ||
+         (resource.data.subscription == null && request.resource.data.subscription.tier == 'free'));
       allow delete: if false; // Users cannot delete their account through client
       
       // User's devices subcollection

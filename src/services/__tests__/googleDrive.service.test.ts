@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { GoogleDriveService } from '../googleDrive.service'
+import { GoogleDriveService } from '@services/googleDrive.service'
 
 // Mock Google APIs
 const mockGapi = {

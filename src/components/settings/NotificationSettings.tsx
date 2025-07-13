@@ -1,10 +1,10 @@
 import React from 'react';
 import { Bell, BellOff, Shield, Archive, Megaphone, RefreshCw } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Switch } from '../ui/switch';
-import { Button } from '../ui/button';
-import { useNotifications } from '../../hooks/useNotifications';
-import { showToast } from '../../utils/toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
+import { Switch } from '@components/ui/switch';
+import { Button } from '@components/ui/button';
+import { useNotifications } from '@hooks/useNotifications';
+import { showToast } from '@utils/toast';
 
 const NotificationSettings: React.FC = () => {
   const { 

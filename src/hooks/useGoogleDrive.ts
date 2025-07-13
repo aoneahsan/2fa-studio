@@ -5,10 +5,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store';
-import { addToast } from '../store/slices/uiSlice';
-import { setUser } from '../store/slices/authSlice';
-import { GoogleDriveService } from '../services/googleDrive.service';
+import { RootState } from '@src/store';
+import { addToast } from '@store/slices/uiSlice';
+import { setUser } from '@store/slices/authSlice';
+import { GoogleDriveService } from '@services/googleDrive.service';
 
 interface GoogleDriveBackup {
   id: string;

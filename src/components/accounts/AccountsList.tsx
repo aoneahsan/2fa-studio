@@ -5,10 +5,10 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { OTPAccount } from '../../services/otp.service';
-import { openModal } from '../../store/slices/uiSlice';
-import AccountCard from './AccountCard';
-import EmptyState from './EmptyState';
+import { OTPAccount } from '@services/otp.service';
+import { openModal } from '@store/slices/uiSlice';
+import AccountCard from '@components/accounts/AccountCard';
+import EmptyState from '@components/accounts/EmptyState';
 
 interface AccountsListProps {
   accounts: OTPAccount[];

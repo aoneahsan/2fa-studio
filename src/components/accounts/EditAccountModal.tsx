@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { updateAccount } from '../../store/slices/accountsSlice';
-import { closeModal, addToast } from '../../store/slices/uiSlice';
-import { OTPAccount } from '../../services/otp.service';
+import { RootState } from '@src/store';
+import { updateAccount } from '@store/slices/accountsSlice';
+import { closeModal, addToast } from '@store/slices/uiSlice';
+import { OTPAccount } from '@services/otp.service';
 import { 
   XMarkIcon,
   BuildingOfficeIcon,

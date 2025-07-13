@@ -4,8 +4,8 @@
  */
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User } from '../../types';
-import { auth } from '../../config/firebase';
+import { User } from '@src/types';
+import { auth } from '@src/config/firebase';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,

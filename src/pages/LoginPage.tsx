@@ -6,11 +6,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../store';
-import { signIn } from '../store/slices/authSlice';
-import { setEncryptionKey } from '../store/slices/authSlice';
-import { addToast } from '../store/slices/uiSlice';
-import { EncryptionService } from '../services/encryption.service';
+import { AppDispatch } from '@src/store';
+import { signIn } from '@store/slices/authSlice';
+import { setEncryptionKey } from '@store/slices/authSlice';
+import { addToast } from '@store/slices/uiSlice';
+import { EncryptionService } from '@services/encryption.service';
 import { LockClosedIcon, EnvelopeIcon, KeyIcon } from '@heroicons/react/24/outline';
 
 /**

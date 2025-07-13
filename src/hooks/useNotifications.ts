@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { notificationService } from '../services/notification-service';
-import { useAppSelector } from '../store/hooks';
+import { notificationService } from '@services/notification-service';
+import { useAppSelector } from '@store/hooks';
 
 interface NotificationPreferences {
   securityAlerts: boolean;

@@ -35,10 +35,10 @@ import {
   deleteDoc,
   Timestamp
 } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
-import { User, Device, Subscription } from '../types';
+import { auth, db } from '@src/config/firebase';
+import { User, Device, Subscription } from '@src/types';
 import { Capacitor } from '@capacitor/core';
-import { authRateLimiter } from '../utils/rate-limiter';
+import { authRateLimiter } from '@utils/rate-limiter';
 
 export interface AuthCredentials {
   email: string;
@@ -451,7 +451,7 @@ export class AuthService {
     } else {
       // Web platform
       const userAgent = navigator.userAgent;
-      let platform = 'web';
+      const platform = 'web';
       let name = 'Web Browser';
       
       if (userAgent.includes('Chrome')) name = 'Chrome';

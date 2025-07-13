@@ -6,9 +6,9 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../store';
-import { signOut } from '../../store/slices/authSlice';
-import { useBiometric } from '../../hooks/useBiometric';
+import { RootState, AppDispatch } from '@src/store';
+import { signOut } from '@store/slices/authSlice';
+import { useBiometric } from '@hooks/useBiometric';
 import { 
   HomeIcon, 
   KeyIcon, 

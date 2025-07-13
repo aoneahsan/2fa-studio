@@ -5,8 +5,8 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { useBiometric } from '../../hooks/useBiometric';
+import { RootState } from '@src/store';
+import { useBiometric } from '@hooks/useBiometric';
 import { LockClosedIcon, FingerPrintIcon } from '@heroicons/react/24/outline';
 
 /**

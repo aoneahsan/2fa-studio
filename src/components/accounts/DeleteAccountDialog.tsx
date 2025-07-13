@@ -5,9 +5,9 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { closeModal, addToast } from '../../store/slices/uiSlice';
-import { useAccounts } from '../../hooks/useAccounts';
+import { RootState } from '@src/store';
+import { closeModal, addToast } from '@store/slices/uiSlice';
+import { useAccounts } from '@hooks/useAccounts';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 /**

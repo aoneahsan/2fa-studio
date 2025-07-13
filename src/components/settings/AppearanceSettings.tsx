@@ -5,8 +5,8 @@
 
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
-import { setTheme } from '../../store/slices/settingsSlice';
+import { RootState } from '@src/store';
+import { setTheme } from '@store/slices/settingsSlice';
 import { 
   SunIcon, 
   MoonIcon, 

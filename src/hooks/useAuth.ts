@@ -5,9 +5,9 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../store';
-import { setUser, setLoading, setError } from '../store/slices/authSlice';
-import { AuthService } from '../services/auth.service';
+import { RootState, AppDispatch } from '@src/store';
+import { setUser, setLoading, setError } from '@store/slices/authSlice';
+import { AuthService } from '@services/auth.service';
 
 /**
  * Hook for managing authentication state

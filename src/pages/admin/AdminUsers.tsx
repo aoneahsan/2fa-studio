@@ -12,13 +12,13 @@ import {
   XCircleIcon,
   EllipsisVerticalIcon
 } from '@heroicons/react/24/outline';
-import { adminService, UserSearchParams } from '../../services/admin.service';
-import { User, SubscriptionTier, SubscriptionStatus } from '../../types';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import UserDetailsModal from '../../components/admin/UserDetailsModal';
-import UpdateSubscriptionModal from '../../components/admin/UpdateSubscriptionModal';
+import { adminService, UserSearchParams } from '@services/admin.service';
+import { User, SubscriptionTier, SubscriptionStatus } from '@src/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
+import { Button } from '@components/ui/button';
+import LoadingSpinner from '@components/common/LoadingSpinner';
+import UserDetailsModal from '@components/admin/UserDetailsModal';
+import UpdateSubscriptionModal from '@components/admin/UpdateSubscriptionModal';
 import { DocumentSnapshot } from 'firebase/firestore';
 
 const AdminUsers: React.FC = () => {

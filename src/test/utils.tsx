@@ -3,11 +3,11 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { configureStore, PreloadedState } from '@reduxjs/toolkit';
-import { RootState, AppStore } from '../store';
-import authReducer from '../store/slices/authSlice';
-import accountsReducer from '../store/slices/accountsSlice';
-import settingsReducer from '../store/slices/settingsSlice';
-import uiReducer from '../store/slices/uiSlice';
+import { RootState, AppStore } from '@src/store';
+import authReducer from '@store/slices/authSlice';
+import accountsReducer from '@store/slices/accountsSlice';
+import settingsReducer from '@store/slices/settingsSlice';
+import uiReducer from '@store/slices/uiSlice';
 
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'queries'> {
   preloadedState?: PreloadedState<RootState>;

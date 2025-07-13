@@ -5,7 +5,7 @@
 
 import { AdMob, AdOptions, AdLoadInfo, AdMobError } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
-import { isPlatform } from '../utils/platform';
+import { isPlatform } from '@utils/platform';
 
 export interface AdConfig {
   bannerId: string;

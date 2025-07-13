@@ -5,9 +5,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAppSelector } from '../../store/hooks';
-import { adminService } from '../../services/admin.service';
-import LoadingScreen from '../common/LoadingScreen';
+import { useAppSelector } from '@store/hooks';
+import { adminService } from '@services/admin.service';
+import LoadingScreen from '@components/common/LoadingScreen';
 
 interface AdminRouteProps {
   requireSuperAdmin?: boolean;
