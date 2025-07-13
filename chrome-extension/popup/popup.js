@@ -24,6 +24,14 @@ class PopupManager {
   }
 
   async init() {
+    // Check if extension is locked
+    const lockStatus = await this.checkLockStatus();
+    if (lockStatus.locked) {
+      // Redirect to lock screen
+      window.location.href = 'lock-screen.html';
+      return;
+    }
+
     // Get DOM elements
     this.elements = {
       searchInput: document.getElementById('searchInput'),
@@ -771,6 +779,19 @@ class PopupManager {
       }
     } catch (error) {
       console.error('Failed to fill password:', error);
+    }
+  }
+
+  async checkLockStatus() {
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'isExtensionLocked'
+      });
+      
+      return { locked: response.success ? response.locked : false };
+    } catch (error) {
+      console.error('Failed to check lock status:', error);
+      return { locked: false };
     }
   }
 }

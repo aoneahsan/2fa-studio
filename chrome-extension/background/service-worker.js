@@ -11,6 +11,10 @@ import { QRScanner } from '../src/qr-scanner-lib.js';
 import { SecurityService } from '../src/security.js';
 import { KeyboardShortcutsService } from '../src/keyboard-shortcuts.js';
 import { PasswordManagerService } from '../src/password-manager.js';
+import SyncManager from '../src/sync-manager.js';
+import { ExtensionLockService } from '../src/extension-lock.js';
+import { BadgeManager } from '../src/badge-manager.js';
+import { MobileConnector } from '../src/mobile-connector.js';
 
 class BackgroundService {
   constructor() {
@@ -19,6 +23,9 @@ class BackgroundService {
     this.securityService = new SecurityService();
     this.keyboardShortcuts = new KeyboardShortcutsService();
     this.passwordManager = new PasswordManagerService();
+    this.extensionLock = new ExtensionLockService();
+    this.badgeManager = new BadgeManager();
+    this.mobileConnector = new MobileConnector();
   }
 
   init() {
@@ -159,6 +166,82 @@ class BackgroundService {
 
         case 'fillBothCredentials':
           this.handleFillBothCredentials(request.passwordId, request.accountId, sender.tab, sendResponse);
+          return true;
+
+        // Extension Lock actions
+        case 'setExtensionPin':
+          this.handleSetExtensionPin(request.pin, sendResponse);
+          return true;
+
+        case 'verifyExtensionPin':
+          this.handleVerifyExtensionPin(request.pin, sendResponse);
+          return true;
+
+        case 'removeExtensionPin':
+          this.handleRemoveExtensionPin(sendResponse);
+          return true;
+
+        case 'lockExtension':
+          this.handleLockExtension(sendResponse);
+          return true;
+
+        case 'isExtensionLocked':
+          this.handleIsExtensionLocked(sendResponse);
+          return true;
+
+        case 'setAutoLockTimeout':
+          this.handleSetAutoLockTimeout(request.minutes, sendResponse);
+          return true;
+
+        // Browser Sync actions
+        case 'enableSync':
+          this.handleEnableSync(sendResponse);
+          return true;
+
+        case 'disableSync':
+          this.handleDisableSync(sendResponse);
+          return true;
+
+        case 'getSyncStatus':
+          this.handleGetSyncStatus(sendResponse);
+          return true;
+
+        case 'exportSyncData':
+          this.handleExportSyncData(sendResponse);
+          return true;
+
+        case 'importSyncData':
+          this.handleImportSyncData(request.data, sendResponse);
+          return true;
+
+        // Mobile Connector actions
+        case 'pairWithMobile':
+          this.handlePairWithMobile(request.pairingCode, sendResponse);
+          return true;
+
+        case 'unpairMobile':
+          this.handleUnpairMobile(sendResponse);
+          return true;
+
+        case 'getMobileStatus':
+          this.handleGetMobileStatus(sendResponse);
+          return true;
+
+        case 'sendToMobile':
+          this.handleSendToMobile(request.message, sendResponse);
+          return true;
+
+        // Badge Manager actions
+        case 'updateBadge':
+          this.handleUpdateBadge(sendResponse);
+          return true;
+
+        case 'clearBadge':
+          this.handleClearBadge(sendResponse);
+          return true;
+
+        case 'showNotification':
+          this.handleShowNotification(request.type, request.message, sendResponse);
           return true;
 
         default:
@@ -456,45 +539,321 @@ class BackgroundService {
   }
 
   setupContextMenu() {
+    // Main context menu
+    chrome.contextMenus.create({
+      id: 'tfa-studio-main',
+      title: '2FA Studio',
+      contexts: ['all']
+    });
+
+    // Sub-menu items
     chrome.contextMenus.create({
       id: 'fill-2fa-code',
+      parentId: 'tfa-studio-main',
       title: 'Fill 2FA Code',
       contexts: ['editable'],
       documentUrlPatterns: ['https://*/*', 'http://*/*']
     });
 
     chrome.contextMenus.create({
+      id: 'fill-password-2fa',
+      parentId: 'tfa-studio-main',
+      title: 'Fill Password + 2FA',
+      contexts: ['editable'],
+      documentUrlPatterns: ['https://*/*', 'http://*/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'copy-2fa-code',
+      parentId: 'tfa-studio-main',
+      title: 'Copy 2FA Code',
+      contexts: ['all'],
+      documentUrlPatterns: ['https://*/*', 'http://*/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'separator-1',
+      parentId: 'tfa-studio-main',
+      type: 'separator',
+      contexts: ['all']
+    });
+
+    chrome.contextMenus.create({
       id: 'scan-qr-code',
+      parentId: 'tfa-studio-main',
       title: 'Scan QR Code on Page',
       contexts: ['page', 'image'],
       documentUrlPatterns: ['https://*/*', 'http://*/*']
     });
 
     chrome.contextMenus.create({
+      id: 'scan-qr-image',
+      parentId: 'tfa-studio-main',
+      title: 'Scan This QR Code',
+      contexts: ['image'],
+      documentUrlPatterns: ['https://*/*', 'http://*/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'separator-2',
+      parentId: 'tfa-studio-main',
+      type: 'separator',
+      contexts: ['all']
+    });
+
+    chrome.contextMenus.create({
+      id: 'save-password',
+      parentId: 'tfa-studio-main',
+      title: 'Save Password for This Site',
+      contexts: ['page'],
+      documentUrlPatterns: ['https://*/*', 'http://*/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'add-account-for-site',
+      parentId: 'tfa-studio-main',
+      title: 'Add 2FA Account for This Site',
+      contexts: ['page'],
+      documentUrlPatterns: ['https://*/*', 'http://*/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'separator-3',
+      parentId: 'tfa-studio-main',
+      type: 'separator',
+      contexts: ['all']
+    });
+
+    chrome.contextMenus.create({
       id: 'open-2fa-studio',
+      parentId: 'tfa-studio-main',
       title: 'Open 2FA Studio',
       contexts: ['all']
     });
 
-    chrome.contextMenus.onClicked.addListener((info, tab) => {
-      switch (info.menuItemId) {
-        case 'fill-2fa-code':
-          this.handleFillCode(tab);
-          break;
-        case 'scan-qr-code':
-          this.handleScanQRMenuItem(tab);
-          break;
-        case 'open-2fa-studio':
-          this.handleOpenApp();
-          break;
-      }
+    chrome.contextMenus.create({
+      id: 'settings',
+      parentId: 'tfa-studio-main',
+      title: 'Settings',
+      contexts: ['all']
     });
+
+    // Dynamic account submenu
+    chrome.contextMenus.create({
+      id: 'accounts-submenu',
+      parentId: 'tfa-studio-main',
+      title: 'Accounts',
+      contexts: ['all'],
+      enabled: false
+    });
+
+    chrome.contextMenus.onClicked.addListener((info, tab) => {
+      this.handleContextMenuClick(info, tab);
+    });
+  }
+
+  async handleContextMenuClick(info, tab) {
+    // Check if extension is locked
+    const isLocked = await this.extensionLock.isLocked();
+    if (isLocked) {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: chrome.runtime.getURL('assets/icon-48.png'),
+        title: '2FA Studio Locked',
+        message: 'Please unlock the extension first'
+      });
+      return;
+    }
+
+    switch (info.menuItemId) {
+      case 'fill-2fa-code':
+        await this.handleFillCode(tab);
+        break;
+      case 'fill-password-2fa':
+        await this.handleFillPasswordAnd2FA(tab);
+        break;
+      case 'copy-2fa-code':
+        await this.handleCopy2FACode(tab);
+        break;
+      case 'scan-qr-code':
+        await this.handleScanQRMenuItem(tab);
+        break;
+      case 'scan-qr-image':
+        await this.handleScanQRImage(info.srcUrl, tab);
+        break;
+      case 'save-password':
+        await this.handleSavePasswordForSite(tab);
+        break;
+      case 'add-account-for-site':
+        await this.handleAddAccountForSite(tab);
+        break;
+      case 'open-2fa-studio':
+        this.handleOpenApp();
+        break;
+      case 'settings':
+        chrome.tabs.create({ url: chrome.runtime.getURL('options/options.html') });
+        break;
+      default:
+        // Check if it's an account selection
+        if (info.menuItemId.startsWith('account-')) {
+          await this.handleAccountSelection(info.menuItemId, tab);
+        }
+    }
   }
 
   async handleScanQRMenuItem(tab) {
     // Send message to content script to enable QR selection mode
     chrome.tabs.sendMessage(tab.id, {
       action: 'enableQRSelection'
+    });
+  }
+
+  async handleScanQRImage(imageUrl, tab) {
+    try {
+      // Fetch the image
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(',')[1];
+        const result = await this.qrScanner.scanFromBase64(base64);
+        
+        if (result) {
+          const parsed = this.parseOTPUrl(result);
+          if (parsed) {
+            // Show notification and offer to add account
+            chrome.notifications.create({
+              type: 'basic',
+              iconUrl: chrome.runtime.getURL('assets/icon-48.png'),
+              title: 'QR Code Found',
+              message: `Found 2FA account for ${parsed.issuer}. Check popup to add.`,
+              buttons: [{ title: 'Add Account' }]
+            });
+            
+            // Store temporarily for adding
+            this.qrCodeCache.set('pending-account', parsed);
+          }
+        }
+      };
+      
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error('Failed to scan QR image:', error);
+    }
+  }
+
+  async handleFillPasswordAnd2FA(tab) {
+    try {
+      const url = new URL(tab.url);
+      const domain = url.hostname;
+      
+      // Get passwords for this domain
+      const passwords = await this.passwordManager.getPasswordsForDomain(domain);
+      const accounts = await StorageService.getAccounts();
+      const matchingAccounts = this.findDomainMatches(accounts, domain);
+      
+      if (passwords.length > 0 && matchingAccounts.length > 0) {
+        // If single match for both, auto-fill
+        if (passwords.length === 1 && matchingAccounts.length === 1) {
+          chrome.tabs.sendMessage(tab.id, {
+            action: 'fillBothCredentials',
+            password: passwords[0],
+            account: matchingAccounts[0]
+          });
+        } else {
+          // Show selection in popup
+          chrome.action.openPopup();
+        }
+      } else {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: chrome.runtime.getURL('assets/icon-48.png'),
+          title: 'No Credentials Found',
+          message: 'No saved passwords or 2FA accounts for this site'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fill password and 2FA:', error);
+    }
+  }
+
+  async handleCopy2FACode(tab) {
+    try {
+      const url = new URL(tab.url);
+      const domain = url.hostname;
+      const accounts = await StorageService.getAccounts();
+      const matches = this.findDomainMatches(accounts, domain);
+      
+      if (matches.length === 1) {
+        // Single match - copy directly
+        const code = OTPService.generateCode(matches[0]);
+        await navigator.clipboard.writeText(code.code);
+        
+        await this.badgeManager.showNotification('copied', `Copied ${matches[0].issuer} code`);
+      } else if (matches.length > 1) {
+        // Multiple matches - update context menu with accounts
+        await this.updateAccountsContextMenu(matches, tab);
+      } else {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: chrome.runtime.getURL('assets/icon-48.png'),
+          title: 'No Accounts Found',
+          message: 'No 2FA accounts found for this site'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to copy 2FA code:', error);
+    }
+  }
+
+  async updateAccountsContextMenu(accounts, tab) {
+    // Remove old account items
+    const existingItems = await chrome.contextMenus.removeAll();
+    
+    // Recreate base menu
+    this.setupContextMenu();
+    
+    // Enable accounts submenu
+    chrome.contextMenus.update('accounts-submenu', { enabled: true });
+    
+    // Add account items
+    accounts.forEach((account, index) => {
+      chrome.contextMenus.create({
+        id: `account-${account.id}`,
+        parentId: 'accounts-submenu',
+        title: `${account.issuer} (${account.accountName})`,
+        contexts: ['all']
+      });
+    });
+  }
+
+  async handleAccountSelection(menuItemId, tab) {
+    const accountId = menuItemId.replace('account-', '');
+    const accounts = await StorageService.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+    
+    if (account) {
+      const code = OTPService.generateCode(account);
+      await navigator.clipboard.writeText(code.code);
+      await this.badgeManager.showNotification('copied', `Copied ${account.issuer} code`);
+    }
+  }
+
+  async handleSavePasswordForSite(tab) {
+    // Send message to content script to detect login form
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'promptSavePassword'
+    });
+  }
+
+  async handleAddAccountForSite(tab) {
+    const url = new URL(tab.url);
+    const domain = url.hostname;
+    
+    // Open add account page with pre-filled domain
+    chrome.tabs.create({ 
+      url: chrome.runtime.getURL(`index.html#/accounts?action=add&domain=${domain}`) 
     });
   }
 
@@ -986,6 +1345,172 @@ class BackgroundService {
         message: `Thank you for reporting ${domain}`,
         iconUrl: chrome.runtime.getURL('assets/icon-128.png')
       });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Extension Lock handlers
+  async handleSetExtensionPin(pin, sendResponse) {
+    try {
+      const result = await this.extensionLock.setPin(pin);
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleVerifyExtensionPin(pin, sendResponse) {
+    try {
+      const result = await this.extensionLock.verifyPin(pin);
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleRemoveExtensionPin(sendResponse) {
+    try {
+      const result = await this.extensionLock.removePin();
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleLockExtension(sendResponse) {
+    try {
+      await this.extensionLock.lock();
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleIsExtensionLocked(sendResponse) {
+    try {
+      const locked = await this.extensionLock.isLocked();
+      sendResponse({ success: true, locked });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleSetAutoLockTimeout(minutes, sendResponse) {
+    try {
+      await this.extensionLock.setAutoLockTimeout(minutes);
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Browser Sync handlers
+  async handleEnableSync(sendResponse) {
+    try {
+      const result = await SyncManager.enableSync();
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleDisableSync(sendResponse) {
+    try {
+      const result = await SyncManager.disableSync();
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleGetSyncStatus(sendResponse) {
+    try {
+      const status = await SyncManager.getSyncStatus();
+      sendResponse({ success: true, ...status });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleExportSyncData(sendResponse) {
+    try {
+      const result = await SyncManager.exportSyncData();
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleImportSyncData(data, sendResponse) {
+    try {
+      const result = await SyncManager.importSyncData(data);
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Mobile Connector handlers
+  async handlePairWithMobile(pairingCode, sendResponse) {
+    try {
+      const result = await this.mobileConnector.pairWithMobile(pairingCode);
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleUnpairMobile(sendResponse) {
+    try {
+      const result = await this.mobileConnector.unpair();
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleGetMobileStatus(sendResponse) {
+    try {
+      const status = await this.mobileConnector.getMobileStatus();
+      sendResponse({ success: true, ...status });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleSendToMobile(message, sendResponse) {
+    try {
+      await this.mobileConnector.sendEncryptedMessage(message);
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Badge Manager handlers
+  async handleUpdateBadge(sendResponse) {
+    try {
+      await this.badgeManager.updateBadge();
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleClearBadge(sendResponse) {
+    try {
+      await this.badgeManager.clearBadge();
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleShowNotification(type, message, sendResponse) {
+    try {
+      await this.badgeManager.showNotification(type, message);
+      sendResponse({ success: true });
     } catch (error) {
       sendResponse({ success: false, error: error.message });
     }

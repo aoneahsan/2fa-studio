@@ -28,7 +28,7 @@
     "notifications",
     "scripting"
   ],
-  "options_page": "options/options.html",
+  "options_page": "options/settings-enhanced.html",
   "host_permissions": [
     "https://*/*",
     "http://localhost/*"

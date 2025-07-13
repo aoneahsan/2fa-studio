@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2FA Studio - Locked</title>
+  <link rel="stylesheet" href="lock-screen.css">
+</head>
+<body>
+  <div id="lockScreen">
+    <div class="lock-container">
+      <div class="lock-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      
+      <h1>2FA Studio is Locked</h1>
+      <p class="subtitle">Enter your PIN to unlock</p>
+      
+      <form id="unlockForm" class="unlock-form">
+        <div class="pin-input-container">
+          <input 
+            type="password" 
+            id="pinInput" 
+            class="pin-input" 
+            placeholder="Enter PIN"
+            autocomplete="off"
+            maxlength="20"
+          >
+        </div>
+        
+        <div id="errorMessage" class="error-message hidden"></div>
+        
+        <button type="submit" class="unlock-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2l10 10-10 10M3 12h18"></path>
+          </svg>
+          Unlock
+        </button>
+        
+        <button type="button" id="forgotPinBtn" class="forgot-pin-btn">
+          Forgot PIN?
+        </button>
+      </form>
+      
+      <div id="lockoutMessage" class="lockout-message hidden">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12" y2="16"></line>
+        </svg>
+        <p>Too many failed attempts</p>
+        <p>Try again in <span id="lockoutTimer">300</span> seconds</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="lock-screen.js" type="module"></script>
+</body>
+</html>
