@@ -10,12 +10,14 @@ import { addToast } from '@store/slices/uiSlice';
 import { incrementHOTPCounter } from '@store/slices/accountsSlice';
 import { useAppSelector } from '@hooks/useAppSelector';
 import { selectTagById } from '@store/slices/tagsSlice';
+import { selectFolderById } from '@store/slices/foldersSlice';
 import { 
   ClipboardDocumentIcon, 
   PencilIcon, 
   TrashIcon,
   ArrowPathIcon,
-  StarIcon as StarOutlineIcon
+  StarIcon as StarOutlineIcon,
+  FolderIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import TagPill from '@components/tags/TagPill';
@@ -148,14 +150,19 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
             {account.label}
           </p>
 
-          {/* Tags */}
-          {account.tags && account.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {account.tags.map((tagId) => (
-                <AccountTagPill key={tagId} tagId={tagId} />
-              ))}
-            </div>
-          )}
+          {/* Tags and Folder */}
+          <div className="flex items-center gap-2 mt-1">
+            {account.folderId && (
+              <AccountFolderInfo folderId={account.folderId} />
+            )}
+            {account.tags && account.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {account.tags.map((tagId) => (
+                  <AccountTagPill key={tagId} tagId={tagId} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Actions */}
@@ -273,6 +280,23 @@ const AccountTagPill: React.FC<{ tagId: string }> = ({ tagId }) => {
   if (!tag) return null;
   
   return <TagPill tag={tag} size="sm" />;
+};
+
+// Sub-component for rendering folder info with hooks
+const AccountFolderInfo: React.FC<{ folderId: string }> = ({ folderId }) => {
+  const folder = useAppSelector((state) => selectFolderById(state, folderId));
+  
+  if (!folder) return null;
+  
+  return (
+    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      <FolderIcon 
+        className="w-3.5 h-3.5" 
+        style={{ color: folder.color || undefined }}
+      />
+      <span>{folder.name}</span>
+    </div>
+  );
 };
 
 export default AccountCard;

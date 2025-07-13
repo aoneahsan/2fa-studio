@@ -18,8 +18,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAppSelector } from '@hooks/useAppSelector';
 import { selectTags, fetchTags, initializeDefaultTags } from '@store/slices/tagsSlice';
+import { selectFolders } from '@store/slices/foldersSlice';
 import TagSelector from '@components/tags/TagSelector';
+import FolderSelector from '@components/folders/FolderSelector';
 import { TagService } from '@services/tag.service';
+import { FolderIcon } from '@heroicons/react/24/outline';
 
 interface FormData {
   issuer: string;
@@ -31,6 +34,8 @@ interface FormData {
   type: 'totp' | 'hotp';
   counter?: number;
   tags: string[];
+  folderId: string | null;
+  isFavorite: boolean;
 }
 
 /**
@@ -60,7 +65,9 @@ const AddAccountModal: React.FC = () => {
     period: 30,
     type: 'totp',
     counter: 0,
-    tags: []
+    tags: [],
+    folderId: null,
+    isFavorite: false
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -372,6 +379,18 @@ const AddAccountModal: React.FC = () => {
                   )}
                 </div>
               </details>
+
+              {/* Folder */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Folder
+                </label>
+                <FolderSelector
+                  value={formData.folderId}
+                  onChange={(folderId) => setFormData({ ...formData, folderId })}
+                  placeholder="Select a folder (optional)"
+                />
+              </div>
 
               {/* Tags */}
               <div>

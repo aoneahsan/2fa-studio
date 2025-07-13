@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@src/store';
 import { signOut } from '@store/slices/authSlice';
 import { useBiometric } from '@hooks/useBiometric';
+import SyncStatusIndicator from '@components/sync/SyncStatusIndicator';
+import DeviceManager from '@components/devices/DeviceManager';
 import { 
   HomeIcon, 
   KeyIcon, 
@@ -18,6 +20,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   LockClosedIcon,
+  ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -36,6 +39,7 @@ const Layout: React.FC = () => {
   const { isLocked } = useSelector((state: RootState) => state.ui);
   const { lockApp } = useBiometric();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showDeviceManager, setShowDeviceManager] = useState(false);
 
   const navItems: NavItem[] = [
     { path: '/dashboard', label: 'Dashboard', icon: <HomeIcon className="w-5 h-5" /> },
@@ -67,8 +71,9 @@ const Layout: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-border bg-background px-6 pb-4">
-          <div className="flex h-16 shrink-0 items-center">
+          <div className="flex h-16 shrink-0 items-center justify-between">
             <h1 className="text-2xl font-bold text-primary">2FA Studio</h1>
+            <SyncStatusIndicator showDetails={true} />
           </div>
           
           <nav className="flex flex-1 flex-col">
@@ -104,6 +109,14 @@ const Layout: React.FC = () => {
                 </div>
                 
                 <div className="-mx-2 mt-2 space-y-1">
+                  <button
+                    onClick={() => setShowDeviceManager(true)}
+                    className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <ComputerDesktopIcon className="w-5 h-5" />
+                    Manage Devices
+                  </button>
+                  
                   <button
                     onClick={handleLock}
                     className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -188,6 +201,17 @@ const Layout: React.FC = () => {
                 
                 <div className="-mx-3 mt-2 space-y-1">
                   <button
+                    onClick={() => {
+                      setShowDeviceManager(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <ComputerDesktopIcon className="w-5 h-5" />
+                    Manage Devices
+                  </button>
+                  
+                  <button
                     onClick={handleLock}
                     className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                   >
@@ -215,6 +239,12 @@ const Layout: React.FC = () => {
           <Outlet />
         </div>
       </main>
+
+      {/* Device Manager Modal */}
+      <DeviceManager
+        isOpen={showDeviceManager}
+        onClose={() => setShowDeviceManager(false)}
+      />
     </div>
   );
 };

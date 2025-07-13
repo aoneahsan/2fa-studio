@@ -12,6 +12,7 @@ interface AccountsState {
   error: string | null;
   searchQuery: string;
   selectedTags: string[];
+  selectedFolderId: string | null;
   sortBy: 'name' | 'issuer' | 'createdAt' | 'lastUsed' | 'favorite';
   sortOrder: 'asc' | 'desc';
   showFavoritesOnly: boolean;
@@ -23,6 +24,7 @@ const initialState: AccountsState = {
   error: null,
   searchQuery: '',
   selectedTags: [],
+  selectedFolderId: null,
   sortBy: 'name',
   sortOrder: 'asc',
   showFavoritesOnly: false,
@@ -80,6 +82,9 @@ const accountsSlice = createSlice({
     setShowFavoritesOnly: (state, action: PayloadAction<boolean>) => {
       state.showFavoritesOnly = action.payload;
     },
+    setSelectedFolderId: (state, action: PayloadAction<string | null>) => {
+      state.selectedFolderId = action.payload;
+    },
   },
 });
 
@@ -97,6 +102,7 @@ export const {
   incrementHOTPCounter,
   toggleShowFavoritesOnly,
   setShowFavoritesOnly,
+  setSelectedFolderId,
 } = accountsSlice.actions;
 
 // Selectors

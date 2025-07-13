@@ -18,15 +18,19 @@ import { ImportAccountsModal } from '@components/accounts/ImportAccountsModal';
 import { ExportAccountsModal } from '@components/accounts/ExportAccountsModal';
 import TagFilter from '@components/tags/TagFilter';
 import TagManager from '@components/tags/TagManager';
+import FolderSidebar from '@components/folders/FolderSidebar';
+import FolderManager from '@components/folders/FolderManager';
 import { fetchTags } from '@store/slices/tagsSlice';
 import { toggleShowFavoritesOnly } from '@store/slices/accountsSlice';
+import { selectFolder } from '@store/slices/foldersSlice';
 import { 
   PlusIcon, 
   AdjustmentsHorizontalIcon,
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   TagIcon,
-  StarIcon
+  StarIcon,
+  FolderIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 
@@ -41,6 +45,8 @@ const AccountsPage: React.FC = () => {
   const { filteredAccounts, isLoading } = useAccounts();
   const [showFilters, setShowFilters] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);
+  const [showFolderManager, setShowFolderManager] = useState(false);
+  const [showFolderSidebar, setShowFolderSidebar] = useState(true);
   
   // Load tags on mount
   useEffect(() => {
@@ -61,22 +67,39 @@ const AccountsPage: React.FC = () => {
     dispatch(openModal({ type: 'export' }));
   };
 
+  const handleFolderSelect = (folderId: string | null) => {
+    dispatch(selectFolder(folderId));
+  };
+
   // Check if user has reached account limit
   const hasReachedLimit = user?.subscription.type === 'free' && 
     filteredAccounts.length >= (user?.subscription.accountLimit || 10);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">2FA Accounts</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage your two-factor authentication accounts
-        </p>
-      </div>
+    <div className="flex gap-6">
+      {/* Folder Sidebar */}
+      {showFolderSidebar && (
+        <div className="w-64 flex-shrink-0">
+          <FolderSidebar
+            onFolderSelect={handleFolderSelect}
+            onManageFolders={() => setShowFolderManager(true)}
+            className="sticky top-6"
+          />
+        </div>
+      )}
 
-      {/* Account Limit Warning */}
-      {hasReachedLimit && (
+      {/* Main Content */}
+      <div className="flex-1 space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">2FA Accounts</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your two-factor authentication accounts
+          </p>
+        </div>
+
+        {/* Account Limit Warning */}
+        {hasReachedLimit && (
         <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
             You've reached the free account limit. 
@@ -87,11 +110,11 @@ const AccountsPage: React.FC = () => {
               Upgrade to Premium
             </button> for unlimited accounts.
           </p>
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Actions Bar */}
+        <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="flex-1">
           <AdvancedSearch />
@@ -99,8 +122,17 @@ const AccountsPage: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <button
-            onClick={() => dispatch(toggleShowFavoritesOnly())}
+            <button
+              onClick={() => setShowFolderSidebar(!showFolderSidebar)}
+              className={`btn btn-outline btn-md ${showFolderSidebar ? 'bg-muted' : ''}`}
+              title="Toggle folder sidebar"
+            >
+              <FolderIcon className="w-5 h-5" />
+              <span className="hidden sm:inline">Folders</span>
+            </button>
+
+            <button
+              onClick={() => dispatch(toggleShowFavoritesOnly())}
             className={`btn btn-outline btn-md ${showFavoritesOnly ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500' : ''}`}
             title="Show favorites only"
           >
@@ -155,22 +187,22 @@ const AccountsPage: React.FC = () => {
           >
             <PlusIcon className="w-5 h-5" />
             <span className="hidden sm:inline">Add Account</span>
-          </button>
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <div className="bg-muted/30 rounded-lg p-4">
-          <AccountFilters />
-        </div>
-      )}
-      
-      {/* Tag Filter */}
-      <TagFilter className="mt-4" />
+        {/* Filters */}
+        {showFilters && (
+          <div className="bg-muted/30 rounded-lg p-4">
+            <AccountFilters />
+          </div>
+        )}
+        
+        {/* Tag Filter */}
+        <TagFilter className="mt-4" />
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total Accounts</p>
           <p className="text-2xl font-bold text-foreground">
@@ -200,14 +232,14 @@ const AccountsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Accounts List */}
-      <AccountsList 
+        {/* Accounts List */}
+        <AccountsList 
         accounts={filteredAccounts} 
         isLoading={isLoading} 
       />
 
-      {/* Modals */}
-      {modal.type === 'addAccount' && <AddAccountModal />}
+        {/* Modals */}
+        {modal.type === 'addAccount' && <AddAccountModal />}
       {modal.type === 'deleteAccount' && <DeleteAccountDialog />}
       {modal.type === 'editAccount' && <EditAccountModal />}
       <ImportAccountsModal 
@@ -218,10 +250,15 @@ const AccountsPage: React.FC = () => {
         isOpen={modal.type === 'export'} 
         onClose={() => dispatch(openModal({ type: null }))} 
       />
-      <TagManager 
-        isOpen={showTagManager} 
-        onClose={() => setShowTagManager(false)} 
-      />
+        <TagManager 
+          isOpen={showTagManager} 
+          onClose={() => setShowTagManager(false)} 
+        />
+        <FolderManager
+          isOpen={showFolderManager}
+          onClose={() => setShowFolderManager(false)}
+        />
+      </div>
     </div>
   );
 };

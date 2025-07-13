@@ -9,6 +9,12 @@ import { RootState } from '@src/store';
 import { updateAccount } from '@store/slices/accountsSlice';
 import { closeModal, addToast } from '@store/slices/uiSlice';
 import { OTPAccount } from '@services/otp.service';
+import { selectTags, fetchTags } from '@store/slices/tagsSlice';
+import { selectFolders } from '@store/slices/foldersSlice';
+import TagSelector from '@components/tags/TagSelector';
+import FolderSelector from '@components/folders/FolderSelector';
+import { TagService } from '@services/tag.service';
+import { useAccounts } from '@hooks/useAccounts';
 import { 
   XMarkIcon,
   BuildingOfficeIcon,
@@ -16,7 +22,8 @@ import {
   TagIcon,
   ClockIcon,
   HashtagIcon,
-  KeyIcon
+  KeyIcon,
+  FolderIcon
 } from '@heroicons/react/24/outline';
 
 /**
@@ -25,7 +32,11 @@ import {
 const EditAccountModal: React.FC = () => {
   const dispatch = useDispatch();
   const modal = useSelector((state: RootState) => state.ui.modal);
+  const { user } = useSelector((state: RootState) => state.auth);
   const accounts = useSelector((state: RootState) => state.accounts.accounts);
+  const tags = useSelector(selectTags);
+  const folders = useSelector(selectFolders);
+  const { updateAccount: updateAccountHook } = useAccounts();
   
   const accountId = modal.data?.accountId;
   const account = accounts.find(a => a.id === accountId);
@@ -34,13 +45,14 @@ const EditAccountModal: React.FC = () => {
     issuer: '',
     label: '',
     tags: [] as string[],
+    folderId: null as string | null,
+    isFavorite: false,
     period: 30,
     digits: 6,
     algorithm: 'SHA1' as 'SHA1' | 'SHA256' | 'SHA512',
     counter: 0
   });
   
-  const [tagInput, setTagInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -49,6 +61,8 @@ const EditAccountModal: React.FC = () => {
         issuer: account.issuer,
         label: account.label,
         tags: account.tags || [],
+        folderId: account.folderId || null,
+        isFavorite: account.isFavorite || false,
         period: account.period || 30,
         digits: account.digits || 6,
         algorithm: account.algorithm || 'SHA1',
@@ -56,6 +70,13 @@ const EditAccountModal: React.FC = () => {
       });
     }
   }, [account]);
+
+  // Load tags on mount
+  useEffect(() => {
+    if (user && tags.length === 0) {
+      dispatch(fetchTags(user.id));
+    }
+  }, [user, tags.length, dispatch]);
 
   const handleClose = () => {
     dispatch(closeModal());
@@ -71,26 +92,6 @@ const EditAccountModal: React.FC = () => {
     }));
   };
 
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      const newTag = tagInput.trim().toLowerCase();
-      if (!formData.tags.includes(newTag)) {
-        setFormData(prev => ({
-          ...prev,
-          tags: [...prev.tags, newTag]
-        }));
-      }
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,29 +103,23 @@ const EditAccountModal: React.FC = () => {
     try {
       const updatedAccount: OTPAccount = {
         ...account,
-        issuer: formData.issuer,
-        label: formData.label,
+        issuer: formData.issuer.trim(),
+        label: formData.label.trim(),
         tags: formData.tags,
+        folderId: formData.folderId,
+        isFavorite: formData.isFavorite,
         period: formData.period,
         digits: formData.digits,
         algorithm: formData.algorithm,
-        counter: formData.counter,
+        counter: account.type === 'hotp' ? formData.counter : undefined,
         updatedAt: new Date()
       };
-
-      dispatch(updateAccount(updatedAccount));
       
-      dispatch(addToast({
-        type: 'success',
-        message: 'Account updated successfully'
-      }));
+      await updateAccountHook(updatedAccount);
       
       handleClose();
     } catch (error) {
-      dispatch(addToast({
-        type: 'error',
-        message: 'Failed to update account'
-      }));
+      console.error('Error updating account:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -184,41 +179,67 @@ const EditAccountModal: React.FC = () => {
             />
           </div>
 
+          {/* Folder */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              <FolderIcon className="w-4 h-4 inline mr-1" />
+              Folder
+            </label>
+            <FolderSelector
+              value={formData.folderId}
+              onChange={(folderId) => setFormData({ ...formData, folderId })}
+              placeholder="Select a folder (optional)"
+            />
+          </div>
+
           {/* Tags */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               <TagIcon className="w-4 h-4 inline mr-1" />
               Tags
             </label>
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={handleAddTag}
-                className="input"
-                placeholder="Press Enter to add tags"
-              />
-              {formData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm"
-                    >
-                      {tag}
+            <TagSelector
+              selectedTags={formData.tags}
+              onChange={(tagIds) => setFormData({ ...formData, tags: tagIds })}
+              placeholder="Select or create tags..."
+              allowCreate={true}
+              multiple={true}
+            />
+            {/* Tag suggestions based on issuer */}
+            {formData.issuer && (() => {
+              const suggestions = TagService.getTagSuggestions(formData.issuer);
+              const availableSuggestions = suggestions.filter(
+                name => !formData.tags.some(tagId => {
+                  const tag = tags.find(t => t.id === tagId);
+                  return tag?.name === name;
+                })
+              );
+              if (availableSuggestions.length === 0) return null;
+              
+              return (
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Suggestions: 
+                  {availableSuggestions.map((name) => {
+                    const matchingTag = tags.find(t => t.name === name);
+                    if (!matchingTag) return null;
+                    
+                    return (
                       <button
+                        key={matchingTag.id}
                         type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="hover:text-primary/70"
+                        onClick={() => setFormData({ 
+                          ...formData, 
+                          tags: [...formData.tags, matchingTag.id] 
+                        })}
+                        className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                       >
-                        <XMarkIcon className="w-3 h-3" />
+                        {name}
                       </button>
-                    </span>
-                  ))}
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              );
+            })()}
           </div>
 
           {/* Advanced Settings */}

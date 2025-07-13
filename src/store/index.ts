@@ -9,6 +9,7 @@ import accountsReducer from '@store/slices/accountsSlice';
 import settingsReducer from '@store/slices/settingsSlice';
 import uiReducer from '@store/slices/uiSlice';
 import tagsReducer from '@store/slices/tagsSlice';
+import foldersReducer from '@store/slices/foldersSlice';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     settings: settingsReducer,
     ui: uiReducer,
     tags: tagsReducer,
+    folders: foldersReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

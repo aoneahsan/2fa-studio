@@ -21,6 +21,7 @@ import { addToast } from '@store/slices/uiSlice';
 import { OTPAccount } from '@services/otp.service';
 import { EncryptionService } from '@services/encryption.service';
 import { Preferences } from '@capacitor/preferences';
+import { useSync } from '@hooks/useSync';
 
 /**
  * Hook for managing OTP accounts
@@ -31,6 +32,16 @@ export const useAccounts = () => {
   const accountsState = useSelector((state: RootState) => state.accounts);
   const activeTags = useSelector(selectActiveTags);
   const filterMode = useSelector(selectFilterMode);
+  const selectedFolderId = useSelector((state: RootState) => state.folders.selectedFolderId);
+  const { publishAccountChange } = useSync({
+    onAccountSync: (event) => {
+      // Refresh accounts when sync event received
+      if (event.type === 'account_added' || event.type === 'account_updated' || event.type === 'account_deleted') {
+        // The firestore listener will handle the update
+        console.log('Account sync event received:', event.type);
+      }
+    }
+  });
 
   // Load accounts from Firestore
   useEffect(() => {
@@ -69,6 +80,8 @@ export const useAccounts = () => {
               backupCodes: encryptedData.backupCodes || [],
               createdAt: encryptedData.createdAt?.toDate() || new Date(),
               updatedAt: encryptedData.updatedAt?.toDate() || new Date(),
+              isFavorite: encryptedData.isFavorite || false,
+              folderId: encryptedData.folderId || null,
             };
             
             decryptedAccounts.push(account);
@@ -128,7 +141,10 @@ export const useAccounts = () => {
         updatedAt: new Date(),
       };
       
-      await addDoc(collection(db, 'users', user.uid, 'accounts'), accountData);
+      const docRef = await addDoc(collection(db, 'users', user.uid, 'accounts'), accountData);
+      
+      // Publish sync event
+      await publishAccountChange('added', { accountId: docRef.id, ...accountData });
       
       dispatch(addToast({
         type: 'success',
@@ -170,6 +186,9 @@ export const useAccounts = () => {
       
       await updateDoc(doc(db, 'users', user.uid, 'accounts', account.id), accountData);
       
+      // Publish sync event
+      await publishAccountChange('updated', { accountId: account.id, ...accountData });
+      
       dispatch(addToast({
         type: 'success',
         message: 'Account updated successfully',
@@ -196,6 +215,9 @@ export const useAccounts = () => {
       dispatch(setLoading(true));
       
       await deleteDoc(doc(db, 'users', user.uid, 'accounts', accountId));
+      
+      // Publish sync event
+      await publishAccountChange('deleted', { accountId });
       
       dispatch(addToast({
         type: 'success',
@@ -288,6 +310,11 @@ export const useAccounts = () => {
       filtered = filtered.filter(account => account.isFavorite);
     }
     
+    // Apply folder filter
+    if (selectedFolderId !== null) {
+      filtered = filtered.filter(account => account.folderId === selectedFolderId);
+    }
+    
     // Apply tag filter from tags slice
     if (activeTags.length > 0) {
       filtered = filtered.filter(account => {
@@ -334,7 +361,7 @@ export const useAccounts = () => {
     });
     
     return filtered;
-  }, [accountsState, activeTags, filterMode]);
+  }, [accountsState, activeTags, filterMode, selectedFolderId]);
 
   return {
     accounts: accountsState.accounts,

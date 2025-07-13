@@ -13,6 +13,7 @@ export interface Account {
   color?: string;
   tags: string[];
   isFavorite: boolean;
+  folderId?: string | null; // null for root level accounts
   backupCodes: string[];
   notes?: string;
   createdAt: number;

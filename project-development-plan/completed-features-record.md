@@ -150,6 +150,35 @@
 - **Visual Search Options**: Popover UI for configuring search
 - **Real-time Filtering**: Instant results as you type
 
+### ✅ Folder Organization Feature
+- **Folder Management**: Create, edit, and delete folders for organizing accounts
+- **Hierarchical Structure**: Support for nested folders up to 5 levels deep
+- **Visual Tree Display**: Interactive folder tree with expand/collapse functionality
+- **Folder Assignment**: Move accounts between folders with drag-and-drop or selection
+- **Folder Colors**: Customizable folder colors for visual organization
+- **Default Folders**: Auto-created Work and Personal folders for new users
+- **Folder Sidebar**: Collapsible sidebar for easy navigation
+- **Account Counts**: Real-time display of accounts per folder
+- **Bulk Operations**: Move multiple accounts to folders at once
+- **Folder Filtering**: View accounts by selected folder
+- **Integration**: Folder selector in Add/Edit account modals
+- **Redux Integration**: Full state management for folders
+
+### ✅ Multi-Device Sync Improvements
+- **Device Management Service**: Comprehensive device tracking and management
+- **Device Registration**: Automatic device registration with platform detection
+- **Session Management**: Session-based authentication with expiration
+- **Trust System**: Mark devices as trusted for enhanced security
+- **Device Manager UI**: Visual interface to view and manage connected devices
+- **Real-time Sync Service**: Automatic synchronization across devices
+- **Sync Events**: Account, tag, folder, and settings sync events
+- **Offline Support**: Queue changes when offline, sync when reconnected
+- **Conflict Resolution**: Handle sync conflicts with local/remote/merge options
+- **Sync Status Indicator**: Real-time visual feedback on sync status
+- **Activity Tracking**: Last active time and session information per device
+- **Secure Sessions**: 30-day session duration with activity updates
+- **Integration**: Sync hooks integrated with accounts, tags, and folders
+
 ---
 
 *This document tracks all completed features for 2FA Studio. For upcoming features and development plans, see what-next.md*
