@@ -1,28 +1,11 @@
 /**
- * Sync service for managing real-time data synchronization
+ * Enhanced sync service integrating with RealtimeSyncService
  * @module services/sync
  */
 
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  getDocs,
-  writeBatch,
-  onSnapshot,
-  query,
-  where,
-  orderBy,
-  serverTimestamp,
-  Timestamp,
-  Unsubscribe,
-  QuerySnapshot,
-  DocumentData,
-} from 'firebase/firestore';
-import { db } from '@src/config/firebase';
+import { RealtimeSyncService } from './realtime-sync.service';
 import { DeviceService } from './device.service';
-import { NotificationService } from './notification.service';
+import { NotificationService } from './notification-service';
 
 export interface SyncEvent {
   id: string;
@@ -59,9 +42,8 @@ export interface SyncConflict {
 const PROJECT_PREFIX = 'fa2s_';
 
 export class SyncService {
-  private static readonly SYNC_EVENTS_COLLECTION = `${PROJECT_PREFIX}sync_events`;
   private static readonly SYNC_STATUS_KEY = `${PROJECT_PREFIX}sync_status`;
-  private static subscriptions: Map<string, Unsubscribe> = new Map();
+  private static subscriptions: Map<string, () => void> = new Map();
   private static syncStatus: SyncStatus = {
     isOnline: navigator.onLine,
     lastSyncTime: null,
@@ -73,7 +55,7 @@ export class SyncService {
   private static eventHandlers: Map<string, ((event: SyncEvent) => void)[]> = new Map();
 
   /**
-   * Initialize sync service
+   * Initialize sync service using RealtimeSyncService
    */
   static async initialize(userId: string): Promise<void> {
     // Register device if not already registered
@@ -83,14 +65,14 @@ export class SyncService {
     // Setup online/offline listeners
     this.setupConnectivityListeners();
 
-    // Subscribe to sync events
+    // Initialize RealtimeSyncService
+    await RealtimeSyncService.initialize(userId);
+
+    // Subscribe to sync events through RealtimeSyncService
     await this.subscribeSyncEvents(userId);
 
     // Load sync status from local storage
     this.loadSyncStatus();
-
-    // Clean up old sync events
-    this.cleanupOldSyncEvents(userId);
   }
 
   /**
@@ -119,91 +101,42 @@ export class SyncService {
   }
 
   /**
-   * Subscribe to sync events
+   * Subscribe to sync events using RealtimeSyncService
    */
   private static async subscribeSyncEvents(userId: string): Promise<void> {
-    const deviceId = await DeviceService.getDeviceId();
-    const syncRef = collection(db, 'users', userId, this.SYNC_EVENTS_COLLECTION);
-    
-    // Subscribe to events from other devices
-    const q = query(
-      syncRef,
-      where('deviceId', '!=', deviceId),
-      where('synced', '==', false),
-      orderBy('deviceId'),
-      orderBy('timestamp', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      this.handleSyncEvents(snapshot, deviceId);
-    });
-
-    this.subscriptions.set('sync_events', unsubscribe);
-  }
-
-  /**
-   * Handle incoming sync events
-   */
-  private static async handleSyncEvents(
-    snapshot: QuerySnapshot<DocumentData>,
-    currentDeviceId: string
-  ): Promise<void> {
-    const events: SyncEvent[] = [];
-
-    snapshot.docChanges().forEach(change => {
-      if (change.type === 'added') {
-        const data = change.doc.data();
-        const event: SyncEvent = {
-          id: change.doc.id,
-          type: data.type,
-          userId: data.userId,
-          deviceId: data.deviceId,
-          timestamp: (data.timestamp as Timestamp)?.toDate() || new Date(),
-          data: data.data,
-          synced: data.synced,
+    // Subscribe to sync events from RealtimeSyncService
+    RealtimeSyncService.addEventListener((event) => {
+      if (event.type === 'data_changed' && event.data) {
+        // Convert RealtimeSyncService event to SyncEvent format
+        const syncEvent: SyncEvent = {
+          id: `sync_${Date.now()}`,
+          type: 'account_updated', // Default type, could be enhanced
+          userId: userId,
+          deviceId: 'current',
+          timestamp: new Date(),
+          data: event.data,
+          synced: true,
         };
 
-        events.push(event);
+        this.handleSyncEvent(syncEvent);
       }
     });
-
-    // Process events in order
-    for (const event of events) {
-      await this.processSyncEvent(event);
-    }
-
-    // Update connected devices count
-    const uniqueDevices = new Set(events.map(e => e.deviceId));
-    this.updateSyncStatus({ connectedDevices: uniqueDevices.size + 1 });
   }
 
   /**
-   * Process a sync event
+   * Handle a single sync event
    */
-  private static async processSyncEvent(event: SyncEvent): Promise<void> {
+  private static handleSyncEvent(event: SyncEvent): void {
     // Notify event handlers
     const handlers = this.eventHandlers.get(event.type) || [];
     handlers.forEach(handler => handler(event));
 
-    // Mark event as synced
-    const syncRef = doc(
-      db, 
-      'users', 
-      event.userId, 
-      this.SYNC_EVENTS_COLLECTION, 
-      event.id
-    );
-    
-    try {
-      await updateDoc(syncRef, { synced: true });
-      this.updateSyncStatus({ lastSyncTime: new Date() });
-    } catch (error) {
-      console.error('Error marking sync event as processed:', error);
-    }
+    // Update sync status
+    this.updateSyncStatus({ lastSyncTime: new Date() });
   }
 
   /**
-   * Publish a sync event
+   * Publish a sync event using RealtimeSyncService
    */
   static async publishSyncEvent(
     userId: string,
@@ -216,20 +149,13 @@ export class SyncService {
       return;
     }
 
-    const deviceId = await DeviceService.getDeviceId();
-    const syncRef = collection(db, 'users', userId, this.SYNC_EVENTS_COLLECTION);
-
-    const event = {
-      type,
-      userId,
-      deviceId,
-      timestamp: serverTimestamp(),
-      data,
-      synced: false,
-    };
-
     try {
-      await addDoc(syncRef, event);
+      // Use RealtimeSyncService to queue the operation
+      RealtimeSyncService.queueOperation(
+        type,
+        data,
+        'pending'
+      );
     } catch (error) {
       console.error('Error publishing sync event:', error);
       this.queuePendingChange({ type, data });
@@ -283,7 +209,7 @@ export class SyncService {
   }
 
   /**
-   * Process pending changes
+   * Process pending changes using RealtimeSyncService
    */
   private static async processPendingChanges(): Promise<void> {
     if (!this.syncStatus.isOnline || this.syncStatus.syncInProgress) {
@@ -297,12 +223,8 @@ export class SyncService {
 
     for (const change of pendingChanges) {
       try {
-        // Re-publish the change
-        await this.publishSyncEvent(
-          change.userId,
-          change.type,
-          change.data
-        );
+        // Use RealtimeSyncService to sync pending changes
+        await RealtimeSyncService.syncPendingChanges();
         processedIds.push(change.id);
       } catch (error) {
         console.error('Error processing pending change:', error);
@@ -326,7 +248,7 @@ export class SyncService {
   }
 
   /**
-   * Handle sync conflict
+   * Handle sync conflict using RealtimeSyncService
    */
   static addConflict(conflict: Omit<SyncConflict, 'id' | 'resolved'>): void {
     const newConflict: SyncConflict = {
@@ -346,16 +268,23 @@ export class SyncService {
   }
 
   /**
-   * Resolve sync conflict
+   * Resolve sync conflict using RealtimeSyncService
    */
-  static resolveConflict(conflictId: string, resolution: 'local' | 'remote' | 'merge'): void {
+  static async resolveConflict(conflictId: string, resolution: 'local' | 'remote' | 'merge'): Promise<void> {
     const conflict = this.conflictQueue.find(c => c.id === conflictId);
     if (conflict) {
-      conflict.resolved = true;
-      conflict.resolution = resolution;
-      
-      // Remove from queue
-      this.conflictQueue = this.conflictQueue.filter(c => c.id !== conflictId);
+      try {
+        // Use RealtimeSyncService to resolve the conflict
+        await RealtimeSyncService.resolveConflict(conflictId, resolution);
+        
+        conflict.resolved = true;
+        conflict.resolution = resolution;
+        
+        // Remove from queue
+        this.conflictQueue = this.conflictQueue.filter(c => c.id !== conflictId);
+      } catch (error) {
+        console.error('Error resolving conflict:', error);
+      }
     }
   }
 
@@ -401,38 +330,13 @@ export class SyncService {
   }
 
   /**
-   * Clean up old sync events
-   */
-  private static async cleanupOldSyncEvents(userId: string): Promise<void> {
-    // Clean up events older than 7 days
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 7);
-
-    const syncRef = collection(db, 'users', userId, this.SYNC_EVENTS_COLLECTION);
-    const q = query(
-      syncRef,
-      where('timestamp', '<', Timestamp.fromDate(cutoffDate)),
-      where('synced', '==', true)
-    );
-
-    try {
-      const snapshot = await getDocs(q);
-      const batch = writeBatch(db);
-
-      snapshot.docs.forEach(doc => {
-        batch.delete(doc.ref);
-      });
-
-      await batch.commit();
-    } catch (error) {
-      console.error('Error cleaning up old sync events:', error);
-    }
-  }
-
-  /**
    * Cleanup and unsubscribe
    */
   static cleanup(): void {
+    // Cleanup RealtimeSyncService
+    RealtimeSyncService.cleanup();
+    
+    // Cleanup local subscriptions
     this.subscriptions.forEach(unsubscribe => unsubscribe());
     this.subscriptions.clear();
     this.eventHandlers.clear();

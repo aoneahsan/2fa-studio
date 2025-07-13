@@ -1,19 +1,12 @@
 /**
- * Backup service for managing account backups
+ * Enhanced backup service integrating with GoogleDriveBackupService
  * @module services/backup
  */
 
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  getDoc,
-  serverTimestamp,
-  addDoc,
-} from 'firebase/firestore';
-import { db } from '@src/config/firebase';
 import { OTPAccount } from '@services/otp.service';
-import { EncryptionService } from '@services/encryption.service';
+import { GoogleDriveBackupService } from '@services/google-drive-backup.service';
+import { FirestoreService } from '@services/firestore.service';
+import { MobileEncryptionService } from '@services/mobile-encryption.service';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
@@ -33,36 +26,36 @@ export interface BackupResult {
   accountsCount: number;
   fileSize?: number;
   error?: string;
+  fileId?: string;
 }
 
 export class BackupService {
   private static BACKUP_VERSION = '1.0';
 
   /**
-   * Create a backup of all accounts
+   * Create a backup of all accounts using enhanced services
    */
   static async createBackup(
     userId: string,
-    encryptionKey: string,
     includeSettings: boolean = true
   ): Promise<BackupData> {
     try {
-      // Get all accounts
-      const accountsRef = collection(db, `users/${userId}/accounts`);
-      const accountsSnapshot = await getDocs(accountsRef);
+      // Get all accounts using FirestoreService
+      const result = await FirestoreService.getCollection<any>(
+        `users/${userId}/accounts`
+      );
       
       const accounts: any[] = [];
       
-      for (const doc of accountsSnapshot.docs) {
-        const accountData = doc.data();
-        // Decrypt the secret for backup
-        const decryptedSecret = await EncryptionService.decrypt({
-          encryptedData: accountData.encryptedSecret,
-          password: encryptionKey,
-        });
+      for (const accountData of result.data) {
+        // Decrypt the secret for backup using MobileEncryptionService
+        const decryptedSecret = await MobileEncryptionService.decryptData(
+          accountData.encryptedSecret,
+          userId
+        );
         
         accounts.push({
-          id: doc.id,
+          id: accountData.id,
           issuer: accountData.issuer,
           label: accountData.label,
           secret: decryptedSecret,
@@ -83,9 +76,9 @@ export class BackupService {
       // Get settings if requested
       let settings = null;
       if (includeSettings) {
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
+        const userResult = await FirestoreService.getDocument('users', userId);
+        if (userResult.success && userResult.data) {
+          const userData = userResult.data;
           settings = {
             theme: userData.theme,
             autoLock: userData.autoLock,
@@ -121,19 +114,18 @@ export class BackupService {
     includeSettings: boolean = true
   ): Promise<void> {
     try {
-      const encryptionKey = localStorage.getItem('encryptionKey') || '';
-      const backupData = await this.createBackup(userId, encryptionKey, includeSettings);
+      const backupData = await this.createBackup(userId, includeSettings);
       
       let fileContent: string;
       let fileName: string;
       
       if (format === 'encrypted') {
-        // Encrypt the entire backup
-        const encrypted = await EncryptionService.encrypt({
-          data: JSON.stringify(backupData),
-          password: encryptionKey,
-        });
-        fileContent = JSON.stringify(encrypted);
+        // Encrypt the entire backup using MobileEncryptionService
+        const encryptedData = await MobileEncryptionService.encryptData(
+          JSON.stringify(backupData),
+          userId
+        );
+        fileContent = encryptedData;
         fileName = `2fa-studio-backup-encrypted-${Date.now()}.2fas`;
       } else {
         fileContent = JSON.stringify(backupData, null, 2);
@@ -175,31 +167,30 @@ export class BackupService {
   }
 
   /**
-   * Import backup from file content
+   * Import backup from file content using enhanced services
    */
   static async importBackup(
     userId: string,
-    fileContent: string,
-    encryptionKey: string
+    fileContent: string
   ): Promise<BackupResult> {
     try {
       let backupData: BackupData;
       
       // Try to parse as encrypted backup first
       try {
-        const encrypted = JSON.parse(fileContent);
-        if (encrypted.salt && encrypted.iv && encrypted.encryptedData) {
-          const decrypted = await EncryptionService.decrypt({
-            encryptedData: fileContent,
-            password: encryptionKey,
-          });
-          backupData = JSON.parse(decrypted);
-        } else {
-          backupData = encrypted;
-        }
+        // Try to decrypt using MobileEncryptionService
+        const decrypted = await MobileEncryptionService.decryptData(
+          fileContent,
+          userId
+        );
+        backupData = JSON.parse(decrypted);
       } catch {
-        // If not JSON, try as plain backup
-        backupData = JSON.parse(fileContent);
+        // If decryption fails, try as plain JSON
+        try {
+          backupData = JSON.parse(fileContent);
+        } catch {
+          throw new Error('Invalid backup format');
+        }
       }
 
       // Validate backup version
@@ -207,37 +198,39 @@ export class BackupService {
         throw new Error('Invalid backup format');
       }
 
-      // Import accounts
-      const accountsRef = collection(db, `users/${userId}/accounts`);
+      // Import accounts using FirestoreService
       let importedCount = 0;
       
       for (const account of backupData.accounts) {
         try {
           // Encrypt the secret before storing
-          const encryptedSecret = await EncryptionService.encrypt({
-            data: account.secret,
-            password: encryptionKey,
-          });
+          const encryptedSecret = await MobileEncryptionService.encryptData(
+            account.secret,
+            userId
+          );
           
-          await addDoc(accountsRef, {
-            issuer: account.issuer,
-            label: account.label,
-            encryptedSecret: JSON.stringify(encryptedSecret),
-            algorithm: account.algorithm || 'SHA1',
-            digits: account.digits || 6,
-            period: account.period || 30,
-            type: account.type || 'totp',
-            counter: account.counter,
-            iconUrl: account.iconUrl,
-            tags: account.tags || [],
-            notes: account.notes,
-            backupCodes: account.backupCodes || [],
-            isFavorite: account.isFavorite || false,
-            folderId: account.folderId || null,
-            userId,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          });
+          await FirestoreService.addDocument(
+            `users/${userId}/accounts`,
+            {
+              issuer: account.issuer,
+              label: account.label,
+              encryptedSecret,
+              algorithm: account.algorithm || 'SHA1',
+              digits: account.digits || 6,
+              period: account.period || 30,
+              type: account.type || 'totp',
+              counter: account.counter,
+              iconUrl: account.iconUrl,
+              tags: account.tags || [],
+              notes: account.notes,
+              backupCodes: account.backupCodes || [],
+              isFavorite: account.isFavorite || false,
+              folderId: account.folderId || null,
+              userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }
+          );
           
           importedCount++;
         } catch (error) {
@@ -266,7 +259,7 @@ export class BackupService {
   }
 
   /**
-   * Backup to Google Drive
+   * Backup to Google Drive using GoogleDriveBackupService
    */
   static async backupToGoogleDrive(
     userId: string,
@@ -274,37 +267,43 @@ export class BackupService {
     includeSettings: boolean = true
   ): Promise<BackupResult> {
     try {
-      const encryptionKey = localStorage.getItem('encryptionKey') || '';
-      const backupData = await this.createBackup(userId, encryptionKey, includeSettings);
+      const backupData = await this.createBackup(userId, includeSettings);
       
-      let fileContent: string;
-      let fileName: string;
-      
-      if (encrypted) {
-        const encryptedData = await EncryptionService.encrypt({
-          data: JSON.stringify(backupData),
-          password: encryptionKey,
-        });
-        fileContent = JSON.stringify(encryptedData);
-        fileName = `2fa-studio-backup-${Date.now()}.2fas`;
-      } else {
-        fileContent = JSON.stringify(backupData, null, 2);
-        fileName = `2fa-studio-backup-${Date.now()}.json`;
-      }
+      // Convert to OTPAccount format for GoogleDriveBackupService
+      const accounts: OTPAccount[] = backupData.accounts.map(account => ({
+        id: account.id,
+        issuer: account.issuer,
+        label: account.label,
+        secret: account.secret,
+        algorithm: account.algorithm,
+        digits: account.digits,
+        period: account.period,
+        type: account.type,
+        counter: account.counter,
+        iconUrl: account.iconUrl,
+        tags: account.tags,
+        notes: account.notes,
+        backupCodes: account.backupCodes,
+        isFavorite: account.isFavorite,
+        folderId: account.folderId,
+        requiresBiometric: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
 
-      // TODO: Implement actual Google Drive upload
-      // For now, we'll simulate the upload
-      console.log('Would upload to Google Drive:', {
-        fileName,
-        size: new Blob([fileContent]).size,
-        accountsCount: backupData.accountsCount,
+      // Use GoogleDriveBackupService for the actual backup
+      const result = await GoogleDriveBackupService.createBackup(accounts, {
+        encrypted,
+        includeSettings,
+        settings: backupData.settings,
       });
 
-      // Simulate successful upload
       return {
-        success: true,
+        success: result.success,
         accountsCount: backupData.accountsCount,
-        fileSize: new Blob([fileContent]).size,
+        fileSize: result.fileId ? undefined : 0,
+        fileId: result.fileId,
+        error: result.error,
       };
     } catch (error) {
       console.error('Error backing up to Google Drive:', error);
@@ -317,22 +316,67 @@ export class BackupService {
   }
 
   /**
-   * Restore from Google Drive
+   * Restore from Google Drive using GoogleDriveBackupService
    */
   static async restoreFromGoogleDrive(
     userId: string,
-    backupId: string,
-    encryptionKey: string
+    backupId: string
   ): Promise<BackupResult> {
     try {
-      // TODO: Implement actual Google Drive download
-      // For now, we'll return a simulated result
-      console.log('Would restore from Google Drive:', { backupId });
+      // Use GoogleDriveBackupService to restore backup
+      const result = await GoogleDriveBackupService.restoreBackup(backupId);
+      
+      if (!result.success || !result.accounts) {
+        return {
+          success: false,
+          accountsCount: 0,
+          error: result.error || 'Failed to restore backup',
+        };
+      }
+
+      // Import the restored accounts
+      let importedCount = 0;
+      
+      for (const account of result.accounts) {
+        try {
+          // Encrypt the secret before storing
+          const encryptedSecret = await MobileEncryptionService.encryptData(
+            account.secret,
+            userId
+          );
+          
+          await FirestoreService.addDocument(
+            `users/${userId}/accounts`,
+            {
+              issuer: account.issuer,
+              label: account.label,
+              encryptedSecret,
+              algorithm: account.algorithm || 'SHA1',
+              digits: account.digits || 6,
+              period: account.period || 30,
+              type: account.type || 'totp',
+              counter: account.counter,
+              iconUrl: account.iconUrl,
+              tags: account.tags || [],
+              notes: account.notes,
+              backupCodes: account.backupCodes || [],
+              isFavorite: account.isFavorite || false,
+              folderId: account.folderId || null,
+              userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }
+          );
+          
+          importedCount++;
+        } catch (error) {
+          console.error('Error importing account:', account.label, error);
+        }
+      }
 
       return {
         success: true,
-        accountsCount: 0,
-        error: 'Google Drive restore not yet implemented',
+        accountsCount: importedCount,
       };
     } catch (error) {
       console.error('Error restoring from Google Drive:', error);

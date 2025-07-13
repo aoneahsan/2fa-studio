@@ -5,7 +5,7 @@
 
 import * as OTPAuth from 'otpauth';
 
-export interface OTPAccount {
+export interface OTPAccount extends Record<string, unknown> {
   id: string;
   issuer: string;
   label: string;

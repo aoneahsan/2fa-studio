@@ -5,8 +5,6 @@
 
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '@src/config/firebase';
 import { RootState, AppDispatch } from '@src/store';
 import { 
   setAccounts, 
@@ -19,9 +17,10 @@ import {
 import { selectActiveTags, selectFilterMode } from '@store/slices/tagsSlice';
 import { addToast } from '@store/slices/uiSlice';
 import { OTPAccount } from '@services/otp.service';
-import { EncryptionService } from '@services/encryption.service';
+import { FirestoreService } from '@services/firestore.service';
+import { MobileEncryptionService } from '@services/mobile-encryption.service';
+import { RealtimeSyncService } from '@services/realtime-sync.service';
 import { Preferences } from '@capacitor/preferences';
-import { useSync } from '@hooks/useSync';
 
 /**
  * Hook for managing OTP accounts
@@ -33,58 +32,48 @@ export const useAccounts = () => {
   const activeTags = useSelector(selectActiveTags);
   const filterMode = useSelector(selectFilterMode);
   const selectedFolderId = useSelector((state: RootState) => state.folders.selectedFolderId);
-  const { publishAccountChange } = useSync({
-    onAccountSync: (event) => {
-      // Refresh accounts when sync event received
-      if (event.type === 'account_added' || event.type === 'account_updated' || event.type === 'account_deleted') {
-        // The firestore listener will handle the update
-        console.log('Account sync event received:', event.type);
-      }
-    }
-  });
 
-  // Load accounts from Firestore
+  // Load accounts using FirestoreService with real-time sync
   useEffect(() => {
     if (!user || !encryptionKey) return;
 
     dispatch(setLoading(true));
 
-    const q = collection(db, 'users', user.uid, 'accounts');
-    
-    const unsubscribe = onSnapshot(
-      q,
-      async (snapshot) => {
+    // Subscribe to accounts collection using FirestoreService
+    const unsubscribe = FirestoreService.subscribeToCollection<any>(
+      `users/${user.uid}/accounts`,
+      async (documents) => {
         try {
           const decryptedAccounts: OTPAccount[] = [];
           
-          for (const doc of snapshot.docs) {
-            const encryptedData = doc.data();
-            const decryptedSecret = await EncryptionService.decrypt({
-              encryptedData: encryptedData.encryptedSecret,
-              password: encryptionKey,
-            });
+          for (const doc of documents) {
+            // Decrypt account secret using MobileEncryptionService
+            const decryptedSecret = await MobileEncryptionService.decryptData(
+              doc.encryptedSecret,
+              user.uid
+            );
             
             const account: OTPAccount = {
               id: doc.id,
-              issuer: encryptedData.issuer || 'Unknown',
-              label: encryptedData.label || 'Unknown',
+              issuer: doc.issuer || 'Unknown',
+              label: doc.label || 'Unknown',
               secret: decryptedSecret,
-              algorithm: encryptedData.algorithm || 'SHA1',
-              digits: encryptedData.digits || 6,
-              period: encryptedData.period || 30,
-              type: encryptedData.type || 'totp',
-              counter: encryptedData.counter,
-              iconUrl: encryptedData.iconUrl,
-              tags: encryptedData.tags || [],
-              notes: encryptedData.notes,
-              backupCodes: encryptedData.backupCodes || [],
-              createdAt: encryptedData.createdAt?.toDate() || new Date(),
-              updatedAt: encryptedData.updatedAt?.toDate() || new Date(),
-              isFavorite: encryptedData.isFavorite || false,
-              folderId: encryptedData.folderId || null,
-              requiresBiometric: encryptedData.requiresBiometric || false,
-              biometricTimeout: encryptedData.biometricTimeout,
-              lastBiometricAuth: encryptedData.lastBiometricAuth?.toDate(),
+              algorithm: doc.algorithm || 'SHA1',
+              digits: doc.digits || 6,
+              period: doc.period || 30,
+              type: doc.type || 'totp',
+              counter: doc.counter,
+              iconUrl: doc.iconUrl,
+              tags: doc.tags || [],
+              notes: doc.notes,
+              backupCodes: doc.backupCodes || [],
+              createdAt: doc.createdAt?.toDate() || new Date(),
+              updatedAt: doc.updatedAt?.toDate() || new Date(),
+              isFavorite: doc.isFavorite || false,
+              folderId: doc.folderId || null,
+              requiresBiometric: doc.requiresBiometric || false,
+              biometricTimeout: doc.biometricTimeout,
+              lastBiometricAuth: doc.lastBiometricAuth?.toDate(),
             };
             
             decryptedAccounts.push(account);
@@ -111,7 +100,7 @@ export const useAccounts = () => {
         }
       },
       (error) => {
-        console.error('Firestore error:', error);
+        console.error('Firestore subscription error:', error);
         dispatch(setError('Failed to sync accounts'));
         dispatch(setLoading(false));
       }
@@ -120,7 +109,7 @@ export const useAccounts = () => {
     return () => unsubscribe();
   }, [user, encryptionKey, dispatch]);
 
-  // Add account
+  // Add account using FirestoreService and MobileEncryptionService
   const addAccount = useCallback(async (account: Omit<OTPAccount, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user || !encryptionKey) {
       throw new Error('User not authenticated');
@@ -129,25 +118,33 @@ export const useAccounts = () => {
     try {
       dispatch(setLoading(true));
       
-      // Encrypt the secret
-      const encryptedSecret = await EncryptionService.encrypt({
-        data: account.secret,
-        password: encryptionKey,
-      });
+      // Encrypt the secret using MobileEncryptionService
+      const encryptedSecret = await MobileEncryptionService.encryptData(
+        account.secret,
+        user.uid
+      );
       
       const accountData = {
         ...account,
         userId: user.uid,
-        encryptedSecret: JSON.stringify(encryptedSecret),
+        encryptedSecret,
         secret: undefined, // Don't store plain secret
         createdAt: new Date(),
         updatedAt: new Date(),
       };
       
-      const docRef = await addDoc(collection(db, 'users', user.uid, 'accounts'), accountData);
+      // Use FirestoreService to add document
+      const result = await FirestoreService.addDocument(
+        `users/${user.uid}/accounts`,
+        accountData
+      );
       
-      // Publish sync event
-      await publishAccountChange('added', { accountId: docRef.id, ...accountData });
+      // Publish sync event using RealtimeSyncService
+      await RealtimeSyncService.publishChange(user.uid, {
+        type: 'account_added',
+        accountId: result.id,
+        data: accountData,
+      });
       
       dispatch(addToast({
         type: 'success',
@@ -165,7 +162,7 @@ export const useAccounts = () => {
     }
   }, [user, encryptionKey, dispatch]);
 
-  // Update account
+  // Update account using FirestoreService
   const updateAccount = useCallback(async (account: OTPAccount) => {
     if (!user || !encryptionKey) {
       throw new Error('User not authenticated');
@@ -174,23 +171,32 @@ export const useAccounts = () => {
     try {
       dispatch(setLoading(true));
       
-      // Re-encrypt the secret if it was changed
-      const encryptedSecret = await EncryptionService.encrypt({
-        data: account.secret,
-        password: encryptionKey,
-      });
+      // Re-encrypt the secret using MobileEncryptionService
+      const encryptedSecret = await MobileEncryptionService.encryptData(
+        account.secret,
+        user.uid
+      );
       
       const accountData = {
         ...account,
-        encryptedSecret: JSON.stringify(encryptedSecret),
+        encryptedSecret,
         secret: undefined,
         updatedAt: new Date(),
       };
       
-      await updateDoc(doc(db, 'users', user.uid, 'accounts', account.id), accountData);
+      // Use FirestoreService to update document
+      await FirestoreService.updateDocument(
+        `users/${user.uid}/accounts`,
+        account.id,
+        accountData
+      );
       
-      // Publish sync event
-      await publishAccountChange('updated', { accountId: account.id, ...accountData });
+      // Publish sync event using RealtimeSyncService
+      await RealtimeSyncService.publishChange(user.uid, {
+        type: 'account_updated',
+        accountId: account.id,
+        data: accountData,
+      });
       
       dispatch(addToast({
         type: 'success',
@@ -208,7 +214,7 @@ export const useAccounts = () => {
     }
   }, [user, encryptionKey, dispatch]);
 
-  // Delete account
+  // Delete account using FirestoreService
   const deleteAccount = useCallback(async (accountId: string) => {
     if (!user) {
       throw new Error('User not authenticated');
@@ -217,10 +223,18 @@ export const useAccounts = () => {
     try {
       dispatch(setLoading(true));
       
-      await deleteDoc(doc(db, 'users', user.uid, 'accounts', accountId));
+      // Use FirestoreService to delete document
+      await FirestoreService.deleteDocument(
+        `users/${user.uid}/accounts`,
+        accountId
+      );
       
-      // Publish sync event
-      await publishAccountChange('deleted', { accountId });
+      // Publish sync event using RealtimeSyncService
+      await RealtimeSyncService.publishChange(user.uid, {
+        type: 'account_deleted',
+        accountId,
+        data: { accountId },
+      });
       
       dispatch(addToast({
         type: 'success',

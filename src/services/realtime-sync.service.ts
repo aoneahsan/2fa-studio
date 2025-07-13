@@ -30,7 +30,7 @@ export interface SyncState {
   isSyncing: boolean;
 }
 
-export interface ConflictItem {
+export interface ConflictItem extends Record<string, unknown> {
   id: string;
   type: 'account' | 'folder' | 'tag';
   local: Record<string, unknown>;
@@ -434,19 +434,18 @@ export class RealtimeSyncService {
    */
   private static async mergeConflictData(conflict: ConflictItem): Promise<any> {
     if (conflict.type === 'account') {
-      const local = conflict.local as OTPAccount;
-      const remote = conflict.remote as OTPAccount;
+      const local = conflict.local as unknown as OTPAccount;
+      const remote = conflict.remote as unknown as OTPAccount;
 
       // Use the most recent updatedAt
       const useLocal = (local.updatedAt?.getTime() || 0) > (remote.updatedAt?.getTime() || 0);
       
       return {
-        ...remote,
+        ...(remote as Record<string, unknown>),
         // Keep remote ID and userId
         label: useLocal ? local.label : remote.label,
         issuer: useLocal ? local.issuer : remote.issuer,
-        category: local.category || remote.category,
-        tags: [...new Set([...(local.tags || []), ...(remote.tags || [])])],
+        tags: [...new Set([...((local as any).tags || []), ...((remote as any).tags || [])])],
         isFavorite: local.isFavorite || remote.isFavorite,
         updatedAt: new Date()
       };
