@@ -1,0 +1,79 @@
+name: Chrome Extension CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'chrome-extension/**'
+      - '.github/workflows/chrome-extension.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'chrome-extension/**'
+      - '.github/workflows/chrome-extension.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Validate manifest
+      run: |
+        cd chrome-extension
+        node -e "JSON.parse(require('fs').readFileSync('manifest.json', 'utf8'))"
+    
+    - name: Check JavaScript syntax
+      run: |
+        cd chrome-extension
+        for file in $(find . -name "*.js" -not -path "./node_modules/*"); do
+          node -c "$file"
+        done
+    
+    - name: Create extension ZIP
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        cd chrome-extension
+        zip -r ../2fa-studio-extension.zip . -x "*.git*" -x "node_modules/*" -x "*.DS_Store"
+    
+    - name: Upload extension artifact
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: chrome-extension
+        path: 2fa-studio-extension.zip
+    
+    - name: Calculate version
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      id: version
+      run: |
+        VERSION=$(cat chrome-extension/manifest.json | jq -r '.version')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'release:')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: extension-v${{ steps.version.outputs.version }}
+        release_name: Chrome Extension v${{ steps.version.outputs.version }}
+        draft: false
+        prerelease: false
+    
+    - name: Upload Release Asset
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'release:')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./2fa-studio-extension.zip
+        asset_name: 2fa-studio-extension-v${{ steps.version.outputs.version }}.zip
+        asset_content_type: application/zip
