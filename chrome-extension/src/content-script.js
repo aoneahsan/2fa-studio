@@ -11,9 +11,13 @@ script.onload = function() {
 };
 document.head.appendChild(script);
 
+// Load keyboard shortcuts service
+import { KeyboardShortcutsService } from './keyboard-shortcuts.js';
+
 class ContentScript {
   constructor() {
     this.qrDetector = null;
+    this.keyboardShortcuts = new KeyboardShortcutsService();
     this.init();
     this.setupStyles();
     this.initQRDetector();
@@ -49,6 +53,9 @@ class ContentScript {
           break;
         case 'showSecurityWarning':
           this.showSecurityWarning(request.warning);
+          break;
+        case 'copyToClipboard':
+          this.copyToClipboard(request.text);
           break;
       }
     });
@@ -1627,6 +1634,36 @@ class ContentScript {
     } catch (error) {
       console.error('Failed to request code with security:', error);
       return null;
+    }
+  }
+
+  /**
+   * Copy text to clipboard
+   */
+  async copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.showNotification('Code copied to clipboard', 'success');
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        this.showNotification('Code copied to clipboard', 'success');
+      } catch (fallbackError) {
+        console.error('Failed to copy to clipboard:', fallbackError);
+        this.showNotification('Failed to copy to clipboard', 'error');
+      } finally {
+        document.body.removeChild(textArea);
+      }
     }
   }
 

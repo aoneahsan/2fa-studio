@@ -1,0 +1,510 @@
+/* Keyboard Shortcuts Settings Styles */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+  color: white;
+  padding: 32px 24px;
+  border-radius: 0 0 16px 16px;
+  margin-bottom: 32px;
+}
+
+.header-content {
+  text-align: center;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.title .icon {
+  width: 36px;
+  height: 36px;
+}
+
+.subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* Main Content */
+.main {
+  padding: 0 24px 24px;
+}
+
+.shortcuts-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.section-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Shortcuts List */
+.shortcuts-list {
+  display: grid;
+  gap: 16px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.shortcut-item:hover {
+  background: #e9ecef;
+  border-color: #0066cc;
+}
+
+.shortcut-item.non-customizable {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.shortcut-item.non-customizable:hover {
+  background: #f8f9fa;
+  border-color: transparent;
+}
+
+.shortcut-info {
+  flex: 1;
+}
+
+.shortcut-command {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.shortcut-description {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.shortcut-keys {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortcut-key {
+  background: #fff;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  min-width: 40px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shortcut-key.modifier {
+  background: #0066cc;
+  color: white;
+  border-color: #0066cc;
+}
+
+.shortcut-status {
+  margin-left: 12px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.shortcut-status.custom {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.shortcut-status.default {
+  color: #6c757d;
+}
+
+.shortcut-status.non-customizable {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: #0066cc;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0052a3;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+/* Help Section */
+.help-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.help-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.help-list {
+  list-style: none;
+  margin-bottom: 32px;
+}
+
+.help-list li {
+  padding: 8px 0;
+  position: relative;
+  padding-left: 24px;
+}
+
+.help-list li:before {
+  content: '•';
+  color: #0066cc;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.commands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.command-item {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #0066cc;
+}
+
+.command-item strong {
+  display: block;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.command-item p {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  padding: 24px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 0 24px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.shortcut-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: monospace;
+  background: #f8f9fa;
+  text-align: center;
+  font-weight: 600;
+}
+
+.shortcut-input:focus {
+  outline: none;
+  border-color: #0066cc;
+  background: white;
+}
+
+.input-help {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6c757d;
+  text-align: center;
+}
+
+textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: monospace;
+  resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #0066cc;
+}
+
+/* Conflict Warning */
+.conflict-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  color: #856404;
+  margin-top: 12px;
+}
+
+.conflict-warning svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Status Message */
+.status-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: translateX(400px);
+  transition: transform 0.3s;
+  z-index: 1001;
+}
+
+.status-message.show {
+  transform: translateX(0);
+}
+
+.status-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status-message.info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0;
+  }
+  
+  .header {
+    padding: 24px 16px;
+    margin-bottom: 24px;
+    border-radius: 0;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+  
+  .subtitle {
+    font-size: 16px;
+  }
+  
+  .main {
+    padding: 0 16px 16px;
+  }
+  
+  .shortcuts-section,
+  .help-section {
+    padding: 20px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .shortcut-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .shortcut-keys {
+    align-self: flex-end;
+  }
+  
+  .commands-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 20px 0;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+}

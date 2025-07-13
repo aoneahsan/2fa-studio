@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2FA Studio - Keyboard Shortcuts</title>
+  <link rel="stylesheet" href="shortcuts.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-content">
+        <h1 class="title">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"></path>
+            <path d="M9 12l2 2 4-4"></path>
+          </svg>
+          Keyboard Shortcuts
+        </h1>
+        <p class="subtitle">Customize keyboard shortcuts for quick 2FA operations</p>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="shortcuts-section">
+        <div class="section-header">
+          <h2>Active Shortcuts</h2>
+          <div class="header-actions">
+            <button id="resetAllBtn" class="btn btn-secondary">Reset All</button>
+            <button id="exportBtn" class="btn btn-secondary">Export</button>
+            <button id="importBtn" class="btn btn-secondary">Import</button>
+          </div>
+        </div>
+
+        <div id="shortcutsList" class="shortcuts-list">
+          <!-- Shortcuts will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>How to Use</h3>
+        <ul class="help-list">
+          <li>Click on any shortcut to customize it</li>
+          <li>Press the key combination you want to use</li>
+          <li>Shortcuts must include at least one modifier key (Ctrl, Cmd, Alt, Shift)</li>
+          <li>Some shortcuts cannot be customized for security reasons</li>
+          <li>Changes are saved automatically</li>
+        </ul>
+
+        <h3>Available Commands</h3>
+        <div class="commands-grid">
+          <div class="command-item">
+            <strong>Fill Code</strong>
+            <p>Automatically fill the 2FA code in the current page</p>
+          </div>
+          <div class="command-item">
+            <strong>Copy Code</strong>
+            <p>Copy the 2FA code to clipboard</p>
+          </div>
+          <div class="command-item">
+            <strong>Quick Fill</strong>
+            <p>Instantly fill code using the best matching account</p>
+          </div>
+          <div class="command-item">
+            <strong>Scan QR</strong>
+            <p>Enable QR code scanning mode on the page</p>
+          </div>
+          <div class="command-item">
+            <strong>Toggle Auto-fill</strong>
+            <p>Enable or disable automatic code filling</p>
+          </div>
+          <div class="command-item">
+            <strong>Open Settings</strong>
+            <p>Open the extension settings page</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Shortcut Editor Modal -->
+    <div id="shortcutModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Edit Shortcut</h3>
+          <button id="closeModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="shortcutInput">Press the key combination:</label>
+            <input type="text" id="shortcutInput" class="shortcut-input" placeholder="Press keys..." readonly>
+            <div class="input-help">Hold modifier keys (Ctrl/Cmd, Shift, Alt) + a key</div>
+          </div>
+          <div id="conflictWarning" class="conflict-warning" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 9v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
+            </svg>
+            <span id="conflictText">This shortcut is already used by another command</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="resetShortcut" class="btn btn-secondary">Reset to Default</button>
+          <button id="cancelEdit" class="btn btn-secondary">Cancel</button>
+          <button id="saveShortcut" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Import Shortcuts</h3>
+          <button id="closeImportModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="importData">Paste shortcuts configuration:</label>
+            <textarea id="importData" rows="10" placeholder="Paste your exported shortcuts configuration here..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelImport" class="btn btn-secondary">Cancel</button>
+          <button id="confirmImport" class="btn btn-primary">Import</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="statusMessage" class="status-message"></div>
+  </div>
+
+  <script type="module" src="shortcuts.js"></script>
+</body>
+</html>

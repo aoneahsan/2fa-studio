@@ -195,10 +195,59 @@
   display: block !important;
 }
 
+/* Notification styles */
+.tfa-studio-notification {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  padding: 16px 24px !important;
+  background: #fff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+  z-index: 100000 !important;
+  transform: translateX(400px) !important;
+  transition: transform 0.3s ease !important;
+  max-width: 300px !important;
+  border-left: 4px solid #0066cc !important;
+}
+
+.tfa-studio-notification.tfa-studio-notification-show {
+  transform: translateX(0) !important;
+}
+
+.tfa-studio-notification-success {
+  border-left-color: #28a745 !important;
+  background: #d4edda !important;
+  color: #155724 !important;
+}
+
+.tfa-studio-notification-error {
+  border-left-color: #dc3545 !important;
+  background: #f8d7da !important;
+  color: #721c24 !important;
+}
+
+.tfa-studio-notification-warning {
+  border-left-color: #ffc107 !important;
+  background: #fff3cd !important;
+  color: #856404 !important;
+}
+
+.tfa-studio-notification-info {
+  border-left-color: #17a2b8 !important;
+  background: #d1ecf1 !important;
+  color: #0c5460 !important;
+}
+
 /* Hide on print */
 @media print {
   .tfa-studio-button,
-  .tfa-studio-tooltip {
+  .tfa-studio-tooltip,
+  .tfa-studio-notification {
     display: none !important;
   }
 }

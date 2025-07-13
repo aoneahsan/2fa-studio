@@ -9,12 +9,14 @@ import { NotificationService } from '../src/notification.js';
 import { OTPService } from '../src/otp.js';
 import { QRScanner } from '../src/qr-scanner-lib.js';
 import { SecurityService } from '../src/security.js';
+import { KeyboardShortcutsService } from '../src/keyboard-shortcuts.js';
 
 class BackgroundService {
   constructor() {
     this.init();
     this.qrCodeCache = new Map();
     this.securityService = new SecurityService();
+    this.keyboardShortcuts = new KeyboardShortcutsService();
   }
 
   init() {
@@ -94,6 +96,26 @@ class BackgroundService {
 
         case 'reportPhishing':
           this.handlePhishingReport(request.domain, request.reason, sendResponse);
+          return true;
+
+        case 'handleShortcut':
+          this.handleShortcutCommand(request.command, request.shortcut, sendResponse);
+          return true;
+
+        case 'getShortcuts':
+          this.handleGetShortcuts(sendResponse);
+          return true;
+
+        case 'setCustomShortcut':
+          this.handleSetCustomShortcut(request.command, request.shortcut, sendResponse);
+          return true;
+
+        case 'resetShortcut':
+          this.handleResetShortcut(request.command, sendResponse);
+          return true;
+
+        case 'resetAllShortcuts':
+          this.handleResetAllShortcuts(sendResponse);
           return true;
 
         default:
@@ -539,7 +561,7 @@ class BackgroundService {
     }
   }
 
-  // Handle keyboard commands
+  // Handle keyboard commands (from manifest shortcuts)
   async handleCommand(command) {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -556,19 +578,188 @@ class BackgroundService {
         return;
       }
       
-      switch (command) {
-        case 'fill-code':
-          this.handleFillCode(tab);
-          break;
-          
-        case 'scan-qr':
-          chrome.tabs.sendMessage(tab.id, {
-            action: 'enableQRSelection'
-          });
-          break;
-      }
+      this.executeCommand(command, tab);
     } catch (error) {
       console.error('Failed to handle command:', error);
+    }
+  }
+
+  // Handle custom keyboard shortcuts
+  async handleShortcutCommand(command, shortcut, sendResponse) {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      // Security check for commands
+      const securityCheck = await this.securityService.validateURL(tab.url);
+      if (!securityCheck.valid && securityCheck.severity === 'high') {
+        sendResponse({ 
+          success: false, 
+          error: 'Cannot execute 2FA commands on this site for security reasons',
+          securityWarning: true 
+        });
+        return;
+      }
+      
+      const result = await this.executeCommand(command, tab);
+      sendResponse({ success: true, result });
+    } catch (error) {
+      console.error('Failed to handle shortcut command:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async executeCommand(command, tab) {
+    switch (command) {
+      case 'fill-code':
+        return await this.handleFillCode(tab);
+        
+      case 'scan-qr':
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'enableQRSelection'
+        });
+        return { action: 'QR selection enabled' };
+        
+      case 'copy-code':
+        return await this.handleCopyCode(tab);
+        
+      case 'quick-fill':
+        return await this.handleQuickFill(tab);
+        
+      case 'open-settings':
+        chrome.tabs.create({ 
+          url: chrome.runtime.getURL('../index.html#/settings') 
+        });
+        return { action: 'Settings opened' };
+        
+      case 'toggle-auto-fill':
+        return await this.handleToggleAutoFill();
+        
+      default:
+        throw new Error(`Unknown command: ${command}`);
+    }
+  }
+
+  async handleCopyCode(tab) {
+    try {
+      const accounts = await StorageService.getAccounts();
+      const url = new URL(tab.url);
+      const domain = url.hostname;
+      
+      const matches = this.findDomainMatches(accounts, domain);
+
+      if (matches.length === 1) {
+        const code = OTPService.generateCode(matches[0]);
+        
+        // Copy to clipboard via content script
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'copyToClipboard',
+          text: code.code
+        });
+        
+        NotificationService.show({
+          title: 'Code Copied',
+          message: `${matches[0].issuer} code copied to clipboard`,
+          iconUrl: chrome.runtime.getURL('assets/icon-128.png')
+        });
+        
+        return { code: code.code, account: matches[0].issuer };
+      } else if (matches.length > 1) {
+        // Open popup for selection
+        chrome.action.openPopup();
+        return { action: 'Multiple accounts found, popup opened' };
+      } else {
+        throw new Error('No matching accounts found for this domain');
+      }
+    } catch (error) {
+      throw new Error(`Failed to copy code: ${error.message}`);
+    }
+  }
+
+  async handleQuickFill(tab) {
+    try {
+      const accounts = await StorageService.getAccounts();
+      const url = new URL(tab.url);
+      const domain = url.hostname;
+      
+      const matches = this.findDomainMatches(accounts, domain);
+
+      if (matches.length >= 1) {
+        // Use the best match (first one is highest confidence)
+        const account = matches[0];
+        const code = OTPService.generateCode(account);
+        
+        // Auto-fill immediately
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'fillCode',
+          code: code.code
+        });
+        
+        NotificationService.show({
+          title: 'Quick Fill',
+          message: `${account.issuer} code filled automatically`,
+          iconUrl: chrome.runtime.getURL('assets/icon-128.png')
+        });
+        
+        return { code: code.code, account: account.issuer };
+      } else {
+        throw new Error('No matching accounts found for this domain');
+      }
+    } catch (error) {
+      throw new Error(`Failed to quick fill: ${error.message}`);
+    }
+  }
+
+  async handleToggleAutoFill() {
+    try {
+      const settings = await StorageService.getSettings();
+      settings.autoFill = !settings.autoFill;
+      await StorageService.setSettings(settings);
+      
+      NotificationService.show({
+        title: 'Auto-fill Mode',
+        message: `Auto-fill ${settings.autoFill ? 'enabled' : 'disabled'}`,
+        iconUrl: chrome.runtime.getURL('assets/icon-128.png')
+      });
+      
+      return { autoFill: settings.autoFill };
+    } catch (error) {
+      throw new Error(`Failed to toggle auto-fill: ${error.message}`);
+    }
+  }
+
+  async handleGetShortcuts(sendResponse) {
+    try {
+      const shortcuts = this.keyboardShortcuts.getAllShortcuts();
+      sendResponse({ success: true, data: shortcuts });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleSetCustomShortcut(command, shortcut, sendResponse) {
+    try {
+      await this.keyboardShortcuts.setCustomShortcut(command, shortcut);
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleResetShortcut(command, sendResponse) {
+    try {
+      await this.keyboardShortcuts.resetShortcut(command);
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleResetAllShortcuts(sendResponse) {
+    try {
+      await this.keyboardShortcuts.resetAllShortcuts();
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
     }
   }
 

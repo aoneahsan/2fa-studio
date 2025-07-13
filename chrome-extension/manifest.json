@@ -74,6 +74,26 @@
         "mac": "Command+Shift+Q"
       },
       "description": "Scan QR code on page"
+    },
+    "copy-code": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+C",
+        "mac": "Command+Shift+C"
+      },
+      "description": "Copy 2FA code to clipboard"
+    },
+    "quick-fill": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Enter",
+        "mac": "Command+Shift+Enter"
+      },
+      "description": "Quick fill with auto-detected account"
+    },
+    "open-settings": {
+      "description": "Open extension settings"
+    },
+    "toggle-auto-fill": {
+      "description": "Toggle auto-fill mode"
     }
   }
 }

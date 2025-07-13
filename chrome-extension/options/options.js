@@ -55,7 +55,7 @@ class OptionsManager {
 
     // Configure shortcuts button
     document.getElementById('configureShortcuts').addEventListener('click', () => {
-      chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+      chrome.tabs.create({ url: chrome.runtime.getURL('options/shortcuts.html') });
     });
 
     // Connect app button
