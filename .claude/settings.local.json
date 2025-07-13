@@ -110,7 +110,8 @@
       "Bash(yarn deploy:rules:*)",
       "Bash(firebase deploy:*)",
       "Bash(yarn lint:*)",
-      "Bash(yarn eslint:*)"
+      "Bash(yarn eslint:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }

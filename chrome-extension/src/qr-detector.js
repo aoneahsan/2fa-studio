@@ -140,7 +140,7 @@ class QRDetector {
       
       // Look for QR code patterns (finder patterns)
       return this.detectFinderPatterns(imageData);
-    } catch (error) {
+    } catch (_error) {
       return true; // If pattern detection fails, assume it might be a QR code
     }
   }

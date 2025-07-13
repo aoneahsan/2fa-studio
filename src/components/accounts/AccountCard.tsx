@@ -21,10 +21,10 @@ import {
   ArrowPathIcon,
   StarIcon as StarOutlineIcon,
   FolderIcon,
-  FingerPrintIcon,
   LockClosedIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import FingerPrintIcon from '@components/icons/FingerPrintIcon';
 import TagPill from '@components/tags/TagPill';
 
 interface AccountCardProps {

@@ -234,7 +234,7 @@ class ShortcutsManager {
     if (keyName === 'Enter') keyName = 'Enter';
     else if (keyName === ' ') keyName = 'Space';
     else if (keyName === 'Escape') keyName = 'Escape';
-    else if (keyName.startsWith('F') && keyName.length <= 3) keyName = keyName; // Function keys
+    else if (keyName.startsWith('F') && keyName.length <= 3) { /* Function keys - no change needed */ }
     else if (keyName.length === 1) keyName = keyName.toUpperCase();
     else return; // Invalid key
     

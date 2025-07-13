@@ -2,7 +2,6 @@
  * Bulk Operations Service
  */
 
-import categoriesService from './categories-service.js';
 import tagsService from './tags-service.js';
 import backupCodesService from './backup-codes.js';
 

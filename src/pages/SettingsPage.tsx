@@ -13,7 +13,8 @@ import {
   CloudArrowUpIcon,
   CreditCardIcon,
   InformationCircleIcon,
-  BellIcon
+  BellIcon,
+  ComputerDesktopIcon
 } from '@heroicons/react/24/outline';
 
 // Import settings components
@@ -24,8 +25,9 @@ import BackupSettings from '@components/settings/BackupSettings';
 import SubscriptionSettings from '@components/settings/SubscriptionSettings';
 import AboutSettings from '@components/settings/AboutSettings';
 import NotificationSettings from '@components/settings/NotificationSettings';
+import BrowserExtensionSettings from '@components/settings/BrowserExtensionSettings';
 
-type SettingsTab = 'profile' | 'appearance' | 'security' | 'backup' | 'notifications' | 'subscription' | 'about';
+type SettingsTab = 'profile' | 'appearance' | 'security' | 'backup' | 'notifications' | 'subscription' | 'extension' | 'about';
 
 /**
  * Page for app settings
@@ -71,6 +73,12 @@ const SettingsPage: React.FC = () => {
       label: 'Subscription',
       icon: CreditCardIcon,
       component: SubscriptionSettings
+    },
+    {
+      id: 'extension' as const,
+      label: 'Browser Extension',
+      icon: ComputerDesktopIcon,
+      component: BrowserExtensionSettings
     },
     {
       id: 'about' as const,

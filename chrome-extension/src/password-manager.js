@@ -4,7 +4,6 @@
  */
 
 import { StorageService } from './storage.js';
-import { SecurityService } from './security.js';
 
 class PasswordManagerService {
   constructor() {
@@ -161,7 +160,7 @@ class PasswordManagerService {
       // Try to decrypt existing test data
       const decrypted = await this.decryptData(testData);
       return decrypted === 'password-manager-test';
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -335,7 +334,7 @@ class PasswordManagerService {
     const matches = [];
     const normalizedDomain = this.normalizeDomain(domain);
 
-    for (const [id, entry] of this.passwords) {
+    for (const [_id, entry] of this.passwords) {
       const entryDomain = this.normalizeDomain(entry.domain);
       
       if (this.domainsMatch(normalizedDomain, entryDomain)) {

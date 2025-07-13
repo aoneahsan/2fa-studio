@@ -212,7 +212,7 @@ export class OTPService {
   /**
    * Simple hash function (SHA-1)
    */
-  static hash(data, algorithm) {
+  static hash(data, _algorithm) {
     // This is a placeholder - use Web Crypto API or a library
     // For now, return a mock hash
     const hash = new Uint8Array(20);

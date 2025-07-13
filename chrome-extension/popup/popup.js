@@ -5,7 +5,6 @@
 
 import { StorageService } from '../src/storage.js';
 import { OTPService } from '../src/otp.js';
-import { MessageService } from '../src/message.js';
 
 class PopupManager {
   constructor() {
@@ -124,7 +123,7 @@ class PopupManager {
     });
 
     // Listen for messages from background
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
       if (request.action === 'accountsUpdated') {
         this.loadAccounts();
       }

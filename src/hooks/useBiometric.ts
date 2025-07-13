@@ -5,8 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// Temporarily disable BiometricAuth due to compatibility issues
-// import { BiometricAuth } from 'capacitor-biometric-auth';
+import { BiometricAuth } from 'capacitor-biometric-auth';
 import { Device } from '@capacitor/device';
 import { RootState } from '@src/store';
 import { setBiometricEnabled } from '@store/slices/settingsSlice';
@@ -45,15 +44,14 @@ export const useBiometric = () => {
           return;
         }
 
-        // TODO: Re-enable when BiometricAuth is fixed
-        const result = { isAvailable: false, biometryType: 'none', reason: 'BiometricAuth temporarily disabled' };
+        const result = await BiometricAuth.checkBiometry();
         
         setBiometricStatus({
           isAvailable: result.isAvailable,
-          biometryType: result.biometryType as unknown,
+          biometryType: result.biometryType as 'face' | 'fingerprint' | 'iris' | 'none',
           reason: result.reason,
         });
-      } catch (_error) {
+      } catch (error) {
         console.error('Error checking biometric:', error);
         setBiometricStatus({
           isAvailable: false,
@@ -86,8 +84,14 @@ export const useBiometric = () => {
     }
 
     try {
-      // TODO: Re-enable when BiometricAuth is fixed
-      const result = { authenticated: false };
+      const result = await BiometricAuth.authenticate({
+        reason,
+        title,
+        subtitle,
+        description,
+        fallbackTitle,
+        cancelTitle,
+      });
 
       if (result.authenticated) {
         dispatch(setLocked(false));
@@ -95,8 +99,8 @@ export const useBiometric = () => {
       } else {
         throw new Error('Authentication failed');
       }
-    } catch (_error: unknown) {
-      console.error('Biometric authentication _error:', error);
+    } catch (error: any) {
+      console.error('Biometric authentication error:', error);
       
       if (error.code === 'UserCancel') {
         dispatch(addToast({
@@ -144,7 +148,7 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to enable biometric:', error);
       return false;
     }
@@ -166,7 +170,7 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to disable biometric:', error);
       return false;
     }
@@ -192,7 +196,7 @@ export const useBiometric = () => {
         subtitle: 'Unlock app',
       });
       return true;
-    } catch (_error) {
+    } catch (error) {
       return false;
     }
   }, [biometricEnabled, authenticate, dispatch]);

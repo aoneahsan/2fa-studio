@@ -4,7 +4,6 @@
  */
 
 import { StorageService } from '../src/storage.js';
-import { MessageService } from '../src/message.js';
 import { NotificationService } from '../src/notification.js';
 import { OTPService } from '../src/otp.js';
 import { QRScanner } from '../src/qr-scanner-lib.js';
@@ -558,7 +557,7 @@ class BackgroundService {
     return false;
   }
 
-  updateBadgeForMatch(account) {
+  updateBadgeForMatch(_account) {
     // Show a green badge when a match is found
     chrome.action.setBadgeText({ text: '✓' });
     chrome.action.setBadgeBackgroundColor({ color: '#28a745' });
@@ -756,7 +755,7 @@ class BackgroundService {
     });
   }
 
-  async handleScanQRImage(imageUrl, tab) {
+  async handleScanQRImage(imageUrl, _tab) {
     try {
       // Fetch the image
       const response = await fetch(imageUrl);
@@ -855,9 +854,9 @@ class BackgroundService {
     }
   }
 
-  async updateAccountsContextMenu(accounts, tab) {
+  async updateAccountsContextMenu(accounts, _tab) {
     // Remove old account items
-    const existingItems = await chrome.contextMenus.removeAll();
+    const _existingItems = await chrome.contextMenus.removeAll();
     
     // Recreate base menu
     this.setupContextMenu();
@@ -866,7 +865,7 @@ class BackgroundService {
     chrome.contextMenus.update('accounts-submenu', { enabled: true });
     
     // Add account items
-    accounts.forEach((account, index) => {
+    accounts.forEach((account, _index) => {
       chrome.contextMenus.create({
         id: `account-${account.id}`,
         parentId: 'accounts-submenu',
@@ -876,7 +875,7 @@ class BackgroundService {
     });
   }
 
-  async handleAccountSelection(menuItemId, tab) {
+  async handleAccountSelection(menuItemId, _tab) {
     const accountId = menuItemId.replace('account-', '');
     const accounts = await StorageService.getAccounts();
     const account = accounts.find(a => a.id === accountId);
@@ -1359,7 +1358,7 @@ class BackgroundService {
     try {
       const accounts = await StorageService.getAccounts();
       return accounts.find(a => a.id === accountId);
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }

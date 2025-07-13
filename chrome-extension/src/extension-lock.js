@@ -239,7 +239,7 @@ export class ExtensionLockService {
     };
     
     // Listen for various activity events
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((_request, _sender, _sendResponse) => {
       // Any message indicates activity
       resetTimer();
     });

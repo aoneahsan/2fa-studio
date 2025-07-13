@@ -30,10 +30,11 @@ class ContentScript {
         case 'fillCode':
           this.fillCode(request.code);
           break;
-        case 'detectFields':
+        case 'detectFields': {
           const fields = this.detectOTPFields();
           sendResponse({ fields });
           break;
+        }
         case 'getPageInfo':
           sendResponse({
             title: document.title,
@@ -655,7 +656,7 @@ class ContentScript {
   enhanceMultiDigitGroup(group) {
     // Find a suitable position for the group button (usually after the last field)
     const lastField = group[group.length - 1];
-    const container = lastField.closest('div, form, fieldset') || lastField.parentElement;
+    const _container = lastField.closest('div, form, fieldset') || lastField.parentElement;
     
     // Mark all fields as enhanced
     group.forEach(field => {
@@ -1074,20 +1075,7 @@ class ContentScript {
     return groups.some(group => group.includes(field));
   }
 
-  fillCode(code) {
-    // Try to find the active field first
-    const activeElement = document.activeElement;
-    if (activeElement && activeElement.tagName === 'INPUT' && this.isOTPField(activeElement)) {
-      this.fillField(activeElement, code);
-      return;
-    }
-
-    // Otherwise, find OTP fields and fill the first one
-    const fields = this.detectOTPFields();
-    if (fields.length > 0) {
-      this.fillField(fields[0], code);
-    }
-  }
+  // Removed duplicate fillCode method - using enhanced version below
 
   fillField(field, code) {
     // Focus the field
@@ -1113,28 +1101,7 @@ class ContentScript {
     this.tryAutoSubmit(field);
   }
 
-  tryAutoSubmit(field) {
-    const form = field.closest('form');
-    if (!form) return;
-    
-    // Check if all required fields are filled
-    const requiredFields = form.querySelectorAll('input[required]');
-    const allFilled = Array.from(requiredFields).every(f => f.value.trim() !== '');
-    
-    if (allFilled) {
-      // Look for submit button
-      const submitButton = form.querySelector(
-        'button[type="submit"], input[type="submit"], button:not([type="button"])'
-      );
-      
-      if (submitButton && !submitButton.disabled) {
-        // Give a small delay for any validators to run
-        setTimeout(() => {
-          submitButton.click();
-        }, 100);
-      }
-    }
-  }
+  // Removed duplicate tryAutoSubmit method - using enhanced version below
 
   observePageChanges() {
     // Watch for dynamically added forms
@@ -1711,9 +1678,9 @@ class ContentScript {
 
       this.showNotification('Login credentials filled', 'success');
       sendResponse({ success: true });
-    } catch (error) {
-      console.error('Failed to fill login form:', error);
-      sendResponse({ success: false, error: error.message });
+    } catch (_error) {
+      console.error('Failed to fill login form:', _error);
+      sendResponse({ success: false, error: _error.message });
     }
   }
 
@@ -1724,9 +1691,9 @@ class ContentScript {
     try {
       const forms = this.detectLoginForms();
       sendResponse({ success: true, forms: forms });
-    } catch (error) {
-      console.error('Failed to detect login form:', error);
-      sendResponse({ success: false, error: error.message });
+    } catch (_error) {
+      console.error('Failed to detect login form:', _error);
+      sendResponse({ success: false, error: _error.message });
     }
   }
 

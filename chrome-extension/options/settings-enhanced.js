@@ -214,8 +214,8 @@ class SettingsManager {
 
   // Sync Section
   initializeSyncSection() {
-    const syncEnabled = document.getElementById('syncEnabled');
-    const syncStatus = document.getElementById('syncStatus');
+    const _syncEnabled = document.getElementById('syncEnabled');
+    const _syncStatus = document.getElementById('syncStatus');
     const syncNowBtn = document.getElementById('syncNowBtn');
     const exportSyncBtn = document.getElementById('exportSyncBtn');
     const importSyncBtn = document.getElementById('importSyncBtn');
@@ -275,7 +275,7 @@ class SettingsManager {
               } else {
                 alert('Failed to import settings: ' + response.error);
               }
-            } catch (error) {
+            } catch (_error) {
               alert('Invalid settings file');
             }
           };
@@ -456,7 +456,7 @@ class SettingsManager {
                 alert('Data imported successfully!');
                 this.loadSettings();
               }
-            } catch (error) {
+            } catch (_error) {
               alert('Invalid backup file');
             }
           };

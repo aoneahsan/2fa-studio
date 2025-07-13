@@ -7,7 +7,8 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { useBiometric } from '@hooks/useBiometric';
-import { LockClosedIcon, FingerPrintIcon } from '@heroicons/react/24/outline';
+import { LockClosedIcon } from '@heroicons/react/24/outline';
+import FingerPrintIcon from '@components/icons/FingerPrintIcon';
 
 /**
  * Lock screen overlay for app security

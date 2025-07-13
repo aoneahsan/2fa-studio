@@ -371,7 +371,7 @@ class ImportService {
       }
       
       throw new Error('Unknown format');
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Could not detect import format');
     }
   }

@@ -28,9 +28,9 @@ import {
   HashtagIcon,
   KeyIcon,
   FolderIcon,
-  FingerPrintIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline';
+import FingerPrintIcon from '@components/icons/FingerPrintIcon';
 
 /**
  * Modal for editing existing 2FA accounts

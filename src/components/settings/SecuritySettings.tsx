@@ -14,13 +14,13 @@ import {
 import { addToast } from '@store/slices/uiSlice';
 import { useBiometric } from '@hooks/useBiometric';
 import { 
-  FingerPrintIcon, 
   LockClosedIcon, 
   KeyIcon,
   ShieldCheckIcon,
   ClockIcon,
   BellIcon
 } from '@heroicons/react/24/outline';
+import FingerPrintIcon from '@components/icons/FingerPrintIcon';
 
 /**
  * Security settings tab component

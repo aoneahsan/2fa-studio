@@ -10,12 +10,12 @@ import { BiometricAccountService } from '@services/biometric-account.service';
 import { OTPAccount } from '@services/otp.service';
 import { addToast } from '@store/slices/uiSlice';
 import { 
-  FingerPrintIcon, 
   LockClosedIcon,
   ClockIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
-// import Button from '@components/common/Button';
+import FingerPrintIcon from '@components/icons/FingerPrintIcon';
+import { Button } from '@components/ui/button';
 
 interface BiometricSettingsProps {
   account: OTPAccount;
@@ -57,7 +57,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       }
       
       onUpdate?.();
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: error instanceof Error ? error.message : 'Failed to update biometric settings',
@@ -85,7 +85,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       }));
       
       onUpdate?.();
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update timeout',
@@ -164,9 +164,8 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
               
               <Button
                 onClick={handleUpdateTimeout}
-                variant="secondary"
-                size="sm"
                 disabled={isLoading || timeout === account.biometricTimeout}
+                className="px-4 py-2"
               >
                 Update
               </Button>

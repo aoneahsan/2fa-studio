@@ -17,11 +17,9 @@ export class MobileConnector {
     this.messageQueue = [];
     
     // Firebase configuration for real-time sync
-    this.firebaseConfig = {
-      projectId: 'tfa-studio-prod',
-      messagingSenderId: '123456789012',
-      appId: '1:123456789012:web:abcdef123456'
-    };
+    this.firebaseConfig = null; // Will be loaded from background
+    this.firebaseDb = null;
+    this.firebaseAuth = null;
     
     this.init();
   }
@@ -235,7 +233,7 @@ export class MobileConnector {
     }
   }
 
-  async handleSyncRequest(message) {
+  async handleSyncRequest(_message) {
     // Mobile app is requesting current accounts
     const accounts = await chrome.storage.local.get(['accounts']);
     
@@ -467,21 +465,46 @@ export class MobileConnector {
 
   async pairWithMobile(pairingCode) {
     try {
-      // Pairing code contains encrypted connection info
-      const pairingData = this.decodePairingCode(pairingCode);
+      // Parse pairing code from QR
+      const pairingData = JSON.parse(pairingCode);
+      
+      // Generate key pair for secure communication
+      const keyPair = await crypto.subtle.generateKey(
+        {
+          name: 'RSA-OAEP',
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([1, 0, 1]),
+          hash: 'SHA-256',
+        },
+        true,
+        ['encrypt', 'decrypt']
+      );
       
       // Store pairing info
       await chrome.storage.local.set({
         mobilePaired: true,
-        mobilePairingData: pairingData,
+        mobilePairingData: {
+          userId: pairingData.userId,
+          deviceId: pairingData.deviceId,
+          timestamp: pairingData.timestamp,
+          privateKey: await crypto.subtle.exportKey('jwk', keyPair.privateKey),
+          publicKey: await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+        },
         mobilePairedAt: Date.now()
       });
       
       // Enable mobile sync
       await chrome.storage.local.set({ mobileSyncEnabled: true });
       
-      // Connect
+      // Connect to Firebase
       await this.connect();
+      
+      // Send extension public key to mobile
+      await this.sendMessage({
+        type: 'pairing_complete',
+        extensionId: chrome.runtime.id,
+        publicKey: await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+      });
       
       return { success: true };
     } catch (error) {
@@ -490,7 +513,7 @@ export class MobileConnector {
     }
   }
 
-  decodePairingCode(code) {
+  decodePairingCode(_code) {
     // In production, this would decode a QR code or pairing string
     // For now, returning mock data
     return {

@@ -22,8 +22,8 @@ class DuressSecurityService {
       }
       
       // Hash both PINs
-      const encoder = new TextEncoder();
-      const normalPinHash = await this.hashPin(normalPin);
+      const _encoder = new TextEncoder();
+      const _normalPinHash = await this.hashPin(normalPin);
       const duressPinHash = await this.hashPin(duressPin);
       
       // Store duress configuration
@@ -403,7 +403,7 @@ class DuressSecurityService {
         country: data.country_name,
         approximate: true
       };
-    } catch (error) {
+    } catch (_error) {
       return { error: 'Unable to determine location' };
     }
   }
