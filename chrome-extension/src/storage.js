@@ -7,7 +7,8 @@ export class StorageService {
   static STORAGE_KEYS = {
     ACCOUNTS: 'tfa_accounts',
     SETTINGS: 'tfa_settings',
-    LAST_SYNC: 'tfa_last_sync'
+    LAST_SYNC: 'tfa_last_sync',
+    PASSWORD_ENTRIES: 'tfa_password_entries'
   };
 
   /**
@@ -198,6 +199,53 @@ export class StorageService {
     } catch (error) {
       console.error('Failed to get storage usage:', error);
       return null;
+    }
+  }
+
+  /**
+   * Get password entries
+   */
+  static async getPasswordEntries() {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.PASSWORD_ENTRIES);
+      return result[this.STORAGE_KEYS.PASSWORD_ENTRIES] || [];
+    } catch (error) {
+      console.error('Failed to get password entries:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Save password entries
+   */
+  static async savePasswordEntries(entries) {
+    try {
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.PASSWORD_ENTRIES]: entries
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to save password entries:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete password entry
+   */
+  static async deletePasswordEntry(entryId) {
+    try {
+      const entries = await this.getPasswordEntries();
+      const filtered = entries.filter(e => e.id !== entryId);
+      
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.PASSWORD_ENTRIES]: filtered
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to delete password entry:', error);
+      throw error;
     }
   }
 

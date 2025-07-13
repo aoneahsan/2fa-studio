@@ -10,6 +10,7 @@ import { OTPService } from '../src/otp.js';
 import { QRScanner } from '../src/qr-scanner-lib.js';
 import { SecurityService } from '../src/security.js';
 import { KeyboardShortcutsService } from '../src/keyboard-shortcuts.js';
+import { PasswordManagerService } from '../src/password-manager.js';
 
 class BackgroundService {
   constructor() {
@@ -17,6 +18,7 @@ class BackgroundService {
     this.qrCodeCache = new Map();
     this.securityService = new SecurityService();
     this.keyboardShortcuts = new KeyboardShortcutsService();
+    this.passwordManager = new PasswordManagerService();
   }
 
   init() {
@@ -116,6 +118,47 @@ class BackgroundService {
 
         case 'resetAllShortcuts':
           this.handleResetAllShortcuts(sendResponse);
+          return true;
+
+        // Password Manager actions
+        case 'unlockPasswordManager':
+          this.handleUnlockPasswordManager(request.masterPassword, sendResponse);
+          return true;
+
+        case 'lockPasswordManager':
+          this.handleLockPasswordManager(sendResponse);
+          return true;
+
+        case 'isPasswordManagerUnlocked':
+          this.handleIsPasswordManagerUnlocked(sendResponse);
+          return true;
+
+        case 'savePassword':
+          this.handleSavePassword(request.passwordData, sendResponse);
+          return true;
+
+        case 'deletePassword':
+          this.handleDeletePassword(request.id, sendResponse);
+          return true;
+
+        case 'getPasswordsForDomain':
+          this.handleGetPasswordsForDomain(request.domain, sendResponse);
+          return true;
+
+        case 'getPassword':
+          this.handleGetPassword(request.id, sendResponse);
+          return true;
+
+        case 'fillLoginForm':
+          this.handleFillLoginForm(request.passwordId, sender.tab, sendResponse);
+          return true;
+
+        case 'detectLoginForm':
+          this.handleDetectLoginForm(sender.tab, sendResponse);
+          return true;
+
+        case 'fillBothCredentials':
+          this.handleFillBothCredentials(request.passwordId, request.accountId, sender.tab, sendResponse);
           return true;
 
         default:
@@ -760,6 +803,157 @@ class BackgroundService {
       sendResponse({ success: true });
     } catch (error) {
       sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Password Manager Methods
+  async handleUnlockPasswordManager(masterPassword, sendResponse) {
+    try {
+      const result = await this.passwordManager.unlock(masterPassword);
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  handleLockPasswordManager(sendResponse) {
+    try {
+      this.passwordManager.lock();
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  handleIsPasswordManagerUnlocked(sendResponse) {
+    try {
+      const isUnlocked = this.passwordManager.isEnabled();
+      sendResponse({ success: true, isUnlocked });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleSavePassword(passwordData, sendResponse) {
+    try {
+      const result = await this.passwordManager.savePassword(passwordData);
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleDeletePassword(id, sendResponse) {
+    try {
+      const result = await this.passwordManager.deletePassword(id);
+      sendResponse(result);
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  handleGetPasswordsForDomain(domain, sendResponse) {
+    try {
+      const passwords = this.passwordManager.findPasswordsForDomain(domain);
+      sendResponse({ success: true, passwords });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  handleGetPassword(id, sendResponse) {
+    try {
+      const password = this.passwordManager.getPassword(id);
+      if (password) {
+        sendResponse({ success: true, password });
+      } else {
+        sendResponse({ success: false, error: 'Password not found' });
+      }
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleFillLoginForm(passwordId, tab, sendResponse) {
+    try {
+      // Send message to content script to fill the form
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'fillLoginForm',
+        passwordId: passwordId
+      });
+
+      if (response?.success) {
+        await this.passwordManager.markAsUsed(passwordId);
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false, error: response?.error || 'Failed to fill form' });
+      }
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleDetectLoginForm(tab, sendResponse) {
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'detectLoginForm'
+      });
+
+      sendResponse({ success: true, forms: response?.forms || [] });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleFillBothCredentials(passwordId, accountId, tab, sendResponse) {
+    try {
+      // First fill the password
+      const passwordResponse = await chrome.tabs.sendMessage(tab.id, {
+        action: 'fillLoginForm',
+        passwordId: passwordId
+      });
+
+      if (!passwordResponse?.success) {
+        sendResponse({ success: false, error: 'Failed to fill password' });
+        return;
+      }
+
+      // Then fill the 2FA code
+      const account = await this.getAccountById(accountId);
+      if (!account) {
+        sendResponse({ success: false, error: '2FA account not found' });
+        return;
+      }
+
+      const code = OTPService.generateCode(account);
+      const codeResponse = await chrome.tabs.sendMessage(tab.id, {
+        action: 'fillCode',
+        code: code.code
+      });
+
+      if (codeResponse?.success) {
+        await this.passwordManager.markAsUsed(passwordId);
+        sendResponse({ success: true });
+        
+        NotificationService.show({
+          title: 'Credentials Filled',
+          message: 'Both password and 2FA code have been filled',
+          iconUrl: chrome.runtime.getURL('assets/icon-128.png')
+        });
+      } else {
+        sendResponse({ success: false, error: 'Failed to fill 2FA code' });
+      }
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async getAccountById(accountId) {
+    try {
+      const accounts = await StorageService.getAccounts();
+      return accounts.find(a => a.id === accountId);
+    } catch (error) {
+      return null;
     }
   }
 

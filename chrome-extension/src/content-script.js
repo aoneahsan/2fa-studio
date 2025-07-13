@@ -57,6 +57,12 @@ class ContentScript {
         case 'copyToClipboard':
           this.copyToClipboard(request.text);
           break;
+        case 'fillLoginForm':
+          this.handleFillLoginForm(request.passwordId, sendResponse);
+          return true;
+        case 'detectLoginForm':
+          this.handleDetectLoginForm(sendResponse);
+          return true;
       }
     });
 
@@ -1665,6 +1671,211 @@ class ContentScript {
         document.body.removeChild(textArea);
       }
     }
+  }
+
+  /**
+   * Handle fill login form request
+   */
+  async handleFillLoginForm(passwordId, sendResponse) {
+    try {
+      // Get password data from background
+      const passwordResponse = await chrome.runtime.sendMessage({
+        action: 'getPassword',
+        id: passwordId
+      });
+
+      if (!passwordResponse.success) {
+        sendResponse({ success: false, error: passwordResponse.error });
+        return;
+      }
+
+      const password = passwordResponse.password;
+      
+      // Detect login form
+      const forms = this.detectLoginForms();
+      if (forms.length === 0) {
+        sendResponse({ success: false, error: 'No login form detected' });
+        return;
+      }
+
+      const loginForm = forms[0]; // Use the best match
+
+      // Fill the form
+      if (loginForm.usernameField) {
+        this.fillFormField(loginForm.usernameField, password.username);
+      }
+
+      if (loginForm.passwordField) {
+        this.fillFormField(loginForm.passwordField, password.password);
+      }
+
+      this.showNotification('Login credentials filled', 'success');
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error('Failed to fill login form:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * Handle detect login form request
+   */
+  handleDetectLoginForm(sendResponse) {
+    try {
+      const forms = this.detectLoginForms();
+      sendResponse({ success: true, forms: forms });
+    } catch (error) {
+      console.error('Failed to detect login form:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * Detect login forms on the page
+   */
+  detectLoginForms() {
+    const forms = document.querySelectorAll('form');
+    const results = [];
+
+    for (const form of forms) {
+      const usernameField = this.findUsernameField(form);
+      const passwordField = this.findPasswordField(form);
+
+      if (usernameField && passwordField) {
+        results.push({
+          form: form,
+          usernameField: usernameField,
+          passwordField: passwordField,
+          confidence: this.calculateFormConfidence(form, usernameField, passwordField)
+        });
+      }
+    }
+
+    // Sort by confidence
+    results.sort((a, b) => b.confidence - a.confidence);
+    return results;
+  }
+
+  /**
+   * Find username field in form
+   */
+  findUsernameField(form) {
+    const selectors = [
+      'input[type="email"]',
+      'input[type="text"][name*="user"]',
+      'input[type="text"][name*="email"]',
+      'input[type="text"][name*="login"]',
+      'input[type="text"][id*="user"]',
+      'input[type="text"][id*="email"]',
+      'input[type="text"][id*="login"]',
+      'input[autocomplete="username"]',
+      'input[autocomplete="email"]'
+    ];
+
+    for (const selector of selectors) {
+      const field = form.querySelector(selector);
+      if (field && this.isVisibleFormField(field)) {
+        return field;
+      }
+    }
+
+    // Fallback: first visible text input
+    const textInputs = form.querySelectorAll('input[type="text"]');
+    for (const input of textInputs) {
+      if (this.isVisibleFormField(input)) {
+        return input;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find password field in form
+   */
+  findPasswordField(form) {
+    const passwordFields = form.querySelectorAll('input[type="password"]');
+    
+    for (const field of passwordFields) {
+      if (this.isVisibleFormField(field)) {
+        return field;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Check if form field is visible
+   */
+  isVisibleFormField(field) {
+    const rect = field.getBoundingClientRect();
+    const style = window.getComputedStyle(field);
+    
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      style.display !== 'none' &&
+      style.visibility !== 'hidden' &&
+      style.opacity !== '0'
+    );
+  }
+
+  /**
+   * Calculate form confidence score
+   */
+  calculateFormConfidence(form, usernameField, passwordField) {
+    let confidence = 0.5;
+
+    // Check for login-related keywords
+    const formText = form.textContent.toLowerCase();
+    const loginKeywords = ['login', 'sign in', 'log in', 'authenticate'];
+    
+    for (const keyword of loginKeywords) {
+      if (formText.includes(keyword)) {
+        confidence += 0.2;
+        break;
+      }
+    }
+
+    // Check field attributes
+    if (usernameField.autocomplete === 'username' || usernameField.autocomplete === 'email') {
+      confidence += 0.1;
+    }
+
+    if (passwordField.autocomplete === 'current-password') {
+      confidence += 0.1;
+    }
+
+    // Check for submit button
+    const submitButton = form.querySelector('input[type="submit"], button[type="submit"], button:not([type])');
+    if (submitButton) {
+      const buttonText = submitButton.textContent.toLowerCase();
+      if (buttonText.includes('login') || buttonText.includes('sign in')) {
+        confidence += 0.1;
+      }
+    }
+
+    return Math.min(confidence, 1.0);
+  }
+
+  /**
+   * Fill a form field with value
+   */
+  fillFormField(field, value) {
+    // Focus field
+    field.focus();
+    
+    // Clear existing value
+    field.value = '';
+    
+    // Set new value
+    field.value = value;
+    
+    // Trigger events
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+    field.dispatchEvent(new Event('blur', { bubbles: true }));
   }
 
   /**

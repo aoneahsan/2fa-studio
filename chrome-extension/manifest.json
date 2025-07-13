@@ -25,7 +25,8 @@
     "tabs",
     "activeTab",
     "clipboardWrite",
-    "notifications"
+    "notifications",
+    "scripting"
   ],
   "options_page": "options/options.html",
   "host_permissions": [
