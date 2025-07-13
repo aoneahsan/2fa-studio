@@ -27,6 +27,16 @@ export interface User {
   storageUsed?: number;
   role?: UserRole;
   disabled?: boolean;
+  // Firebase Phase 4 additions
+  authProvider?: 'email' | 'google' | 'apple';
+  dataVersion?: string;
+  lastMigration?: Date;
+  migrationHistory?: MigrationRecord[];
+  syncStatus?: {
+    lastSync: Date;
+    conflicts: number;
+    pendingChanges: number;
+  };
 }
 
 export interface UserSettings {
@@ -203,4 +213,50 @@ export interface AdminAction {
   metadata: Record<string, any>;
   timestamp: Date;
   ipAddress?: string;
+}
+
+// Migration types for Phase 4
+export interface MigrationRecord {
+  fromVersion: string;
+  toVersion: string;
+  migratedAt: Date;
+  success: boolean;
+  rollback?: boolean;
+  steps?: number;
+  completedSteps?: number;
+}
+
+// Sync types for Phase 4
+export interface SyncConflict {
+  id: string;
+  type: 'account' | 'folder' | 'tag' | 'settings';
+  localData: any;
+  remoteData: any;
+  timestamp: Date;
+  resolved: boolean;
+  resolution?: 'local' | 'remote' | 'merge';
+}
+
+// Backup versioning types
+export interface BackupVersion {
+  id: string;
+  version: number;
+  createdAt: Date;
+  size: number;
+  checksum: string;
+  metadata: {
+    accountCount: number;
+    deviceInfo: any;
+    appVersion: string;
+  };
+}
+
+// Real-time sync status
+export interface SyncStatus {
+  isOnline: boolean;
+  isSyncing: boolean;
+  lastSync: Date;
+  pendingChanges: number;
+  conflicts: number;
+  queuedOperations: number;
 }

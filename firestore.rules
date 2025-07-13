@@ -92,6 +92,20 @@ service cloud.firestore {
         allow update: if false; // History records are immutable
         allow delete: if isOwner(userId);
       }
+      
+      // User's sync conflicts subcollection
+      match /syncConflicts/{conflictId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+      
+      // User's migration records subcollection
+      match /migrationRecords/{recordId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update: if false; // Migration records are immutable
+        allow delete: if false; // Keep for audit trail
+      }
     }
     
     // Admin access rules

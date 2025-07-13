@@ -15,12 +15,17 @@ import {
   reauthenticateWithCredential,
   onAuthStateChanged,
   GoogleAuthProvider,
+  OAuthProvider,
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence
+  browserSessionPersistence,
+  linkWithCredential,
+  unlink,
+  deleteUser,
+  sendEmailVerification
 } from 'firebase/auth';
 import { 
   doc, 
@@ -217,71 +222,114 @@ export class AuthService {
         userCredential = await signInWithPopup(auth, provider);
       }
 
-      // Check if user exists
-      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-      
-      if (userDoc.exists()) {
-        // Existing user
-        const user = await this.getUserData(userCredential.user);
-        await this.registerDevice(user.id);
-        return user;
-      } else {
-        // New user - create profile
-        const userData: User = {
-          id: userCredential.user.uid,
-          email: userCredential.user.email!,
-          displayName: userCredential.user.displayName || '',
-          photoURL: userCredential.user.photoURL || '',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          subscription: {
-            tier: 'free',
-            status: 'active',
-            startDate: new Date(),
-            endDate: null,
-            accountLimit: 10,
-            features: {
-              cloudBackup: true, // Google users get cloud backup
-              browserExtension: false,
-              prioritySupport: false,
-              advancedSecurity: false,
-              noAds: false
-            }
-          },
-          settings: {
-            theme: 'system',
-            language: 'en',
-            autoLock: true,
-            autoLockTimeout: 60,
-            biometricAuth: false,
-            showAccountIcons: true,
-            copyOnTap: true,
-            sortOrder: 'manual',
-            groupByIssuer: false,
-            hideTokens: false,
-            fontSize: 'medium'
-          },
-          lastBackup: null,
-          backupEnabled: true,
-          deviceCount: 1
-        };
-
-        await setDoc(doc(db, 'users', userData.id), {
-          ...userData,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        await this.registerDevice(userData.id);
-        
-        // Initialize default tags
-        const { TagService } = await import('@services/tag.service');
-        await TagService.initializeDefaultTags(userData.id);
-        
-        return userData;
-      }
+      return await this.handleSocialSignIn(userCredential, 'google');
     } catch (error: any) {
       throw new Error(this.getErrorMessage(error.code));
+    }
+  }
+
+  /**
+   * Sign in with Apple
+   */
+  static async signInWithApple(): Promise<User> {
+    try {
+      const provider = new OAuthProvider('apple.com');
+      provider.addScope('email');
+      provider.addScope('name');
+      
+      let userCredential;
+      
+      if (Capacitor.isNativePlatform()) {
+        // Use redirect for mobile apps
+        await signInWithRedirect(auth, provider);
+        userCredential = await getRedirectResult(auth);
+        if (!userCredential) {
+          throw new Error('No redirect result');
+        }
+      } else {
+        // Use popup for web
+        userCredential = await signInWithPopup(auth, provider);
+      }
+
+      return await this.handleSocialSignIn(userCredential, 'apple');
+    } catch (error: any) {
+      throw new Error(this.getErrorMessage(error.code));
+    }
+  }
+
+  /**
+   * Handle social sign-in (Google/Apple)
+   */
+  private static async handleSocialSignIn(userCredential: any, provider: 'google' | 'apple'): Promise<User> {
+    // Check if user exists
+    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+    
+    if (userDoc.exists()) {
+      // Existing user
+      const user = await this.getUserData(userCredential.user);
+      await this.registerDevice(user.id);
+      
+      // Update last login
+      await updateDoc(doc(db, 'users', user.id), {
+        lastLogin: serverTimestamp()
+      });
+      
+      return user;
+    } else {
+      // New user - create profile
+      const userData: User = {
+        id: userCredential.user.uid,
+        email: userCredential.user.email!,
+        displayName: userCredential.user.displayName || '',
+        photoURL: userCredential.user.photoURL || '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        subscription: {
+          tier: 'free',
+          status: 'active',
+          startDate: new Date(),
+          endDate: null,
+          accountLimit: 10,
+          features: {
+            cloudBackup: provider === 'google', // Google users get cloud backup
+            browserExtension: false,
+            prioritySupport: false,
+            advancedSecurity: false,
+            noAds: false
+          }
+        },
+        settings: {
+          theme: 'system',
+          language: 'en',
+          autoLock: true,
+          autoLockTimeout: 60,
+          biometricAuth: false,
+          showAccountIcons: true,
+          copyOnTap: true,
+          sortOrder: 'manual',
+          groupByIssuer: false,
+          hideTokens: false,
+          fontSize: 'medium'
+        },
+        lastBackup: null,
+        backupEnabled: provider === 'google',
+        deviceCount: 1,
+        authProvider: provider
+      };
+
+      await setDoc(doc(db, 'users', userData.id), {
+        ...userData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      await this.registerDevice(userData.id);
+      
+      // Initialize default tags
+      const { TagService } = await import('@services/tag.service');
+      await TagService.initializeDefaultTags(userData.id);
+      
+      return userData;
     }
   }
 
@@ -534,5 +582,124 @@ export class AuthService {
     if (!this.currentUser) return false;
     const limit = this.currentUser.subscription.accountLimit;
     return limit === null || currentCount < limit;
+  }
+
+  /**
+   * Send email verification
+   */
+  static async sendEmailVerification(): Promise<void> {
+    if (!auth.currentUser) throw new Error('No authenticated user');
+    
+    try {
+      await sendEmailVerification(auth.currentUser);
+    } catch (error: any) {
+      throw new Error(this.getErrorMessage(error.code));
+    }
+  }
+
+  /**
+   * Link account with Google
+   */
+  static async linkWithGoogle(): Promise<void> {
+    if (!auth.currentUser) throw new Error('No authenticated user');
+    
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.addScope('https://www.googleapis.com/auth/drive.file');
+      
+      const credential = await signInWithPopup(auth, provider);
+      await linkWithCredential(auth.currentUser, credential.credential!);
+      
+      // Update user data to enable cloud backup
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        authProvider: 'google',
+        backupEnabled: true,
+        'subscription.features.cloudBackup': true,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error: any) {
+      throw new Error(this.getErrorMessage(error.code));
+    }
+  }
+
+  /**
+   * Unlink account from provider
+   */
+  static async unlinkProvider(providerId: string): Promise<void> {
+    if (!auth.currentUser) throw new Error('No authenticated user');
+    
+    try {
+      await unlink(auth.currentUser, providerId);
+      
+      // Update user data if unlinking Google
+      if (providerId === 'google.com') {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          backupEnabled: false,
+          'subscription.features.cloudBackup': false,
+          updatedAt: serverTimestamp()
+        });
+      }
+    } catch (error: any) {
+      throw new Error(this.getErrorMessage(error.code));
+    }
+  }
+
+  /**
+   * Delete user account
+   */
+  static async deleteAccount(password?: string): Promise<void> {
+    if (!auth.currentUser) throw new Error('No authenticated user');
+    
+    try {
+      // Re-authenticate if password provided
+      if (password && auth.currentUser.email) {
+        const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
+        await reauthenticateWithCredential(auth.currentUser, credential);
+      }
+      
+      const userId = auth.currentUser.uid;
+      
+      // Delete user data from Firestore (handled by security rules and cloud functions)
+      await updateDoc(doc(db, 'users', userId), {
+        deleted: true,
+        deletedAt: serverTimestamp()
+      });
+      
+      // Delete Firebase Auth user
+      await deleteUser(auth.currentUser);
+      
+      this.currentUser = null;
+    } catch (error: any) {
+      throw new Error(this.getErrorMessage(error.code));
+    }
+  }
+
+  /**
+   * Get current user
+   */
+  static getCurrentUser(): User | null {
+    return this.currentUser;
+  }
+
+  /**
+   * Get current Firebase user
+   */
+  static getCurrentFirebaseUser(): FirebaseUser | null {
+    return auth.currentUser;
+  }
+
+  /**
+   * Check if user is authenticated
+   */
+  static isAuthenticated(): boolean {
+    return !!auth.currentUser;
+  }
+
+  /**
+   * Get user's linked providers
+   */
+  static getLinkedProviders(): string[] {
+    if (!auth.currentUser) return [];
+    return auth.currentUser.providerData.map(provider => provider.providerId);
   }
 }

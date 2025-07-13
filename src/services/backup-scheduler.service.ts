@@ -119,7 +119,7 @@ export class BackupSchedulerService {
     const scheduleRef = doc(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`, scheduleId);
     
     // Recalculate next run if frequency or time changed
-    let updateData: any = {
+    const updateData: any = {
       ...updates,
       updatedAt: serverTimestamp(),
     };
