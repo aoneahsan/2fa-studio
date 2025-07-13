@@ -69,6 +69,9 @@ const authSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
     setEncryptionKey: (state, action: PayloadAction<string | null>) => {
       state.encryptionKey = action.payload;
     },
@@ -136,6 +139,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setLoading, setError, setEncryptionKey, clearAuth, updateUserSubscription } = authSlice.actions;
+export const { setUser, setLoading, setError, clearError, setEncryptionKey, clearAuth, updateUserSubscription } = authSlice.actions;
 
 export default authSlice.reducer;

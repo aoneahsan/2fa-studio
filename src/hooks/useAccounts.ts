@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '@src/store';
+import { RootState, AppDispatch, store } from '@src/store';
 import { 
   setAccounts, 
   addAccount as addAccountAction, 
@@ -42,6 +42,7 @@ export const useAccounts = () => {
     // Subscribe to accounts collection using FirestoreService
     const unsubscribe = FirestoreService.subscribeToCollection<any>(
       `users/${user.uid}/accounts`,
+      [],
       async (documents) => {
         try {
           const decryptedAccounts: OTPAccount[] = [];
@@ -133,18 +134,19 @@ export const useAccounts = () => {
         updatedAt: new Date(),
       };
       
-      // Use FirestoreService to add document
-      const result = await FirestoreService.addDocument(
+      // Use FirestoreService to create document
+      const documentId = await FirestoreService.createDocument(
         `users/${user.uid}/accounts`,
         accountData
       );
       
-      // Publish sync event using RealtimeSyncService
-      await RealtimeSyncService.publishChange(user.uid, {
-        type: 'account_added',
-        accountId: result.id,
-        data: accountData,
-      });
+      // Queue sync operation using RealtimeSyncService
+      RealtimeSyncService.queueOperation(
+        documentId,
+        'create',
+        `users/${user.uid}/accounts`,
+        accountData
+      );
       
       dispatch(addToast({
         type: 'success',
@@ -191,12 +193,13 @@ export const useAccounts = () => {
         accountData
       );
       
-      // Publish sync event using RealtimeSyncService
-      await RealtimeSyncService.publishChange(user.uid, {
-        type: 'account_updated',
-        accountId: account.id,
-        data: accountData,
-      });
+      // Queue sync operation using RealtimeSyncService
+      RealtimeSyncService.queueOperation(
+        account.id,
+        'update',
+        `users/${user.uid}/accounts`,
+        accountData
+      );
       
       dispatch(addToast({
         type: 'success',
@@ -229,12 +232,12 @@ export const useAccounts = () => {
         accountId
       );
       
-      // Publish sync event using RealtimeSyncService
-      await RealtimeSyncService.publishChange(user.uid, {
-        type: 'account_deleted',
+      // Queue sync operation using RealtimeSyncService
+      RealtimeSyncService.queueOperation(
         accountId,
-        data: { accountId },
-      });
+        'delete',
+        `users/${user.uid}/accounts`
+      );
       
       dispatch(addToast({
         type: 'success',
@@ -339,10 +342,10 @@ export const useAccounts = () => {
         
         if (filterMode === 'OR') {
           // Account must have at least one of the selected tags
-          return account.tags.some(tag => activeTags.includes(tag));
+          return account.tags?.some(tag => activeTags.includes(tag)) || false;
         } else {
           // Account must have all selected tags
-          return activeTags.every(tag => account.tags.includes(tag));
+          return activeTags.every(tag => account.tags?.includes(tag) || false);
         }
       });
     }
