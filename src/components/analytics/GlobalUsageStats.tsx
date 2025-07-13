@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { AnalyticsService } from '@services/analytics.service';
-import { GlobalUsageStats as GlobalStats } from '@types/analytics.types';
+import { GlobalUsageStats as GlobalStats } from '@app-types/analytics';
 import { 
   ChartBarIcon,
   TrendingUpIcon,
@@ -44,7 +44,7 @@ const GlobalUsageStats: React.FC = () => {
         timeRange
       );
       setStats(globalStats);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading global stats:', error);
     } finally {
       setIsLoading(false);

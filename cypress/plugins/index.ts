@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+import 'cypress'
 
 import { defineConfig } from 'cypress'
 
@@ -69,14 +69,14 @@ export default defineConfig({
           }
           
           return admin.auth().getUserByEmail(email)
-            .then((user: any) => {
+            .then((user) => {
               return Promise.all([
                 admin.auth().deleteUser(user.uid),
                 admin.firestore().collection('users').doc(user.uid).delete(),
                 admin.firestore().collection('accounts').where('userId', '==', user.uid).get()
-                  .then((snapshot: any) => {
+                  .then((snapshot) => {
                     const batch = admin.firestore().batch()
-                    snapshot.forEach((doc: any) => {
+                    snapshot.forEach((doc) => {
                       batch.delete(doc.ref)
                     })
                     return batch.commit()
@@ -151,9 +151,9 @@ export default defineConfig({
           const puppeteer = require('puppeteer')
           
           return puppeteer.launch({ headless: true })
-            .then((browser: any) => {
+            .then((browser) => {
               return browser.newPage()
-                .then((page: any) => {
+                .then((page) => {
                   const start = performance.now()
                   return page.goto(url)
                     .then(() => {
@@ -169,9 +169,9 @@ export default defineConfig({
         
         // Screenshot comparison for visual regression testing
         compareScreenshots(baseline: string, current: string) {
-          const pixelmatch = require('pixelmatch')
-          const fs = require('fs')
-          const PNG = require('pngjs').PNG
+          const pixelmatch = require('pixelmatch');
+          const fs = require('fs');
+          const { PNG } = require('pngjs');
           
           const baselineImg = PNG.sync.read(fs.readFileSync(baseline))
           const currentImg = PNG.sync.read(fs.readFileSync(current))

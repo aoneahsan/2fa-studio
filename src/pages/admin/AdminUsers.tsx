@@ -61,7 +61,7 @@ const AdminUsers: React.FC = () => {
       
       setLastDoc(result.lastDoc);
       setHasMore(result.hasMore);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading users:', error);
     } finally {
       setLoading(false);

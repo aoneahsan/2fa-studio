@@ -89,7 +89,7 @@ export function ExportAccountsModal({ isOpen, onClose }: ExportAccountsModalProp
       setPassword('');
       setConfirmPassword('');
       onClose();
-    } catch (error) {
+    } catch (_error) {
       dispatch(showToast({ 
         message: error instanceof Error ? error.message : 'Failed to export accounts', 
         type: 'error' 

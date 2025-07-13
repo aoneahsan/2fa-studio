@@ -8,7 +8,7 @@
 import './commands';
 
 // Alternatively you can use CommonJS syntax:
-// require('./commands')
+// import('./commands')
 
 // Hide fetch/XHR requests from the command log
 const app = window.top;

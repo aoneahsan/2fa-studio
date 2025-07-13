@@ -153,7 +153,7 @@ export class AdminAnalyticsService {
 
       this.setCache(cacheKey, metrics);
       return metrics;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting dashboard metrics:', error);
       throw error;
     }
@@ -206,7 +206,7 @@ export class AdminAnalyticsService {
         userRetention,
         topCountries,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting user metrics:', error);
       throw error;
     }
@@ -276,7 +276,7 @@ export class AdminAnalyticsService {
         churnRate,
         refundRate,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting revenue metrics:', error);
       throw error;
     }
@@ -318,7 +318,7 @@ export class AdminAnalyticsService {
         averageBackupsPerUser,
         topFeatures,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting usage metrics:', error);
       throw error;
     }
@@ -348,7 +348,7 @@ export class AdminAnalyticsService {
         default:
           return [];
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting time series data:', error);
       return [];
     }
@@ -372,7 +372,7 @@ export class AdminAnalyticsService {
         errorRate: Math.random() * 5, // 0-5%
         responseTime: Math.floor(Math.random() * 200) + 100, // 100-300ms
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting real-time metrics:', error);
       return {
         activeUsers: 0,
@@ -402,7 +402,7 @@ export class AdminAnalyticsService {
       // For now, return basic structure
       
       return { data, summary };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error generating custom report:', error);
       throw error;
     }
@@ -426,7 +426,7 @@ export class AdminAnalyticsService {
       free: 0,
       premium: 0,
       family: 0,
-      business: 0,
+      enterprise: 0,
     };
 
     subscriptions.forEach(sub => {
@@ -472,12 +472,12 @@ export class AdminAnalyticsService {
     return userMetrics.totalUsers > 0 ? (paidUsers / userMetrics.totalUsers) * 100 : 0;
   }
 
-  private static async getRevenueByTier(invoices: any[]): Promise<Record<SubscriptionTier, number>> {
+  private static async getRevenueByTier(invoices: unknown[]): Promise<Record<SubscriptionTier, number>> {
     const revenueByTier: Record<SubscriptionTier, number> = {
       free: 0,
       premium: 0,
       family: 0,
-      business: 0,
+      enterprise: 0,
     };
 
     // This would correlate invoices with subscription tiers
@@ -587,7 +587,7 @@ export class AdminAnalyticsService {
     return this.getUserTimeSeriesData(startDate, endDate, period);
   }
 
-  private static getFromCache(key: string): any {
+  private static getFromCache(key: string): unknown {
     const cached = this.cache.get(key);
     if (cached && (Date.now() - cached.timestamp) < this.CACHE_TTL) {
       return cached.data;

@@ -32,7 +32,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (_e: React.FormEvent) => {
     e.preventDefault();
     
     if (!reason.trim()) {
@@ -57,7 +57,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
       
       showToast('success', 'Subscription updated successfully');
       onSuccess();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating subscription:', error);
       showToast('error', 'Failed to update subscription');
     } finally {

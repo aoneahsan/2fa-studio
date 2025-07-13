@@ -18,7 +18,7 @@ import AccountUsageChart from '@components/analytics/AccountUsageChart';
 import { TagService } from '@services/tag.service';
 import { AnalyticsService } from '@services/analytics.service';
 import { useAccounts } from '@hooks/useAccounts';
-import { UsageStats } from '@types/analytics.types';
+import { UsageStats } from '@app-types/analytics';
 import { 
   XMarkIcon,
   BuildingOfficeIcon,
@@ -97,7 +97,7 @@ const EditAccountModal: React.FC = () => {
     dispatch(closeModal());
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (_e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -108,7 +108,7 @@ const EditAccountModal: React.FC = () => {
   };
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (_e: React.FormEvent) => {
     e.preventDefault();
     
     if (!account) return;
@@ -133,7 +133,7 @@ const EditAccountModal: React.FC = () => {
       await updateAccountHook(updatedAccount);
       
       handleClose();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating account:', error);
     } finally {
       setIsSubmitting(false);

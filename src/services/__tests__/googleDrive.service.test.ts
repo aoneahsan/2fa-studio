@@ -85,7 +85,7 @@ describe('GoogleDriveService', () => {
 
       const result = GoogleDriveService.isSignedIn()
 
-      expect(result).toBe(true)
+      expect(_result).toBe(true)
       expect(mockAuthInstance.isSignedIn.get).toHaveBeenCalled()
     })
 
@@ -129,7 +129,7 @@ describe('GoogleDriveService', () => {
 
     it('should create backup file', async () => {
       const mockFileResponse = {
-        result: {
+        _result: {
           id: 'mock-file-id',
           name: 'backup.json'
         }
@@ -139,7 +139,7 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.createBackup(mockBackupData)
 
-      expect(result).toEqual(mockFileResponse.result)
+      expect(_result).toEqual(mockFileResponse._result)
       expect(mockGapi.client.drive.files.create).toHaveBeenCalledWith({
         resource: {
           name: expect.stringMatching(/2fa-backup-\d{4}-\d{2}-\d{2}\.json/),
@@ -154,7 +154,7 @@ describe('GoogleDriveService', () => {
 
     it('should list backup files', async () => {
       const mockFilesResponse = {
-        result: {
+        _result: {
           files: [
             {
               id: 'file1',
@@ -174,7 +174,7 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.listBackups()
 
-      expect(result).toEqual(mockFilesResponse.result.files)
+      expect(_result).toEqual(mockFilesResponse.result.files)
       expect(mockGapi.client.drive.files.list).toHaveBeenCalledWith({
         q: "name contains '2fa-backup' and parents in 'appDataFolder'",
         orderBy: 'modifiedTime desc',
@@ -192,7 +192,7 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.downloadBackup('mock-file-id')
 
-      expect(result).toEqual(mockBackupData)
+      expect(_result).toEqual(mockBackupData)
       expect(mockGapi.client.drive.files.get).toHaveBeenCalledWith({
         fileId: 'mock-file-id',
         alt: 'media'
@@ -212,7 +212,7 @@ describe('GoogleDriveService', () => {
     })
 
     it('should delete backup file', async () => {
-      mockGapi.client.drive.files.delete.mockResolvedValue({ result: {} })
+      mockGapi.client.drive.files.delete.mockResolvedValue({ _result: {} })
 
       await GoogleDriveService.deleteBackup('mock-file-id')
 
@@ -223,7 +223,7 @@ describe('GoogleDriveService', () => {
 
     it('should update existing backup file', async () => {
       const mockFileResponse = {
-        result: {
+        _result: {
           id: 'mock-file-id',
           name: 'backup.json'
         }
@@ -233,7 +233,7 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.updateBackup('mock-file-id', mockBackupData)
 
-      expect(result).toEqual(mockFileResponse.result)
+      expect(_result).toEqual(mockFileResponse._result)
       expect(mockGapi.client.drive.files.update).toHaveBeenCalledWith({
         fileId: 'mock-file-id',
         media: {
@@ -247,7 +247,7 @@ describe('GoogleDriveService', () => {
   describe('error handling', () => {
     it('should handle API errors gracefully', async () => {
       const apiError = {
-        error: {
+        _error: {
           code: 403,
           message: 'Insufficient permissions'
         }
@@ -274,7 +274,7 @@ describe('GoogleDriveService', () => {
       }
 
       await expect(
-        GoogleDriveService.createBackup(invalidBackupData as any)
+        GoogleDriveService.createBackup(invalidBackupData as unknown)
       ).rejects.toThrow('Invalid backup data structure')
     })
 
@@ -300,7 +300,7 @@ describe('GoogleDriveService', () => {
   describe('quota management', () => {
     it('should check available storage quota', async () => {
       const mockAboutResponse = {
-        result: {
+        _result: {
           storageQuota: {
             limit: '15000000000',
             usage: '5000000000'
@@ -318,7 +318,7 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.getStorageQuota()
 
-      expect(result).toEqual({
+      expect(_result).toEqual({
         total: 15000000000,
         used: 5000000000,
         available: 10000000000
@@ -327,7 +327,7 @@ describe('GoogleDriveService', () => {
 
     it('should warn when storage quota is low', async () => {
       const mockAboutResponse = {
-        result: {
+        _result: {
           storageQuota: {
             limit: '15000000000',
             usage: '14500000000' // 96.67% used

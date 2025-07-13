@@ -124,7 +124,7 @@ export class EncryptionService {
         iv: ivBase64,
         iterations
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Encryption failed:', error);
       throw new Error('Failed to encrypt data');
     }
@@ -172,7 +172,7 @@ export class EncryptionService {
 
       const decoder = new TextDecoder();
       return decoder.decode(decryptedBuffer);
-    } catch (error) {
+    } catch (_error) {
       console.error('Decryption failed:', error);
       throw new Error('Failed to decrypt data - invalid password or corrupted data');
     }

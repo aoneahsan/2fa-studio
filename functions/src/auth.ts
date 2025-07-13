@@ -43,8 +43,8 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     await sendWelcomeNotification(user);
 
     console.log(`User created: ${user.uid}`);
-  } catch (error) {
-    console.error("Error creating user document:", error);
+  } catch (_error) {
+    console.error('Error creating user document:', error);
   }
 });
 
@@ -91,16 +91,16 @@ export const onUserDelete = functions.auth.user().onDelete(async (user) => {
     await batch.commit();
 
     console.log(`User deleted: ${user.uid}`);
-  } catch (error) {
-    console.error("Error deleting user data:", error);
+  } catch (_error) {
+    console.error('Error deleting user data:', error);
   }
 });
 
 /**
  * Validate admin privileges
  */
-export const validateAdmin = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const validateAdmin = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -116,8 +116,8 @@ export const validateAdmin = functions.https.onCall(async (data, context) => {
       isSuperAdmin,
       role: userData?.role || "user",
     };
-  } catch (error) {
-    console.error("Error validating admin:", error);
+  } catch (_error) {
+    console.error('Error validating admin:', error);
     throw new functions.https.HttpsError("internal", "Failed to validate admin status");
   }
 });
@@ -125,9 +125,9 @@ export const validateAdmin = functions.https.onCall(async (data, context) => {
 /**
  * Cleanup expired sessions
  */
-export const cleanupSessions = functions.https.onCall(async (data, context) => {
+export const cleanupSessions = functions.https.onCall(async (_data, _context) => {
   // This can be called by scheduled function or admin
-  if (context.auth) {
+  if (context._auth) {
     // Check if admin
     const userDoc = await db.collection("users").doc(context.auth.uid).get();
     if (userDoc.data()?.role !== "admin" && userDoc.data()?.role !== "super_admin") {
@@ -163,8 +163,8 @@ export async function cleanupExpiredSessions() {
     }
 
     return { cleaned: count };
-  } catch (error) {
-    console.error("Error cleaning up sessions:", error);
+  } catch (_error) {
+    console.error('Error cleaning up sessions:', error);
     throw new functions.https.HttpsError("internal", "Failed to cleanup sessions");
   }
 }
@@ -189,16 +189,16 @@ async function sendWelcomeNotification(user: admin.auth.UserRecord) {
 
     // TODO: Send welcome email via SendGrid or other email service
     // TODO: Send push notification via OneSignal
-  } catch (error) {
-    console.error("Error sending welcome notification:", error);
+  } catch (_error) {
+    console.error('Error sending welcome notification:', error);
   }
 }
 
 /**
  * Create session for user
  */
-export const createSession = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const createSession = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -234,8 +234,8 @@ export const createSession = functions.https.onCall(async (data, context) => {
       sessionId: sessionRef.id,
       expiresAt: expiresAt.toISOString(),
     };
-  } catch (error) {
-    console.error("Error creating session:", error);
+  } catch (_error) {
+    console.error('Error creating session:', error);
     throw new functions.https.HttpsError("internal", "Failed to create session");
   }
 });
@@ -243,8 +243,8 @@ export const createSession = functions.https.onCall(async (data, context) => {
 /**
  * Revoke session
  */
-export const revokeSession = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const revokeSession = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -271,8 +271,8 @@ export const revokeSession = functions.https.onCall(async (data, context) => {
     await sessionDoc.ref.delete();
 
     return { success: true };
-  } catch (error) {
-    console.error("Error revoking session:", error);
+  } catch (_error) {
+    console.error('Error revoking session:', error);
     throw new functions.https.HttpsError("internal", "Failed to revoke session");
   }
 });
@@ -280,8 +280,8 @@ export const revokeSession = functions.https.onCall(async (data, context) => {
 /**
  * Get user sessions
  */
-export const getUserSessions = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const getUserSessions = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -292,7 +292,7 @@ export const getUserSessions = functions.https.onCall(async (data, context) => {
       .orderBy("lastActiveAt", "desc")
       .get();
 
-    const sessions: any[] = [];
+    const sessions: unknown[] = [];
     sessionsSnapshot.forEach((doc) => {
       sessions.push({
         id: doc.id,
@@ -301,8 +301,8 @@ export const getUserSessions = functions.https.onCall(async (data, context) => {
     });
 
     return { sessions };
-  } catch (error) {
-    console.error("Error getting sessions:", error);
+  } catch (_error) {
+    console.error('Error getting sessions:', error);
     throw new functions.https.HttpsError("internal", "Failed to get sessions");
   }
 });

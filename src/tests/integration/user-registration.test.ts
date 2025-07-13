@@ -45,7 +45,7 @@ describe('User Registration Integration Tests', () => {
       };
 
       // Mock Firebase Auth registration
-      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as any);
+      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as unknown);
 
       // Step 4: Register user
       const registeredUser = await AuthService.signUpWithEmail(
@@ -86,7 +86,7 @@ describe('User Registration Integration Tests', () => {
         uid: 'test-uid',
         email: maliciousUser.email,
         displayName: sanitized
-      } as any);
+      } as unknown);
 
       const user = await AuthService.signUpWithEmail(
         maliciousUser.email,
@@ -105,7 +105,7 @@ describe('User Registration Integration Tests', () => {
       };
 
       // Mock registration
-      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as any);
+      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as unknown);
       
       // Mock Firestore document creation
       vi.spyOn(FirestoreService, 'createDocument').mockResolvedValue('profile-doc-id');
@@ -137,8 +137,8 @@ describe('User Registration Integration Tests', () => {
       try {
         await AuthService.signUpWithEmail(invalidEmail, testUser.password);
         expect(false).toBe(true); // Should not reach here
-      } catch (error) {
-        expect(error).toBeDefined();
+      } catch (_error) {
+        expect(_error).toBeDefined();
       }
     });
 
@@ -150,8 +150,8 @@ describe('User Registration Integration Tests', () => {
       try {
         await AuthService.signUpWithEmail(testUser.email, weakPassword);
         expect(false).toBe(true); // Should not reach here
-      } catch (error) {
-        expect(error).toBeDefined();
+      } catch (_error) {
+        expect(_error).toBeDefined();
       }
     });
 
@@ -165,7 +165,7 @@ describe('User Registration Integration Tests', () => {
 
       try {
         await AuthService.signUpWithEmail(testUser.email, testUser.password);
-      } catch (error) {
+      } catch (_error) {
         expect(error.code).toBe('auth/email-already-in-use');
       }
     });
@@ -177,7 +177,7 @@ describe('User Registration Integration Tests', () => {
       };
 
       // Mock successful auth but failed Firestore
-      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as any);
+      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as unknown);
       vi.spyOn(FirestoreService, 'createDocument').mockRejectedValue(
         new Error('Firestore: permission denied')
       );
@@ -185,7 +185,7 @@ describe('User Registration Integration Tests', () => {
       try {
         await AuthService.signUpWithEmail(testUser.email, testUser.password);
         // Should still handle profile creation error gracefully
-      } catch (error) {
+      } catch (_error) {
         expect(error.message).toContain('permission denied');
       }
     });
@@ -199,7 +199,7 @@ describe('User Registration Integration Tests', () => {
         displayName: testUser.displayName
       };
 
-      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as any);
+      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as unknown);
       vi.spyOn(MobileEncryptionService, 'generateEncryptionKey').mockResolvedValue('test-key');
       vi.spyOn(RealtimeSyncService, 'initialize').mockResolvedValue();
 
@@ -227,7 +227,7 @@ describe('User Registration Integration Tests', () => {
         email: testUser.email
       };
 
-      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as any);
+      vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue(mockUser as unknown);
       vi.spyOn(FirestoreService, 'createDocument').mockResolvedValue('doc-id');
 
       const user = await AuthService.signUpWithEmail(testUser.email, testUser.password);
@@ -249,7 +249,7 @@ describe('User Registration Integration Tests', () => {
       vi.spyOn(AuthService, 'signUpWithEmail').mockResolvedValue({
         uid: 'test-uid',
         email: testUser.email
-      } as any);
+      } as unknown);
 
       await AuthService.signUpWithEmail(testUser.email, testUser.password);
 
@@ -274,8 +274,8 @@ describe('User Registration Integration Tests', () => {
         try {
           await AuthService.signUpWithEmail(input.email, input.password);
           expect(false).toBe(true); // Should not reach here
-        } catch (error) {
-          expect(error).toBeDefined();
+        } catch (_error) {
+          expect(_error).toBeDefined();
         }
       }
     });
@@ -293,7 +293,7 @@ describe('User Registration Integration Tests', () => {
         async (email) => ({
           uid: `uid-${email.split('@')[0]}`,
           email
-        } as any)
+        } as unknown)
       );
 
       const promises = users.map(user => 

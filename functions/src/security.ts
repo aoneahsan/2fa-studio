@@ -11,7 +11,7 @@ const db = admin.firestore();
 // Rate limiting configuration
 const RATE_LIMITS = {
   api: { window: 60, max: 100 }, // 100 requests per minute
-  auth: { window: 300, max: 5 }, // 5 auth attempts per 5 minutes
+  _auth: { window: 300, max: 5 }, // 5 auth attempts per 5 minutes
   backup: { window: 3600, max: 10 }, // 10 backups per hour
 };
 
@@ -20,7 +20,7 @@ const RATE_LIMITS = {
  */
 export const monitorSuspiciousActivity = functions.firestore
   .document("audit_logs/{logId}")
-  .onCreate(async (snap, context) => {
+  .onCreate(async (snap, _context) => {
     const log = snap.data();
     const suspiciousActions = [
       "failed_login",
@@ -47,15 +47,15 @@ export const monitorSuspiciousActivity = functions.firestore
         // Too many suspicious activities
         await handleSuspiciousUser(userId, recentLogsSnapshot.docs);
       }
-    } catch (error) {
-      console.error("Error monitoring activity:", error);
+    } catch (_error) {
+      console.error('Error monitoring activity:', error);
     }
   });
 
 /**
  * Enforce rate limiting
  */
-export const enforceRateLimit = functions.https.onCall(async (data, context) => {
+export const enforceRateLimit = functions.https.onCall(async (_data, _context) => {
   const { action = "api", identifier } = data;
   const id = identifier || context.auth?.uid || context.rawRequest.ip;
   
@@ -105,11 +105,11 @@ export const enforceRateLimit = functions.https.onCall(async (data, context) => 
       remaining: limit.max - count - 1,
       resetAt: new Date(windowStart + (limit.window * 1000)).toISOString(),
     };
-  } catch (error: any) {
+  } catch (_error: unknown) {
     if (error.code === "resource-exhausted") {
       throw error;
     }
-    console.error("Error enforcing rate limit:", error);
+    console.error('Error enforcing rate limit:', error);
     throw new functions.https.HttpsError("internal", "Failed to check rate limit");
   }
 });
@@ -117,7 +117,7 @@ export const enforceRateLimit = functions.https.onCall(async (data, context) => 
 /**
  * Validate request signature
  */
-export const validateRequest = functions.https.onCall(async (data, context) => {
+export const validateRequest = functions.https.onCall(async (_data, _context) => {
   const { signature, payload, timestamp } = data;
   
   if (!signature || !payload || !timestamp) {
@@ -157,7 +157,7 @@ export const validateRequest = functions.https.onCall(async (data, context) => {
 /**
  * Create audit log entry
  */
-export const createAuditLog = functions.https.onCall(async (data, context) => {
+export const createAuditLog = functions.https.onCall(async (_data, _context) => {
   const { action, targetId, details, severity = "info" } = data;
   
   if (!action) {
@@ -184,8 +184,8 @@ export const createAuditLog = functions.https.onCall(async (data, context) => {
     }
     
     return { success: true };
-  } catch (error) {
-    console.error("Error creating audit log:", error);
+  } catch (_error) {
+    console.error('Error creating audit log:', error);
     throw new functions.https.HttpsError("internal", "Failed to create audit log");
   }
 });
@@ -237,8 +237,8 @@ export async function cleanupOldAuditLogs() {
       auditLogs: oldLogsSnapshot.size,
       rateLimits: oldRateLimitsSnapshot.size,
     };
-  } catch (error) {
-    console.error("Error cleaning up logs:", error);
+  } catch (_error) {
+    console.error('Error cleaning up logs:', error);
     throw error;
   }
 }
@@ -283,15 +283,15 @@ async function handleSuspiciousUser(
       userId,
       severity: "high",
     });
-  } catch (error) {
-    console.error("Error handling suspicious user:", error);
+  } catch (_error) {
+    console.error('Error handling suspicious user:', error);
   }
 }
 
 /**
  * Alert administrators
  */
-async function alertAdmins(alert: any) {
+async function alertAdmins(alert: unknown) {
   try {
     // Get admin users
     const adminsSnapshot = await db
@@ -323,15 +323,15 @@ async function alertAdmins(alert: any) {
     
     // TODO: Send push notifications via OneSignal
     // TODO: Send email alerts
-  } catch (error) {
-    console.error("Error alerting admins:", error);
+  } catch (_error) {
+    console.error('Error alerting admins:', error);
   }
 }
 
 /**
  * Check IP reputation
  */
-export const checkIPReputation = functions.https.onCall(async (data, context) => {
+export const checkIPReputation = functions.https.onCall(async (_data, _context) => {
   const ip = data.ip || context.rawRequest.ip;
   
   try {
@@ -361,8 +361,8 @@ export const checkIPReputation = functions.https.onCall(async (data, context) =>
       reputation: suspiciousCount < 5 ? "good" : suspiciousCount < 20 ? "suspicious" : "bad",
       recentSuspiciousActivity: suspiciousCount,
     };
-  } catch (error) {
-    console.error("Error checking IP reputation:", error);
+  } catch (_error) {
+    console.error('Error checking IP reputation:', error);
     throw new functions.https.HttpsError("internal", "Failed to check IP reputation");
   }
 });

@@ -58,7 +58,7 @@ const AppContent: React.FC = () => {
       if (appId) {
         try {
           await notificationService.initialize({ appId, safariWebId });
-        } catch (error) {
+        } catch (_error) {
           console.error('Failed to initialize notifications:', error);
         }
       }

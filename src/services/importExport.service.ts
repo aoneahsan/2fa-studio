@@ -23,7 +23,7 @@ export interface ExportData {
   version: string;
   exported: string;
   encrypted: boolean;
-  accounts: any[];
+  accounts: unknown[];
   checksum?: string;
 }
 
@@ -50,7 +50,7 @@ export class ImportExportService {
     const userId = auth.currentUser?.uid || 'unknown';
     
     try {
-      let result: string;
+      let _result: string;
       
       switch (format) {
       case 'json':
@@ -86,7 +86,7 @@ export class ImportExportService {
       });
       
       return result;
-    } catch (error) {
+    } catch (_error) {
       // Log failed export
       await AuditLogService.log({
         userId,
@@ -116,7 +116,7 @@ export class ImportExportService {
     // For now, we don't support auto-detect
     // Later we can implement detectFormat method
 
-    let result: ImportResult;
+    let _result: ImportResult;
     
     switch (format) {
       case '2fas':
@@ -327,7 +327,7 @@ export class ImportExportService {
    * Import from 2FAS format
    */
   private static async importFrom2FAS(data: string, password?: string): Promise<ImportResult> {
-    const result: ImportResult = {
+    const _result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -336,7 +336,7 @@ export class ImportExportService {
     };
 
     try {
-      let parsedData: any;
+      let parsedData: unknown;
 
       // Try to parse as encrypted data first
       try {
@@ -386,14 +386,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (error: any) {
+        } catch (_error: unknown) {
           result.failed++;
           result.errors.push(`Failed to import ${accountData.name}: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       result.errors.push(`Failed to parse 2FAS data: ${error.message}`);
     }
 
@@ -404,7 +404,7 @@ export class ImportExportService {
    * Import from Aegis format
    */
   private static async importFromAegis(data: string, password?: string): Promise<ImportResult> {
-    const result: ImportResult = {
+    const _result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -446,14 +446,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (error: any) {
+        } catch (_error: unknown) {
           result.failed++;
           result.errors.push(`Failed to import ${entry.name}: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       result.errors.push(`Failed to parse Aegis data: ${error.message}`);
     }
 
@@ -464,7 +464,7 @@ export class ImportExportService {
    * Import from andOTP format
    */
   private static async importFromAndOTP(data: string, password?: string): Promise<ImportResult> {
-    const result: ImportResult = {
+    const _result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -498,14 +498,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (error: any) {
+        } catch (_error: unknown) {
           result.failed++;
           result.errors.push(`Failed to import account: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       result.errors.push(`Failed to parse andOTP data: ${error.message}`);
     }
 
@@ -516,7 +516,7 @@ export class ImportExportService {
    * Import from Google Authenticator format (URI list)
    */
   private static importFromGoogleAuth(data: string): ImportResult {
-    const result: ImportResult = {
+    const _result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -541,7 +541,7 @@ export class ImportExportService {
           id: crypto.randomUUID(),
           type: parsed.type as 'totp' | 'hotp',
           issuer: parsed.issuer || 'Unknown',
-          label: parsed.label || (parsed as any).accountName || (parsed as any).name || '',
+          label: parsed.label || (parsed as unknown).accountName || (parsed as unknown).name || '',
           secret: parsed.secret || '',
           algorithm: parsed.algorithm || 'SHA1',
           digits: parsed.digits || 6,
@@ -554,7 +554,7 @@ export class ImportExportService {
 
         result.accounts.push(account);
         result.imported++;
-      } catch (error: any) {
+      } catch (_error: unknown) {
         result.failed++;
         result.errors.push(`Failed to import URI: ${error.message}`);
       }
@@ -568,7 +568,7 @@ export class ImportExportService {
    * Import from plain text format
    */
   private static importFromPlainText(data: string): ImportResult {
-    const result: ImportResult = {
+    const _result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -645,7 +645,7 @@ export class ImportExportService {
 
         result.accounts.push(account as OTPAccount);
         result.imported++;
-      } catch (error: any) {
+      } catch (_error: unknown) {
         result.failed++;
         result.errors.push(`Failed to import entry: ${error.message}`);
       }
@@ -710,8 +710,8 @@ export class ImportExportService {
   static async readFileAsText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = (e) => reject(e);
+      reader.onload = (_e) => resolve(e.target?.result as string);
+      reader.onerror = (_e) => reject(_e);
       reader.readAsText(file);
     });
   }

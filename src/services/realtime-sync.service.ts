@@ -104,9 +104,9 @@ export class RealtimeSyncService {
       this.syncState.isSyncing = false;
       
       this.emitEvent({ type: 'sync_complete' });
-    } catch (error) {
+    } catch (_error) {
       this.syncState.isSyncing = false;
-      this.emitEvent({ type: 'sync_error', error: error as Error });
+      this.emitEvent({ type: 'sync_error', _error: error as Error });
     }
   }
 
@@ -123,7 +123,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(accountsQuery,
       (snapshot) => this.handleAccountsSnapshot(snapshot),
-      (error) => this.handleSyncError('accounts', error)
+      (_error) => this.handleSyncError('accounts', _error)
     );
 
     this.listeners.set('accounts', unsubscribe);
@@ -142,7 +142,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(foldersQuery,
       (snapshot) => this.handleFoldersSnapshot(snapshot),
-      (error) => this.handleSyncError('folders', error)
+      (_error) => this.handleSyncError('folders', _error)
     );
 
     this.listeners.set('folders', unsubscribe);
@@ -161,7 +161,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(tagsQuery,
       (snapshot) => this.handleTagsSnapshot(snapshot),
-      (error) => this.handleSyncError('tags', error)
+      (_error) => this.handleSyncError('tags', _error)
     );
 
     this.listeners.set('tags', unsubscribe);
@@ -177,7 +177,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(userDoc,
       (snapshot) => this.handleUserSnapshot(snapshot),
-      (error) => this.handleSyncError('user', error)
+      (_error) => this.handleSyncError('user', _error)
     );
 
     this.listeners.set('user', unsubscribe);
@@ -261,7 +261,7 @@ export class RealtimeSyncService {
    */
   private static async handleFolderChange(
     changeType: 'added' | 'modified' | 'removed',
-    folder: any
+    folder: unknown
   ): Promise<void> {
     // Similar to account handling but for folders
     if (changeType === 'removed') {
@@ -302,7 +302,7 @@ export class RealtimeSyncService {
    */
   private static async handleTagChange(
     changeType: 'added' | 'modified' | 'removed',
-    tag: any
+    tag: unknown
   ): Promise<void> {
     if (changeType === 'removed') {
       await this.removeLocalTag(tag.id);
@@ -390,7 +390,7 @@ export class RealtimeSyncService {
     }
 
     try {
-      let resolvedData: any;
+      let resolvedData: unknown;
 
       switch (resolution) {
         case 'local':
@@ -423,7 +423,7 @@ export class RealtimeSyncService {
           data: resolvedData
         } 
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to resolve conflict:', error);
       throw error;
     }
@@ -445,7 +445,7 @@ export class RealtimeSyncService {
         // Keep remote ID and userId
         label: useLocal ? local.label : remote.label,
         issuer: useLocal ? local.issuer : remote.issuer,
-        tags: [...new Set([...((local as any).tags || []), ...((remote as any).tags || [])])],
+        tags: [...new Set([...((local as unknown).tags || []), ...((remote as unknown).tags || [])])],
         isFavorite: local.isFavorite || remote.isFavorite,
         updatedAt: new Date()
       };
@@ -489,7 +489,7 @@ export class RealtimeSyncService {
       this.pendingOperations.clear();
       this.syncState.pendingChanges = 0;
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to sync pending changes:', error);
       throw error;
     } finally {
@@ -504,7 +504,7 @@ export class RealtimeSyncService {
     id: string,
     type: 'create' | 'update' | 'delete',
     collection: string,
-    data?: any
+    data?: unknown
   ): void {
     this.pendingOperations.set(id, { type, collection, data });
     this.syncState.pendingChanges = this.pendingOperations.size;
@@ -532,8 +532,8 @@ export class RealtimeSyncService {
   /**
    * Handle sync errors
    */
-  private static handleSyncError(collection: string, error: FirestoreError): void {
-    console.error(`Sync error for ${collection}:`, error);
+  private static handleSyncError(collection: string, _error: FirestoreError): void {
+    console.error(`Sync error for ${collection}:`, _error);
     this.emitEvent({ type: 'sync_error', error });
   }
 
@@ -552,8 +552,8 @@ export class RealtimeSyncService {
     this.eventListeners.forEach(listener => {
       try {
         listener(event);
-      } catch (error) {
-        console.error('Event listener error:', error);
+      } catch (_error) {
+        console.error('Event listener _error:', error);
       }
     });
   }
@@ -621,7 +621,7 @@ export class RealtimeSyncService {
     );
   }
 
-  private static async saveLocalFolder(folder: any): Promise<void> {
+  private static async saveLocalFolder(folder: unknown): Promise<void> {
     await MobileEncryptionService.secureStore(`folder_${folder.id}`, JSON.stringify(folder));
   }
 
@@ -629,7 +629,7 @@ export class RealtimeSyncService {
     await MobileEncryptionService.secureRemove(`folder_${folderId}`);
   }
 
-  private static async saveLocalTag(tag: any): Promise<void> {
+  private static async saveLocalTag(tag: unknown): Promise<void> {
     await MobileEncryptionService.secureStore(`tag_${tag.id}`, JSON.stringify(tag));
   }
 

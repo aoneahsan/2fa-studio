@@ -20,7 +20,7 @@ import LoadingSpinner from '@components/common/LoadingSpinner';
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboardStats();

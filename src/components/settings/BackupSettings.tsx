@@ -69,7 +69,7 @@ const BackupSettings: React.FC = () => {
         type: 'success',
         message: 'Backup completed successfully'
       }));
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Backup failed. Please try again.'
@@ -96,7 +96,7 @@ const BackupSettings: React.FC = () => {
         type: 'success',
         message: 'Data restored successfully'
       }));
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Restore failed. Please try again.'
@@ -120,7 +120,7 @@ const BackupSettings: React.FC = () => {
     }));
   };
 
-  const handleFrequencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleFrequencyChange = (_e: React.ChangeEvent<HTMLSelectElement>) => {
     const frequency = e.target.value as BackupInfo['backupFrequency'];
     setBackupInfo({ ...backupInfo, backupFrequency: frequency });
     dispatch(addToast({

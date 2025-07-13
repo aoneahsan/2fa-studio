@@ -10,7 +10,7 @@ import { useAppDispatch } from '@hooks/useAppDispatch';
 import { useAppSelector } from '@hooks/useAppSelector';
 import { selectTags, createTag } from '@store/slices/tagsSlice';
 import { store } from '@store/index';
-import { Tag, TAG_COLORS } from '@types/tag';
+import { Tag, TAG_COLORS } from '@app-types/tag';
 import TagPill from './TagPill';
 
 interface TagSelectorProps {
@@ -86,7 +86,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
         onChange([result.id]);
       }
       setQuery('');
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to create tag:', error);
     } finally {
       setIsCreating(false);
@@ -106,7 +106,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       <Combobox
         value={multiple ? selectedTags : selectedTags[0] || null}
         onChange={handleSelect}
-        multiple={multiple as any}
+        multiple={multiple as unknown}
       >
         <div className="relative">
           <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm">

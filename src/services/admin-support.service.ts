@@ -37,7 +37,7 @@ export class AdminSupportService {
     priority?: string;
     assignedTo?: string;
   }): Promise<SupportTicket[]> {
-    const queryFilters: any[] = [];
+    const queryFilters: unknown[] = [];
     
     if (filters?.status) {
       queryFilters.push({ field: 'status', operator: '==', value: filters.status });
@@ -90,7 +90,7 @@ export class AdminSupportService {
     status: SupportTicket['status'],
     adminId: string
   ): Promise<void> {
-    const updateData: any = {
+    const updateData: unknown = {
       status,
       updatedAt: new Date(),
     };

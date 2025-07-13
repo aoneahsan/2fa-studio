@@ -17,8 +17,8 @@ export interface BackupData {
   accountsCount: number;
   encrypted: boolean;
   includesSettings: boolean;
-  accounts: any[];
-  settings?: any;
+  accounts: unknown[];
+  settings?: unknown;
 }
 
 export interface BackupResult {
@@ -45,7 +45,7 @@ export class BackupService {
         `users/${userId}/accounts`
       );
       
-      const accounts: any[] = [];
+      const accounts: unknown[] = [];
       
       for (const accountData of result.data) {
         // Decrypt the secret for backup using MobileEncryptionService
@@ -99,7 +99,7 @@ export class BackupService {
       };
 
       return backupData;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating backup:', error);
       throw error;
     }
@@ -160,7 +160,7 @@ export class BackupService {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error exporting backup:', error);
       throw error;
     }
@@ -233,8 +233,8 @@ export class BackupService {
           );
           
           importedCount++;
-        } catch (error) {
-          console.error('Error importing account:', account.label, error);
+        } catch (_error) {
+          console.error('Error importing account:', account.label, _error);
         }
       }
 
@@ -248,12 +248,12 @@ export class BackupService {
         success: true,
         accountsCount: importedCount,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error importing backup:', error);
       return {
         success: false,
         accountsCount: 0,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -303,14 +303,14 @@ export class BackupService {
         accountsCount: backupData.accountsCount,
         fileSize: result.fileId ? undefined : 0,
         fileId: result.fileId,
-        error: result.error,
+        _error: result._error,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error backing up to Google Drive:', error);
       return {
         success: false,
         accountsCount: 0,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -330,7 +330,7 @@ export class BackupService {
         return {
           success: false,
           accountsCount: 0,
-          error: result.error || 'Failed to restore backup',
+          _error: result.error || 'Failed to restore backup',
         };
       }
 
@@ -369,8 +369,8 @@ export class BackupService {
           );
           
           importedCount++;
-        } catch (error) {
-          console.error('Error importing account:', account.label, error);
+        } catch (_error) {
+          console.error('Error importing account:', account.label, _error);
         }
       }
 
@@ -378,12 +378,12 @@ export class BackupService {
         success: true,
         accountsCount: importedCount,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error restoring from Google Drive:', error);
       return {
         success: false,
         accountsCount: 0,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

@@ -46,8 +46,8 @@ export const handleOneSignalWebhook = functions.https.onRequest(async (req, res)
     }
 
     res.status(200).json({ received: true });
-  } catch (error) {
-    console.error("Error processing OneSignal webhook:", error);
+  } catch (_error) {
+    console.error('Error processing OneSignal webhook:', error);
     res.status(500).send("Webhook processing failed");
   }
 });
@@ -94,8 +94,8 @@ export const handleGoogleDriveWebhook = functions.https.onRequest(async (req, re
     }
 
     res.status(200).send("OK");
-  } catch (error) {
-    console.error("Error processing Google Drive webhook:", error);
+  } catch (_error) {
+    console.error('Error processing Google Drive webhook:', error);
     res.status(500).send("Webhook processing failed");
   }
 });
@@ -122,14 +122,14 @@ export async function handleWebhook(req: Request, res: Response) {
       break;
       
     default:
-      res.status(404).json({ error: "Unknown webhook type" });
+      res.status(404).json({ _error: "Unknown webhook type" });
   }
 }
 
 /**
  * Verify OneSignal webhook signature
  */
-function verifyOneSignalSignature(payload: any, signature: string): boolean {
+function verifyOneSignalSignature(payload: unknown, signature: string): boolean {
   if (!signature) return false;
   
   const secret = functions.config().onesignal.webhook_secret;
@@ -149,7 +149,7 @@ function verifyOneSignalSignature(payload: any, signature: string): boolean {
 /**
  * Handle notification clicked event
  */
-async function handleNotificationClicked(event: any) {
+async function handleNotificationClicked(event: unknown) {
   try {
     const { userId, notificationId, heading, content } = event.data;
     
@@ -170,15 +170,15 @@ async function handleNotificationClicked(event: any) {
         "engagement.notificationClicks": admin.firestore.FieldValue.increment(1),
       });
     }
-  } catch (error) {
-    console.error("Error handling notification click:", error);
+  } catch (_error) {
+    console.error('Error handling notification click:', error);
   }
 }
 
 /**
  * Handle notification viewed event
  */
-async function handleNotificationViewed(event: any) {
+async function handleNotificationViewed(event: unknown) {
   try {
     const { userId, notificationId } = event.data;
     
@@ -189,20 +189,20 @@ async function handleNotificationViewed(event: any) {
       notificationId,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
-  } catch (error) {
-    console.error("Error handling notification view:", error);
+  } catch (_error) {
+    console.error('Error handling notification view:', error);
   }
 }
 
 /**
  * Handle subscription changed event
  */
-async function handleSubscriptionChanged(event: any) {
+async function handleSubscriptionChanged(event: unknown) {
   try {
     const { userId, subscribed, subscriptionId } = event.data;
     
     if (userId) {
-      const updates: any = {
+      const updates: unknown = {
         "pushNotifications.subscribed": subscribed,
         "pushNotifications.lastUpdated": admin.firestore.FieldValue.serverTimestamp(),
       };
@@ -213,8 +213,8 @@ async function handleSubscriptionChanged(event: any) {
       
       await db.collection("users").doc(userId).update(updates);
     }
-  } catch (error) {
-    console.error("Error handling subscription change:", error);
+  } catch (_error) {
+    console.error('Error handling subscription change:', error);
   }
 }
 
@@ -247,8 +247,8 @@ async function handleDriveFileChange(data: any) {
       
       // TODO: Trigger sync process
     }
-  } catch (error) {
-    console.error("Error handling Drive file change:", error);
+  } catch (_error) {
+    console.error('Error handling Drive file change:', error);
   }
 }
 
@@ -290,17 +290,17 @@ async function handleDriveFileRemoval(data: any) {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
     }
-  } catch (error) {
-    console.error("Error handling Drive file removal:", error);
+  } catch (_error) {
+    console.error('Error handling Drive file removal:', error);
   }
 }
 
 /**
  * Register webhook endpoint
  */
-export const registerWebhook = functions.https.onCall(async (data, context) => {
+export const registerWebhook = functions.https.onCall(async (_data, _context) => {
   // Check admin privileges
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -333,8 +333,8 @@ export const registerWebhook = functions.https.onCall(async (data, context) => {
       webhookId: webhookRef.id,
       message: "Webhook registered successfully",
     };
-  } catch (error) {
-    console.error("Error registering webhook:", error);
+  } catch (_error) {
+    console.error('Error registering webhook:', error);
     throw new functions.https.HttpsError("internal", "Failed to register webhook");
   }
 });
@@ -342,9 +342,9 @@ export const registerWebhook = functions.https.onCall(async (data, context) => {
 /**
  * List registered webhooks
  */
-export const listWebhooks = functions.https.onCall(async (data, context) => {
+export const listWebhooks = functions.https.onCall(async (_data, _context) => {
   // Check admin privileges
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -366,8 +366,8 @@ export const listWebhooks = functions.https.onCall(async (data, context) => {
     }));
 
     return { webhooks };
-  } catch (error) {
-    console.error("Error listing webhooks:", error);
+  } catch (_error) {
+    console.error('Error listing webhooks:', error);
     throw new functions.https.HttpsError("internal", "Failed to list webhooks");
   }
 });

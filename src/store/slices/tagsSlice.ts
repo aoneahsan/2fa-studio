@@ -4,7 +4,7 @@
  */
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Tag, TagFilter } from '@types/tag';
+import { Tag, TagFilter } from '@app-types/tag';
 import { TagService } from '@services/tag.service';
 import { RootState } from '@store/index';
 
@@ -13,7 +13,7 @@ interface TagsState {
   activeTags: string[]; // Currently selected filter tags
   filterMode: 'AND' | 'OR';
   isLoading: boolean;
-  error: string | null;
+  _error: string | null;
   lastFetch: number | null;
 }
 
@@ -22,7 +22,7 @@ const initialState: TagsState = {
   activeTags: [],
   filterMode: 'OR',
   isLoading: false,
-  error: null,
+  _error: null,
   lastFetch: null,
 };
 

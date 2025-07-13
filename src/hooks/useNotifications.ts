@@ -46,7 +46,7 @@ export function useNotifications(): UseNotificationsReturn {
       setIsLoading(true);
       const enabled = await notificationService.isPushNotificationEnabled();
       setIsEnabled(enabled);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to check notification permission:', error);
     } finally {
       setIsLoading(false);
@@ -65,7 +65,7 @@ export function useNotifications(): UseNotificationsReturn {
       }
       
       return granted;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to request notification permission:', error);
       return false;
     } finally {
@@ -81,7 +81,7 @@ export function useNotifications(): UseNotificationsReturn {
         const parsed = JSON.parse(savedPrefs);
         setPreferences(parsed);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to load notification preferences:', error);
     }
   }, []);
@@ -102,7 +102,7 @@ export function useNotifications(): UseNotificationsReturn {
       if (isEnabled) {
         await notificationService.updateNotificationPreferences(updatedPrefs);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to update notification preferences:', error);
       throw error;
     }

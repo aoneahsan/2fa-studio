@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FolderTree as FolderTreeType } from '@types/folder';
+import { FolderTree as FolderTreeType } from '@app-types/folder';
 import { 
   selectSelectedFolderId, 
   selectExpandedFolders,
@@ -48,7 +48,7 @@ const FolderNode: React.FC<FolderNodeProps> = ({
   const isSelected = selectedFolderId === folder.id;
   const hasChildren = folder.children && folder.children.length > 0;
 
-  const handleToggle = (e: React.MouseEvent) => {
+  const handleToggle = (_e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasChildren) {
       dispatch(toggleFolderExpanded(folder.id));

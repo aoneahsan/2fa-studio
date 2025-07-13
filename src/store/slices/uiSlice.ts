@@ -7,7 +7,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface Modal {
   type: 'addAccount' | 'editAccount' | 'deleteAccount' | 'backup' | 'import' | 'export' | 'settings' | null;
-  data?: any;
+  data?: unknown;
 }
 
 interface Toast {

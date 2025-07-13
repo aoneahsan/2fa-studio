@@ -1,6 +1,6 @@
-/// <reference types="@types/gapi" />
-/// <reference types="@types/gapi.client" />
-/// <reference types="@types/google.accounts" />
+/// <reference types="@app-types/gapi" />
+/// <reference types="@app-types/gapi.client" />
+/// <reference types="@app-types/google.accounts" />
 
 declare global {
   interface Window {

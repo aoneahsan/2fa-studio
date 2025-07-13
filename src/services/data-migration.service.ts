@@ -74,7 +74,7 @@ export class DataMigrationService {
         targetVersion: this.CURRENT_VERSION,
         plan
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to check migration:', error);
       throw error;
     }
@@ -175,7 +175,7 @@ export class DataMigrationService {
     plan: MigrationPlan,
     progressCallback?: (step: string, progress: number) => void
   ): Promise<MigrationResult> {
-    const result: MigrationResult = {
+    const _result: MigrationResult = {
       success: false,
       migratedCount: 0,
       errorCount: 0,
@@ -201,7 +201,7 @@ export class DataMigrationService {
         try {
           await this.executeStep(userId, step, plan.fromVersion, plan.toVersion);
           result.migratedCount++;
-        } catch (error) {
+        } catch (_error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
           result.errors.push(`Step ${step.id}: ${errorMsg}`);
           result.errorCount++;
@@ -228,7 +228,7 @@ export class DataMigrationService {
       progressCallback?.('Migration complete', 100);
       result.success = true;
       
-    } catch (error) {
+    } catch (_error) {
       const errorMsg = error instanceof Error ? error.message : 'Migration failed';
       result.errors.push(errorMsg);
       result.success = false;
@@ -310,8 +310,8 @@ export class DataMigrationService {
           encryptionVersion: toVersion
         });
         
-      } catch (error) {
-        console.error(`Failed to migrate encryption for account ${account.id}:`, error);
+      } catch (_error) {
+        console.error(`Failed to migrate encryption for account ${account.id}:`, _error);
         throw error;
       }
     }
@@ -484,8 +484,8 @@ export class DataMigrationService {
   /**
    * Validate backup data
    */
-  static async validateBackup(backupData: any): Promise<BackupValidationResult> {
-    const result: BackupValidationResult = {
+  static async validateBackup(backupData: unknown): Promise<BackupValidationResult> {
+    const _result: BackupValidationResult = {
       isValid: true,
       version: backupData.version || '1.0',
       accountCount: 0,
@@ -528,8 +528,8 @@ export class DataMigrationService {
         result.warnings.push('Backup missing creation date');
       }
 
-    } catch (error) {
-      result.errors.push(`Validation error: ${error}`);
+    } catch (_error) {
+      result.errors.push(`Validation _error: ${error}`);
       result.isValid = false;
     }
 
@@ -539,7 +539,7 @@ export class DataMigrationService {
   /**
    * Validate individual account data
    */
-  private static validateAccountData(account: any, version: string): string[] {
+  private static validateAccountData(account: unknown, version: string): string[] {
     const errors: string[] = [];
 
     // Required fields
@@ -634,7 +634,7 @@ export class DataMigrationService {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  private static convertToCSV(accounts: any[]): string {
+  private static convertToCSV(accounts: unknown[]): string {
     const headers = ['Label', 'Issuer', 'Type', 'Algorithm', 'Digits', 'Period', 'Tags', 'Category', 'Favorite'];
     const rows = accounts.map(account => [
       account.label,

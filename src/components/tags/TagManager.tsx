@@ -20,7 +20,7 @@ import {
   updateTag,
   deleteTag,
 } from '@store/slices/tagsSlice';
-import { Tag, TAG_COLORS } from '@types/tag';
+import { Tag, TAG_COLORS } from '@app-types/tag';
 import TagPill from './TagPill';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 
@@ -80,7 +80,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (_e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !formData.name.trim()) return;
 
@@ -99,7 +99,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
         })).unwrap();
       }
       resetForm();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to save tag:', error);
     } finally {
       setIsSubmitting(false);
@@ -115,7 +115,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
         tagId,
       })).unwrap();
       setDeleteConfirm(null);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to delete tag:', error);
     }
   };

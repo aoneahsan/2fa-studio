@@ -50,10 +50,10 @@ export const useBiometric = () => {
         
         setBiometricStatus({
           isAvailable: result.isAvailable,
-          biometryType: result.biometryType as any,
+          biometryType: result.biometryType as unknown,
           reason: result.reason,
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('Error checking biometric:', error);
         setBiometricStatus({
           isAvailable: false,
@@ -95,8 +95,8 @@ export const useBiometric = () => {
       } else {
         throw new Error('Authentication failed');
       }
-    } catch (error: any) {
-      console.error('Biometric authentication error:', error);
+    } catch (_error: unknown) {
+      console.error('Biometric authentication _error:', error);
       
       if (error.code === 'UserCancel') {
         dispatch(addToast({
@@ -144,7 +144,7 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to enable biometric:', error);
       return false;
     }
@@ -166,7 +166,7 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to disable biometric:', error);
       return false;
     }
@@ -192,7 +192,7 @@ export const useBiometric = () => {
         subtitle: 'Unlock app',
       });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }, [biometricEnabled, authenticate, dispatch]);

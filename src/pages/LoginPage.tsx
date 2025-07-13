@@ -25,7 +25,7 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showEncryptionField, setShowEncryptionField] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (_e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
@@ -69,8 +69,8 @@ const LoginPage: React.FC = () => {
       }));
       
       navigate('/dashboard');
-    } catch (error: any) {
-      console.error('Login error:', error);
+    } catch (_error: unknown) {
+      console.error('Login _error:', error);
       dispatch(addToast({
         type: 'error',
         message: error.message || 'Failed to sign in',

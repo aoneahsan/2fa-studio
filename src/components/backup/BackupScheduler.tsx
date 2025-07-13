@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { BackupSchedulerService } from '@services/backup-scheduler.service';
-import { BackupSchedule } from '@types/backup.types';
+import { BackupSchedule } from '@app-types/backup';
 import { 
   PlusIcon, 
   TrashIcon, 
@@ -17,8 +17,8 @@ import {
   CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
-import Button from '@components/common/Button';
-import Modal from '@components/common/Modal';
+// import Button from '@components/common/Button';
+// import Modal from '@components/common/Modal';
 
 /**
  * Component for managing backup schedules
@@ -60,7 +60,7 @@ const BackupScheduler: React.FC = () => {
       setIsLoading(true);
       const userSchedules = await BackupSchedulerService.getSchedules(user.id);
       setSchedules(userSchedules);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading schedules:', error);
     } finally {
       setIsLoading(false);
@@ -94,7 +94,7 @@ const BackupScheduler: React.FC = () => {
 
       await loadSchedules();
       resetForm();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error saving schedule:', error);
     }
   };
@@ -105,7 +105,7 @@ const BackupScheduler: React.FC = () => {
     try {
       await BackupSchedulerService.deleteSchedule(user.id, scheduleId);
       await loadSchedules();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error deleting schedule:', error);
     }
   };
@@ -115,7 +115,7 @@ const BackupScheduler: React.FC = () => {
 
     try {
       await BackupSchedulerService.runBackupNow(user.id, scheduleId);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error running backup:', error);
     }
   };

@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+import 'cypress'
 
 // ***********************************************
 // Custom commands for 2FA Studio E2E tests
@@ -121,7 +121,7 @@ Cypress.Commands.add('cleanup', () => {
 // Mock biometric authentication
 Cypress.Commands.add('mockBiometric', (success = true) => {
   cy.window().then((win) => {
-    win.BiometricAuth = {
+    (win as any).BiometricAuth = {
       isAvailable: () => Promise.resolve({ isAvailable: true }),
       verify: () => Promise.resolve({ isVerified: success })
     };
@@ -132,11 +132,11 @@ Cypress.Commands.add('mockBiometric', (success = true) => {
 Cypress.Commands.add('setupEmulator', () => {
   cy.window().then((win) => {
     // Initialize Firebase with emulator settings
-    if (win.firebase) {
-      win.firebase.auth().useEmulator('http://localhost:9099');
-      win.firebase.firestore().useEmulator('localhost', 8080);
-      win.firebase.storage().useEmulator('localhost', 9199);
-      win.firebase.functions().useEmulator('localhost', 5001);
+    if ((win as any).firebase) {
+      (win as any).firebase.auth().useEmulator('http://localhost:9099');
+      (win as any).firebase.firestore().useEmulator('localhost', 8080);
+      (win as any).firebase.storage().useEmulator('localhost', 9199);
+      (win as any).firebase.functions().useEmulator('localhost', 5001);
     }
   });
 });

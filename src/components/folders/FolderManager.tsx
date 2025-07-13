@@ -15,7 +15,7 @@ import {
   clearFoldersError,
   selectFoldersError
 } from '@store/slices/foldersSlice';
-import { Folder, FOLDER_COLORS } from '@types/folder';
+import { Folder, FOLDER_COLORS } from '@app-types/folder';
 import FolderTree from './FolderTree';
 import { 
   XMarkIcon, 
@@ -63,13 +63,13 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
   } | null>(null);
 
   useEffect(() => {
-    if (error) {
+    if (_error) {
       const timer = setTimeout(() => {
         dispatch(clearFoldersError());
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [error, dispatch]);
+  }, [_error, dispatch]);
 
   const handleCreate = async () => {
     if (!user || !formData.name.trim()) return;

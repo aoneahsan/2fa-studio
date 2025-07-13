@@ -53,7 +53,7 @@ const RegisterPage: React.FC = () => {
     setEncryptionStrength(strength);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (_e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -115,8 +115,8 @@ const RegisterPage: React.FC = () => {
       }));
       
       navigate('/dashboard');
-    } catch (error: any) {
-      console.error('Registration error:', error);
+    } catch (_error: unknown) {
+      console.error('Registration _error:', error);
       dispatch(addToast({
         type: 'error',
         message: error.message || 'Failed to create account',

@@ -46,7 +46,7 @@ const DeleteAccountDialog: React.FC = () => {
       }));
       
       dispatch(closeModal());
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to delete account:', error);
       dispatch(addToast({
         type: 'error',

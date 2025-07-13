@@ -7,14 +7,14 @@ import React, { Component, ReactNode } from 'react';
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | null;
+  _error: Error | null;
   errorInfo: React.ErrorInfo | null;
 }
 
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  onError?: (_error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -23,36 +23,36 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     
     this.state = {
       hasError: false,
-      error: null,
+      _error: null,
       errorInfo: null
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+  static getDerivedStateFromError(_error: Error): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
       error
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+  componentDidCatch(_error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by ErrorBoundary:', _error, errorInfo);
     
     this.setState({
-      error,
+      _error,
       errorInfo
     });
 
     // Report error to monitoring service
-    this.reportError(error, errorInfo);
+    this.reportError(_error, errorInfo);
     
     // Call custom error handler if provided
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      this.props.onError(_error, errorInfo);
     }
   }
 
-  private reportError(error: Error, errorInfo: React.ErrorInfo) {
+  private reportError(_error: Error, errorInfo: React.ErrorInfo) {
     // In a real app, this would send to Sentry or similar service
     const errorReport = {
       message: error.message,
@@ -67,7 +67,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.queueErrorReport(errorReport);
   }
 
-  private queueErrorReport(errorReport: any) {
+  private queueErrorReport(errorReport: unknown) {
     try {
       const existingErrors = JSON.parse(
         localStorage.getItem('error_queue') || '[]'
@@ -81,15 +81,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
       
       localStorage.setItem('error_queue', JSON.stringify(existingErrors));
-    } catch (e) {
-      console.error('Failed to queue error report:', e);
+    } catch (_e) {
+      console.error('Failed to queue error report:', _e);
     }
   }
 
   private handleRetry = () => {
     this.setState({
       hasError: false,
-      error: null,
+      _error: null,
       errorInfo: null
     });
   };
@@ -149,7 +149,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 // Hook for functional components
 export const useErrorHandler = () => {
-  const handleError = (error: Error, errorInfo?: any) => {
+  const handleError = (_error: Error, errorInfo?: unknown) => {
     console.error('Error handled by hook:', error);
     
     // Report error
@@ -169,8 +169,8 @@ export const useErrorHandler = () => {
       
       existingErrors.push(errorReport);
       localStorage.setItem('error_queue', JSON.stringify(existingErrors));
-    } catch (e) {
-      console.error('Failed to queue error report:', e);
+    } catch (_e) {
+      console.error('Failed to queue error report:', _e);
     }
   };
 

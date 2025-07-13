@@ -17,7 +17,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@src/config/firebase';
-import { BackupSchedule, BackupHistory } from '@types/backup.types';
+import { BackupSchedule, BackupHistory } from '@app-types/backup';
 import { BackupService } from '@services/backup.service';
 import { NotificationService } from '@services/notification.service';
 import { addDays, addWeeks, addMonths, setHours, setMinutes, parseISO, format } from 'date-fns';
@@ -119,7 +119,7 @@ export class BackupSchedulerService {
     const scheduleRef = doc(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`, scheduleId);
     
     // Recalculate next run if frequency or time changed
-    const updateData: any = {
+    const updateData: unknown = {
       ...updates,
       updatedAt: serverTimestamp(),
     };
@@ -240,7 +240,7 @@ export class BackupSchedulerService {
   ): Promise<void> {
     const startTime = Date.now();
     let status: BackupHistory['status'] = 'success';
-    let error: string | undefined;
+    let _error: string | undefined;
     let accountsCount = 0;
 
     try {
@@ -286,7 +286,7 @@ export class BackupSchedulerService {
       status,
       destination: schedule.destination === 'both' ? 'googledrive' : schedule.destination,
       accountsCount,
-      error,
+      _error,
       duration,
     });
   }

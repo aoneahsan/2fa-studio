@@ -49,7 +49,7 @@ export interface StripeWebhookEvent {
   id: string;
   type: string;
   data: {
-    object: any;
+    object: unknown;
   };
   created: number;
   livemode: boolean;
@@ -77,7 +77,7 @@ export class StripeService {
    */
   static createElements(options?: {
     clientSecret?: string;
-    appearance?: any;
+    appearance?: unknown;
   }): StripeElements {
     if (!this.stripe) {
       throw new Error('Stripe not initialized');
@@ -96,9 +96,9 @@ export class StripeService {
       name?: string;
       email?: string;
       phone?: string;
-      address?: any;
+      address?: unknown;
     }
-  ): Promise<{ paymentMethod?: any; error?: any }> {
+  ): Promise<{ paymentMethod?: unknown; error?: unknown }> {
     if (!this.stripe) {
       throw new Error('Stripe not initialized');
     }
@@ -119,7 +119,7 @@ export class StripeService {
       payment_method?: string;
       return_url?: string;
     }
-  ): Promise<{ paymentIntent?: any; error?: any }> {
+  ): Promise<{ paymentIntent?: unknown; error?: unknown }> {
     if (!this.stripe) {
       throw new Error('Stripe not initialized');
     }
@@ -154,7 +154,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          error: result.error || 'Failed to create subscription',
+          _error: result.error || 'Failed to create subscription',
         };
       }
 
@@ -176,11 +176,11 @@ export class StripeService {
         subscription: result.subscription,
         clientSecret: result.clientSecret,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating subscription:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -207,7 +207,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          error: result.error || 'Failed to update subscription',
+          _error: result.error || 'Failed to update subscription',
         };
       }
 
@@ -234,11 +234,11 @@ export class StripeService {
         success: true,
         subscription: result.subscription,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating subscription:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -268,7 +268,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          error: result.error || 'Failed to cancel subscription',
+          _error: result.error || 'Failed to cancel subscription',
         };
       }
 
@@ -295,11 +295,11 @@ export class StripeService {
         success: true,
         subscription: result.subscription,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -320,7 +320,7 @@ export class StripeService {
         return {
           success: false,
           paymentMethods: [],
-          error: result.error || 'Failed to get payment methods',
+          _error: result.error || 'Failed to get payment methods',
         };
       }
 
@@ -328,12 +328,12 @@ export class StripeService {
         success: true,
         paymentMethods: result.paymentMethods,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting payment methods:', error);
       return {
         success: false,
         paymentMethods: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -366,7 +366,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          error: result.error || 'Failed to attach payment method',
+          _error: result.error || 'Failed to attach payment method',
         };
       }
 
@@ -374,11 +374,11 @@ export class StripeService {
         success: true,
         paymentMethod: result.paymentMethod,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error attaching payment method:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -406,18 +406,18 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          error: result.error || 'Failed to detach payment method',
+          _error: result.error || 'Failed to detach payment method',
         };
       }
 
       return {
         success: true,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error detaching payment method:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -438,7 +438,7 @@ export class StripeService {
         return {
           success: false,
           invoices: [],
-          error: result.error || 'Failed to get invoices',
+          _error: result.error || 'Failed to get invoices',
         };
       }
 
@@ -446,12 +446,12 @@ export class StripeService {
         success: true,
         invoices: result.invoices,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting invoices:', error);
       return {
         success: false,
         invoices: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -481,7 +481,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          error: result.error || 'Failed to create portal session',
+          _error: result.error || 'Failed to create portal session',
         };
       }
 
@@ -489,11 +489,11 @@ export class StripeService {
         success: true,
         url: result.url,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating portal session:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -532,7 +532,7 @@ export class StripeService {
   /**
    * Handle subscription update webhook
    */
-  private static async handleSubscriptionUpdate(subscription: any): Promise<void> {
+  private static async handleSubscriptionUpdate(subscription: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -556,7 +556,7 @@ export class StripeService {
           subscriptionData
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling subscription update:', error);
     }
   }
@@ -564,7 +564,7 @@ export class StripeService {
   /**
    * Handle subscription deleted webhook
    */
-  private static async handleSubscriptionDeleted(subscription: any): Promise<void> {
+  private static async handleSubscriptionDeleted(subscription: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -582,7 +582,7 @@ export class StripeService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling subscription deletion:', error);
     }
   }
@@ -590,7 +590,7 @@ export class StripeService {
   /**
    * Handle invoice payment succeeded webhook
    */
-  private static async handleInvoicePaymentSucceeded(invoice: any): Promise<void> {
+  private static async handleInvoicePaymentSucceeded(invoice: unknown): Promise<void> {
     try {
       // Store invoice in Firestore
       await FirestoreService.addDocument('invoices', {
@@ -609,7 +609,7 @@ export class StripeService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling invoice payment succeeded:', error);
     }
   }
@@ -617,7 +617,7 @@ export class StripeService {
   /**
    * Handle invoice payment failed webhook
    */
-  private static async handleInvoicePaymentFailed(invoice: any): Promise<void> {
+  private static async handleInvoicePaymentFailed(invoice: unknown): Promise<void> {
     try {
       // Update subscription status and send notification
       const firestoreResult = await FirestoreService.getCollection(
@@ -635,7 +635,7 @@ export class StripeService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling invoice payment failed:', error);
     }
   }
@@ -643,7 +643,7 @@ export class StripeService {
   /**
    * Handle payment method attached webhook
    */
-  private static async handlePaymentMethodAttached(paymentMethod: any): Promise<void> {
+  private static async handlePaymentMethodAttached(paymentMethod: unknown): Promise<void> {
     try {
       // Store payment method in Firestore if it doesn't exist
       const existing = await FirestoreService.getCollection(
@@ -666,7 +666,7 @@ export class StripeService {
           updatedAt: new Date(),
         });
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling payment method attached:', error);
     }
   }

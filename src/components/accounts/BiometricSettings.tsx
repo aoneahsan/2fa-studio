@@ -15,7 +15,7 @@ import {
   ClockIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
-import Button from '@components/common/Button';
+// import Button from '@components/common/Button';
 
 interface BiometricSettingsProps {
   account: OTPAccount;
@@ -57,7 +57,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       }
       
       onUpdate?.();
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: error instanceof Error ? error.message : 'Failed to update biometric settings',
@@ -85,7 +85,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       }));
       
       onUpdate?.();
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update timeout',

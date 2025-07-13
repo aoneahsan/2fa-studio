@@ -15,7 +15,7 @@ export const showToast = (message: string, options: ToastOptions = {}) => {
   console.log(`[${options.type || 'info'}] ${message}`);
   
   // You can integrate with react-hot-toast, react-toastify, or Capacitor Toast here
-  if (typeof window !== 'undefined' && (window as any).Capacitor) {
+  if (typeof window !== 'undefined' && (window as unknown).Capacitor) {
     // Use Capacitor Toast for mobile
     import('@capacitor/toast').then(({ Toast }) => {
       Toast.show({

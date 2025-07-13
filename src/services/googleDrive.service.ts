@@ -28,7 +28,7 @@ export class GoogleDriveService {
   private static DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
   private static SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
   
-  private static tokenClient: any = null;
+  private static tokenClient: unknown = null;
   private static gapiInited = false;
   private static gisInited = false;
   private static accessToken: string | null = null;
@@ -62,8 +62,8 @@ export class GoogleDriveService {
             });
             this.gapiInited = true;
             resolve();
-          } catch (error) {
-            reject(error);
+          } catch (_error) {
+            reject(_error);
           }
         });
       };
@@ -84,7 +84,7 @@ export class GoogleDriveService {
         this.tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: this.CLIENT_ID,
           scope: this.SCOPES,
-          callback: (response: any) => {
+          callback: (response: unknown) => {
             this.accessToken = response.access_token;
           },
         });
@@ -105,7 +105,7 @@ export class GoogleDriveService {
     }
 
     return new Promise((resolve) => {
-      this.tokenClient.callback = async (response: any) => {
+      this.tokenClient.callback = async (response: unknown) => {
         if (response.error !== undefined) {
           resolve(false);
           return;
@@ -192,7 +192,7 @@ export class GoogleDriveService {
         name: `2fa-studio-backup-${Date.now()}.json`,
         mimeType: 'application/json',
         parents: ['appDataFolder'],
-        properties: metadata as any,
+        properties: metadata as unknown,
       };
 
       const multipartRequestBody =
@@ -216,7 +216,7 @@ export class GoogleDriveService {
       });
 
       return response.result.id;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to create backup:', error);
       throw error;
     }
@@ -242,8 +242,8 @@ export class GoogleDriveService {
       const files = response.result.files || [];
       // Map and filter to ensure all required properties exist
       return files
-        .filter((file: any) => file.id && file.name)
-        .map((file: any) => ({
+        .filter((file: unknown) => file.id && file.name)
+        .map((file: unknown) => ({
           id: file.id,
           name: file.name,
           mimeType: file.mimeType || 'application/json',
@@ -251,7 +251,7 @@ export class GoogleDriveService {
           modifiedTime: file.modifiedTime || new Date().toISOString(),
           size: file.size || '0'
         }));
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to list backups:', error);
       throw error;
     }
@@ -278,7 +278,7 @@ export class GoogleDriveService {
       if (typeof data === 'string') {
         try {
           data = JSON.parse(data);
-        } catch (e) {
+        } catch (_e) {
           // Data might be already parsed
         }
       }
@@ -293,7 +293,7 @@ export class GoogleDriveService {
       }
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get backup:', error);
       throw error;
     }
@@ -312,7 +312,7 @@ export class GoogleDriveService {
       await gapi.client.drive.files.delete({
         fileId: fileId,
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to delete backup:', error);
       throw error;
     }
@@ -337,7 +337,7 @@ export class GoogleDriveService {
         used: parseInt(quota?.usage || '0'),
         limit: parseInt(quota?.limit || '0'),
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get storage quota:', error);
       throw error;
     }
@@ -372,7 +372,7 @@ export class GoogleDriveService {
           await this.deleteBackup(backup.id);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to sync backup:', error);
       throw error;
     }

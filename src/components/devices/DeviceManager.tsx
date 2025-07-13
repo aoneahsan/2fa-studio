@@ -53,7 +53,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
 
       setDevices(userDevices);
       setSessions(activeSessions);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading devices:', error);
     } finally {
       setIsLoading(false);
@@ -66,7 +66,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
     try {
       await DeviceService.trustDevice(user.id, deviceId);
       await loadDevices();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error trusting device:', error);
     }
   };
@@ -78,7 +78,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
       await DeviceService.removeDevice(user.id, deviceId);
       setShowConfirmDelete(null);
       await loadDevices();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error removing device:', error);
     }
   };
@@ -89,7 +89,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
     try {
       await DeviceService.endSession(user.id, sessionId);
       await loadDevices();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error ending session:', error);
     }
   };

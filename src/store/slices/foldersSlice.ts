@@ -5,7 +5,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { FolderService } from '@services/folder.service';
-import { Folder, FolderTree } from '@types/folder';
+import { Folder, FolderTree } from '@app-types/folder';
 import { RootState } from '@store/index';
 
 interface FoldersState {
@@ -14,7 +14,7 @@ interface FoldersState {
   selectedFolderId: string | null;
   expandedFolders: string[];
   isLoading: boolean;
-  error: string | null;
+  _error: string | null;
 }
 
 const initialState: FoldersState = {
@@ -23,7 +23,7 @@ const initialState: FoldersState = {
   selectedFolderId: null,
   expandedFolders: [],
   isLoading: false,
-  error: null,
+  _error: null,
 };
 
 // Async thunks

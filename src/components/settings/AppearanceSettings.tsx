@@ -61,7 +61,7 @@ const AppearanceSettings: React.FC = () => {
     if (theme !== 'system') return;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
+    const handleChange = (_e: MediaQueryListEvent) => {
       const root = document.documentElement;
       if (e.matches) {
         root.classList.add('dark');

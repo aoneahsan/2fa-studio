@@ -13,7 +13,7 @@ import foldersReducer from '@store/slices/foldersSlice';
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
+    _auth: authReducer,
     accounts: accountsReducer,
     settings: settingsReducer,
     ui: uiReducer,

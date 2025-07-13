@@ -69,7 +69,7 @@ export class MobileNotificationsService {
 
       console.log('Push notifications initialized successfully');
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize push notifications:', error);
       return false;
     }
@@ -98,8 +98,8 @@ export class MobileNotificationsService {
     });
 
     // Registration error
-    PushNotifications.addListener('registrationError', (error: any) => {
-      console.error('Error on registration:', error);
+    PushNotifications.addListener('registrationError', (_error: unknown) => {
+      console.error('Error on _registration:', error);
     });
 
     // Notification received (app in foreground)
@@ -112,7 +112,7 @@ export class MobileNotificationsService {
 
     // Notification tapped (app in background/closed)
     PushNotifications.addListener('pushNotificationActionPerformed', 
-      (notification: any) => {
+      (notification: unknown) => {
         console.log('Push action performed:', notification);
         this.handleNotificationTap(notification.notification);
       }
@@ -146,7 +146,7 @@ export class MobileNotificationsService {
       );
 
       console.log('Local notifications initialized');
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize local notifications:', error);
     }
   }
@@ -184,7 +184,7 @@ export class MobileNotificationsService {
   /**
    * Handle notification tap
    */
-  private static handleNotificationTap(notification: any): void {
+  private static handleNotificationTap(notification: unknown): void {
     const data = notification.data || {};
     
     switch (data.type) {
@@ -211,7 +211,7 @@ export class MobileNotificationsService {
   /**
    * Handle local notification tap
    */
-  private static handleLocalNotificationTap(notification: any): void {
+  private static handleLocalNotificationTap(notification: unknown): void {
     const data = notification.extra || {};
     
     switch (data.type) {
@@ -238,7 +238,7 @@ export class MobileNotificationsService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get notification settings:', error);
     }
 
@@ -281,7 +281,7 @@ export class MobileNotificationsService {
     id: number;
     title: string;
     body: string;
-    data?: any;
+    data?: unknown;
     scheduledAt: Date;
     repeats?: boolean;
   }): Promise<void> {
@@ -396,7 +396,7 @@ export class MobileNotificationsService {
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({ token, platform, userId: getCurrentUserId() })
       // });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to send token to server:', error);
     }
   }

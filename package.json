@@ -109,6 +109,7 @@
 		"eslint": "^9.31.0",
 		"eslint-plugin-react-hooks": "^6.0.0",
 		"eslint-plugin-react-refresh": "^0.4.20",
+		"glob": "^11.0.3",
 		"globals": "^16.3.0",
 		"jsdom": "^26.1.0",
 		"postcss": "^8.5.6",

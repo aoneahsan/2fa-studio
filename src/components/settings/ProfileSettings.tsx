@@ -10,7 +10,7 @@ import { setUser } from '@store/slices/authSlice';
 import { addToast } from '@store/slices/uiSlice';
 import { updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '@src/config/firebase';
+import { _auth, db } from '@src/config/firebase';
 import { CameraIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 /**
@@ -23,7 +23,7 @@ const ProfileSettings: React.FC = () => {
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [photoURL, setPhotoURL] = useState(user?.photoURL || '');
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const handleUpdateProfile = async (_e: React.FormEvent) => {
     e.preventDefault();
     
     if (!auth.currentUser || !user) return;
@@ -61,8 +61,8 @@ const ProfileSettings: React.FC = () => {
         type: 'success',
         message: 'Profile updated successfully'
       }));
-    } catch (error) {
-      console.error('Profile update error:', error);
+    } catch (_error) {
+      console.error('Profile update _error:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update profile'
@@ -72,7 +72,7 @@ const ProfileSettings: React.FC = () => {
     }
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (_e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 

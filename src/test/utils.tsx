@@ -20,7 +20,7 @@ export function renderWithProviders(
     preloadedState = {},
     store = configureStore({
       reducer: {
-        auth: authReducer,
+        _auth: authReducer,
         accounts: accountsReducer,
         settings: settingsReducer,
         ui: uiReducer,

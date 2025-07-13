@@ -49,7 +49,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({
     isAuthenticating: false
   });
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   // Check biometric requirement
   const checkBiometric = useCallback(async () => {

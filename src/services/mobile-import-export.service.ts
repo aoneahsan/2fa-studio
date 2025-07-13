@@ -46,7 +46,7 @@ export class MobileImportExportService extends ImportExportService {
         directory: Directory.Documents,
         recursive: true
       });
-    } catch (error) {
+    } catch (_error) {
       // Directories might already exist
     }
   }
@@ -95,11 +95,11 @@ export class MobileImportExportService extends ImportExportService {
 
       // Default: return data for further processing
       return { success: true, uri: `data:application/json;base64,${btoa(exportData)}` };
-    } catch (error) {
+    } catch (_error) {
       console.error('Export failed:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Export failed' 
+        _error: error instanceof Error ? error.message : 'Export failed' 
       };
     }
   }
@@ -122,7 +122,7 @@ export class MobileImportExportService extends ImportExportService {
         });
 
         if (!result.files.length) {
-          return { success: false, error: 'No file selected' };
+          return { success: false, _error: 'No file selected' };
         }
 
         const file = result.files[0];
@@ -158,11 +158,11 @@ export class MobileImportExportService extends ImportExportService {
       const accounts = await this.importAccounts(fileContent, format, options.password);
       
       return { success: true, accounts };
-    } catch (error) {
+    } catch (_error) {
       console.error('Import failed:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Import failed' 
+        _error: error instanceof Error ? error.message : 'Import failed' 
       };
     }
   }
@@ -201,11 +201,11 @@ export class MobileImportExportService extends ImportExportService {
       });
 
       return { success: true, uri: result.uri };
-    } catch (error) {
+    } catch (_error) {
       console.error('Backup failed:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Backup failed' 
+        _error: error instanceof Error ? error.message : 'Backup failed' 
       };
     }
   }
@@ -232,7 +232,7 @@ export class MobileImportExportService extends ImportExportService {
       });
 
       if (!result.files.length) {
-        return { success: false, error: 'No backup file selected' };
+        return { success: false, _error: 'No backup file selected' };
       }
 
       const file = result.files[0];
@@ -260,11 +260,11 @@ export class MobileImportExportService extends ImportExportService {
       }
 
       return { success: true, accounts: backupData.accounts };
-    } catch (error) {
+    } catch (_error) {
       console.error('Restore failed:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Restore failed' 
+        _error: error instanceof Error ? error.message : 'Restore failed' 
       };
     }
   }
@@ -307,7 +307,7 @@ export class MobileImportExportService extends ImportExportService {
       );
 
       return backups.sort((a, b) => b.created.getTime() - a.created.getTime());
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to list backups:', error);
       return [];
     }
@@ -330,8 +330,8 @@ export class MobileImportExportService extends ImportExportService {
           path: `${this.BACKUP_DIR}/${backup.filename}`,
           directory: Directory.Documents
         });
-      } catch (error) {
-        console.error(`Failed to delete backup ${backup.filename}:`, error);
+      } catch (_error) {
+        console.error(`Failed to delete backup ${backup.filename}:`, _error);
       }
     }
   }
@@ -422,7 +422,7 @@ export class MobileImportExportService extends ImportExportService {
       input.type = 'file';
       input.accept = '.json,.txt,.2fas';
       
-      input.onchange = async (e) => {
+      input.onchange = async (_e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file) {
           reject(new Error('No file selected'));
@@ -432,8 +432,8 @@ export class MobileImportExportService extends ImportExportService {
         try {
           const content = await this.readFileAsText(file);
           resolve(content);
-        } catch (error) {
-          reject(error);
+        } catch (_error) {
+          reject(_error);
         }
       };
       

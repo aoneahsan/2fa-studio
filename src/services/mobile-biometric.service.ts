@@ -48,7 +48,7 @@ export class MobileBiometricService {
         type: result.biometryType,
         reason: result.reason
       };
-    } catch (error) {
+    } catch (_error) {
       return { 
         available: false, 
         reason: 'Error checking biometry' 
@@ -65,8 +65,8 @@ export class MobileBiometricService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (error) {
-      console.error('Failed to get biometric config:', error);
+    } catch (_error) {
+      console.error('Failed to get biometric _config:', error);
     }
 
     return {
@@ -79,10 +79,10 @@ export class MobileBiometricService {
   /**
    * Save biometric configuration
    */
-  static async saveConfig(config: BiometricConfig): Promise<void> {
+  static async saveConfig(_config: BiometricConfig): Promise<void> {
     await Preferences.set({
       key: this.CONFIG_KEY,
-      value: JSON.stringify(config)
+      value: JSON.stringify(_config)
     });
   }
 
@@ -107,10 +107,10 @@ export class MobileBiometricService {
       const config = await this.getConfig();
       config.enabled = true;
       config.timeout = timeout;
-      await this.saveConfig(config);
+      await this.saveConfig(_config);
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to enable biometric:', error);
       return false;
     }
@@ -131,13 +131,13 @@ export class MobileBiometricService {
       const config = await this.getConfig();
       config.enabled = false;
       config.protectedAccounts = [];
-      await this.saveConfig(config);
+      await this.saveConfig(_config);
 
       // Clear sessions
       this.authenticatedSessions.clear();
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to disable biometric:', error);
       return false;
     }
@@ -160,15 +160,15 @@ export class MobileBiometricService {
         disableDeviceFallback: false
       });
 
-      if (result) {
+      if (_result) {
         // Update config with last authentication time
         const config = await this.getConfig();
         config.lastAuthentication = new Date().toISOString();
-        await this.saveConfig(config);
+        await this.saveConfig(_config);
       }
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       console.error('Biometric authentication failed:', error);
       return false;
     }
@@ -182,7 +182,7 @@ export class MobileBiometricService {
     
     if (!config.protectedAccounts.includes(accountId)) {
       config.protectedAccounts.push(accountId);
-      await this.saveConfig(config);
+      await this.saveConfig(_config);
     }
   }
 
@@ -192,7 +192,7 @@ export class MobileBiometricService {
   static async unprotectAccount(accountId: string): Promise<void> {
     const config = await this.getConfig();
     config.protectedAccounts = config.protectedAccounts.filter(id => id !== accountId);
-    await this.saveConfig(config);
+    await this.saveConfig(_config);
     
     // Remove from authenticated sessions
     this.authenticatedSessions.delete(accountId);
@@ -292,7 +292,7 @@ export class MobileBiometricService {
   static async updateTimeout(minutes: number): Promise<void> {
     const config = await this.getConfig();
     config.timeout = minutes;
-    await this.saveConfig(config);
+    await this.saveConfig(_config);
   }
 
   /**

@@ -22,7 +22,7 @@ export class AdminSubscriptionManagementService {
     tier?: SubscriptionTier;
     provider?: string;
   }): Promise<UserSubscription[]> {
-    const queryFilters: any[] = [];
+    const queryFilters: unknown[] = [];
     
     if (filters?.status) {
       queryFilters.push({ field: 'status', operator: '==', value: filters.status });

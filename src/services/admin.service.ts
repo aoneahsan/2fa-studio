@@ -68,7 +68,7 @@ export class AdminService {
       const idTokenResult = await currentUser.getIdTokenResult();
       return idTokenResult.claims.role === 'admin' || 
              idTokenResult.claims.role === 'super_admin';
-    } catch (error) {
+    } catch (_error) {
       console.error('Error checking admin status:', error);
       return false;
     }
@@ -84,7 +84,7 @@ export class AdminService {
 
       const idTokenResult = await currentUser.getIdTokenResult();
       return idTokenResult.claims.role === 'super_admin';
-    } catch (error) {
+    } catch (_error) {
       console.error('Error checking super admin status:', error);
       return false;
     }
@@ -98,7 +98,7 @@ export class AdminService {
       const getStats = httpsCallable<void, AdminStats>(this.functions, 'getAdminStats');
       const result = await getStats();
       return result.data;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting dashboard stats:', error);
       throw error;
     }
@@ -114,7 +114,7 @@ export class AdminService {
   }> {
     try {
       const q = collection(db, 'users');
-      const constraints: any[] = [];
+      const constraints: unknown[] = [];
 
       // Add filters
       if (params.subscriptionTier) {
@@ -138,7 +138,7 @@ export class AdminService {
       }
 
       // Execute query
-      const queryRef = query(q as any, ...constraints);
+      const queryRef = query(q as unknown, ...constraints);
       const snapshot = await getDocs(queryRef);
 
       const users: User[] = [];
@@ -165,7 +165,7 @@ export class AdminService {
       }
 
       return { users, lastDoc: lastDocSnapshot, hasMore };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error searching users:', error);
       throw error;
     }
@@ -194,7 +194,7 @@ export class AdminService {
       });
       
       return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting user details:', error);
       throw error;
     }
@@ -213,7 +213,7 @@ export class AdminService {
           throw new Error('User not found');
         }
 
-        const updates: any = {
+        const updates: unknown = {
           updatedAt: serverTimestamp()
         };
 
@@ -294,7 +294,7 @@ export class AdminService {
           }
         });
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating user subscription:', error);
       throw error;
     }
@@ -364,7 +364,7 @@ export class AdminService {
     hasMore: boolean;
   }> {
     try {
-      const constraints: any[] = [];
+      const constraints: unknown[] = [];
 
       // Add filters
       if (params.adminId) {
@@ -412,7 +412,7 @@ export class AdminService {
       const hasMore = snapshot.docs.length > pageSize;
 
       return { actions, lastDoc: lastDocSnapshot, hasMore };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting admin actions:', error);
       throw error;
     }
@@ -443,7 +443,7 @@ export class AdminService {
         },
         timestamp: serverTimestamp()
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error sending notification:', error);
       throw error;
     }
@@ -460,7 +460,7 @@ export class AdminService {
       );
       const result = await exportData({ userId });
       return result.data.downloadUrl;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error exporting user data:', error);
       throw error;
     }
@@ -482,7 +482,7 @@ export class AdminService {
         metadata: { reason },
         timestamp: serverTimestamp()
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error deleting user account:', error);
       throw error;
     }

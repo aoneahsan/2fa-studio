@@ -43,7 +43,7 @@ const AccountsList: React.FC<AccountsListProps> = ({ accounts, isLoading }) => {
         ...account,
         isFavorite: !account.isFavorite
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to toggle favorite:', error);
     }
   };

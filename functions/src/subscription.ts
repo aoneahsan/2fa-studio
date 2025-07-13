@@ -28,8 +28,8 @@ const TIER_LIMITS = {
 /**
  * Create Stripe checkout session
  */
-export const createCheckoutSession = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const createCheckoutSession = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -83,8 +83,8 @@ export const createCheckoutSession = functions.https.onCall(async (data, context
     });
 
     return { sessionId: session.id, url: session.url };
-  } catch (error) {
-    console.error("Error creating checkout session:", error);
+  } catch (_error) {
+    console.error('Error creating checkout session:', error);
     throw new functions.https.HttpsError("internal", "Failed to create checkout session");
   }
 });
@@ -92,8 +92,8 @@ export const createCheckoutSession = functions.https.onCall(async (data, context
 /**
  * Create customer portal session
  */
-export const createPortalSession = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const createPortalSession = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -115,8 +115,8 @@ export const createPortalSession = functions.https.onCall(async (data, context) 
     });
 
     return { url: session.url };
-  } catch (error) {
-    console.error("Error creating portal session:", error);
+  } catch (_error) {
+    console.error('Error creating portal session:', error);
     throw new functions.https.HttpsError("internal", "Failed to create portal session");
   }
 });
@@ -142,7 +142,7 @@ export const handleStripeWebhook = functions.https.onRequest(async (req, res) =>
 
   try {
     event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Webhook signature verification failed:", err.message);
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
@@ -176,8 +176,8 @@ export const handleStripeWebhook = functions.https.onRequest(async (req, res) =>
     }
 
     res.json({ received: true });
-  } catch (error) {
-    console.error("Error processing webhook:", error);
+  } catch (_error) {
+    console.error('Error processing webhook:', error);
     res.status(500).send("Webhook processing failed");
   }
 });
@@ -185,8 +185,8 @@ export const handleStripeWebhook = functions.https.onRequest(async (req, res) =>
 /**
  * Check account limits for user
  */
-export const checkAccountLimits = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const checkAccountLimits = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -205,8 +205,8 @@ export const checkAccountLimits = functions.https.onCall(async (data, context) =
       remaining: limits.accounts === -1 ? -1 : limits.accounts - currentCount,
       canAdd: limits.accounts === -1 || currentCount < limits.accounts,
     };
-  } catch (error) {
-    console.error("Error checking limits:", error);
+  } catch (_error) {
+    console.error('Error checking limits:', error);
     throw new functions.https.HttpsError("internal", "Failed to check limits");
   }
 });
@@ -214,8 +214,8 @@ export const checkAccountLimits = functions.https.onCall(async (data, context) =
 /**
  * Update usage statistics
  */
-export const updateUsageStats = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const updateUsageStats = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -223,7 +223,7 @@ export const updateUsageStats = functions.https.onCall(async (data, context) => 
 
   try {
     const increment = admin.firestore.FieldValue.increment(value);
-    const updates: any = {
+    const updates: unknown = {
       lastActive: admin.firestore.FieldValue.serverTimestamp(),
     };
 
@@ -245,8 +245,8 @@ export const updateUsageStats = functions.https.onCall(async (data, context) => 
     await db.collection("users").doc(context.auth.uid).update(updates);
 
     return { success: true };
-  } catch (error) {
-    console.error("Error updating usage stats:", error);
+  } catch (_error) {
+    console.error('Error updating usage stats:', error);
     throw new functions.https.HttpsError("internal", "Failed to update usage stats");
   }
 });
@@ -282,8 +282,8 @@ export async function enforceUsageLimits() {
     }
 
     return { violations };
-  } catch (error) {
-    console.error("Error enforcing limits:", error);
+  } catch (_error) {
+    console.error('Error enforcing limits:', error);
     throw error;
   }
 }

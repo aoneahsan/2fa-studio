@@ -116,8 +116,8 @@ export async function aggregateDailyStats() {
 
     console.log(`Aggregated stats for ${today.toISOString().split("T")[0]}`);
     return stats;
-  } catch (error) {
-    console.error("Error aggregating stats:", error);
+  } catch (_error) {
+    console.error('Error aggregating stats:', error);
     throw error;
   }
 }
@@ -125,9 +125,9 @@ export async function aggregateDailyStats() {
 /**
  * Generate analytics reports
  */
-export const generateReports = functions.https.onCall(async (data, context) => {
+export const generateReports = functions.https.onCall(async (_data, _context) => {
   // Check admin privileges
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -183,8 +183,8 @@ export const generateReports = functions.https.onCall(async (data, context) => {
     };
 
     return report;
-  } catch (error) {
-    console.error("Error generating report:", error);
+  } catch (_error) {
+    console.error('Error generating report:', error);
     throw new functions.https.HttpsError("internal", "Failed to generate report");
   }
 });
@@ -192,7 +192,7 @@ export const generateReports = functions.https.onCall(async (data, context) => {
 /**
  * Track custom events
  */
-export const trackEvent = functions.https.onCall(async (data, context) => {
+export const trackEvent = functions.https.onCall(async (_data, _context) => {
   const { event, properties = {} } = data;
 
   if (!event) {
@@ -209,8 +209,8 @@ export const trackEvent = functions.https.onCall(async (data, context) => {
     });
 
     return { success: true };
-  } catch (error) {
-    console.error("Error tracking event:", error);
+  } catch (_error) {
+    console.error('Error tracking event:', error);
     throw new functions.https.HttpsError("internal", "Failed to track event");
   }
 });
@@ -259,8 +259,8 @@ export async function cleanupOldAnalytics() {
       analytics: oldAnalyticsSnapshot.size,
       events: oldEventsSnapshot.size,
     };
-  } catch (error) {
-    console.error("Error cleaning up analytics:", error);
+  } catch (_error) {
+    console.error('Error cleaning up analytics:', error);
     throw error;
   }
 }

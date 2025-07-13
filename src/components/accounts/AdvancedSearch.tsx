@@ -71,7 +71,7 @@ const AdvancedSearch: React.FC = () => {
     localStorage.setItem('recentSearches', JSON.stringify(updated));
   }, [recentSearches]);
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((_e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     dispatch(setSearchQuery(value));
     
@@ -93,7 +93,7 @@ const AdvancedSearch: React.FC = () => {
     inputRef.current?.focus();
   }, [dispatch]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((_e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery) {
       saveRecentSearch(searchQuery);
       setShowSuggestions(false);

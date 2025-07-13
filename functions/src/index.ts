@@ -61,7 +61,7 @@ export const webhookGoogleDrive = webhookFunctions.handleGoogleDriveWebhook;
 // Scheduled Functions
 export const scheduledCleanup = functions.pubsub
   .schedule("every 24 hours")
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log("Running daily cleanup tasks");
     
     // Cleanup tasks
@@ -77,7 +77,7 @@ export const scheduledCleanup = functions.pubsub
 
 export const scheduledUsageCheck = functions.pubsub
   .schedule("every 1 hours")
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log("Checking user usage limits");
     
     await subscriptionFunctions.enforceUsageLimits();
@@ -87,7 +87,7 @@ export const scheduledUsageCheck = functions.pubsub
 
 export const scheduledBackup = functions.pubsub
   .schedule("every 12 hours")
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log("Running scheduled backups");
     
     await backupFunctions.runScheduledBackups();
@@ -120,10 +120,10 @@ export const api = functions.https.onRequest(async (req, res) => {
       // Webhook routes
       await webhookFunctions.handleWebhook(req, res);
     } else {
-      res.status(404).json({ error: "Not found" });
+      res.status(404).json({ _error: "Not found" });
     }
-  } catch (error) {
-    console.error("API Error:", error);
-    res.status(500).json({ error: "Internal server error" });
+  } catch (_error) {
+    console.error('API Error:', error);
+    res.status(500).json({ _error: "Internal server error" });
   }
 });

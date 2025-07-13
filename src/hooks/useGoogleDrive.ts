@@ -53,7 +53,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
         if (GoogleDriveService.isAuthenticated()) {
           await refreshBackups();
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to initialize Google Drive:', error);
       }
     };
@@ -95,8 +95,8 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
         }));
         return false;
       }
-    } catch (error) {
-      console.error('Google Drive connection error:', error);
+    } catch (_error) {
+      console.error('Google Drive connection _error:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to connect to Google Drive',
@@ -153,7 +153,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
 
       // Refresh backup list
       await refreshBackups();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to create backup:', error);
       dispatch(addToast({
         type: 'error',
@@ -195,7 +195,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
         type: 'success',
         message: 'Backup restored successfully',
       }));
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to restore backup:', error);
       dispatch(addToast({
         type: 'error',
@@ -225,7 +225,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
 
       // Refresh backup list
       await refreshBackups();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to delete backup:', error);
       dispatch(addToast({
         type: 'error',
@@ -261,7 +261,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       }));
 
       setBackups(formattedBackups);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to refresh backups:', error);
       dispatch(addToast({
         type: 'error',
@@ -298,7 +298,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
 
       // Refresh backup list
       await refreshBackups();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to sync:', error);
       dispatch(addToast({
         type: 'error',

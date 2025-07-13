@@ -27,7 +27,7 @@ export class MobileAccountService {
         directory: Directory.Documents,
         recursive: true
       });
-    } catch (error) {
+    } catch (_error) {
       // Directory might already exist
     }
   }
@@ -46,7 +46,7 @@ export class MobileAccountService {
         key: this.ACCOUNTS_KEY,
         value: encrypted
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to save accounts:', error);
       throw new Error('Failed to save accounts securely');
     }
@@ -65,7 +65,7 @@ export class MobileAccountService {
 
       const decrypted = await EncryptionService.decryptData(value);
       return JSON.parse(decrypted);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to load accounts:', error);
       throw new Error('Failed to load accounts');
     }
@@ -147,7 +147,7 @@ export class MobileAccountService {
       });
 
       return result.uri;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to export accounts:', error);
       throw new Error('Failed to export accounts');
     }
@@ -174,7 +174,7 @@ export class MobileAccountService {
         dialogTitle: 'Share your accounts',
         files: [`data:application/json;base64,${btoa(JSON.stringify(exportData))}`]
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to share accounts:', error);
     }
   }
@@ -197,7 +197,7 @@ export class MobileAccountService {
       }
 
       return importData.accounts;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to import accounts:', error);
       throw new Error('Failed to import accounts from file');
     }
@@ -231,7 +231,7 @@ export class MobileAccountService {
       });
 
       return result.uri;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to create backup:', error);
       throw new Error('Failed to create encrypted backup');
     }
@@ -271,7 +271,7 @@ export class MobileAccountService {
       }
 
       return newAccounts.length;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to restore backup:', error);
       throw new Error('Failed to restore from backup');
     }

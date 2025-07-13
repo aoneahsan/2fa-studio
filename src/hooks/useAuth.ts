@@ -29,7 +29,7 @@ export const useAuth = () => {
       if (user) {
         try {
           await RealtimeSyncService.initialize(user.uid);
-        } catch (error) {
+        } catch (_error) {
           console.error('Failed to initialize sync service:', error);
         }
       } else {
@@ -53,7 +53,7 @@ export const useAuth = () => {
       dispatch(clearError());
       const user = await AuthService.signInWithEmail(email, password);
       return user;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Sign in failed'));
       throw error;
     } finally {
@@ -67,7 +67,7 @@ export const useAuth = () => {
       dispatch(clearError());
       const user = await AuthService.signUpWithEmail(email, password, displayName);
       return user;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Sign up failed'));
       throw error;
     } finally {
@@ -81,7 +81,7 @@ export const useAuth = () => {
       dispatch(clearError());
       const user = await AuthService.signInWithGoogle();
       return user;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Google sign in failed'));
       throw error;
     } finally {
@@ -95,7 +95,7 @@ export const useAuth = () => {
       dispatch(clearError());
       const user = await AuthService.signInWithApple();
       return user;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Apple sign in failed'));
       throw error;
     } finally {
@@ -108,7 +108,7 @@ export const useAuth = () => {
       dispatch(setLoading(true));
       dispatch(clearError());
       await AuthService.signOut();
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Sign out failed'));
       throw error;
     } finally {
@@ -121,7 +121,7 @@ export const useAuth = () => {
       dispatch(setLoading(true));
       dispatch(clearError());
       await AuthService.resetPassword(email);
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Password reset failed'));
       throw error;
     } finally {
@@ -136,7 +136,7 @@ export const useAuth = () => {
       const updatedUser = await AuthService.updateProfile(data);
       dispatch(setUser(updatedUser));
       return updatedUser;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Profile update failed'));
       throw error;
     } finally {
@@ -151,7 +151,7 @@ export const useAuth = () => {
       const linkedUser = await AuthService.linkAccount(provider);
       dispatch(setUser(linkedUser));
       return linkedUser;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Account linking failed'));
       throw error;
     } finally {
@@ -166,7 +166,7 @@ export const useAuth = () => {
       const updatedUser = await AuthService.unlinkAccount(providerId);
       dispatch(setUser(updatedUser));
       return updatedUser;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Account unlinking failed'));
       throw error;
     } finally {
@@ -179,7 +179,7 @@ export const useAuth = () => {
       dispatch(setLoading(true));
       dispatch(clearError());
       await AuthService.deleteAccount();
-    } catch (error: any) {
+    } catch (_error: unknown) {
       dispatch(setError(error.message || 'Account deletion failed'));
       throw error;
     } finally {
@@ -192,7 +192,7 @@ export const useAuth = () => {
     user: authState.user,
     isLoading: authState.isLoading,
     isAuthenticated: authState.isAuthenticated,
-    error: authState.error,
+    _error: authState._error,
     
     // Enhanced authentication methods
     signInWithEmail,

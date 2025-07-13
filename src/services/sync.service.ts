@@ -31,8 +31,8 @@ export interface SyncStatus {
 export interface SyncConflict {
   id: string;
   type: string;
-  localData: any;
-  remoteData: any;
+  localData: unknown;
+  remoteData: unknown;
   localTimestamp: Date;
   remoteTimestamp: Date;
   resolved: boolean;
@@ -156,7 +156,7 @@ export class SyncService {
         data,
         'pending'
       );
-    } catch (error) {
+    } catch (_error) {
       console.error('Error publishing sync event:', error);
       this.queuePendingChange({ type, data });
     }
@@ -203,7 +203,7 @@ export class SyncService {
   /**
    * Get pending changes
    */
-  private static getPendingChanges(): any[] {
+  private static getPendingChanges(): unknown[] {
     const stored = localStorage.getItem(`${PROJECT_PREFIX}pending_changes`);
     return stored ? JSON.parse(stored) : [];
   }
@@ -226,7 +226,7 @@ export class SyncService {
         // Use RealtimeSyncService to sync pending changes
         await RealtimeSyncService.syncPendingChanges();
         processedIds.push(change.id);
-      } catch (error) {
+      } catch (_error) {
         console.error('Error processing pending change:', error);
       }
     }
@@ -282,7 +282,7 @@ export class SyncService {
         
         // Remove from queue
         this.conflictQueue = this.conflictQueue.filter(c => c.id !== conflictId);
-      } catch (error) {
+      } catch (_error) {
         console.error('Error resolving conflict:', error);
       }
     }
@@ -316,7 +316,7 @@ export class SyncService {
           ...parsed,
           lastSyncTime: parsed.lastSyncTime ? new Date(parsed.lastSyncTime) : null,
         };
-      } catch (error) {
+      } catch (_error) {
         console.error('Error loading sync status:', error);
       }
     }

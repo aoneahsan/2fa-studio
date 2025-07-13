@@ -18,8 +18,8 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@src/config/firebase';
-import { Folder, FolderTree, DEFAULT_FOLDERS } from '@types/folder';
-import { Account } from '@types/account';
+import { Folder, FolderTree, DEFAULT_FOLDERS } from '@app-types/folder';
+import { Account } from '@app-types/account';
 
 export class FolderService {
   private static readonly COLLECTION = 'folders';

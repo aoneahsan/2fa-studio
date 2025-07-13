@@ -114,7 +114,7 @@ export class PerformanceMonitor {
    */
   static getMemoryUsage(): number {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const memory = (performance as unknown).memory;
       return memory.usedJSHeapSize / (1024 * 1024); // MB
     }
     return 0;
@@ -170,7 +170,7 @@ export class PerformanceMonitor {
         });
         longTaskObserver.observe({ entryTypes: ['longtask'] });
         this.observers.push(longTaskObserver);
-      } catch (e) {
+      } catch (_e) {
         // Long task API not supported
       }
     }
@@ -179,7 +179,7 @@ export class PerformanceMonitor {
     try {
       const layoutShiftObserver = new PerformanceObserver((list) => {
         let cumulativeLayoutShift = 0;
-        list.getEntries().forEach((entry: any) => {
+        list.getEntries().forEach((entry: unknown) => {
           if (!entry.hadRecentInput) {
             cumulativeLayoutShift += entry.value;
           }
@@ -191,7 +191,7 @@ export class PerformanceMonitor {
       });
       layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(layoutShiftObserver);
-    } catch (e) {
+    } catch (_e) {
       // Layout shift API not supported
     }
 
@@ -206,7 +206,7 @@ export class PerformanceMonitor {
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(lcpObserver);
-    } catch (e) {
+    } catch (_e) {
       // LCP API not supported
     }
   }
@@ -217,7 +217,7 @@ export class PerformanceMonitor {
   private static setupMemoryMonitoring(): void {
     if ('memory' in performance) {
       setInterval(() => {
-        const memory = (performance as any).memory;
+        const memory = (performance as unknown).memory;
         const usedMB = memory.usedJSHeapSize / (1024 * 1024);
         const limitMB = memory.jsHeapSizeLimit / (1024 * 1024);
         
@@ -234,7 +234,7 @@ export class PerformanceMonitor {
    */
   private static setupNetworkMonitoring(): void {
     if ('navigator' in window && 'connection' in navigator) {
-      const connection = (navigator as any).connection;
+      const connection = (navigator as unknown).connection;
       
       if (connection) {
         const logConnectionInfo = () => {

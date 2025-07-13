@@ -44,7 +44,7 @@ export class AppShortcutsService {
       await this.updateShortcuts();
       
       console.log('App shortcuts initialized');
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize app shortcuts:', error);
     }
   }
@@ -58,7 +58,7 @@ export class AppShortcutsService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get shortcuts:', error);
     }
     return [];
@@ -95,7 +95,7 @@ export class AppShortcutsService {
       await this.updateShortcuts();
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to add shortcut:', error);
       throw error;
     }
@@ -116,7 +116,7 @@ export class AppShortcutsService {
 
       await this.saveShortcuts(filtered);
       await this.updateShortcuts();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to remove shortcut:', error);
       throw error;
     }
@@ -134,7 +134,7 @@ export class AppShortcutsService {
 
       await this.saveShortcuts(shortcuts);
       await this.updateShortcuts();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to reorder shortcuts:', error);
       throw error;
     }
@@ -165,7 +165,7 @@ export class AppShortcutsService {
         issuer: account.issuer,
         label: account.label
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to generate shortcut code:', error);
       return null;
     }
@@ -180,7 +180,7 @@ export class AppShortcutsService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get widget accounts:', error);
     }
     return [];
@@ -201,7 +201,7 @@ export class AppShortcutsService {
 
       // Update widget data
       await this.updateWidgetData();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to set widget accounts:', error);
       throw error;
     }
@@ -234,14 +234,14 @@ export class AppShortcutsService {
             remainingTime: result.remainingTime || 0,
             lastUpdated: new Date()
           });
-        } catch (error) {
-          console.error(`Failed to generate code for widget account ${account.id}:`, error);
+        } catch (_error) {
+          console.error(`Failed to generate code for widget account ${account.id}:`, _error);
         }
       }
 
       // Send data to native layer for widget update
       await this.sendWidgetData(widgetData);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to update widget data:', error);
     }
   }
@@ -279,7 +279,7 @@ export class AppShortcutsService {
 
       // Send to native layer
       await this.sendShortcutsData(shortcutsData);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to update platform shortcuts:', error);
     }
   }
@@ -287,7 +287,7 @@ export class AppShortcutsService {
   /**
    * Send shortcuts data to native layer
    */
-  private static async sendShortcutsData(shortcuts: any[]): Promise<void> {
+  private static async sendShortcutsData(shortcuts: unknown[]): Promise<void> {
     try {
       // For Android: Use app shortcuts API
       // For iOS: Use Siri shortcuts
@@ -301,7 +301,7 @@ export class AppShortcutsService {
         // This would be implemented in the native iOS code
         await Capacitor.Plugins.TwoFAShortcuts?.updateSiriShortcuts({ shortcuts });
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to send shortcuts data to native layer:', error);
     }
   }
@@ -318,7 +318,7 @@ export class AppShortcutsService {
         // Send to iOS widget handler
         await Capacitor.Plugins.TwoFAWidget?.updateWidget({ accounts: data });
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to send widget data to native layer:', error);
     }
   }
@@ -331,12 +331,12 @@ export class AppShortcutsService {
       if (data.action === 'generate_code' && data.accountId) {
         const result = await this.generateShortcutCode(data.accountId);
         
-        if (result) {
+        if (_result) {
           // Show code in native interface or copy to clipboard
-          await this.showShortcutResult(result);
+          await this.showShortcutResult(_result);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to handle shortcut intent:', error);
     }
   }
@@ -344,7 +344,7 @@ export class AppShortcutsService {
   /**
    * Show shortcut result
    */
-  private static async showShortcutResult(result: {
+  private static async showShortcutResult(_result: {
     code: string;
     remainingTime: number;
     issuer: string;
@@ -359,8 +359,8 @@ export class AppShortcutsService {
         text: `${result.issuer}: ${result.code} (copied)`,
         duration: 'short'
       });
-    } catch (error) {
-      console.error('Failed to show shortcut result:', error);
+    } catch (_error) {
+      console.error('Failed to show shortcut _result:', error);
     }
   }
 
@@ -400,7 +400,7 @@ export class AppShortcutsService {
   /**
    * Import shortcuts configuration
    */
-  static async importShortcuts(config: {
+  static async importShortcuts(_config: {
     shortcuts: AppShortcut[];
     widgetAccounts: string[];
   }): Promise<void> {

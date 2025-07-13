@@ -110,7 +110,7 @@ const SubscriptionSettings: React.FC = () => {
       
       // Update subscription in store
       dispatch(updateUserSubscription({
-        type: planId as any,
+        type: planId as unknown,
         status: 'active',
         expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
         accountLimit: planId === 'free' ? 10 : undefined
@@ -120,7 +120,7 @@ const SubscriptionSettings: React.FC = () => {
         type: 'success',
         message: `Successfully upgraded to ${planId} plan!`
       }));
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Payment failed. Please try again.'

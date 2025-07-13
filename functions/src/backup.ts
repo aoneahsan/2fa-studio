@@ -13,8 +13,8 @@ const bucket = storage.bucket(functions.config().storage.backup_bucket || "2fa-s
 /**
  * Schedule automatic backup for premium users
  */
-export const scheduleAutoBackup = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const scheduleAutoBackup = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -45,8 +45,8 @@ export const scheduleAutoBackup = functions.https.onCall(async (data, context) =
     }
 
     return { success: true };
-  } catch (error) {
-    console.error("Error scheduling backup:", error);
+  } catch (_error) {
+    console.error('Error scheduling backup:', error);
     throw new functions.https.HttpsError("internal", "Failed to schedule backup");
   }
 });
@@ -103,8 +103,8 @@ export async function cleanupOldBackups() {
             if (fileName) {
               await bucket.file(`users/${userDoc.id}/${fileName}`).delete();
             }
-          } catch (error) {
-            console.error(`Failed to delete file: ${url}`, error);
+          } catch (_error) {
+            console.error(`Failed to delete file: ${url}`, _error);
           }
         }
         
@@ -114,8 +114,8 @@ export async function cleanupOldBackups() {
 
     console.log(`Cleaned up ${totalDeleted} old backups`);
     return { deleted: totalDeleted };
-  } catch (error) {
-    console.error("Error cleaning up backups:", error);
+  } catch (_error) {
+    console.error('Error cleaning up backups:', error);
     throw error;
   }
 }
@@ -123,14 +123,14 @@ export async function cleanupOldBackups() {
 /**
  * Export user data (GDPR compliance)
  */
-export const exportUserData = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const exportUserData = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
   try {
     const userId = context.auth.uid;
-    const exportData: any = {
+    const exportData: unknown = {
       exportedAt: new Date().toISOString(),
       userId,
     };
@@ -201,8 +201,8 @@ export const exportUserData = functions.https.onCall(async (data, context) => {
     });
 
     return { downloadUrl: url, expiresIn: "7 days" };
-  } catch (error) {
-    console.error("Error exporting user data:", error);
+  } catch (_error) {
+    console.error('Error exporting user data:', error);
     throw new functions.https.HttpsError("internal", "Failed to export user data");
   }
 });
@@ -210,8 +210,8 @@ export const exportUserData = functions.https.onCall(async (data, context) => {
 /**
  * Validate backup integrity
  */
-export const validateBackup = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const validateBackup = functions.https.onCall(async (_data, _context) => {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -266,8 +266,8 @@ export const validateBackup = functions.https.onCall(async (data, context) => {
         md5Hash: metadata.md5Hash,
       },
     };
-  } catch (error) {
-    console.error("Error validating backup:", error);
+  } catch (_error) {
+    console.error('Error validating backup:', error);
     throw new functions.https.HttpsError("internal", "Failed to validate backup");
   }
 });
@@ -295,16 +295,16 @@ export async function runScheduledBackups() {
         try {
           await createAutomaticBackup(userDoc.id);
           processed++;
-        } catch (error) {
-          console.error(`Failed to backup for user ${userDoc.id}:`, error);
+        } catch (_error) {
+          console.error(`Failed to backup for user ${userDoc.id}:`, _error);
         }
       }
     }
 
     console.log(`Processed ${processed} scheduled backups`);
     return { processed };
-  } catch (error) {
-    console.error("Error running scheduled backups:", error);
+  } catch (_error) {
+    console.error('Error running scheduled backups:', error);
     throw error;
   }
 }

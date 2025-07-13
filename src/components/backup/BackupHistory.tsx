@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { BackupSchedulerService } from '@services/backup-scheduler.service';
-import { BackupHistory as BackupHistoryType } from '@types/backup.types';
+import { BackupHistory as BackupHistoryType } from '@app-types/backup';
 import { 
   CheckCircleIcon, 
   XCircleIcon,
@@ -39,7 +39,7 @@ const BackupHistory: React.FC = () => {
       setIsLoading(true);
       const backupHistory = await BackupSchedulerService.getBackupHistory(user.id);
       setHistory(backupHistory);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading backup history:', error);
     } finally {
       setIsLoading(false);

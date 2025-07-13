@@ -78,7 +78,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
         setRemainingTime(result.remainingTime);
         setProgress(result.progress || 0);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to generate code:', error);
       setOtpCode('ERROR');
     }
@@ -119,7 +119,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
           message: result.error || 'Biometric authentication failed',
         }));
       }
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to authenticate',
@@ -154,7 +154,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
       }));
 
       setTimeout(() => setIsCopying(false), 1000);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to copy:', error);
       dispatch(addToast({
         type: 'error',
@@ -191,7 +191,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
           src={account.iconUrl} 
           alt={account.issuer}
           className="w-full h-full object-contain"
-          onError={(e) => {
+          onError={(_e) => {
             (e.target as HTMLImageElement).style.display = 'none';
           }}
         />

@@ -26,7 +26,7 @@ vi.mock('firebase/firestore', () => ({
 
 vi.mock('@src/config/firebase', () => ({
   db: {},
-  auth: {
+  _auth: {
     currentUser: null
   }
 }));
@@ -68,7 +68,7 @@ describe('AuditLogService', () => {
         details: { email: 'test@example.com' }
       };
 
-      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'log-id' } as any);
+      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'log-id' } as unknown);
 
       await AuditLogService.log(mockEntry);
 
@@ -98,7 +98,7 @@ describe('AuditLogService', () => {
         details: { email: 'test@example.com' }
       };
 
-      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'log-id' } as any);
+      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'log-id' } as unknown);
 
       await AuditLogService.log(mockEntry);
 
@@ -156,7 +156,7 @@ describe('AuditLogService', () => {
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: mockDocs,
         size: mockDocs.length
-      } as any);
+      } as unknown);
 
       const result = await AuditLogService.searchLogs({
         userId: 'user1',
@@ -186,7 +186,7 @@ describe('AuditLogService', () => {
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: mockDocs,
         size: mockDocs.length
-      } as any);
+      } as unknown);
 
       const result = await AuditLogService.searchLogs({
         userId: 'user1',
@@ -214,9 +214,9 @@ describe('AuditLogService', () => {
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: mockFailedLogins,
         size: mockFailedLogins.length
-      } as any);
+      } as unknown);
 
-      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'alert-log' } as any);
+      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'alert-log' } as unknown);
 
       const isSuspicious = await AuditLogService.detectSuspiciousActivity('user1');
 
@@ -247,15 +247,15 @@ describe('AuditLogService', () => {
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: [],
         size: 0
-      } as any);
+      } as unknown);
 
       // Second call for recent access
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: mockAccessLogs,
         size: mockAccessLogs.length
-      } as any);
+      } as unknown);
 
-      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'alert-log' } as any);
+      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'alert-log' } as unknown);
 
       const isSuspicious = await AuditLogService.detectSuspiciousActivity('user1');
 
@@ -311,7 +311,7 @@ describe('AuditLogService', () => {
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: mockLogs,
         size: mockLogs.length
-      } as any);
+      } as unknown);
 
       const stats = await AuditLogService.getStats();
 
@@ -348,9 +348,9 @@ describe('AuditLogService', () => {
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: mockLogs,
         size: mockLogs.length
-      } as any);
+      } as unknown);
 
-      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'export-log' } as any);
+      vi.mocked(addDoc).mockResolvedValueOnce({ id: 'export-log' } as unknown);
 
       const csv = await AuditLogService.exportLogs(
         'user1',

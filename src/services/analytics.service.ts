@@ -23,7 +23,7 @@ import {
   DailyUsage,
   HourlyDistribution,
   DeviceDistribution 
-} from '@types/analytics.types';
+} from '@app-types/analytics';
 import { OTPAccount } from '@services/otp.service';
 import { DeviceService } from '@services/device.service';
 import { startOfDay, differenceInDays, format } from 'date-fns';
@@ -53,7 +53,7 @@ export class AnalyticsService {
         sessionId,
         timestamp: serverTimestamp(),
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error tracking usage:', error);
       // Don't throw - analytics should not break the app
     }
@@ -86,7 +86,7 @@ export class AnalyticsService {
       })) as AccountUsage[];
 
       return this.calculateUsageStats(accountId, usageData);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting account usage stats:', error);
       return this.getEmptyStats(accountId);
     }
@@ -190,7 +190,7 @@ export class AnalyticsService {
         averageActionsPerDay,
         accountsNotUsedInDays,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting global usage stats:', error);
       return {
         userId,
@@ -345,7 +345,7 @@ export class AnalyticsService {
       if (snapshot.size === this.BATCH_SIZE) {
         await this.cleanupOldData(userId, daysToKeep);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error cleaning up old usage data:', error);
     }
   }

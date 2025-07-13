@@ -164,7 +164,7 @@ export class SubscriptionService {
 
       const { sessionId } = await response.json();
       return sessionId;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating checkout session:', error);
       throw error;
     }
@@ -180,7 +180,7 @@ export class SubscriptionService {
     }
 
     const { error } = await stripe.redirectToCheckout({ sessionId });
-    if (error) {
+    if (_error) {
       throw error;
     }
   }
@@ -205,7 +205,7 @@ export class SubscriptionService {
 
       const { url } = await response.json();
       return url;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating billing portal session:', error);
       throw error;
     }
@@ -247,7 +247,7 @@ export class SubscriptionService {
         tier: update.tier,
         status: update.status
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating user subscription:', error);
       throw error;
     }
@@ -304,7 +304,7 @@ export class SubscriptionService {
       const user = userDoc.data() as User;
       return user.subscription?.status === 'active' && 
              user.subscription?.tier !== 'free';
-    } catch (error) {
+    } catch (_error) {
       console.error('Error checking subscription:', error);
       return false;
     }
@@ -342,7 +342,7 @@ export class SubscriptionService {
         storageUsed: user.storageUsed || 0,
         lastBackup: user.lastBackup ? user.lastBackup.toDate() : null
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting usage stats:', error);
       throw error;
     }
@@ -363,7 +363,7 @@ export class SubscriptionService {
         metadata,
         timestamp: serverTimestamp()
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error logging subscription event:', error);
     }
   }
@@ -385,7 +385,7 @@ export class SubscriptionService {
       if (!response.ok) {
         throw new Error('Failed to cancel subscription');
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error canceling subscription:', error);
       throw error;
     }
@@ -408,7 +408,7 @@ export class SubscriptionService {
       if (!response.ok) {
         throw new Error('Failed to resume subscription');
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error resuming subscription:', error);
       throw error;
     }

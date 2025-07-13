@@ -12,7 +12,7 @@ interface UseAdsReturn {
 	showBanner: (position?: 'top' | 'bottom') => Promise<void>;
 	hideBanner: () => Promise<void>;
 	showInterstitial: () => Promise<boolean>;
-	showRewardedAd: () => Promise<{ completed: boolean; reward?: any }>;
+	showRewardedAd: () => Promise<{ completed: boolean; reward?: unknown }>;
 	shouldShowAds: boolean;
 	isInitialized: boolean;
 }
@@ -92,7 +92,7 @@ export function useAds(): UseAdsReturn {
 
 	const showRewardedAd = useCallback(async (): Promise<{
 		completed: boolean;
-		reward?: any;
+		reward?: unknown;
 	}> => {
 		if (shouldShowAds && isInitialized) {
 			return await adMobService.showRewardedVideo();

@@ -13,7 +13,7 @@ import { Capacitor } from '@capacitor/core';
 export interface BackupMetadata {
   version: string;
   createdAt: string;
-  deviceInfo: any;
+  deviceInfo: unknown;
   accountCount: number;
   encrypted: boolean;
   checksum: string;
@@ -41,7 +41,7 @@ export interface RestoreOptions {
 }
 
 export class GoogleDriveBackupService {
-  private static drive: any = null;
+  private static drive: unknown = null;
   private static isInitialized = false;
   private static readonly APP_FOLDER = '2FA Studio Backups';
   private static readonly BACKUP_PREFIX = '2fa-backup-';
@@ -61,14 +61,14 @@ export class GoogleDriveBackupService {
 
       // Set access token
       const authClient = await auth.getClient();
-      (authClient as any).setCredentials({ access_token: accessToken });
+      (authClient as unknown).setCredentials({ access_token: accessToken });
 
-      this.drive = google.drive({ version: 'v3', auth: authClient });
+      this.drive = google.drive({ version: 'v3', _auth: authClient });
       this.isInitialized = true;
 
       // Ensure app folder exists
       await this.ensureAppFolder();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize Google Drive:', error);
       throw new Error('Google Drive initialization failed');
     }
@@ -82,7 +82,7 @@ export class GoogleDriveBackupService {
     options: BackupOptions = {}
   ): Promise<{ success: boolean; fileId?: string; error?: string }> {
     if (!this.isInitialized) {
-      return { success: false, error: 'Google Drive not initialized' };
+      return { success: false, _error: 'Google Drive not initialized' };
     }
 
     try {
@@ -167,11 +167,11 @@ export class GoogleDriveBackupService {
       await this.cleanupOldBackups();
 
       return { success: true, fileId: response.data.id };
-    } catch (error) {
+    } catch (_error) {
       console.error('Backup failed:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Backup failed'
+        _error: error instanceof Error ? error.message : 'Backup failed'
       };
     }
   }
@@ -193,7 +193,7 @@ export class GoogleDriveBackupService {
         orderBy: 'createdTime desc'
       });
 
-      return response.data.files.map((file: any) => {
+      return response.data.files.map((file: unknown) => {
         let metadata: BackupMetadata;
         try {
           metadata = JSON.parse(file.description || '{}');
@@ -216,7 +216,7 @@ export class GoogleDriveBackupService {
           metadata
         };
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to list backups:', error);
       throw error;
     }
@@ -230,7 +230,7 @@ export class GoogleDriveBackupService {
     options: RestoreOptions = {}
   ): Promise<{ success: boolean; accounts?: OTPAccount[]; error?: string }> {
     if (!this.isInitialized) {
-      return { success: false, error: 'Google Drive not initialized' };
+      return { success: false, _error: 'Google Drive not initialized' };
     }
 
     try {
@@ -256,7 +256,7 @@ export class GoogleDriveBackupService {
       if (options.validateChecksum && originalChecksum) {
         const currentChecksum = await this.generateChecksum(data);
         if (currentChecksum !== originalChecksum) {
-          return { success: false, error: 'Backup integrity check failed' };
+          return { success: false, _error: 'Backup integrity check failed' };
         }
       }
 
@@ -270,7 +270,7 @@ export class GoogleDriveBackupService {
         } else if (Capacitor.isNativePlatform()) {
           data = await MobileEncryptionService.decryptData(data);
         } else {
-          return { success: false, error: 'Password required for encrypted backup' };
+          return { success: false, _error: 'Password required for encrypted backup' };
         }
       }
 
@@ -278,11 +278,11 @@ export class GoogleDriveBackupService {
       const backupData = JSON.parse(data);
       
       if (!backupData.accounts || !Array.isArray(backupData.accounts)) {
-        return { success: false, error: 'Invalid backup format' };
+        return { success: false, _error: 'Invalid backup format' };
       }
 
       // Convert to OTPAccount format
-      const accounts: OTPAccount[] = backupData.accounts.map((account: any) => ({
+      const accounts: OTPAccount[] = backupData.accounts.map((account: unknown) => ({
         ...account,
         id: '', // Will be set when saving
         userId: '', // Will be set when saving
@@ -292,11 +292,11 @@ export class GoogleDriveBackupService {
       }));
 
       return { success: true, accounts };
-    } catch (error) {
+    } catch (_error) {
       console.error('Restore failed:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Restore failed'
+        _error: error instanceof Error ? error.message : 'Restore failed'
       };
     }
   }
@@ -312,7 +312,7 @@ export class GoogleDriveBackupService {
     try {
       await this.drive.files.delete({ fileId });
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to delete backup:', error);
       return false;
     }
@@ -352,7 +352,7 @@ export class GoogleDriveBackupService {
         encrypted: appProperties.encrypted === 'true',
         checksum: appProperties.checksum || ''
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get backup info:', error);
       return null;
     }
@@ -384,7 +384,7 @@ export class GoogleDriveBackupService {
         usage,
         available: limit - usage
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get quota info:', error);
       throw error;
     }
@@ -396,7 +396,7 @@ export class GoogleDriveBackupService {
   private static async ensureAppFolder(): Promise<void> {
     try {
       await this.getAppFolderId();
-    } catch (error) {
+    } catch (_error) {
       // Folder doesn't exist, create it
       await this.drive.files.create({
         requestBody: {
@@ -437,7 +437,7 @@ export class GoogleDriveBackupService {
           await this.deleteBackup(backup.id);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to cleanup old backups:', error);
     }
   }
@@ -475,16 +475,16 @@ export class GoogleDriveBackupService {
    */
   static async testConnection(): Promise<{ success: boolean; error?: string }> {
     if (!this.isInitialized) {
-      return { success: false, error: 'Google Drive not initialized' };
+      return { success: false, _error: 'Google Drive not initialized' };
     }
 
     try {
       await this.drive.about.get({ fields: 'user' });
       return { success: true };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Connection test failed'
+        _error: error instanceof Error ? error.message : 'Connection test failed'
       };
     }
   }
@@ -502,7 +502,7 @@ export class GoogleDriveBackupService {
         fields: 'user,storageQuota'
       });
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get user info:', error);
       throw error;
     }

@@ -82,7 +82,7 @@ export class GooglePlayBillingService {
       if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
         return {
           success: false,
-          error: 'Google Play Billing is only available on Android',
+          _error: 'Google Play Billing is only available on Android',
         };
       }
 
@@ -94,11 +94,11 @@ export class GooglePlayBillingService {
 
       console.log('Google Play Billing initialized');
       return { success: true };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error initializing Google Play Billing:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -136,12 +136,12 @@ export class GooglePlayBillingService {
         success: true,
         products: mockProducts,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error querying products:', error);
       return {
         success: false,
         products: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -178,11 +178,11 @@ export class GooglePlayBillingService {
         success: true,
         purchase: mockPurchase,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error purchasing subscription:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -204,11 +204,11 @@ export class GooglePlayBillingService {
       console.log('Acknowledging purchase:', purchaseToken);
 
       return { success: true };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error acknowledging purchase:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -232,12 +232,12 @@ export class GooglePlayBillingService {
         success: true,
         purchases: [],
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error querying purchases:', error);
       return {
         success: false,
         purchases: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -269,7 +269,7 @@ export class GooglePlayBillingService {
       if (!response.ok) {
         return {
           valid: false,
-          error: result.error || 'Receipt validation failed',
+          _error: result.error || 'Receipt validation failed',
         };
       }
 
@@ -278,11 +278,11 @@ export class GooglePlayBillingService {
         subscription: result.subscription,
         fraudRisk: result.fraudRisk || 'low',
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error validating receipt:', error);
       return {
         valid: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -310,7 +310,7 @@ export class GooglePlayBillingService {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.error || 'Invalid purchase',
+          _error: validation.error || 'Invalid purchase',
         };
       }
 
@@ -348,11 +348,11 @@ export class GooglePlayBillingService {
         success: true,
         subscription,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating subscription from purchase:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -385,11 +385,11 @@ export class GooglePlayBillingService {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -397,7 +397,7 @@ export class GooglePlayBillingService {
   /**
    * Handle Google Play webhook (Real-time Developer Notifications)
    */
-  static async handleWebhook(notification: any): Promise<void> {
+  static async handleWebhook(notification: unknown): Promise<void> {
     try {
       const { subscriptionNotification, testNotification } = notification;
 
@@ -409,7 +409,7 @@ export class GooglePlayBillingService {
       if (subscriptionNotification) {
         await this.handleSubscriptionNotification(subscriptionNotification);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling Google Play webhook:', error);
     }
   }
@@ -417,7 +417,7 @@ export class GooglePlayBillingService {
   /**
    * Handle subscription notification
    */
-  private static async handleSubscriptionNotification(notification: any): Promise<void> {
+  private static async handleSubscriptionNotification(notification: unknown): Promise<void> {
     const { subscriptionId, purchaseToken, notificationType } = notification;
 
     try {
@@ -428,7 +428,7 @@ export class GooglePlayBillingService {
       );
 
       if (firestoreResult.success && firestoreResult.data.length > 0) {
-        const updateData: any = { updatedAt: new Date() };
+        const updateData: unknown = { updatedAt: new Date() };
 
         switch (notificationType) {
           case 1: // SUBSCRIPTION_RECOVERED
@@ -480,7 +480,7 @@ export class GooglePlayBillingService {
           updateData
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling subscription notification:', error);
     }
   }

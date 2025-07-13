@@ -29,7 +29,7 @@ export class MobileEncryptionService extends EncryptionService {
     try {
       // Get or generate device-specific key
       this.deviceKey = await this.getOrCreateDeviceKey();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize encryption:', error);
       throw new Error('Encryption initialization failed');
     }
@@ -45,7 +45,7 @@ export class MobileEncryptionService extends EncryptionService {
         try {
           const { value } = await SecureStoragePlugin.get({ key: this.DEVICE_KEY_NAME });
           if (value) return value;
-        } catch (e) {
+        } catch (_e) {
           // Key doesn't exist yet
         }
 
@@ -68,7 +68,7 @@ export class MobileEncryptionService extends EncryptionService {
         });
         return newKey;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get device key:', error);
       throw error;
     }
@@ -130,7 +130,7 @@ export class MobileEncryptionService extends EncryptionService {
         encryptedData: secureData.encrypted,
         password: this.deviceKey!
       });
-    } catch (error) {
+    } catch (_error) {
       // Try direct decryption for backward compatibility
       if (typeof encryptedData === 'string' && encryptedData.includes('"data"')) {
         return await super.decrypt({
@@ -184,7 +184,7 @@ export class MobileEncryptionService extends EncryptionService {
         if (!value) return null;
         return await this.decryptData(value);
       }
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }

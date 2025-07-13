@@ -136,7 +136,7 @@ export class LicenseManagementService {
         isInGracePeriod,
         violations,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting license info:', error);
       
       // Return default free license on error
@@ -248,7 +248,7 @@ export class LicenseManagementService {
       return {
         allowed: true,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error checking feature access:', error);
       return {
         allowed: false,
@@ -356,7 +356,7 @@ export class LicenseManagementService {
         usage: usageRecord,
         timestamp: Date.now(),
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error tracking usage:', error);
     }
   }
@@ -407,7 +407,7 @@ export class LicenseManagementService {
       });
 
       return usage;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting current usage:', error);
       return {
         userId,
@@ -478,7 +478,7 @@ export class LicenseManagementService {
         overage,
         cost,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error generating usage report:', error);
       throw error;
     }
@@ -487,7 +487,7 @@ export class LicenseManagementService {
   /**
    * Check for license violations
    */
-  private static async checkViolations(userId: string, usage: Usage, limits: any): Promise<string[]> {
+  private static async checkViolations(userId: string, usage: Usage, limits: unknown): Promise<string[]> {
     const violations: string[] = [];
 
     // Check account limit
@@ -531,7 +531,7 @@ export class LicenseManagementService {
         // Could trigger account suspension
         console.warn(`Critical license violation for user ${userId}:`, violation);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error logging violation:', error);
     }
   }
@@ -593,7 +593,7 @@ export class LicenseManagementService {
       }
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting current subscription:', error);
       return null;
     }

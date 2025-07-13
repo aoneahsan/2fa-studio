@@ -88,7 +88,7 @@ export const useAccounts = () => {
             key: 'cached_accounts',
             value: JSON.stringify(decryptedAccounts),
           });
-        } catch (error) {
+        } catch (_error) {
           console.error('Error loading accounts:', error);
           dispatch(setError('Failed to load accounts'));
           
@@ -101,8 +101,8 @@ export const useAccounts = () => {
           dispatch(setLoading(false));
         }
       },
-      (error) => {
-        console.error('Firestore subscription error:', error);
+      (_error) => {
+        console.error('Firestore subscription _error:', error);
         dispatch(setError('Failed to sync accounts'));
         dispatch(setLoading(false));
       }
@@ -170,7 +170,7 @@ export const useAccounts = () => {
           requiresBiometric: account.requiresBiometric || false
         }
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error adding account:', error);
       dispatch(addToast({
         type: 'error',
@@ -239,7 +239,7 @@ export const useAccounts = () => {
           )
         }
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating account:', error);
       dispatch(addToast({
         type: 'error',
@@ -289,7 +289,7 @@ export const useAccounts = () => {
           permanentDeletion: true
         }
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error deleting account:', error);
       dispatch(addToast({
         type: 'error',
@@ -308,7 +308,7 @@ export const useAccounts = () => {
     // Apply search filter
     if (accountsState.searchQuery) {
       // Check if it's an enhanced search query
-      let searchOptions: any = null;
+      let searchOptions: unknown = null;
       let query = accountsState.searchQuery;
       
       try {
@@ -433,7 +433,7 @@ export const useAccounts = () => {
     accounts: accountsState.accounts,
     filteredAccounts: getFilteredAccounts(),
     isLoading: accountsState.isLoading,
-    error: accountsState.error,
+    _error: accountsState._error,
     addAccount,
     updateAccount,
     deleteAccount,

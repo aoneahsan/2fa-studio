@@ -134,7 +134,7 @@ describe('Complete User Flow', () => {
 
     // Go offline
     cy.window().then((win) => {
-      win.navigator.serviceWorker.ready.then((registration) => {
+      win.navigator.serviceWorker.ready.then((_registration) => {
         // Simulate offline mode
         cy.wrap(Cypress.automation('remote:debugger:protocol', {
           command: 'Network.enable'

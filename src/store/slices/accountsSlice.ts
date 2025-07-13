@@ -9,7 +9,7 @@ import { OTPAccount } from '@services/otp.service';
 interface AccountsState {
   accounts: OTPAccount[];
   isLoading: boolean;
-  error: string | null;
+  _error: string | null;
   searchQuery: string;
   selectedTags: string[];
   selectedFolderId: string | null;
@@ -21,7 +21,7 @@ interface AccountsState {
 const initialState: AccountsState = {
   accounts: [],
   isLoading: false,
-  error: null,
+  _error: null,
   searchQuery: '',
   selectedTags: [],
   selectedFolderId: null,

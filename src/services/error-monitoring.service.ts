@@ -57,7 +57,7 @@ export class ErrorMonitoringService {
    * Report an error
    */
   static async reportError(
-    error: Error | string,
+    _error: Error | string,
     metadata?: {
       userId?: string;
       category?: ErrorReport['category'];
@@ -66,7 +66,7 @@ export class ErrorMonitoringService {
     }
   ): Promise<void> {
     const errorReport: ErrorReport = {
-      message: typeof error === 'string' ? error : error.message,
+      message: typeof error === 'string' ? _error : error.message,
       stack: typeof error === 'object' ? error.stack : undefined,
       timestamp: new Date(),
       userAgent: navigator.userAgent,
@@ -98,8 +98,8 @@ export class ErrorMonitoringService {
   /**
    * Report authentication errors
    */
-  static async reportAuthError(error: Error, context?: Record<string, any>): Promise<void> {
-    await this.reportError(error, {
+  static async reportAuthError(_error: Error, context?: Record<string, any>): Promise<void> {
+    await this.reportError(_error, {
       category: 'auth',
       severity: 'high',
       context
@@ -109,44 +109,44 @@ export class ErrorMonitoringService {
   /**
    * Report Firestore errors
    */
-  static async reportFirestoreError(error: Error, operation: string, path: string): Promise<void> {
-    await this.reportError(error, {
+  static async reportFirestoreError(_error: Error, operation: string, path: string): Promise<void> {
+    await this.reportError(_error, {
       category: 'firestore',
       severity: 'medium',
-      context: { operation, path }
+      _context: { operation, path }
     });
   }
 
   /**
    * Report network errors
    */
-  static async reportNetworkError(error: Error, url: string, method?: string): Promise<void> {
-    await this.reportError(error, {
+  static async reportNetworkError(_error: Error, url: string, method?: string): Promise<void> {
+    await this.reportError(_error, {
       category: 'network',
       severity: 'medium',
-      context: { url, method }
+      _context: { url, method }
     });
   }
 
   /**
    * Report encryption errors
    */
-  static async reportEncryptionError(error: Error, operation: string): Promise<void> {
-    await this.reportError(error, {
+  static async reportEncryptionError(_error: Error, operation: string): Promise<void> {
+    await this.reportError(_error, {
       category: 'encryption',
       severity: 'critical',
-      context: { operation }
+      _context: { operation }
     });
   }
 
   /**
    * Report payment errors
    */
-  static async reportPaymentError(error: Error, provider: string, operation: string): Promise<void> {
-    await this.reportError(error, {
+  static async reportPaymentError(_error: Error, provider: string, operation: string): Promise<void> {
+    await this.reportError(_error, {
       category: 'payment',
       severity: 'high',
-      context: { provider, operation }
+      _context: { provider, operation }
     });
   }
 
@@ -155,7 +155,7 @@ export class ErrorMonitoringService {
    */
   static async getErrorStats(timeRange?: { start: Date; end: Date }): Promise<ErrorStats> {
     try {
-      const filters: any[] = [];
+      const filters: unknown[] = [];
       
       if (timeRange) {
         filters.push(
@@ -183,7 +183,7 @@ export class ErrorMonitoringService {
         recentErrors: errors.slice(0, 10),
         topErrors: this.getTopErrors(errors)
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get error stats:', error);
       return {
         totalErrors: 0,
@@ -204,8 +204,8 @@ export class ErrorMonitoringService {
         resolved: true,
         resolvedAt: new Date()
       });
-    } catch (error) {
-      console.error('Failed to resolve error:', error);
+    } catch (_error) {
+      console.error('Failed to resolve _error:', error);
     }
   }
 
@@ -218,7 +218,7 @@ export class ErrorMonitoringService {
       this.reportError(event.error || event.message, {
         category: 'ui',
         severity: 'medium',
-        context: {
+        _context: {
           filename: event.filename,
           lineno: event.lineno,
           colno: event.colno
@@ -231,7 +231,7 @@ export class ErrorMonitoringService {
       this.reportError(event.reason, {
         category: 'unknown',
         severity: 'medium',
-        context: {
+        _context: {
           type: 'unhandled_promise_rejection'
         }
       });
@@ -242,7 +242,7 @@ export class ErrorMonitoringService {
       this.reportError('Network connection lost', {
         category: 'network',
         severity: 'low',
-        context: { type: 'offline' }
+        _context: { type: 'offline' }
       });
     });
   }
@@ -269,11 +269,11 @@ export class ErrorMonitoringService {
 
     for (const error of errorsToFlush) {
       try {
-        await FirestoreService.createDocument('error_reports', error);
-      } catch (e) {
+        await FirestoreService.createDocument('error_reports', _error);
+      } catch (_e) {
         // If failed to report, add back to queue for retry
-        this.errorQueue.push(error);
-        console.error('Failed to report error:', e);
+        this.errorQueue.push(_error);
+        console.error('Failed to report _error:', _e);
       }
     }
   }
@@ -281,10 +281,10 @@ export class ErrorMonitoringService {
   /**
    * Store error in localStorage as backup
    */
-  private static storeErrorLocally(error: ErrorReport): void {
+  private static storeErrorLocally(_error: ErrorReport): void {
     try {
       const stored = JSON.parse(localStorage.getItem('error_queue') || '[]');
-      stored.push(error);
+      stored.push(_error);
       
       // Keep only last 20 errors
       if (stored.length > 20) {
@@ -292,8 +292,8 @@ export class ErrorMonitoringService {
       }
       
       localStorage.setItem('error_queue', JSON.stringify(stored));
-    } catch (e) {
-      console.error('Failed to store error locally:', e);
+    } catch (_e) {
+      console.error('Failed to store error locally:', _e);
     }
   }
 
@@ -312,8 +312,8 @@ export class ErrorMonitoringService {
           await this.flushErrors();
         }
       }
-    } catch (e) {
-      console.error('Failed to process stored errors:', e);
+    } catch (_e) {
+      console.error('Failed to process stored errors:', _e);
     }
   }
 
@@ -321,7 +321,7 @@ export class ErrorMonitoringService {
    * Group errors by field
    */
   private static groupBy(errors: ErrorReport[], field: keyof ErrorReport): Record<string, number> {
-    return errors.reduce((acc, error) => {
+    return errors.reduce((acc, _error) => {
       const key = String(error[field]);
       acc[key] = (acc[key] || 0) + 1;
       return acc;
@@ -332,7 +332,7 @@ export class ErrorMonitoringService {
    * Get top occurring errors
    */
   private static getTopErrors(errors: ErrorReport[]): Array<{ message: string; count: number }> {
-    const errorCounts = errors.reduce((acc, error) => {
+    const errorCounts = errors.reduce((acc, _error) => {
       acc[error.message] = (acc[error.message] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);

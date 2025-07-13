@@ -137,7 +137,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
         );
         setStats(statsData);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading audit logs:', error);
     } finally {
       setLoading(false);
@@ -226,7 +226,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
       a.download = `audit-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error exporting logs:', error);
     }
   };
@@ -272,7 +272,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
               <Select
                 multiple
                 value={tempFilters.actions || []}
-                onChange={(e: SelectChangeEvent<string[]>) => 
+                onChange={(_e: SelectChangeEvent<string[]>) => 
                   setTempFilters({ ...tempFilters, actions: e.target.value as AuditAction[] })
                 }
                 label="Actions"
@@ -292,8 +292,8 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
               <Select
                 multiple
                 value={tempFilters.severity || []}
-                onChange={(e: SelectChangeEvent<string[]>) => 
-                  setTempFilters({ ...tempFilters, severity: e.target.value as any })
+                onChange={(_e: SelectChangeEvent<string[]>) => 
+                  setTempFilters({ ...tempFilters, severity: e.target.value as unknown })
                 }
                 label="Severity"
               >
@@ -314,7 +314,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
               size="small"
               InputLabelProps={{ shrink: true }}
               value={tempFilters.startDate ? format(tempFilters.startDate, 'yyyy-MM-dd') : ''}
-              onChange={(e) => 
+              onChange={(_e) => 
                 setTempFilters({ ...tempFilters, startDate: e.target.value ? new Date(e.target.value) : undefined })
               }
             />
@@ -328,7 +328,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
               size="small"
               InputLabelProps={{ shrink: true }}
               value={tempFilters.endDate ? format(tempFilters.endDate, 'yyyy-MM-dd') : ''}
-              onChange={(e) => 
+              onChange={(_e) => 
                 setTempFilters({ ...tempFilters, endDate: e.target.value ? new Date(e.target.value) : undefined })
               }
             />
@@ -402,7 +402,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
                   </TableCell>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
-                      {getSeverityIcon((log as any).severity || 'info')}
+                      {getSeverityIcon((log as unknown).severity || 'info')}
                       <Typography variant="body2">
                         {getActionLabel(log.action)}
                       </Typography>
@@ -420,8 +420,8 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={(log as any).success ? 'Success' : 'Failed'}
-                      color={(log as any).success ? 'success' : 'error'}
+                      label={(log as unknown).success ? 'Success' : 'Failed'}
+                      color={(log as unknown).success ? 'success' : 'error'}
                       size="small"
                     />
                   </TableCell>
@@ -469,8 +469,8 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
             <DialogTitle>
               Audit Log Details
               <Chip
-                label={(selectedLog as any).severity || 'info'}
-                color={getSeverityColor((selectedLog as any).severity || 'info')}
+                label={(selectedLog as unknown).severity || 'info'}
+                color={getSeverityColor((selectedLog as unknown).severity || 'info')}
                 size="small"
                 sx={{ ml: 2 }}
               />
@@ -501,10 +501,10 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
                   <Typography variant="subtitle2" color="textSecondary">Device ID</Typography>
                   <Typography>{selectedLog.deviceId || 'N/A'}</Typography>
                 </Grid>
-                {(selectedLog as any).errorMessage && (
+                {(selectedLog as unknown).errorMessage && (
                   <Grid item xs={12}>
                     <Typography variant="subtitle2" color="textSecondary">Error Message</Typography>
-                    <Typography color="error">{(selectedLog as any).errorMessage}</Typography>
+                    <Typography color="error">{(selectedLog as unknown).errorMessage}</Typography>
                   </Grid>
                 )}
                 {selectedLog.details && (

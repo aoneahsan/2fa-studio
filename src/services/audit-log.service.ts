@@ -155,7 +155,7 @@ export class AuditLogService {
         // In production, this would be handled by Cloud Functions
         // to get the real IP from the request headers
         ipAddress = 'client-side-log';
-      } catch (error) {
+      } catch (_error) {
         console.error('Error getting IP address:', error);
       }
 
@@ -177,7 +177,7 @@ export class AuditLogService {
       if (entry.severity === 'critical' || !entry.success) {
         await this.triggerSecurityAlert(auditLog);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error logging audit event:', error);
       // Don't throw - audit logging should not break the app
     }
@@ -192,7 +192,7 @@ export class AuditLogService {
     hasMore: boolean;
   }> {
     try {
-      const constraints: any[] = [];
+      const constraints: unknown[] = [];
       
       if (params.userId) {
         constraints.push(where('userId', '==', params.userId));
@@ -264,7 +264,7 @@ export class AuditLogService {
         lastDoc,
         hasMore: snapshot.docs.length > pageSize
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error searching audit logs:', error);
       throw error;
     }
@@ -279,7 +279,7 @@ export class AuditLogService {
     endDate?: Date
   ): Promise<AuditLogStats> {
     try {
-      const constraints: any[] = [];
+      const constraints: unknown[] = [];
       
       if (userId) {
         constraints.push(where('userId', '==', userId));
@@ -350,7 +350,7 @@ export class AuditLogService {
         .map(([action, count]) => ({ action, count }));
 
       return stats;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting audit log stats:', error);
       throw error;
     }
@@ -413,7 +413,7 @@ export class AuditLogService {
       }
 
       return false;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error detecting suspicious activity:', error);
       return false;
     }
@@ -422,7 +422,7 @@ export class AuditLogService {
   /**
    * Trigger security alert for critical events
    */
-  private static async triggerSecurityAlert(auditLog: any): Promise<void> {
+  private static async triggerSecurityAlert(auditLog: unknown): Promise<void> {
     try {
       // In production, this would:
       // 1. Send email to user
@@ -437,7 +437,7 @@ export class AuditLogService {
       // - FCM for push notifications
       // - Slack for admin alerts
       // - PagerDuty for critical incidents
-    } catch (error) {
+    } catch (_error) {
       console.error('Error triggering security alert:', error);
     }
   }
@@ -462,7 +462,7 @@ export class AuditLogService {
       console.log(`Found ${snapshot.size} old audit logs to clean up`);
       
       return snapshot.size;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error cleaning up old logs:', error);
       return 0;
     }
@@ -513,7 +513,7 @@ export class AuditLogService {
       });
 
       return csv;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error exporting audit logs:', error);
       throw error;
     }

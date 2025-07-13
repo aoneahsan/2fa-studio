@@ -106,7 +106,7 @@ export const useSync = (options: UseSyncOptions = {}) => {
   const publishAccountChange = useCallback(
     async (type: 'added' | 'updated' | 'deleted', data: any) => {
       if (!user) return;
-      await SyncService.publishSyncEvent(user.id, `account_${type}` as any, data);
+      await SyncService.publishSyncEvent(user.id, `account_${type}` as unknown, data);
     },
     [user]
   );
@@ -114,7 +114,7 @@ export const useSync = (options: UseSyncOptions = {}) => {
   const publishTagChange = useCallback(
     async (type: 'added' | 'updated' | 'deleted', data: any) => {
       if (!user) return;
-      await SyncService.publishSyncEvent(user.id, `tag_${type}` as any, data);
+      await SyncService.publishSyncEvent(user.id, `tag_${type}` as unknown, data);
     },
     [user]
   );
@@ -122,7 +122,7 @@ export const useSync = (options: UseSyncOptions = {}) => {
   const publishFolderChange = useCallback(
     async (type: 'added' | 'updated' | 'deleted', data: any) => {
       if (!user) return;
-      await SyncService.publishSyncEvent(user.id, `folder_${type}` as any, data);
+      await SyncService.publishSyncEvent(user.id, `folder_${type}` as unknown, data);
     },
     [user]
   );

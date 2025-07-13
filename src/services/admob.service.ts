@@ -17,7 +17,7 @@ export class AdMobService {
   private static instance: AdMobService;
   private initialized = false;
   private bannerShowing = false;
-  private config: AdConfig | null = null;
+  private _config: AdConfig | null = null;
 
   private constructor() {}
 
@@ -70,7 +70,7 @@ export class AdMobService {
 
       this.initialized = true;
       console.log('AdMob initialized successfully');
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize AdMob:', error);
     }
   }
@@ -84,7 +84,7 @@ export class AdMobService {
       console.log('Banner ad loaded');
     });
 
-    AdMob.addListener('bannerAdFailedToLoad', (error: AdMobError) => {
+    AdMob.addListener('bannerAdFailedToLoad', (_error: AdMobError) => {
       console.error('Banner ad failed to load:', error);
       this.bannerShowing = false;
     });
@@ -94,7 +94,7 @@ export class AdMobService {
       console.log('Interstitial ad loaded:', info);
     });
 
-    AdMob.addListener('interstitialAdFailedToLoad', (error: AdMobError) => {
+    AdMob.addListener('interstitialAdFailedToLoad', (_error: AdMobError) => {
       console.error('Interstitial ad failed to load:', error);
     });
 
@@ -109,7 +109,7 @@ export class AdMobService {
       console.log('Rewarded ad loaded:', info);
     });
 
-    AdMob.addListener('rewardedAdFailedToLoad', (error: AdMobError) => {
+    AdMob.addListener('rewardedAdFailedToLoad', (_error: AdMobError) => {
       console.error('Rewarded ad failed to load:', error);
     });
 
@@ -139,7 +139,7 @@ export class AdMobService {
 
       await AdMob.showBanner(options);
       this.bannerShowing = true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to show banner:', error);
     }
   }
@@ -155,7 +155,7 @@ export class AdMobService {
     try {
       await AdMob.hideBanner();
       this.bannerShowing = false;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to hide banner:', error);
     }
   }
@@ -167,7 +167,7 @@ export class AdMobService {
     try {
       await AdMob.removeBanner();
       this.bannerShowing = false;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to remove banner:', error);
     }
   }
@@ -187,7 +187,7 @@ export class AdMobService {
       };
 
       await AdMob.prepareInterstitial(options);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to prepare interstitial:', error);
     }
   }
@@ -203,7 +203,7 @@ export class AdMobService {
     try {
       await AdMob.showInterstitial();
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to show interstitial:', error);
       // Try to prepare for next time
       this.prepareInterstitial();
@@ -226,7 +226,7 @@ export class AdMobService {
       };
 
       await AdMob.prepareRewardVideo(options);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to prepare rewarded video:', error);
     }
   }
@@ -234,7 +234,7 @@ export class AdMobService {
   /**
    * Show rewarded video ad
    */
-  async showRewardedVideo(): Promise<{ completed: boolean; reward?: any }> {
+  async showRewardedVideo(): Promise<{ completed: boolean; reward?: unknown }> {
     if (!this.initialized || !this.config?.rewardedId) {
       return { completed: false };
     }
@@ -261,7 +261,7 @@ export class AdMobService {
       });
 
       // Show the ad
-      AdMob.showRewardVideo().catch((error) => {
+      AdMob.showRewardVideo().catch((_error) => {
         console.error('Failed to show rewarded video:', error);
         rewardListener.remove();
         dismissListener.remove();
@@ -305,7 +305,7 @@ export class AdMobService {
 
     try {
       await AdMob.resume();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to resume ads:', error);
     }
   }
@@ -320,7 +320,7 @@ export class AdMobService {
 
     try {
       await AdMob.pause();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to pause ads:', error);
     }
   }

@@ -18,7 +18,7 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  error: string | null;
+  _error: string | null;
   encryptionKey: string | null;
 }
 
@@ -26,7 +26,7 @@ const initialState: AuthState = {
   user: null,
   isLoading: true,
   isAuthenticated: false,
-  error: null,
+  _error: null,
   encryptionKey: null,
 };
 
@@ -34,7 +34,7 @@ const initialState: AuthState = {
 export const signIn = createAsyncThunk(
   'auth/signIn',
   async ({ email, password }: { email: string; password: string }) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(_auth, email, password);
     return userCredential.user;
   }
 );
@@ -42,7 +42,7 @@ export const signIn = createAsyncThunk(
 export const signUp = createAsyncThunk(
   'auth/signUp',
   async ({ email, password }: { email: string; password: string }) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(_auth, email, password);
     return userCredential.user;
   }
 );
@@ -50,7 +50,7 @@ export const signUp = createAsyncThunk(
 export const signOut = createAsyncThunk(
   'auth/signOut',
   async () => {
-    await firebaseSignOut(auth);
+    await firebaseSignOut(_auth);
   }
 );
 

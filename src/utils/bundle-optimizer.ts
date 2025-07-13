@@ -17,11 +17,11 @@ export const createLazyComponent = <T extends React.ComponentType<any>>(
     while (attempts < retries) {
       try {
         return await importFunc();
-      } catch (error) {
+      } catch (_error) {
         attempts++;
         
         if (attempts >= retries) {
-          console.error(`Failed to load component after ${retries} attempts:`, error);
+          console.error(`Failed to load component after ${retries} attempts:`, _error);
           
           // Return a fallback component if loading fails
           if (fallback) {
@@ -152,8 +152,8 @@ export class PreloadManager {
         this.preloadedComponents.add(name);
         
         console.log(`Preloaded component: ${name}`);
-      } catch (error) {
-        console.warn(`Failed to preload component ${name}:`, error);
+      } catch (_error) {
+        console.warn(`Failed to preload component ${name}:`, _error);
       }
     }
 
@@ -298,7 +298,7 @@ export const registerServiceWorker = (): void => {
     window.addEventListener('load', async () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
+        console.log('Service Worker registered:', _registration);
         
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
@@ -311,7 +311,7 @@ export const registerServiceWorker = (): void => {
             });
           }
         });
-      } catch (error) {
+      } catch (_error) {
         console.log('Service Worker registration failed:', error);
       }
     });
@@ -376,8 +376,8 @@ export class MemoryManager {
    * Force garbage collection (for debugging)
    */
   static forceGC(): void {
-    if ('gc' in window && typeof (window as any).gc === 'function') {
-      (window as any).gc();
+    if ('gc' in window && typeof (window as unknown).gc === 'function') {
+      (window as unknown).gc();
     }
   }
 }

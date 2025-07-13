@@ -19,7 +19,7 @@ export class RateLimiter {
   private attempts: Map<string, AttemptRecord> = new Map();
   private cleanupInterval: NodeJS.Timeout | null = null;
 
-  constructor(private config: RateLimitConfig) {
+  constructor(private _config: RateLimitConfig) {
     // Cleanup old records every minute
     this.cleanupInterval = setInterval(() => this.cleanup(), 60000);
   }

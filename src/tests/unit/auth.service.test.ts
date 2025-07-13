@@ -58,8 +58,8 @@ describe('AuthService', () => {
           'user..email@domain.com',
           'user@domain',
           '',
-          null as any,
-          undefined as any
+          null as unknown,
+          undefined as unknown
         ];
 
         invalidEmails.forEach(email => {
@@ -89,8 +89,8 @@ describe('AuthService', () => {
           '',
           'CONTAINS8AND9',
           'lowercase',
-          null as any,
-          undefined as any
+          null as unknown,
+          undefined as unknown
         ];
 
         invalidSecrets.forEach(secret => {
@@ -124,8 +124,8 @@ describe('AuthService', () => {
           'ALLUPPERCASE123',
           'alllowercase123!',
           '',
-          null as any,
-          undefined as any
+          null as unknown,
+          undefined as unknown
         ];
 
         weakPasswords.forEach(password => {
@@ -171,9 +171,9 @@ describe('AuthService', () => {
 
       it('should handle edge cases', () => {
         expect(AuthService.sanitizeInput('')).toBe('');
-        expect(AuthService.sanitizeInput(null as any)).toBe('');
-        expect(AuthService.sanitizeInput(undefined as any)).toBe('');
-        expect(AuthService.sanitizeInput(123 as any)).toBe(123);
+        expect(AuthService.sanitizeInput(null as unknown)).toBe('');
+        expect(AuthService.sanitizeInput(undefined as unknown)).toBe('');
+        expect(AuthService.sanitizeInput(123 as unknown)).toBe(123);
       });
     });
   });
@@ -186,8 +186,8 @@ describe('AuthService', () => {
       try {
         await AuthService.signInWithEmail(invalidEmail, weakPassword);
         expect(false).toBe(true); // Should not reach here
-      } catch (error) {
-        expect(error).toBeDefined();
+      } catch (_error) {
+        expect(_error).toBeDefined();
       }
     });
 
@@ -196,7 +196,7 @@ describe('AuthService', () => {
       
       try {
         await AuthService.signUpWithEmail('test@test.com', 'ValidPass123!', maliciousDisplayName);
-      } catch (error) {
+      } catch (_error) {
         // Should handle malicious input gracefully
         expect(error.message).not.toContain('<script>');
       }
@@ -207,7 +207,7 @@ describe('AuthService', () => {
     it('should not expose sensitive information in error messages', async () => {
       try {
         await AuthService.signInWithEmail('test@test.com', 'wrongpassword');
-      } catch (error) {
+      } catch (_error) {
         // Error should not contain sensitive information
         expect(error.message).not.toContain('password');
         expect(error.message).not.toContain('database');
@@ -233,7 +233,7 @@ describe('AuthService', () => {
 
       try {
         await AuthService.signInWithEmail('test@test.com', 'password123');
-      } catch (error) {
+      } catch (_error) {
         expect(error.message).toContain('Network error');
       }
     });
@@ -248,7 +248,7 @@ describe('AuthService', () => {
 
       try {
         await AuthService.signInWithEmail('test@test.com', 'password123');
-      } catch (error) {
+      } catch (_error) {
         expect(error.code).toBe('auth/user-not-found');
       }
     });
@@ -279,12 +279,12 @@ describe('AuthService', () => {
 
   describe('Account Linking', () => {
     it('should validate provider before linking', async () => {
-      const invalidProvider = 'invalid-provider' as any;
+      const invalidProvider = 'invalid-provider' as unknown;
 
       try {
         await AuthService.linkAccount(invalidProvider);
-      } catch (error) {
-        expect(error).toBeDefined();
+      } catch (_error) {
+        expect(_error).toBeDefined();
       }
     });
 
@@ -298,7 +298,7 @@ describe('AuthService', () => {
 
       try {
         await AuthService.linkAccount('google');
-      } catch (error) {
+      } catch (_error) {
         expect(error.code).toBe('auth/email-already-in-use');
       }
     });

@@ -30,7 +30,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
     { value: 'raivo', label: 'Raivo OTP', encrypted: false },
   ];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (_e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
@@ -94,7 +94,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
         fileInputRef.current.value = '';
       }
       onClose();
-    } catch (error) {
+    } catch (_error) {
       dispatch(showToast({ 
         message: error instanceof Error ? error.message : 'Failed to import accounts', 
         type: 'error' 
@@ -104,12 +104,12 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (_e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (_e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     

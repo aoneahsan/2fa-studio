@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { UsageStats } from '@types/analytics.types';
+import { UsageStats } from '@app-types/analytics';
 import { format } from 'date-fns';
 import { 
   ChartBarIcon,

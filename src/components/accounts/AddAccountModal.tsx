@@ -128,7 +128,7 @@ const AddAccountModal: React.FC = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (_e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -157,7 +157,7 @@ const AddAccountModal: React.FC = () => {
       }));
 
       dispatch(closeModal());
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to add account:', error);
       dispatch(addToast({
         type: 'error',
@@ -324,7 +324,7 @@ const AddAccountModal: React.FC = () => {
                     </label>
                     <select
                       value={formData.algorithm}
-                      onChange={(e) => setFormData({ ...formData, algorithm: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, algorithm: e.target.value as unknown })}
                       className="input"
                     >
                       <option value="SHA1">SHA1</option>

@@ -112,7 +112,7 @@ const BackupPage: React.FC = () => {
         type: 'success',
         message: `Successfully backed up ${result.accountsCount} accounts`
       }));
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Backup failed. Please try again.'
@@ -143,7 +143,7 @@ const BackupPage: React.FC = () => {
         type: 'success',
         message: `Successfully restored ${backup.accountCount} accounts`
       }));
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Restore failed. Please try again.'
@@ -169,7 +169,7 @@ const BackupPage: React.FC = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.2fas,.json';
-    input.onchange = (e) => {
+    input.onchange = (_e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         dispatch(addToast({

@@ -66,7 +66,7 @@ export const usePlatform = () => {
         
         // Check if PWA
         const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
-                     (window.navigator as any).standalone === true;
+                     (window.navigator as unknown).standalone === true;
         
         // Check if tablet
         const isTablet = (isIOS && info.model?.includes('iPad')) ||
@@ -107,7 +107,7 @@ export const usePlatform = () => {
           hasKeyboard: Capacitor.isPluginAvailable('Keyboard'),
           hasSafeArea: isIOS || (isAndroid && parseInt(info.osVersion || '0') >= 9)
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to detect platform:', error);
       }
     };
@@ -116,7 +116,7 @@ export const usePlatform = () => {
 
     // Listen for color scheme changes
     const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleDarkModeChange = (e: MediaQueryListEvent) => {
+    const handleDarkModeChange = (_e: MediaQueryListEvent) => {
       setPlatformInfo(prev => ({ ...prev, isDarkMode: e.matches }));
     };
     darkModeQuery.addEventListener('change', handleDarkModeChange);
@@ -142,7 +142,7 @@ export const usePlatform = () => {
           style: style === 'dark' ? Style.Dark : Style.Light 
         });
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to set status bar style:', error);
     }
   };
@@ -155,7 +155,7 @@ export const usePlatform = () => {
 
     try {
       await StatusBar.setBackgroundColor({ color });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to set status bar color:', error);
     }
   };
@@ -172,7 +172,7 @@ export const usePlatform = () => {
       } else {
         await StatusBar.hide();
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to set status bar visibility:', error);
     }
   };

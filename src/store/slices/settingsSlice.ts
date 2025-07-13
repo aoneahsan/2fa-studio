@@ -8,7 +8,7 @@ import { UserSettings } from '@src/types';
 
 interface SettingsState extends UserSettings {
   isLoading: boolean;
-  error: string | null;
+  _error: string | null;
 }
 
 const initialState: SettingsState = {
@@ -28,7 +28,7 @@ const initialState: SettingsState = {
   backupEnabled: false, // For backward compatibility
   backupFrequency: 'weekly', // For backward compatibility
   isLoading: false,
-  error: null,
+  _error: null,
 };
 
 const settingsSlice = createSlice({

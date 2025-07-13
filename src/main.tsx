@@ -9,7 +9,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     navigator.serviceWorker
       .register('/sw.js')
       .then(registration => {
-        console.log('SW registered:', registration);
+        console.log('SW registered:', _registration);
         
         // Check for updates periodically
         setInterval(() => {
@@ -39,9 +39,9 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 }
 
 // Handle app install prompt
-let deferredPrompt: any;
+let deferredPrompt: unknown;
 
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener('beforeinstallprompt', (_e) => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
   // Stash the event so it can be triggered later

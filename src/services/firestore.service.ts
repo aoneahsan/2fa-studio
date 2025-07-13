@@ -63,7 +63,7 @@ export class FirestoreService {
   /**
    * Sanitize user input data
    */
-  static sanitizeInput(data: any): any {
+  static sanitizeInput(data: any): unknown {
     if (typeof data === 'string') {
       return data
         .replace(/[<>'"]/g, '') // Remove potential HTML/JS chars
@@ -79,7 +79,7 @@ export class FirestoreService {
     }
     
     if (data && typeof data === 'object') {
-      const sanitized: any = {};
+      const sanitized: unknown = {};
       Object.keys(data).forEach(key => {
         const sanitizedKey = this.sanitizeInput(key);
         sanitized[sanitizedKey] = this.sanitizeInput(data[key]);
@@ -93,7 +93,7 @@ export class FirestoreService {
   /**
    * Sanitize backup data
    */
-  static sanitizeBackupData(backup: any): any {
+  static sanitizeBackupData(backup: unknown): unknown {
     return this.sanitizeInput(backup);
   }
   
@@ -121,7 +121,7 @@ export class FirestoreService {
       // Enable offline persistence
       // Note: This should be called before any other Firestore operations
       console.log('Firestore service initialized');
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize Firestore:', error);
     }
   }
@@ -147,7 +147,7 @@ export class FirestoreService {
       }
       
       return null;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting document:', error);
       throw error;
     }
@@ -158,7 +158,7 @@ export class FirestoreService {
    */
   static async getCollection<T = any>(
     collectionPath: string,
-    filters: Array<{ field: string; operator: any; value: any }> = [],
+    filters: Array<{ field: string; operator: unknown; value: any }> = [],
     pagination: PaginationOptions = {}
   ): Promise<SyncResult<T>> {
     try {
@@ -204,7 +204,7 @@ export class FirestoreService {
         lastDoc: resultDocs[resultDocs.length - 1],
         fromCache: querySnapshot.metadata.fromCache
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting collection:', error);
       throw error;
     }
@@ -235,7 +235,7 @@ export class FirestoreService {
         const docRef = await addDoc(collectionRef, documentData);
         return docRef.id;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating document:', error);
       throw error;
     }
@@ -274,7 +274,7 @@ export class FirestoreService {
           updatedAt: serverTimestamp()
         });
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating document:', error);
       throw error;
     }
@@ -290,7 +290,7 @@ export class FirestoreService {
     try {
       const docRef = doc(db, collectionPath, documentId);
       await deleteDoc(docRef);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error deleting document:', error);
       throw error;
     }
@@ -303,7 +303,7 @@ export class FirestoreService {
     type: 'create' | 'update' | 'delete';
     collectionPath: string;
     documentId?: string;
-    data?: any;
+    data?: unknown;
   }>): Promise<void> {
     try {
       const batch = writeBatch(db);
@@ -334,7 +334,7 @@ export class FirestoreService {
       });
 
       await batch.commit();
-    } catch (error) {
+    } catch (_error) {
       console.error('Error in batch operation:', error);
       throw error;
     }
@@ -344,11 +344,11 @@ export class FirestoreService {
    * Transaction
    */
   static async runTransaction<T>(
-    callback: (transaction: any) => Promise<T>
+    callback: (transaction: unknown) => Promise<T>
   ): Promise<T> {
     try {
       return await runTransaction(db, callback);
-    } catch (error) {
+    } catch (_error) {
       console.error('Transaction failed:', error);
       throw error;
     }
@@ -380,9 +380,9 @@ export class FirestoreService {
             callback(null);
           }
         },
-        (error) => {
-          console.error('Document subscription error:', error);
-          callback(null, error);
+        (_error) => {
+          console.error('Document subscription _error:', error);
+          callback(null, _error);
         }
       );
 
@@ -391,7 +391,7 @@ export class FirestoreService {
       }
 
       return unsubscribe;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error setting up document subscription:', error);
       throw error;
     }
@@ -402,7 +402,7 @@ export class FirestoreService {
    */
   static subscribeToCollection<T = any>(
     collectionPath: string,
-    filters: Array<{ field: string; operator: any; value: any }> = [],
+    filters: Array<{ field: string; operator: unknown; value: any }> = [],
     callback: (data: T[], error?: FirestoreError) => void,
     subscriptionKey?: string,
     pagination?: PaginationOptions
@@ -436,9 +436,9 @@ export class FirestoreService {
           })) as T[];
           callback(data);
         },
-        (error) => {
-          console.error('Collection subscription error:', error);
-          callback([], error);
+        (_error) => {
+          console.error('Collection subscription _error:', error);
+          callback([], _error);
         }
       );
 
@@ -447,7 +447,7 @@ export class FirestoreService {
       }
 
       return unsubscribe;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error setting up collection subscription:', error);
       throw error;
     }
@@ -481,7 +481,7 @@ export class FirestoreService {
     try {
       await disableNetwork(db);
       console.log('Firestore offline mode enabled');
-    } catch (error) {
+    } catch (_error) {
       console.error('Error enabling offline mode:', error);
     }
   }
@@ -490,7 +490,7 @@ export class FirestoreService {
     try {
       await enableNetwork(db);
       console.log('Firestore online mode enabled');
-    } catch (error) {
+    } catch (_error) {
       console.error('Error enabling online mode:', error);
     }
   }
@@ -498,7 +498,7 @@ export class FirestoreService {
   static async waitForPendingWrites(): Promise<void> {
     try {
       await waitForPendingWrites(db);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error waiting for pending writes:', error);
     }
   }
@@ -507,10 +507,10 @@ export class FirestoreService {
    * Merge documents for conflict resolution
    */
   private static mergeDocuments(
-    currentData: any,
-    newData: any,
+    currentData: unknown,
+    newData: unknown,
     mergeFields?: string[]
-  ): any {
+  ): unknown {
     if (!mergeFields) {
       // Default merge strategy - newer values take precedence
       return { ...currentData, ...newData };

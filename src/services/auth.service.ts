@@ -40,7 +40,7 @@ import {
   deleteDoc,
   Timestamp
 } from 'firebase/firestore';
-import { auth, db } from '@src/config/firebase';
+import { _auth, db } from '@src/config/firebase';
 import { User, Device, Subscription } from '@src/types';
 import { Capacitor } from '@capacitor/core';
 import { authRateLimiter } from '@utils/rate-limiter';
@@ -109,7 +109,7 @@ export class AuthService {
    * Initialize auth state listener
    */
   static initialize(onUserChange: (user: User | null) => void): () => void {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
+    return onAuthStateChanged(_auth, async (firebaseUser) => {
       if (firebaseUser) {
         const user = await this.getUserData(firebaseUser);
         this.currentUser = user;
@@ -126,7 +126,7 @@ export class AuthService {
    */
   static async setPersistence(rememberMe: boolean): Promise<void> {
     const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
-    await setPersistence(auth, persistence);
+    await setPersistence(_auth, persistence);
   }
 
   /**
@@ -135,7 +135,7 @@ export class AuthService {
   static async signUp(credentials: AuthCredentials): Promise<User> {
     try {
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        _auth,
         credentials.email,
         credentials.password
       );
@@ -207,7 +207,7 @@ export class AuthService {
       });
 
       return userData;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       // Log failed signup attempt
       await AuditLogService.log({
         userId: credentials.email,
@@ -230,7 +230,7 @@ export class AuthService {
    * Sign in with email and password
    */
   static async signIn(credentials: AuthCredentials): Promise<User> {
-    const rateLimitKey = `auth:${credentials.email}`;
+    const rateLimitKey = `_auth:${credentials.email}`;
     
     // Check rate limit
     if (!authRateLimiter.isAllowed(rateLimitKey)) {
@@ -256,7 +256,7 @@ export class AuthService {
     
     try {
       const userCredential = await signInWithEmailAndPassword(
-        auth,
+        _auth,
         credentials.email,
         credentials.password
       );
@@ -291,7 +291,7 @@ export class AuthService {
       await AuditLogService.detectSuspiciousActivity(user.id);
 
       return user;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       // Record failed attempt
       authRateLimiter.recordAttempt(rateLimitKey);
       
@@ -330,18 +330,18 @@ export class AuthService {
       
       if (Capacitor.isNativePlatform()) {
         // Use redirect for mobile apps
-        await signInWithRedirect(auth, provider);
-        userCredential = await getRedirectResult(auth);
+        await signInWithRedirect(_auth, provider);
+        userCredential = await getRedirectResult(_auth);
         if (!userCredential) {
           throw new Error('No redirect result');
         }
       } else {
         // Use popup for web
-        userCredential = await signInWithPopup(auth, provider);
+        userCredential = await signInWithPopup(_auth, provider);
       }
 
       return await this.handleSocialSignIn(userCredential, 'google');
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -359,18 +359,18 @@ export class AuthService {
       
       if (Capacitor.isNativePlatform()) {
         // Use redirect for mobile apps
-        await signInWithRedirect(auth, provider);
-        userCredential = await getRedirectResult(auth);
+        await signInWithRedirect(_auth, provider);
+        userCredential = await getRedirectResult(_auth);
         if (!userCredential) {
           throw new Error('No redirect result');
         }
       } else {
         // Use popup for web
-        userCredential = await signInWithPopup(auth, provider);
+        userCredential = await signInWithPopup(_auth, provider);
       }
 
       return await this.handleSocialSignIn(userCredential, 'apple');
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -378,7 +378,7 @@ export class AuthService {
   /**
    * Handle social sign-in (Google/Apple)
    */
-  private static async handleSocialSignIn(userCredential: any, provider: 'google' | 'apple'): Promise<User> {
+  private static async handleSocialSignIn(userCredential: unknown, provider: 'google' | 'apple'): Promise<User> {
     // Check if user exists
     const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
     
@@ -487,7 +487,7 @@ export class AuthService {
         await this.unregisterDevice(this.currentUser.id);
       }
       
-      await signOut(auth);
+      await signOut(_auth);
       this.currentUser = null;
       
       // Log signout
@@ -499,7 +499,7 @@ export class AuthService {
         success: true,
         details: {}
       });
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -509,7 +509,7 @@ export class AuthService {
    */
   static async sendPasswordResetEmail(email: string): Promise<void> {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(_auth, email);
       
       // Log password reset request
       await AuditLogService.log({
@@ -520,7 +520,7 @@ export class AuthService {
         success: true,
         details: { email }
       });
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -543,7 +543,7 @@ export class AuthService {
         ...profile,
         updatedAt: serverTimestamp()
       });
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -576,7 +576,7 @@ export class AuthService {
         success: true,
         details: {}
       });
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -776,7 +776,7 @@ export class AuthService {
         success: true,
         details: { email: auth.currentUser.email }
       });
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -791,7 +791,7 @@ export class AuthService {
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/drive.file');
       
-      const credential = await signInWithPopup(auth, provider);
+      const credential = await signInWithPopup(_auth, provider);
       await linkWithCredential(auth.currentUser, credential.credential!);
       
       // Update user data to enable cloud backup
@@ -811,7 +811,7 @@ export class AuthService {
         success: true,
         details: { provider: 'google' }
       });
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -843,7 +843,7 @@ export class AuthService {
         success: true,
         details: { provider: providerId }
       });
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -883,7 +883,7 @@ export class AuthService {
       });
       
       this.currentUser = null;
-    } catch (error: any) {
+    } catch (_error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }

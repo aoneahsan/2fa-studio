@@ -3,7 +3,7 @@
  * @module types
  */
 
-export * from '@types/account';
+export * from './account';
 
 // User types
 export interface User {
@@ -157,7 +157,7 @@ export interface AuditLog {
 export interface ExportData {
   version: string;
   exportDate: Date;
-  accounts: any[]; // Encrypted account data
+  accounts: unknown[]; // Encrypted account data
   settings: UserSettings;
   checksum: string;
 }
@@ -166,7 +166,7 @@ export interface ExportData {
 export interface AppError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: Date;
 }
 
@@ -230,8 +230,8 @@ export interface MigrationRecord {
 export interface SyncConflict {
   id: string;
   type: 'account' | 'folder' | 'tag' | 'settings';
-  localData: any;
-  remoteData: any;
+  localData: unknown;
+  remoteData: unknown;
   timestamp: Date;
   resolved: boolean;
   resolution?: 'local' | 'remote' | 'merge';
@@ -246,7 +246,7 @@ export interface BackupVersion {
   checksum: string;
   metadata: {
     accountCount: number;
-    deviceInfo: any;
+    deviceInfo: unknown;
     appVersion: string;
   };
 }

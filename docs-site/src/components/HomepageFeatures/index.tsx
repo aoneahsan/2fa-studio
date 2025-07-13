@@ -12,7 +12,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Comprehensive Documentation',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: import('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
         Complete documentation for 2FA Studio including architecture guides,
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Developer Focused',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: import('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
         Detailed technical documentation covering React, Capacitor.js, Firebase
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Always Up to Date',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: import('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
         Documentation is continuously updated with the latest features,

@@ -196,7 +196,7 @@ describe('FirestoreService', () => {
 
       // Mock successful document creation
       const mockDocRef = { id: 'doc123' };
-      vi.mocked(addDoc).mockResolvedValue(mockDocRef as any);
+      vi.mocked(addDoc).mockResolvedValue(mockDocRef as unknown);
 
       const documentId = await FirestoreService.createDocument(
         'users/test/accounts',
@@ -244,7 +244,7 @@ describe('FirestoreService', () => {
 
       try {
         await FirestoreService.getDocument('users/test', 'doc123');
-      } catch (error) {
+      } catch (_error) {
         expect(error.message).toContain('permission denied');
       }
     });
@@ -255,7 +255,7 @@ describe('FirestoreService', () => {
 
       try {
         await FirestoreService.getCollection('users');
-      } catch (error) {
+      } catch (_error) {
         expect(error.message).toContain('Network request failed');
       }
     });
@@ -263,8 +263,8 @@ describe('FirestoreService', () => {
     it('should handle invalid document references', async () => {
       try {
         await FirestoreService.getDocument('', '');
-      } catch (error) {
-        expect(error).toBeDefined();
+      } catch (_error) {
+        expect(_error).toBeDefined();
       }
     });
   });
@@ -365,7 +365,7 @@ describe('FirestoreService', () => {
         commit: vi.fn().mockResolvedValue(undefined)
       };
 
-      vi.mocked(writeBatch).mockReturnValue(mockBatch as any);
+      vi.mocked(writeBatch).mockReturnValue(mockBatch as unknown);
 
       await FirestoreService.batchWrite(operations);
 
@@ -385,7 +385,7 @@ describe('FirestoreService', () => {
 
       const transactionCallback = vi.fn().mockResolvedValue('success');
       vi.mocked(runTransaction).mockImplementation((_, callback) => 
-        callback(mockTransaction as any)
+        callback(mockTransaction as unknown)
       );
 
       const result = await FirestoreService.runTransaction(transactionCallback);

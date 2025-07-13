@@ -48,14 +48,14 @@ export interface ApplePurchase {
   subscriptionAutoRenewStatus?: boolean;
   subscriptionRetryFlag?: boolean;
   subscriptionInGracePeriod?: boolean;
-  pendingRenewalInfo?: any;
+  pendingRenewalInfo?: unknown;
 }
 
 export interface AppStoreReceiptValidationResult {
   valid: boolean;
   purchase?: ApplePurchase;
-  latestReceiptInfo?: any[];
-  pendingRenewalInfo?: any[];
+  latestReceiptInfo?: unknown[];
+  pendingRenewalInfo?: unknown[];
   environment: 'sandbox' | 'production';
   error?: string;
   fraudRisk?: 'low' | 'medium' | 'high';
@@ -90,8 +90,8 @@ export interface ApplePayLineItem {
 export interface ApplePayResult {
   success: boolean;
   paymentToken?: string;
-  billingContact?: any;
-  shippingContact?: any;
+  billingContact?: unknown;
+  shippingContact?: unknown;
   error?: string;
 }
 
@@ -107,7 +107,7 @@ export class ApplePayService {
       if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') {
         return {
           success: false,
-          error: 'Apple Pay is only available on iOS',
+          _error: 'Apple Pay is only available on iOS',
         };
       }
 
@@ -117,11 +117,11 @@ export class ApplePayService {
 
       console.log('Apple Pay and StoreKit initialized');
       return { success: true };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error initializing Apple Pay:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -138,7 +138,7 @@ export class ApplePayService {
       // Check if Apple Pay is available on this device
       // This would call the native Apple Pay API
       return true; // Simulated response
-    } catch (error) {
+    } catch (_error) {
       console.error('Error checking Apple Pay availability:', error);
       return false;
     }
@@ -185,12 +185,12 @@ export class ApplePayService {
         success: true,
         products: mockProducts,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error querying products:', error);
       return {
         success: false,
         products: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -226,11 +226,11 @@ export class ApplePayService {
         success: true,
         purchase: mockPurchase,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error purchasing subscription:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -243,7 +243,7 @@ export class ApplePayService {
       if (!await this.isApplePayAvailable()) {
         return {
           success: false,
-          error: 'Apple Pay not available',
+          _error: 'Apple Pay not available',
         };
       }
 
@@ -270,11 +270,11 @@ export class ApplePayService {
       };
 
       return mockResult;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error processing Apple Pay payment:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -305,7 +305,7 @@ export class ApplePayService {
         return {
           valid: false,
           environment: 'sandbox',
-          error: result.error || 'Receipt validation failed',
+          _error: result.error || 'Receipt validation failed',
         };
       }
 
@@ -317,12 +317,12 @@ export class ApplePayService {
         environment: result.environment,
         fraudRisk: result.fraudRisk || 'low',
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error validating receipt:', error);
       return {
         valid: false,
         environment: 'sandbox',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -346,12 +346,12 @@ export class ApplePayService {
         success: true,
         purchases: [],
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error restoring purchases:', error);
       return {
         success: false,
         purchases: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -375,7 +375,7 @@ export class ApplePayService {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.error || 'Invalid purchase',
+          _error: validation.error || 'Invalid purchase',
         };
       }
 
@@ -414,11 +414,11 @@ export class ApplePayService {
         success: true,
         subscription,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error creating subscription from purchase:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -451,11 +451,11 @@ export class ApplePayService {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -463,7 +463,7 @@ export class ApplePayService {
   /**
    * Handle App Store Server Notifications
    */
-  static async handleServerNotification(notification: any): Promise<void> {
+  static async handleServerNotification(notification: unknown): Promise<void> {
     try {
       const { notificationType, latestReceiptInfo, password } = notification;
 
@@ -507,7 +507,7 @@ export class ApplePayService {
         default:
           console.log(`Unhandled App Store notification type: ${notificationType}`);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling App Store server notification:', error);
     }
   }
@@ -515,7 +515,7 @@ export class ApplePayService {
   /**
    * Handle initial purchase notification
    */
-  private static async handleInitialPurchase(receiptInfo: any): Promise<void> {
+  private static async handleInitialPurchase(receiptInfo: unknown): Promise<void> {
     // Implementation for initial purchase
     console.log('Handling initial purchase:', receiptInfo);
   }
@@ -523,7 +523,7 @@ export class ApplePayService {
   /**
    * Handle cancellation notification
    */
-  private static async handleCancellation(receiptInfo: any): Promise<void> {
+  private static async handleCancellation(receiptInfo: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -541,7 +541,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling cancellation:', error);
     }
   }
@@ -549,7 +549,7 @@ export class ApplePayService {
   /**
    * Handle renewal notification
    */
-  private static async handleRenewal(receiptInfo: any): Promise<void> {
+  private static async handleRenewal(receiptInfo: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -567,7 +567,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling renewal:', error);
     }
   }
@@ -575,7 +575,7 @@ export class ApplePayService {
   /**
    * Handle interactive renewal notification
    */
-  private static async handleInteractiveRenewal(receiptInfo: any): Promise<void> {
+  private static async handleInteractiveRenewal(receiptInfo: unknown): Promise<void> {
     // Similar to regular renewal but triggered by user action
     await this.handleRenewal(receiptInfo);
   }
@@ -583,7 +583,7 @@ export class ApplePayService {
   /**
    * Handle renewal preference change notification
    */
-  private static async handleRenewalPreferenceChange(receiptInfo: any): Promise<void> {
+  private static async handleRenewalPreferenceChange(receiptInfo: unknown): Promise<void> {
     // Handle subscription preference changes
     console.log('Handling renewal preference change:', receiptInfo);
   }
@@ -591,7 +591,7 @@ export class ApplePayService {
   /**
    * Handle renewal status change notification
    */
-  private static async handleRenewalStatusChange(receiptInfo: any): Promise<void> {
+  private static async handleRenewalStatusChange(receiptInfo: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -608,7 +608,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling renewal status change:', error);
     }
   }
@@ -616,7 +616,7 @@ export class ApplePayService {
   /**
    * Handle renewal failure notification
    */
-  private static async handleRenewalFailure(receiptInfo: any): Promise<void> {
+  private static async handleRenewalFailure(receiptInfo: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -633,7 +633,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling renewal failure:', error);
     }
   }
@@ -641,7 +641,7 @@ export class ApplePayService {
   /**
    * Handle recovery notification
    */
-  private static async handleRecovery(receiptInfo: any): Promise<void> {
+  private static async handleRecovery(receiptInfo: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -658,7 +658,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling recovery:', error);
     }
   }
@@ -666,7 +666,7 @@ export class ApplePayService {
   /**
    * Handle refund notification
    */
-  private static async handleRefund(receiptInfo: any): Promise<void> {
+  private static async handleRefund(receiptInfo: unknown): Promise<void> {
     try {
       const firestoreResult = await FirestoreService.getCollection(
         'subscriptions',
@@ -689,7 +689,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error handling refund:', error);
     }
   }

@@ -17,7 +17,7 @@ async function isAdmin(uid: string): Promise<boolean> {
     const userDoc = await db.collection("users").doc(uid).get();
     const userData = userDoc.data();
     return userData?.role === "admin" || userData?.role === "super_admin";
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -25,9 +25,9 @@ async function isAdmin(uid: string): Promise<boolean> {
 /**
  * Get user statistics for admin dashboard
  */
-export const getUserStats = functions.https.onCall(async (data, context) => {
+export const getUserStats = functions.https.onCall(async (_data, _context) => {
   // Check authentication
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -87,8 +87,8 @@ export const getUserStats = functions.https.onCall(async (data, context) => {
       subscriptionStats,
       lastUpdated: new Date().toISOString(),
     };
-  } catch (error) {
-    console.error("Error getting user stats:", error);
+  } catch (_error) {
+    console.error('Error getting user stats:', error);
     throw new functions.https.HttpsError("internal", "Failed to get user statistics");
   }
 });
@@ -96,9 +96,9 @@ export const getUserStats = functions.https.onCall(async (data, context) => {
 /**
  * Update user subscription (admin override)
  */
-export const updateUserSubscription = functions.https.onCall(async (data, context) => {
+export const updateUserSubscription = functions.https.onCall(async (_data, _context) => {
   // Check authentication
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -137,8 +137,8 @@ export const updateUserSubscription = functions.https.onCall(async (data, contex
     });
 
     return { success: true };
-  } catch (error) {
-    console.error("Error updating subscription:", error);
+  } catch (_error) {
+    console.error('Error updating subscription:', error);
     throw new functions.https.HttpsError("internal", "Failed to update subscription");
   }
 });
@@ -146,9 +146,9 @@ export const updateUserSubscription = functions.https.onCall(async (data, contex
 /**
  * Delete user and all associated data
  */
-export const deleteUser = functions.https.onCall(async (data, context) => {
+export const deleteUser = functions.https.onCall(async (_data, _context) => {
   // Check authentication
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -204,8 +204,8 @@ export const deleteUser = functions.https.onCall(async (data, context) => {
     });
 
     return { success: true };
-  } catch (error) {
-    console.error("Error deleting user:", error);
+  } catch (_error) {
+    console.error('Error deleting user:', error);
     throw new functions.https.HttpsError("internal", "Failed to delete user");
   }
 });
@@ -213,9 +213,9 @@ export const deleteUser = functions.https.onCall(async (data, context) => {
 /**
  * Get system statistics
  */
-export const getSystemStats = functions.https.onCall(async (data, context) => {
+export const getSystemStats = functions.https.onCall(async (_data, _context) => {
   // Check authentication
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -274,8 +274,8 @@ export const getSystemStats = functions.https.onCall(async (data, context) => {
       revenue: revenueStats,
       lastUpdated: new Date().toISOString(),
     };
-  } catch (error) {
-    console.error("Error getting system stats:", error);
+  } catch (_error) {
+    console.error('Error getting system stats:', error);
     throw new functions.https.HttpsError("internal", "Failed to get system statistics");
   }
 });
@@ -283,9 +283,9 @@ export const getSystemStats = functions.https.onCall(async (data, context) => {
 /**
  * Send notification to user(s)
  */
-export const sendNotification = functions.https.onCall(async (data, context) => {
+export const sendNotification = functions.https.onCall(async (_data, _context) => {
   // Check authentication
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -327,8 +327,8 @@ export const sendNotification = functions.https.onCall(async (data, context) => 
     // TODO: Send push notifications via OneSignal
 
     return { success: true, notificationsSent: userIds.length };
-  } catch (error) {
-    console.error("Error sending notifications:", error);
+  } catch (_error) {
+    console.error('Error sending notifications:', error);
     throw new functions.https.HttpsError("internal", "Failed to send notifications");
   }
 });
@@ -336,9 +336,9 @@ export const sendNotification = functions.https.onCall(async (data, context) => 
 /**
  * Export users data
  */
-export const exportUsers = functions.https.onCall(async (data, context) => {
+export const exportUsers = functions.https.onCall(async (_data, _context) => {
   // Check authentication
-  if (!context.auth) {
+  if (!context._auth) {
     throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
   }
 
@@ -350,7 +350,7 @@ export const exportUsers = functions.https.onCall(async (data, context) => {
 
   try {
     const usersSnapshot = await db.collection("users").get();
-    const users: any[] = [];
+    const users: unknown[] = [];
 
     usersSnapshot.forEach((doc) => {
       const userData = doc.data();
@@ -378,8 +378,8 @@ export const exportUsers = functions.https.onCall(async (data, context) => {
       exportedAt: new Date().toISOString(),
       exportedBy: context.auth.uid,
     };
-  } catch (error) {
-    console.error("Error exporting users:", error);
+  } catch (_error) {
+    console.error('Error exporting users:', error);
     throw new functions.https.HttpsError("internal", "Failed to export users");
   }
 });
@@ -393,7 +393,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
   // Verify admin token
   const token = req.headers.authorization?.split("Bearer ")[1];
   if (!token) {
-    res.status(401).json({ error: "Unauthorized" });
+    res.status(401).json({ _error: "Unauthorized" });
     return;
   }
 
@@ -402,7 +402,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
     const isUserAdmin = await isAdmin(decodedToken.uid);
     
     if (!isUserAdmin) {
-      res.status(403).json({ error: "Forbidden" });
+      res.status(403).json({ _error: "Forbidden" });
       return;
     }
 
@@ -420,18 +420,18 @@ export async function handleAdminAPI(req: Request, res: Response) {
         .offset(offset)
         .get();
 
-      const users: any[] = [];
+      const users: unknown[] = [];
       usersSnapshot.forEach((doc) => {
         users.push({ id: doc.id, ...doc.data() });
       });
 
       res.json({ users, page, limit });
     } else {
-      res.status(404).json({ error: "Not found" });
+      res.status(404).json({ _error: "Not found" });
     }
-  } catch (error) {
-    console.error("Admin API error:", error);
-    res.status(500).json({ error: "Internal server error" });
+  } catch (_error) {
+    console.error('Admin API _error:', error);
+    res.status(500).json({ _error: "Internal server error" });
   }
 }
 

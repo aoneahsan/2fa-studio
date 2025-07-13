@@ -54,7 +54,7 @@ export class BiometricAccountService {
       }
 
       if (!Capacitor.isNativePlatform()) {
-        // On web, we can't use biometric auth, so we'll simulate with a prompt
+        // On web, we can't use biometric _auth, so we'll simulate with a prompt
         const confirmed = window.confirm(
           reason || `Biometric authentication required for ${account.label}`
         );
@@ -65,7 +65,7 @@ export class BiometricAccountService {
         } else {
           return { 
             success: false, 
-            error: 'Authentication cancelled' 
+            _error: 'Authentication cancelled' 
           };
         }
       }
@@ -75,7 +75,7 @@ export class BiometricAccountService {
       if (!checkResult.isAvailable) {
         return { 
           success: false, 
-          error: checkResult.biometryType || 'Biometric authentication not available' 
+          _error: checkResult.biometryType || 'Biometric authentication not available' 
         };
       }
 
@@ -124,14 +124,14 @@ export class BiometricAccountService {
         
         return { 
           success: false, 
-          error: 'Authentication failed' 
+          _error: 'Authentication failed' 
         };
       }
-    } catch (error) {
-      console.error('Biometric authentication error:', error);
+    } catch (_error) {
+      console.error('Biometric authentication _error:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Authentication error' 
+        _error: error instanceof Error ? error.message : 'Authentication error' 
       };
     }
   }
@@ -189,7 +189,7 @@ export class BiometricAccountService {
           platform: Capacitor.getPlatform()
         }
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error enabling biometric:', error);
       
       // Log failed attempt
@@ -254,7 +254,7 @@ export class BiometricAccountService {
           platform: Capacitor.getPlatform()
         }
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error disabling biometric:', error);
       
       // Log failed attempt
@@ -285,7 +285,7 @@ export class BiometricAccountService {
         biometricTimeout: timeout,
         updatedAt: new Date(),
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating biometric timeout:', error);
       throw error;
     }
@@ -303,8 +303,8 @@ export class BiometricAccountService {
       await updateDoc(accountRef, {
         lastBiometricAuth: new Date(),
       });
-    } catch (error) {
-      console.error('Error updating last biometric auth:', error);
+    } catch (_error) {
+      console.error('Error updating last biometric _auth:', error);
     }
   }
 

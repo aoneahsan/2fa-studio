@@ -18,8 +18,8 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@src/config/firebase';
-import { Tag, DEFAULT_TAGS } from '@types/tag';
-import { Account } from '@types/account';
+import { Tag, DEFAULT_TAGS } from '@app-types/tag';
+import { Account } from '@app-types/account';
 import { store } from '@store/index';
 
 export class TagService {

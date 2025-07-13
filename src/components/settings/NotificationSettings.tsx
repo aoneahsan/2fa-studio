@@ -31,7 +31,7 @@ const NotificationSettings: React.FC = () => {
     try {
       await updatePreferences({ [key]: value });
       showToast('success', 'Notification preferences updated');
-    } catch (error) {
+    } catch (_error) {
       showToast('error', 'Failed to update preferences');
     }
   };

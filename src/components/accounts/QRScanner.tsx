@@ -20,7 +20,7 @@ interface QRScannerProps {
  */
 const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef<QrScanner | null>(null);
 
@@ -55,7 +55,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
             handleScanResult(result.content!);
           }
         } catch (err) {
-          console.error('Native scanner error:', err);
+          console.error('Native scanner _error:', err);
           setError('Failed to access camera. Please check permissions.');
         }
       } else {
@@ -73,7 +73,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
           // Create scanner instance
           const scanner = new QrScanner(
             videoRef.current,
-            (result) => {
+            (_result) => {
               handleScanResult(result.data);
             },
             {
@@ -90,7 +90,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
           await scanner.start();
           setIsScanning(true);
         } catch (err) {
-          console.error('Scanner initialization error:', err);
+          console.error('Scanner initialization _error:', err);
           setError('Failed to access camera. Please check permissions.');
         }
       }
@@ -134,7 +134,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
         uri: data
       });
     } catch (err) {
-      console.error('QR parsing error:', err);
+      console.error('QR parsing _error:', err);
       setError('Failed to parse QR code. Please try manual entry.');
     }
   };

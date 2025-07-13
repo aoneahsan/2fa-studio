@@ -52,8 +52,8 @@ const Layout: React.FC = () => {
     try {
       await dispatch(signOut()).unwrap();
       navigate('/login');
-    } catch (error) {
-      console.error('Sign out error:', error);
+    } catch (_error) {
+      console.error('Sign out _error:', error);
     }
   };
 

@@ -67,7 +67,7 @@ export interface LDAPConfig {
 
 export interface SSOLoginResult {
   success: boolean;
-  user?: any;
+  user?: unknown;
   error?: string;
   redirectUrl?: string;
 }
@@ -82,12 +82,12 @@ export class SSOService {
     try {
       // Load SSO configurations from Firestore
       await this.loadSSOConfigurations();
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize SSO service:', error);
-      await ErrorMonitoringService.reportError(error, {
+      await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
         severity: 'high',
-        context: { operation: 'sso_initialization' }
+        _context: { operation: 'sso_initialization' }
       });
     }
   }
@@ -97,11 +97,11 @@ export class SSOService {
    */
   static async createSSOConfig(
     organizationId: string,
-    config: Omit<SSOConfig, 'id' | 'createdAt' | 'updatedAt'>
+    _config: Omit<SSOConfig, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<string> {
     try {
       const ssoConfig: SSOConfig = {
-        ...config,
+        ..._config,
         id: `sso_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         organizationId,
         createdAt: new Date(),
@@ -122,12 +122,12 @@ export class SSOService {
       this.ssoConfigs.set(configId, ssoConfig);
 
       return configId;
-    } catch (error) {
-      console.error('Failed to create SSO config:', error);
-      await ErrorMonitoringService.reportError(error, {
+    } catch (_error) {
+      console.error('Failed to create SSO _config:', error);
+      await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
         severity: 'high',
-        context: { operation: 'create_sso_config', organizationId }
+        _context: { operation: 'create_sso_config', organizationId }
       });
       throw error;
     }
@@ -155,17 +155,17 @@ export class SSOService {
         success: true,
         redirectUrl: `${samlConfig.ssoUrl}?SAMLRequest=${encodeURIComponent(samlRequest)}&RelayState=${encodeURIComponent(relayState || '')}`
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initiate SAML login:', error);
-      await ErrorMonitoringService.reportError(error, {
+      await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
         severity: 'high',
-        context: { operation: 'saml_login_initiation', organizationId }
+        _context: { operation: 'saml_login_initiation', organizationId }
       });
       
       return {
         success: false,
-        error: error.message
+        _error: error.message
       };
     }
   }
@@ -193,7 +193,7 @@ export class SSOService {
       const organizationId = validationResult.organizationId;
       const config = await this.getSSOConfig(organizationId, 'saml');
       
-      if (!config) {
+      if (!_config) {
         throw new Error('SSO configuration not found');
       }
 
@@ -207,17 +207,17 @@ export class SSOService {
         success: true,
         user
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to handle SAML response:', error);
-      await ErrorMonitoringService.reportError(error, {
+      await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
         severity: 'high',
-        context: { operation: 'saml_response_handling' }
+        _context: { operation: 'saml_response_handling' }
       });
       
       return {
         success: false,
-        error: error.message
+        _error: error.message
       };
     }
   }
@@ -244,17 +244,17 @@ export class SSOService {
         success: true,
         redirectUrl: authUrl
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initiate OIDC login:', error);
-      await ErrorMonitoringService.reportError(error, {
+      await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
         severity: 'high',
-        context: { operation: 'oidc_login_initiation', organizationId }
+        _context: { operation: 'oidc_login_initiation', organizationId }
       });
       
       return {
         success: false,
-        error: error.message
+        _error: error.message
       };
     }
   }
@@ -269,7 +269,7 @@ export class SSOService {
   ): Promise<SSOLoginResult> {
     try {
       const config = await this.getSSOConfig(organizationId, 'oidc');
-      if (!config) {
+      if (!_config) {
         throw new Error('OIDC configuration not found');
       }
 
@@ -291,17 +291,17 @@ export class SSOService {
         success: true,
         user
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to handle OIDC callback:', error);
-      await ErrorMonitoringService.reportError(error, {
+      await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
         severity: 'high',
-        context: { operation: 'oidc_callback_handling', organizationId }
+        _context: { operation: 'oidc_callback_handling', organizationId }
       });
       
       return {
         success: false,
-        error: error.message
+        _error: error.message
       };
     }
   }
@@ -309,7 +309,7 @@ export class SSOService {
   /**
    * Test LDAP connection
    */
-  static async testLDAPConnection(config: LDAPConfig): Promise<boolean> {
+  static async testLDAPConnection(_config: LDAPConfig): Promise<boolean> {
     try {
       // This would use a server-side LDAP client
       // For now, we'll simulate the test
@@ -317,7 +317,7 @@ export class SSOService {
       
       // In a real implementation, this would be handled by a backend service
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('LDAP connection test failed:', error);
       return false;
     }
@@ -337,7 +337,7 @@ export class SSOService {
       );
 
       return result.success ? result.data : [];
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get available SSO providers:', error);
       return [];
     }
@@ -363,8 +363,8 @@ export class SSOService {
       if (existing) {
         this.ssoConfigs.set(configId, { ...existing, ...updatedConfig });
       }
-    } catch (error) {
-      console.error('Failed to update SSO config:', error);
+    } catch (_error) {
+      console.error('Failed to update SSO _config:', error);
       throw error;
     }
   }
@@ -376,8 +376,8 @@ export class SSOService {
     try {
       await FirestoreService.deleteDocument('sso_configurations', configId);
       this.ssoConfigs.delete(configId);
-    } catch (error) {
-      console.error('Failed to delete SSO config:', error);
+    } catch (_error) {
+      console.error('Failed to delete SSO _config:', error);
       throw error;
     }
   }
@@ -389,7 +389,7 @@ export class SSOService {
     
     if (result.success) {
       result.data.forEach(config => {
-        this.ssoConfigs.set(config.id, config);
+        this.ssoConfigs.set(config.id, _config);
       });
     }
   }
@@ -417,7 +417,7 @@ export class SSOService {
     return result.success && result.data.length > 0 ? result.data[0] : null;
   }
 
-  private static async validateSSOConfig(config: SSOConfig): Promise<void> {
+  private static async validateSSOConfig(_config: SSOConfig): Promise<void> {
     switch (config.provider) {
       case 'saml':
         this.validateSAMLConfig(config.configuration as SAMLConfig);
@@ -433,26 +433,26 @@ export class SSOService {
     }
   }
 
-  private static validateSAMLConfig(config: SAMLConfig): void {
+  private static validateSAMLConfig(_config: SAMLConfig): void {
     if (!config.entityId || !config.ssoUrl || !config.x509Certificate) {
       throw new Error('Missing required SAML configuration fields');
     }
   }
 
-  private static validateOIDCConfig(config: OIDCConfig): void {
+  private static validateOIDCConfig(_config: OIDCConfig): void {
     if (!config.issuer || !config.clientId || !config.authorizationEndpoint) {
       throw new Error('Missing required OIDC configuration fields');
     }
   }
 
-  private static validateLDAPConfig(config: LDAPConfig): void {
+  private static validateLDAPConfig(_config: LDAPConfig): void {
     if (!config.url || !config.searchBase || !config.searchFilter) {
       throw new Error('Missing required LDAP configuration fields');
     }
   }
 
   private static async generateSAMLRequest(
-    config: SAMLConfig,
+    _config: SAMLConfig,
     relayState?: string
   ): Promise<string> {
     // In a real implementation, this would use a SAML library
@@ -460,12 +460,12 @@ export class SSOService {
     return btoa(`<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" />`);
   }
 
-  private static decodeSAMLResponse(response: string): any {
+  private static decodeSAMLResponse(response: string): unknown {
     // Decode base64 SAML response
     return atob(response);
   }
 
-  private static async validateSAMLResponse(response: any): Promise<{
+  private static async validateSAMLResponse(response: unknown): Promise<{
     valid: boolean;
     error?: string;
     organizationId?: string;
@@ -478,7 +478,7 @@ export class SSOService {
     };
   }
 
-  private static extractSAMLAttributes(response: any): Record<string, any> {
+  private static extractSAMLAttributes(response: unknown): Record<string, any> {
     // Extract user attributes from SAML response
     return {
       email: 'user@example.com',
@@ -488,7 +488,7 @@ export class SSOService {
     };
   }
 
-  private static generateOIDCAuthorizationUrl(config: OIDCConfig, state?: string): string {
+  private static generateOIDCAuthorizationUrl(_config: OIDCConfig, state?: string): string {
     const params = new URLSearchParams({
       response_type: config.responseType,
       client_id: config.clientId,
@@ -500,7 +500,7 @@ export class SSOService {
     return `${config.authorizationEndpoint}?${params.toString()}`;
   }
 
-  private static async exchangeOIDCCode(config: OIDCConfig, code: string): Promise<{
+  private static async exchangeOIDCCode(_config: OIDCConfig, code: string): Promise<{
     accessToken: string;
     idToken: string;
     refreshToken?: string;
@@ -513,7 +513,7 @@ export class SSOService {
     };
   }
 
-  private static async getOIDCUserInfo(config: OIDCConfig, accessToken: string): Promise<Record<string, any>> {
+  private static async getOIDCUserInfo(_config: OIDCConfig, accessToken: string): Promise<Record<string, any>> {
     // Get user info from OIDC provider
     return {
       email: 'user@example.com',
@@ -526,8 +526,8 @@ export class SSOService {
   private static mapUserAttributes(
     attributes: Record<string, any>,
     mappings: UserAttributeMappings
-  ): any {
-    const mappedUser: any = {};
+  ): unknown {
+    const mappedUser: unknown = {};
 
     Object.entries(mappings).forEach(([userField, attributePath]) => {
       if (attributePath && attributes[attributePath]) {
@@ -539,7 +539,7 @@ export class SSOService {
   }
 
   private static async createOrUpdateSSOUser(
-    userAttributes: any,
+    userAttributes: unknown,
     organizationId: string
   ): Promise<any> {
     try {
@@ -570,7 +570,7 @@ export class SSOService {
         
         return { ...newUser, id: userId };
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to create or update SSO user:', error);
       throw error;
     }
