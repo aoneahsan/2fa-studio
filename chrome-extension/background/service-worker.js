@@ -283,9 +283,9 @@ class BackgroundService {
     }
   }
 
-  handleGenerateCode(account, sendResponse) {
+  async handleGenerateCode(account, sendResponse) {
     try {
-      const code = OTPService.generateCode(account);
+      const code = await OTPService.generateCode(account);
       sendResponse({ success: true, data: code });
     } catch (error) {
       sendResponse({ success: false, error: error.message });
@@ -380,13 +380,17 @@ class BackgroundService {
         ? label.split(':', 2) 
         : ['', label];
 
+      // Check if this is a Steam account
+      const isSteam = params.get('steam') === 'true' || 
+                     (params.get('issuer') || issuer || '').toLowerCase().includes('steam');
+      
       return {
-        type: type.toUpperCase(),
+        type: isSteam ? 'steam' : type.toUpperCase(),
         issuer: params.get('issuer') || issuer || accountName,
         accountName: accountName || params.get('issuer') || issuer,
         secret: params.get('secret'),
         algorithm: params.get('algorithm') || 'SHA1',
-        digits: parseInt(params.get('digits') || '6'),
+        digits: isSteam ? 5 : parseInt(params.get('digits') || '6'),
         period: parseInt(params.get('period') || '30'),
         counter: parseInt(params.get('counter') || '0')
       };
@@ -418,7 +422,7 @@ class BackgroundService {
 
       if (matches.length === 1) {
         // Auto-return code for single match
-        const code = OTPService.generateCode(matches[0]);
+        const code = await OTPService.generateCode(matches[0]);
         sendResponse({ 
           success: true, 
           code: code.code,

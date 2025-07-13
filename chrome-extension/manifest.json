@@ -26,7 +26,10 @@
     "activeTab",
     "clipboardWrite",
     "notifications",
-    "scripting"
+    "scripting",
+    "contextMenus",
+    "idle",
+    "alarms"
   ],
   "options_page": "options/settings-enhanced.html",
   "host_permissions": [

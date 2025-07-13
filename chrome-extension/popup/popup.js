@@ -274,10 +274,11 @@ class PopupManager {
     this.elements.emptyState.classList.add('hidden');
     this.elements.accountsList.classList.remove('hidden');
     
-    // Render accounts
-    this.elements.accountsList.innerHTML = this.filteredAccounts
-      .map(account => this.renderAccount(account))
-      .join('');
+    // Render accounts asynchronously
+    Promise.all(this.filteredAccounts.map(account => this.renderAccount(account)))
+      .then(html => {
+        this.elements.accountsList.innerHTML = html.join('');
+      });
 
     // Add click handlers
     this.filteredAccounts.forEach(account => {
@@ -463,21 +464,22 @@ class PopupManager {
     }
   }
 
-  renderAccount(account) {
-    const code = OTPService.generateCode(account);
+  async renderAccount(account) {
+    const code = await OTPService.generateCode(account);
     const iconLetter = account.issuer.charAt(0).toUpperCase();
+    const isSteam = account.type === 'steam';
 
     return `
-      <div class="account-item" id="account-${account.id}">
-        <div class="account-icon">${iconLetter}</div>
+      <div class="account-item ${isSteam ? 'steam-account' : ''}" id="account-${account.id}">
+        <div class="account-icon ${isSteam ? 'steam-icon' : ''}">${iconLetter}</div>
         <div class="account-info">
           <div class="account-name">${this.escapeHtml(account.issuer)}</div>
           <div class="account-email">${this.escapeHtml(account.accountName)}</div>
         </div>
-        <div class="account-code" id="code-${account.id}">
-          ${this.formatCode(code.code)}
+        <div class="account-code ${isSteam ? 'steam-code' : ''}" id="code-${account.id}">
+          ${this.formatCode(code.code, isSteam)}
         </div>
-        ${account.type === 'totp' ? this.renderTimer(account.id, code.remainingTime) : ''}
+        ${account.type === 'totp' || account.type === 'steam' ? this.renderTimer(account.id, code.remainingTime) : ''}
       </div>
     `;
   }
@@ -503,8 +505,15 @@ class PopupManager {
     `;
   }
 
-  formatCode(code) {
-    if (!code) return '------';
+  formatCode(code, isSteam = false) {
+    if (!code) return isSteam ? '-----' : '------';
+    
+    // Steam codes don't need formatting (5 chars)
+    if (isSteam) {
+      return code;
+    }
+    
+    // Standard codes get split in middle
     const mid = Math.ceil(code.length / 2);
     return `${code.slice(0, mid)} ${code.slice(mid)}`;
   }
@@ -516,7 +525,7 @@ class PopupManager {
   }
 
   async copyAndFillCode(account) {
-    const code = OTPService.generateCode(account);
+    const code = await OTPService.generateCode(account);
     
     try {
       await navigator.clipboard.writeText(code.code);
@@ -576,7 +585,7 @@ class PopupManager {
 
   updateAllCodes() {
     this.filteredAccounts.forEach(account => {
-      if (account.type === 'totp') {
+      if (account.type === 'totp' || account.type === 'steam') {
         this.updateTOTPCode(account);
       }
     });
@@ -584,19 +593,19 @@ class PopupManager {
 
   updateMatchedAccountsCodes() {
     this.matchedAccounts.forEach(account => {
-      if (account.type === 'totp') {
+      if (account.type === 'totp' || account.type === 'steam') {
         this.updateMatchedTOTPCode(account);
       }
     });
   }
 
-  updateTOTPCode(account) {
-    const code = OTPService.generateCode(account);
+  async updateTOTPCode(account) {
+    const code = await OTPService.generateCode(account);
     
     // Update code display
     const codeElement = document.getElementById(`code-${account.id}`);
     if (codeElement) {
-      codeElement.textContent = this.formatCode(code.code);
+      codeElement.textContent = this.formatCode(code.code, account.type === 'steam');
     }
 
     // Update timer
@@ -612,13 +621,13 @@ class PopupManager {
     }
   }
 
-  updateMatchedTOTPCode(account) {
-    const code = OTPService.generateCode(account);
+  async updateMatchedTOTPCode(account) {
+    const code = await OTPService.generateCode(account);
     
     // Update code display for matched accounts
     const codeElement = document.getElementById(`matched-code-${account.id}`);
     if (codeElement) {
-      codeElement.textContent = this.formatCode(code.code);
+      codeElement.textContent = this.formatCode(code.code, account.type === 'steam');
     }
 
     // Update timer for matched accounts

@@ -23,6 +23,36 @@ body {
   }
 }
 
+/* Steam-specific styles */
+.steam-account {
+  background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
+  border: 1px solid #2a475e;
+}
+
+.steam-account:hover {
+  background: linear-gradient(135deg, #2a475e 0%, #3a5a7e 100%);
+}
+
+.steam-icon {
+  background: #171a21;
+  color: #66c0f4;
+  font-weight: bold;
+}
+
+.steam-code {
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+  font-weight: bold;
+  color: #66c0f4;
+  letter-spacing: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .steam-account {
+    border-color: #3a5a7e;
+  }
+}
+
 #app {
   display: flex;
   flex-direction: column;

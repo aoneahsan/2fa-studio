@@ -3,18 +3,51 @@
  * @module src/otp
  */
 
+import steamGuard from './steam-guard.js';
+
 export class OTPService {
   /**
    * Generate OTP code for an account
    */
-  static generateCode(account) {
+  static async generateCode(account) {
     if (account.type === 'totp') {
       return this.generateTOTP(account);
     } else if (account.type === 'hotp') {
       return this.generateHOTP(account);
+    } else if (account.type === 'steam') {
+      return this.generateSteamCode(account);
     }
     
     throw new Error('Invalid account type');
+  }
+
+  /**
+   * Generate Steam Guard code
+   */
+  static async generateSteamCode(account) {
+    try {
+      const code = await steamGuard.generateCode(account.secret);
+      const remainingTime = steamGuard.getTimeRemaining();
+      const progress = (remainingTime / 30) * 100;
+      
+      return {
+        code,
+        remainingTime,
+        progress,
+        period: 30,
+        type: 'steam'
+      };
+    } catch (error) {
+      console.error('Steam code generation failed:', error);
+      return {
+        code: 'ERROR',
+        remainingTime: 0,
+        progress: 0,
+        period: 30,
+        type: 'steam',
+        error: true
+      };
+    }
   }
 
   /**

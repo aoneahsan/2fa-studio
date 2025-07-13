@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Backup Codes - 2FA Studio</title>
+  <link rel="stylesheet" href="../assets/common.css">
+  <link rel="stylesheet" href="backup-codes.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <button class="back-btn" id="backBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back
+      </button>
+      <h1>Backup Codes</h1>
+      <div class="header-actions">
+        <button class="icon-btn" id="helpBtn" title="Help">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Account Selector -->
+    <div class="account-selector">
+      <label for="accountSelect">Select Account:</label>
+      <select id="accountSelect" class="form-select">
+        <option value="">Choose an account...</option>
+      </select>
+    </div>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- No Account Selected -->
+      <div id="noAccountState" class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 15V17M6 3v18M18 3v18M3 6h18M3 18h18M12 7.5V11"></path>
+        </svg>
+        <h2>Select an Account</h2>
+        <p>Choose an account to manage its backup codes</p>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="loading-state hidden">
+        <div class="spinner"></div>
+        <p>Loading backup codes...</p>
+      </div>
+
+      <!-- Backup Codes View -->
+      <div id="backupCodesView" class="backup-codes-view hidden">
+        <!-- Stats Card -->
+        <div class="stats-card">
+          <div class="stat">
+            <span class="stat-value" id="remainingCount">0</span>
+            <span class="stat-label">Remaining</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="usedCount">0</span>
+            <span class="stat-label">Used</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="totalCount">0</span>
+            <span class="stat-label">Total</span>
+          </div>
+        </div>
+
+        <!-- Warning if low -->
+        <div id="lowCodesWarning" class="warning-box hidden">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Low backup codes! Consider generating new ones.</span>
+        </div>
+
+        <!-- No Codes State -->
+        <div id="noCodesState" class="no-codes-state hidden">
+          <h3>No Backup Codes</h3>
+          <p>Generate backup codes to use when you can't access your authenticator app.</p>
+          <button class="primary-btn" id="generateFirstBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Generate Backup Codes
+          </button>
+        </div>
+
+        <!-- Codes List -->
+        <div id="codesList" class="codes-list hidden">
+          <h3>Your Backup Codes</h3>
+          <div id="codesContainer" class="codes-container"></div>
+        </div>
+
+        <!-- Actions -->
+        <div id="codesActions" class="codes-actions hidden">
+          <button class="secondary-btn" id="exportTextBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Export as Text
+          </button>
+          <button class="secondary-btn" id="printBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print
+          </button>
+          <button class="danger-btn" id="regenerateBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Regenerate All
+          </button>
+        </div>
+      </div>
+
+      <!-- Validate Code -->
+      <div id="validateSection" class="validate-section">
+        <h3>Use Backup Code</h3>
+        <p>Enter a backup code to sign in when you can't use your authenticator.</p>
+        <form id="validateForm" class="validate-form">
+          <input 
+            type="text" 
+            id="codeInput" 
+            class="form-input" 
+            placeholder="XXXX-XXXX"
+            maxlength="9"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button type="submit" class="primary-btn" id="validateBtn">
+            Validate Code
+          </button>
+        </form>
+        <div id="validateResult" class="validate-result hidden"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>About Backup Codes</h2>
+        <button class="close-btn" id="closeHelpBtn">×</button>
+      </div>
+      <div class="modal-body">
+        <h3>What are backup codes?</h3>
+        <p>Backup codes are one-time use codes that let you sign in when you don't have access to your authenticator app.</p>
+        
+        <h3>How to use them:</h3>
+        <ul>
+          <li>Each code can only be used once</li>
+          <li>Store them in a secure location</li>
+          <li>Print them or save them offline</li>
+          <li>Generate new codes when running low</li>
+        </ul>
+        
+        <h3>Security tips:</h3>
+        <ul>
+          <li>Never share your backup codes</li>
+          <li>Store them separately from your password</li>
+          <li>Consider using a safe or secure note</li>
+          <li>Regenerate if you suspect compromise</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="backup-codes.js" type="module"></script>
+</body>
+</html>

@@ -300,7 +300,7 @@ export class MobileConnector {
       if (account) {
         // Generate code
         const { OTPService } = await import('./otp.js');
-        const code = OTPService.generateCode(account);
+        const code = await OTPService.generateCode(account);
         
         // Send code back to mobile
         const response = {
