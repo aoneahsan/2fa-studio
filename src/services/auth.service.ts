@@ -58,6 +58,51 @@ export interface UserProfile {
 
 export class AuthService {
   private static currentUser: User | null = null;
+  
+  /**
+   * Validate email format strictly
+   */
+  static validateEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    return emailRegex.test(email);
+  }
+  
+  /**
+   * Validate TOTP secret format
+   */
+  static validateTOTPSecret(secret: string): boolean {
+    if (!secret || typeof secret !== 'string') return false;
+    // Base32 alphabet check
+    const base32Regex = /^[A-Z2-7]+=*$/;
+    return base32Regex.test(secret) && secret.length >= 16;
+  }
+  
+  /**
+   * Validate password strength
+   */
+  static validatePasswordStrength(password: string): boolean {
+    if (!password || password.length < 8) return false;
+    
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    return hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
+  }
+  
+  /**
+   * Sanitize user input to prevent XSS
+   */
+  static sanitizeInput(input: string): string {
+    if (!input || typeof input !== 'string') return '';
+    
+    return input
+      .replace(/[<>'"]/g, '') // Remove potential HTML/JS chars
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/on\w+=/gi, '') // Remove event handlers
+      .trim();
+  }
 
   /**
    * Initialize auth state listener

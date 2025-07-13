@@ -61,6 +61,59 @@ export class FirestoreService {
   private static offlineQueue: Array<{ operation: string; data: any }> = [];
 
   /**
+   * Sanitize user input data
+   */
+  static sanitizeInput(data: any): any {
+    if (typeof data === 'string') {
+      return data
+        .replace(/[<>'"]/g, '') // Remove potential HTML/JS chars
+        .replace(/javascript:/gi, '') // Remove javascript: protocol
+        .replace(/on\w+=/gi, '') // Remove event handlers
+        .replace(/\.\.\//g, '') // Remove path traversal
+        .replace(/\${.*?}/g, '') // Remove template injection
+        .trim();
+    }
+    
+    if (Array.isArray(data)) {
+      return data.map(item => this.sanitizeInput(item));
+    }
+    
+    if (data && typeof data === 'object') {
+      const sanitized: any = {};
+      Object.keys(data).forEach(key => {
+        const sanitizedKey = this.sanitizeInput(key);
+        sanitized[sanitizedKey] = this.sanitizeInput(data[key]);
+      });
+      return sanitized;
+    }
+    
+    return data;
+  }
+  
+  /**
+   * Sanitize backup data
+   */
+  static sanitizeBackupData(backup: any): any {
+    return this.sanitizeInput(backup);
+  }
+  
+  /**
+   * Validate user authorization for data access
+   */
+  static validateUserAccess(requestedPath: string, userId: string): boolean {
+    // Ensure user can only access their own data
+    const allowedPaths = [
+      `users/${userId}`,
+      `users/${userId}/accounts`,
+      `users/${userId}/subscriptions`,
+      `users/${userId}/backups`,
+      `users/${userId}/devices`
+    ];
+    
+    return allowedPaths.some(path => requestedPath.startsWith(path));
+  }
+
+  /**
    * Initialize Firestore service
    */
   static async initialize(): Promise<void> {
