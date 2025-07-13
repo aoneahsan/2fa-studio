@@ -15,6 +15,13 @@ import SyncManager from '../src/sync-manager.js';
 import { ExtensionLockService } from '../src/extension-lock.js';
 import { BadgeManager } from '../src/badge-manager.js';
 import { MobileConnector } from '../src/mobile-connector.js';
+// Phase 2 imports
+import importService from '../src/import-service.js';
+import backupCodesService from '../src/backup-codes.js';
+import categoriesService from '../src/categories-service.js';
+import tagsService from '../src/tags-service.js';
+import bulkOperationsService from '../src/bulk-operations.js';
+import duressSecurityService from '../src/duress-security.js';
 
 class BackgroundService {
   constructor() {
@@ -242,6 +249,43 @@ class BackgroundService {
 
         case 'showNotification':
           this.handleShowNotification(request.type, request.message, sendResponse);
+          return true;
+
+        // Phase 2 actions
+        case 'importAccounts':
+          this.handleImportAccounts(request.data, request.format, sendResponse);
+          return true;
+
+        case 'generateBackupCodes':
+          this.handleGenerateBackupCodes(request.accountId, sendResponse);
+          return true;
+
+        case 'validateBackupCode':
+          this.handleValidateBackupCode(request.accountId, request.code, sendResponse);
+          return true;
+
+        case 'assignCategory':
+          this.handleAssignCategory(request.accountId, request.categoryId, sendResponse);
+          return true;
+
+        case 'addTags':
+          this.handleAddTags(request.accountId, request.tags, sendResponse);
+          return true;
+
+        case 'toggleFavorite':
+          this.handleToggleFavorite(request.accountId, sendResponse);
+          return true;
+
+        case 'bulkOperation':
+          this.handleBulkOperation(request.operation, request.params, sendResponse);
+          return true;
+
+        case 'checkDuressPin':
+          this.handleCheckDuressPin(request.pin, sendResponse);
+          return true;
+
+        case 'logSecurityEvent':
+          this.handleLogSecurityEvent(request.event, sendResponse);
           return true;
 
         default:
@@ -1599,6 +1643,124 @@ class BackgroundService {
         }
       }
     });
+  }
+
+  // Phase 2 Handlers
+  async handleImportAccounts(data, format, sendResponse) {
+    try {
+      let result;
+      if (format) {
+        result = await importService.importers[format](data);
+      } else {
+        result = await importService.autoImport(data);
+      }
+      
+      // Save imported accounts
+      const storage = await chrome.storage.local.get(['accounts']);
+      const existingAccounts = storage.accounts || [];
+      const newAccounts = [...existingAccounts, ...result.accounts || result];
+      
+      await chrome.storage.local.set({ accounts: newAccounts });
+      sendResponse({ success: true, imported: result.accounts?.length || result.length });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleGenerateBackupCodes(accountId, sendResponse) {
+    try {
+      const codes = backupCodesService.generateBackupCodes();
+      await backupCodesService.storeBackupCodes(accountId, codes);
+      sendResponse({ success: true, codes });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleValidateBackupCode(accountId, code, sendResponse) {
+    try {
+      const result = await backupCodesService.validateBackupCode(accountId, code);
+      sendResponse({ success: result.valid, ...result });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleAssignCategory(accountId, categoryId, sendResponse) {
+    try {
+      const account = await categoriesService.assignAccountToCategory(accountId, categoryId);
+      sendResponse({ success: true, account });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleAddTags(accountId, tags, sendResponse) {
+    try {
+      const account = await tagsService.addTagsToAccount(accountId, tags);
+      sendResponse({ success: true, account });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleToggleFavorite(accountId, sendResponse) {
+    try {
+      const account = await tagsService.toggleFavorite(accountId);
+      sendResponse({ success: true, account });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleBulkOperation(operation, params, sendResponse) {
+    try {
+      let result;
+      switch (operation) {
+        case 'delete':
+          result = await bulkOperationsService.bulkDelete(params.accountIds);
+          break;
+        case 'assignCategory':
+          result = await bulkOperationsService.bulkAssignCategory(params.categoryId, params.accountIds);
+          break;
+        case 'addTags':
+          result = await bulkOperationsService.bulkAddTags(params.tags, params.accountIds);
+          break;
+        case 'toggleFavorite':
+          result = await bulkOperationsService.bulkToggleFavorite(params.makeFavorite, params.accountIds);
+          break;
+        case 'export':
+          result = await bulkOperationsService.bulkExport(params.format, params.accountIds);
+          break;
+        default:
+          throw new Error('Unknown bulk operation');
+      }
+      sendResponse({ success: true, result });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleCheckDuressPin(pin, sendResponse) {
+    try {
+      const result = await duressSecurityService.checkDuressPin(pin);
+      if (!result.isDuress) {
+        // Log successful login
+        await duressSecurityService.logLoginAttempt(true, 'pin');
+      }
+      sendResponse({ success: true, ...result });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handleLogSecurityEvent(event, sendResponse) {
+    try {
+      await duressSecurityService.logSecurityEvent(event);
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
   }
 }
 

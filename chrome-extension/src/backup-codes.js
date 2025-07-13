@@ -272,19 +272,93 @@ class BackupCodesService {
    * @private
    */
   async encryptCodes(codes) {
-    // For now, just return the codes
-    // In production, use proper encryption
-    return codes;
+    try {
+      // Get encryption key from storage (should be derived from user's master key)
+      const storage = await chrome.storage.local.get(['encryptionKey']);
+      if (!storage.encryptionKey) {
+        // Generate a temporary key for this session
+        const key = await crypto.subtle.generateKey(
+          { name: 'AES-GCM', length: 256 },
+          true,
+          ['encrypt', 'decrypt']
+        );
+        const exportedKey = await crypto.subtle.exportKey('jwk', key);
+        await chrome.storage.local.set({ encryptionKey: exportedKey });
+        storage.encryptionKey = exportedKey;
+      }
+      
+      // Import the key
+      const key = await crypto.subtle.importKey(
+        'jwk',
+        storage.encryptionKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt']
+      );
+      
+      // Encrypt the codes
+      const encoder = new TextEncoder();
+      const data = encoder.encode(JSON.stringify(codes));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      
+      const encrypted = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv: iv },
+        key,
+        data
+      );
+      
+      return {
+        encrypted: Array.from(new Uint8Array(encrypted)),
+        iv: Array.from(iv)
+      };
+    } catch (error) {
+      console.error('Encryption failed:', error);
+      // Fallback to storing unencrypted (with warning)
+      console.warn('Storing backup codes without encryption');
+      return codes;
+    }
   }
 
   /**
    * Decrypt backup codes
    * @private
    */
-  async decryptCodes(codes) {
-    // For now, just return the codes
-    // In production, use proper decryption
-    return codes;
+  async decryptCodes(encryptedData) {
+    try {
+      // Handle unencrypted data (backward compatibility)
+      if (Array.isArray(encryptedData) && encryptedData[0]?.code) {
+        return encryptedData;
+      }
+      
+      // Get decryption key
+      const storage = await chrome.storage.local.get(['encryptionKey']);
+      if (!storage.encryptionKey) {
+        throw new Error('No encryption key found');
+      }
+      
+      // Import the key
+      const key = await crypto.subtle.importKey(
+        'jwk',
+        storage.encryptionKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+      
+      // Decrypt the codes
+      const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: new Uint8Array(encryptedData.iv) },
+        key,
+        new Uint8Array(encryptedData.encrypted)
+      );
+      
+      const decoder = new TextDecoder();
+      const decryptedText = decoder.decode(decrypted);
+      return JSON.parse(decryptedText);
+    } catch (error) {
+      console.error('Decryption failed:', error);
+      return [];
+    }
   }
 
   /**
