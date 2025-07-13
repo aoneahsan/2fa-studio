@@ -12,8 +12,9 @@ interface AccountsState {
   error: string | null;
   searchQuery: string;
   selectedTags: string[];
-  sortBy: 'name' | 'issuer' | 'createdAt' | 'lastUsed';
+  sortBy: 'name' | 'issuer' | 'createdAt' | 'lastUsed' | 'favorite';
   sortOrder: 'asc' | 'desc';
+  showFavoritesOnly: boolean;
 }
 
 const initialState: AccountsState = {
@@ -24,6 +25,7 @@ const initialState: AccountsState = {
   selectedTags: [],
   sortBy: 'name',
   sortOrder: 'asc',
+  showFavoritesOnly: false,
 };
 
 // Async thunks would go here for Firebase operations
@@ -72,6 +74,12 @@ const accountsSlice = createSlice({
         account.updatedAt = new Date();
       }
     },
+    toggleShowFavoritesOnly: (state) => {
+      state.showFavoritesOnly = !state.showFavoritesOnly;
+    },
+    setShowFavoritesOnly: (state, action: PayloadAction<boolean>) => {
+      state.showFavoritesOnly = action.payload;
+    },
   },
 });
 
@@ -87,6 +95,8 @@ export const {
   setLoading,
   setError,
   incrementHOTPCounter,
+  toggleShowFavoritesOnly,
+  setShowFavoritesOnly,
 } = accountsSlice.actions;
 
 // Selectors

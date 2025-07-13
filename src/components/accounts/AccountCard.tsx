@@ -8,23 +8,29 @@ import { useDispatch } from 'react-redux';
 import { OTPAccount, OTPService } from '@services/otp.service';
 import { addToast } from '@store/slices/uiSlice';
 import { incrementHOTPCounter } from '@store/slices/accountsSlice';
+import { useAppSelector } from '@hooks/useAppSelector';
+import { selectTagById } from '@store/slices/tagsSlice';
 import { 
   ClipboardDocumentIcon, 
   PencilIcon, 
   TrashIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  StarIcon as StarOutlineIcon
 } from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import TagPill from '@components/tags/TagPill';
 
 interface AccountCardProps {
   account: OTPAccount;
   onEdit: (account: OTPAccount) => void;
   onDelete: (account: OTPAccount) => void;
+  onToggleFavorite?: (account: OTPAccount) => void;
 }
 
 /**
  * Displays a single 2FA account with OTP code generation
  */
-const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete }) => {
+const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, onToggleFavorite }) => {
   const dispatch = useDispatch();
   const [otpCode, setOtpCode] = useState('');
   const [remainingTime, setRemainingTime] = useState(0);
@@ -144,14 +150,9 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete }) 
 
           {/* Tags */}
           {account.tags && account.tags.length > 0 && (
-            <div className="flex gap-1 mt-1">
-              {account.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary"
-                >
-                  {tag}
-                </span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {account.tags.map((tagId) => (
+                <AccountTagPill key={tagId} tagId={tagId} />
               ))}
             </div>
           )}
@@ -159,6 +160,19 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete }) 
 
         {/* Actions */}
         <div className="flex items-center gap-1">
+          {onToggleFavorite && (
+            <button
+              onClick={() => onToggleFavorite(account)}
+              className="p-1.5 rounded hover:bg-muted transition-colors"
+              title={account.isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              {account.isFavorite ? (
+                <StarSolidIcon className="w-4 h-4 text-yellow-500" />
+              ) : (
+                <StarOutlineIcon className="w-4 h-4 text-muted-foreground hover:text-yellow-500" />
+              )}
+            </button>
+          )}
           <button
             onClick={() => onEdit(account)}
             className="p-1.5 rounded hover:bg-muted transition-colors"
@@ -250,6 +264,15 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete }) 
       </div>
     </div>
   );
+};
+
+// Sub-component for rendering tags with hooks
+const AccountTagPill: React.FC<{ tagId: string }> = ({ tagId }) => {
+  const tag = useAppSelector(selectTagById(tagId));
+  
+  if (!tag) return null;
+  
+  return <TagPill tag={tag} size="sm" />;
 };
 
 export default AccountCard;

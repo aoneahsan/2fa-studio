@@ -3,7 +3,7 @@
  * @module components/accounts/AddAccountModal
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Device } from '@capacitor/device';
 import { closeModal, addToast } from '@store/slices/uiSlice';
@@ -16,6 +16,10 @@ import {
   PencilSquareIcon,
   CheckIcon
 } from '@heroicons/react/24/outline';
+import { useAppSelector } from '@hooks/useAppSelector';
+import { selectTags, fetchTags, initializeDefaultTags } from '@store/slices/tagsSlice';
+import TagSelector from '@components/tags/TagSelector';
+import { TagService } from '@services/tag.service';
 
 interface FormData {
   issuer: string;
@@ -35,9 +39,17 @@ interface FormData {
 const AddAccountModal: React.FC = () => {
   const dispatch = useDispatch();
   const { addAccount } = useAccounts();
+  const tags = useAppSelector(selectTags);
+  const user = useAppSelector(state => state.auth.user);
   const [mode, setMode] = useState<'choice' | 'scan' | 'manual'>('choice');
   const [isLoading, setIsLoading] = useState(false);
-  const [tagInput, setTagInput] = useState('');
+  
+  // Load tags on mount
+  useEffect(() => {
+    if (user && tags.length === 0) {
+      dispatch(fetchTags(user.id));
+    }
+  }, [user, tags.length, dispatch]);
   
   const [formData, setFormData] = useState<FormData>({
     issuer: '',
@@ -129,7 +141,7 @@ const AddAccountModal: React.FC = () => {
         ...formData,
         secret: cleanSecret,
         iconUrl,
-        tags: formData.tags.filter(tag => tag.length > 0)
+        tags: formData.tags
       });
 
       dispatch(addToast({
@@ -147,25 +159,6 @@ const AddAccountModal: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Add tag
-  const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim()]
-      });
-      setTagInput('');
-    }
-  };
-
-  // Remove tag
-  const handleRemoveTag = (tag: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter(t => t !== tag)
-    });
   };
 
   // Check if we're on mobile for camera
@@ -385,42 +378,48 @@ const AddAccountModal: React.FC = () => {
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Tags
                 </label>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                    className="input flex-1"
-                    placeholder="Add tag"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddTag}
-                    className="btn btn-outline btn-sm"
-                  >
-                    Add
-                  </button>
-                </div>
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-primary/10 text-primary"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTag(tag)}
-                          className="hover:text-primary/70"
-                        >
-                          <XMarkIcon className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <TagSelector
+                  selectedTags={formData.tags}
+                  onChange={(tagIds) => setFormData({ ...formData, tags: tagIds })}
+                  placeholder="Select or create tags..."
+                  allowCreate={true}
+                  multiple={true}
+                />
+                {/* Tag suggestions based on issuer */}
+                {formData.issuer && (() => {
+                  const suggestions = TagService.getTagSuggestions(formData.issuer);
+                  const availableSuggestions = suggestions.filter(
+                    name => !formData.tags.some(tagId => {
+                      const tag = tags.find(t => t.id === tagId);
+                      return tag?.name === name;
+                    })
+                  );
+                  if (availableSuggestions.length === 0) return null;
+                  
+                  return (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Suggestions: 
+                      {availableSuggestions.map((name) => {
+                        const matchingTag = tags.find(t => t.name === name);
+                        if (!matchingTag) return null;
+                        
+                        return (
+                          <button
+                            key={matchingTag.id}
+                            type="button"
+                            onClick={() => setFormData({ 
+                              ...formData, 
+                              tags: [...formData.tags, matchingTag.id] 
+                            })}
+                            className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            {name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </div>
             </form>
           )}

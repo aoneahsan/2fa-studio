@@ -16,6 +16,7 @@ import {
   setLoading,
   setError,
 } from '@store/slices/accountsSlice';
+import { selectActiveTags, selectFilterMode } from '@store/slices/tagsSlice';
 import { addToast } from '@store/slices/uiSlice';
 import { OTPAccount } from '@services/otp.service';
 import { EncryptionService } from '@services/encryption.service';
@@ -28,6 +29,8 @@ export const useAccounts = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user, encryptionKey } = useSelector((state: RootState) => state.auth);
   const accountsState = useSelector((state: RootState) => state.accounts);
+  const activeTags = useSelector(selectActiveTags);
+  const filterMode = useSelector(selectFilterMode);
 
   // Load accounts from Firestore
   useEffect(() => {
@@ -35,7 +38,7 @@ export const useAccounts = () => {
 
     dispatch(setLoading(true));
 
-    const q = query(collection(db, 'accounts'), where('userId', '==', user.uid));
+    const q = collection(db, 'users', user.uid, 'accounts');
     
     const unsubscribe = onSnapshot(
       q,
@@ -125,7 +128,7 @@ export const useAccounts = () => {
         updatedAt: new Date(),
       };
       
-      await addDoc(collection(db, 'accounts'), accountData);
+      await addDoc(collection(db, 'users', user.uid, 'accounts'), accountData);
       
       dispatch(addToast({
         type: 'success',
@@ -165,7 +168,7 @@ export const useAccounts = () => {
         updatedAt: new Date(),
       };
       
-      await updateDoc(doc(db, 'accounts', account.id), accountData);
+      await updateDoc(doc(db, 'users', user.uid, 'accounts', account.id), accountData);
       
       dispatch(addToast({
         type: 'success',
@@ -192,7 +195,7 @@ export const useAccounts = () => {
     try {
       dispatch(setLoading(true));
       
-      await deleteDoc(doc(db, 'accounts', accountId));
+      await deleteDoc(doc(db, 'users', user.uid, 'accounts', accountId));
       
       dispatch(addToast({
         type: 'success',
@@ -216,19 +219,88 @@ export const useAccounts = () => {
     
     // Apply search filter
     if (accountsState.searchQuery) {
-      const query = accountsState.searchQuery.toLowerCase();
-      filtered = filtered.filter(account => 
-        account.issuer.toLowerCase().includes(query) ||
-        account.label.toLowerCase().includes(query) ||
-        account.tags?.some(tag => tag.toLowerCase().includes(query))
-      );
+      // Check if it's an enhanced search query
+      let searchOptions: any = null;
+      let query = accountsState.searchQuery;
+      
+      try {
+        const parsed = JSON.parse(accountsState.searchQuery);
+        if (parsed.query && parsed.options) {
+          query = parsed.query;
+          searchOptions = parsed.options;
+        }
+      } catch {
+        // Not JSON, use as plain query
+      }
+      
+      filtered = filtered.filter(account => {
+        // Prepare search text based on options
+        const searchTexts: string[] = [];
+        
+        if (!searchOptions || searchOptions.searchIn.issuer) {
+          searchTexts.push(account.issuer);
+        }
+        if (!searchOptions || searchOptions.searchIn.label) {
+          searchTexts.push(account.label);
+        }
+        if ((!searchOptions || searchOptions.searchIn.tags) && account.tags) {
+          // For tags, we need to get the tag names from the tags slice
+          const tagNames = account.tags.map(tagId => {
+            const tag = store.getState().tags.tags.find(t => t.id === tagId);
+            return tag?.name || '';
+          }).filter(Boolean);
+          searchTexts.push(...tagNames);
+        }
+        if (searchOptions?.searchIn.notes && account.notes) {
+          searchTexts.push(account.notes);
+        }
+        
+        const searchText = searchTexts.join(' ');
+        
+        // Apply search based on options
+        if (searchOptions?.regex) {
+          try {
+            const regex = new RegExp(query, searchOptions.caseSensitive ? 'g' : 'gi');
+            return regex.test(searchText);
+          } catch {
+            return false;
+          }
+        } else if (searchOptions?.exactMatch) {
+          if (searchOptions.caseSensitive) {
+            return searchTexts.some(text => text === query);
+          } else {
+            const lowerQuery = query.toLowerCase();
+            return searchTexts.some(text => text.toLowerCase() === lowerQuery);
+          }
+        } else {
+          // Default contains search
+          if (searchOptions?.caseSensitive) {
+            return searchText.includes(query);
+          } else {
+            return searchText.toLowerCase().includes(query.toLowerCase());
+          }
+        }
+      });
     }
     
-    // Apply tag filter
-    if (accountsState.selectedTags.length > 0) {
-      filtered = filtered.filter(account =>
-        account.tags?.some(tag => accountsState.selectedTags.includes(tag))
-      );
+    // Apply favorites filter
+    if (accountsState.showFavoritesOnly) {
+      filtered = filtered.filter(account => account.isFavorite);
+    }
+    
+    // Apply tag filter from tags slice
+    if (activeTags.length > 0) {
+      filtered = filtered.filter(account => {
+        if (!account.tags || account.tags.length === 0) return false;
+        
+        if (filterMode === 'OR') {
+          // Account must have at least one of the selected tags
+          return account.tags.some(tag => activeTags.includes(tag));
+        } else {
+          // Account must have all selected tags
+          return activeTags.every(tag => account.tags.includes(tag));
+        }
+      });
     }
     
     // Apply sorting
@@ -248,13 +320,21 @@ export const useAccounts = () => {
         case 'lastUsed':
           comparison = (a.updatedAt?.getTime() || 0) - (b.updatedAt?.getTime() || 0);
           break;
+        case 'favorite':
+          // Sort favorites first
+          comparison = (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0);
+          // If both are favorites or both are not, sort by name
+          if (comparison === 0) {
+            comparison = a.label.localeCompare(b.label);
+          }
+          break;
       }
       
       return accountsState.sortOrder === 'asc' ? comparison : -comparison;
     });
     
     return filtered;
-  }, [accountsState]);
+  }, [accountsState, activeTags, filterMode]);
 
   return {
     accounts: accountsState.accounts,

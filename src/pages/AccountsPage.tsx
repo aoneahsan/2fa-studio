@@ -3,25 +3,32 @@
  * @module pages/AccountsPage
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { openModal } from '@store/slices/uiSlice';
 import { useAccounts } from '@hooks/useAccounts';
 import AccountsList from '@components/accounts/AccountsList';
-import AccountSearch from '@components/accounts/AccountSearch';
+import AdvancedSearch from '@components/accounts/AdvancedSearch';
 import AccountFilters from '@components/accounts/AccountFilters';
 import AddAccountModal from '@components/accounts/AddAccountModal';
 import DeleteAccountDialog from '@components/accounts/DeleteAccountDialog';
 import EditAccountModal from '@components/accounts/EditAccountModal';
 import { ImportAccountsModal } from '@components/accounts/ImportAccountsModal';
 import { ExportAccountsModal } from '@components/accounts/ExportAccountsModal';
+import TagFilter from '@components/tags/TagFilter';
+import TagManager from '@components/tags/TagManager';
+import { fetchTags } from '@store/slices/tagsSlice';
+import { toggleShowFavoritesOnly } from '@store/slices/accountsSlice';
 import { 
   PlusIcon, 
   AdjustmentsHorizontalIcon,
   ArrowDownTrayIcon,
-  ArrowUpTrayIcon
+  ArrowUpTrayIcon,
+  TagIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 
 /**
  * Page for managing 2FA accounts
@@ -30,8 +37,17 @@ const AccountsPage: React.FC = () => {
   const dispatch = useDispatch();
   const modal = useSelector((state: RootState) => state.ui.modal);
   const { user } = useSelector((state: RootState) => state.auth);
+  const showFavoritesOnly = useSelector((state: RootState) => state.accounts.showFavoritesOnly);
   const { filteredAccounts, isLoading } = useAccounts();
   const [showFilters, setShowFilters] = useState(false);
+  const [showTagManager, setShowTagManager] = useState(false);
+  
+  // Load tags on mount
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchTags(user.id));
+    }
+  }, [user, dispatch]);
 
   const handleAddAccount = () => {
     dispatch(openModal({ type: 'addAccount' }));
@@ -78,17 +94,39 @@ const AccountsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="flex-1">
-          <AccountSearch />
+          <AdvancedSearch />
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-2">
+          <button
+            onClick={() => dispatch(toggleShowFavoritesOnly())}
+            className={`btn btn-outline btn-md ${showFavoritesOnly ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500' : ''}`}
+            title="Show favorites only"
+          >
+            {showFavoritesOnly ? (
+              <StarSolidIcon className="w-5 h-5" />
+            ) : (
+              <StarIcon className="w-5 h-5" />
+            )}
+            <span className="hidden sm:inline">Favorites</span>
+          </button>
+
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`btn btn-outline btn-md ${showFilters ? 'bg-muted' : ''}`}
           >
             <AdjustmentsHorizontalIcon className="w-5 h-5" />
             <span className="hidden sm:inline">Filters</span>
+          </button>
+
+          <button
+            onClick={() => setShowTagManager(true)}
+            className="btn btn-outline btn-md"
+            title="Manage tags"
+          >
+            <TagIcon className="w-5 h-5" />
+            <span className="hidden sm:inline">Tags</span>
           </button>
 
           <button
@@ -127,6 +165,9 @@ const AccountsPage: React.FC = () => {
           <AccountFilters />
         </div>
       )}
+      
+      {/* Tag Filter */}
+      <TagFilter className="mt-4" />
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -152,9 +193,9 @@ const AccountsPage: React.FC = () => {
         </div>
         
         <div className="bg-card border border-border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">Tags</p>
+          <p className="text-sm text-muted-foreground">Favorites</p>
           <p className="text-2xl font-bold text-foreground">
-            {new Set(filteredAccounts.flatMap(a => a.tags || [])).size}
+            {filteredAccounts.filter(a => a.isFavorite).length}
           </p>
         </div>
       </div>
@@ -176,6 +217,10 @@ const AccountsPage: React.FC = () => {
       <ExportAccountsModal 
         isOpen={modal.type === 'export'} 
         onClose={() => dispatch(openModal({ type: null }))} 
+      />
+      <TagManager 
+        isOpen={showTagManager} 
+        onClose={() => setShowTagManager(false)} 
       />
     </div>
   );

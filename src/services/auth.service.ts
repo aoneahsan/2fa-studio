@@ -137,6 +137,10 @@ export class AuthService {
 
       // Register device
       await this.registerDevice(userData.id);
+      
+      // Initialize default tags
+      const { TagService } = await import('@services/tag.service');
+      await TagService.initializeDefaultTags(userData.id);
 
       return userData;
     } catch (error: any) {
@@ -269,6 +273,11 @@ export class AuthService {
         });
 
         await this.registerDevice(userData.id);
+        
+        // Initialize default tags
+        const { TagService } = await import('@services/tag.service');
+        await TagService.initializeDefaultTags(userData.id);
+        
         return userData;
       }
     } catch (error: any) {

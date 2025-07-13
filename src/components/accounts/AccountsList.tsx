@@ -9,6 +9,7 @@ import { OTPAccount } from '@services/otp.service';
 import { openModal } from '@store/slices/uiSlice';
 import AccountCard from '@components/accounts/AccountCard';
 import EmptyState from '@components/accounts/EmptyState';
+import { useAccounts } from '@hooks/useAccounts';
 
 interface AccountsListProps {
   accounts: OTPAccount[];
@@ -20,6 +21,7 @@ interface AccountsListProps {
  */
 const AccountsList: React.FC<AccountsListProps> = ({ accounts, isLoading }) => {
   const dispatch = useDispatch();
+  const { updateAccount } = useAccounts();
 
   const handleEdit = (account: OTPAccount) => {
     dispatch(openModal({
@@ -33,6 +35,17 @@ const AccountsList: React.FC<AccountsListProps> = ({ accounts, isLoading }) => {
       type: 'deleteAccount',
       data: account
     }));
+  };
+  
+  const handleToggleFavorite = async (account: OTPAccount) => {
+    try {
+      await updateAccount({
+        ...account,
+        isFavorite: !account.isFavorite
+      });
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    }
   };
 
   if (isLoading) {
@@ -71,6 +84,7 @@ const AccountsList: React.FC<AccountsListProps> = ({ accounts, isLoading }) => {
           account={account}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onToggleFavorite={handleToggleFavorite}
         />
       ))}
     </div>
