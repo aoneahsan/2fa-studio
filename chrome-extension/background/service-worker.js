@@ -8,11 +8,13 @@ import { MessageService } from '../src/message.js';
 import { NotificationService } from '../src/notification.js';
 import { OTPService } from '../src/otp.js';
 import { QRScanner } from '../src/qr-scanner-lib.js';
+import { SecurityService } from '../src/security.js';
 
 class BackgroundService {
   constructor() {
     this.init();
     this.qrCodeCache = new Map();
+    this.securityService = new SecurityService();
   }
 
   init() {
@@ -24,6 +26,9 @@ class BackgroundService {
     
     // Set up alarms for notifications
     this.setupAlarms();
+    
+    // Initialize security monitoring
+    this.monitorTabSecurity();
     
     // Initialize on install
     chrome.runtime.onInstalled.addListener((details) => {
@@ -82,6 +87,14 @@ class BackgroundService {
         case 'qrCodesDetected':
           this.handleQRCodesDetected(request.count, sender.tab);
           break;
+
+        case 'checkSecurity':
+          this.handleSecurityCheck(request.url, sendResponse);
+          return true;
+
+        case 'reportPhishing':
+          this.handlePhishingReport(request.domain, request.reason, sendResponse);
+          return true;
 
         default:
           sendResponse({ error: 'Unknown action' });
@@ -237,31 +250,127 @@ class BackgroundService {
 
   async handleRequestCode(pageInfo, sendResponse) {
     try {
+      // Security check first
+      const securityCheck = await this.securityService.validateURL(pageInfo.url);
+      if (!securityCheck.valid) {
+        sendResponse({ 
+          success: false, 
+          securityWarning: true,
+          reason: securityCheck.reason,
+          severity: securityCheck.severity
+        });
+        return;
+      }
+
       const accounts = await StorageService.getAccounts();
       const domain = pageInfo.domain;
       
-      // Find matching accounts
-      const matches = accounts.filter(account => {
-        const issuerLower = account.issuer.toLowerCase();
-        const domainLower = domain.toLowerCase();
-        const domainParts = domainLower.split('.');
-        
-        return domainParts.some(part => 
-          issuerLower.includes(part) || part.includes(issuerLower)
-        );
-      });
+      // Find matching accounts with improved logic
+      const matches = this.findDomainMatches(accounts, domain);
 
       if (matches.length === 1) {
         // Auto-return code for single match
         const code = OTPService.generateCode(matches[0]);
-        sendResponse({ success: true, code: code.code });
+        sendResponse({ 
+          success: true, 
+          code: code.code,
+          securityWarnings: securityCheck.warnings
+        });
+        
+        // Update badge to show successful match
+        this.updateBadgeForMatch(matches[0]);
+      } else if (matches.length > 1) {
+        // Multiple matches - return them for user selection
+        sendResponse({ 
+          success: false, 
+          needsSelection: true, 
+          matches: matches.map(account => ({
+            id: account.id,
+            issuer: account.issuer,
+            accountName: account.accountName
+          })),
+          securityWarnings: securityCheck.warnings
+        });
       } else {
-        // Multiple or no matches - need user selection
-        sendResponse({ success: false, needsSelection: true });
+        // No matches - need user selection
+        sendResponse({ 
+          success: false, 
+          needsSelection: true,
+          securityWarnings: securityCheck.warnings
+        });
       }
     } catch (error) {
       sendResponse({ success: false, error: error.message });
     }
+  }
+
+  findDomainMatches(accounts, domain) {
+    if (!domain || !accounts.length) {
+      return [];
+    }
+
+    return accounts.filter(account => {
+      const issuerLower = account.issuer.toLowerCase();
+      const domainLower = domain.toLowerCase();
+      const domainParts = domainLower.split('.');
+      
+      // Check for exact matches or partial matches
+      return (
+        // Direct match
+        issuerLower.includes(domainLower) ||
+        domainLower.includes(issuerLower) ||
+        // Check against domain parts
+        domainParts.some(part => 
+          part.length > 2 && (
+            issuerLower.includes(part) || 
+            part.includes(issuerLower.replace(/\s+/g, ''))
+          )
+        ) ||
+        // Check for common service mappings
+        this.checkServiceMapping(issuerLower, domainLower)
+      );
+    });
+  }
+
+  checkServiceMapping(issuer, domain) {
+    const mappings = {
+      'google': ['gmail.com', 'google.com', 'accounts.google.com', 'youtube.com'],
+      'microsoft': ['outlook.com', 'live.com', 'hotmail.com', 'microsoft.com', 'office.com'],
+      'github': ['github.com'],
+      'amazon': ['amazon.com', 'aws.amazon.com'],
+      'facebook': ['facebook.com', 'fb.com', 'instagram.com'],
+      'twitter': ['twitter.com', 'x.com'],
+      'discord': ['discord.com', 'discordapp.com'],
+      'slack': ['slack.com'],
+      'netflix': ['netflix.com'],
+      'dropbox': ['dropbox.com'],
+      'apple': ['apple.com', 'icloud.com'],
+      'linkedin': ['linkedin.com'],
+      'reddit': ['reddit.com'],
+      'steam': ['steampowered.com', 'steamcommunity.com']
+    };
+
+    for (const [service, domains] of Object.entries(mappings)) {
+      if (issuer.includes(service)) {
+        return domains.some(d => domain.includes(d));
+      }
+      if (domains.some(d => domain.includes(d))) {
+        return issuer.includes(service);
+      }
+    }
+
+    return false;
+  }
+
+  updateBadgeForMatch(account) {
+    // Show a green badge when a match is found
+    chrome.action.setBadgeText({ text: '✓' });
+    chrome.action.setBadgeBackgroundColor({ color: '#28a745' });
+    
+    // Clear badge after 3 seconds
+    setTimeout(() => {
+      chrome.action.setBadgeText({ text: '' });
+    }, 3000);
   }
 
   handleQRCodesDetected(count, tab) {
@@ -333,10 +442,7 @@ class BackgroundService {
       const url = new URL(tab.url);
       const domain = url.hostname;
       
-      const matches = accounts.filter(account => {
-        const issuerLower = account.issuer.toLowerCase();
-        return domain.includes(issuerLower) || issuerLower.includes(domain.split('.')[0]);
-      });
+      const matches = this.findDomainMatches(accounts, domain);
 
       if (matches.length === 0) {
         // Show popup to select account
@@ -347,6 +453,16 @@ class BackgroundService {
         chrome.tabs.sendMessage(tab.id, {
           action: 'fillCode',
           code: code.code
+        });
+        
+        // Update badge to show successful match
+        this.updateBadgeForMatch(matches[0]);
+        
+        // Show notification
+        NotificationService.show({
+          title: 'Code Auto-Filled',
+          message: `${matches[0].issuer} code filled automatically`,
+          iconUrl: chrome.runtime.getURL('assets/icon-128.png')
         });
       } else {
         // Show popup to select from matches
@@ -428,6 +544,18 @@ class BackgroundService {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       
+      // Security check for commands
+      const securityCheck = await this.securityService.validateURL(tab.url);
+      if (!securityCheck.valid && securityCheck.severity === 'high') {
+        // Block commands on dangerous sites
+        NotificationService.show({
+          title: 'Security Warning',
+          message: 'Cannot execute 2FA commands on this site for security reasons',
+          iconUrl: chrome.runtime.getURL('assets/icon-128.png')
+        });
+        return;
+      }
+      
       switch (command) {
         case 'fill-code':
           this.handleFillCode(tab);
@@ -442,6 +570,121 @@ class BackgroundService {
     } catch (error) {
       console.error('Failed to handle command:', error);
     }
+  }
+
+  async handleSecurityCheck(url, sendResponse) {
+    try {
+      // Enhanced security check with domain verification
+      const result = await this.securityService.validateURL(url);
+      
+      // Also get detailed domain verification
+      if (result.valid) {
+        const urlObj = new URL(url);
+        const domainVerification = await this.securityService.verifyDomainTrust(urlObj.hostname);
+        result.domainVerification = domainVerification;
+      }
+      
+      sendResponse({ success: true, data: result });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async handlePhishingReport(domain, reason, sendResponse) {
+    try {
+      await this.securityService.reportSuspiciousDomain(domain, reason);
+      sendResponse({ success: true });
+      
+      // Show notification
+      NotificationService.show({
+        title: 'Report Submitted',
+        message: `Thank you for reporting ${domain}`,
+        iconUrl: chrome.runtime.getURL('assets/icon-128.png')
+      });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Enhanced tab monitoring for security with domain verification
+  async monitorTabSecurity() {
+    chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+      if (changeInfo.status === 'complete' && tab.url) {
+        try {
+          const url = new URL(tab.url);
+          
+          // Quick security warning check
+          const warning = this.securityService.getSecurityWarning(url.hostname);
+          
+          // Enhanced domain verification for HTTPS sites
+          if (url.protocol === 'https:') {
+            const domainVerification = await this.securityService.verifyDomainTrust(url.hostname);
+            
+            if (!domainVerification.verified || domainVerification.trustScore < 0.5) {
+              // Show enhanced security warning for low trust domains
+              chrome.action.setBadgeText({ 
+                text: '🔒', 
+                tabId: tabId 
+              });
+              chrome.action.setBadgeBackgroundColor({ 
+                color: domainVerification.trustScore < 0.3 ? '#dc3545' : '#ffc107',
+                tabId: tabId 
+              });
+              
+              // Inject enhanced security warning
+              chrome.tabs.sendMessage(tabId, {
+                action: 'showSecurityWarning',
+                warning: {
+                  type: domainVerification.trustScore < 0.3 ? 'danger' : 'warning',
+                  title: 'Domain Verification Warning',
+                  message: `Trust Score: ${Math.round(domainVerification.trustScore * 100)}% - ${domainVerification.recommendations[0]}`,
+                  action: 'Enhanced Security Check',
+                  verification: domainVerification
+                }
+              });
+            } else if (warning) {
+              // Standard phishing/security warning
+              chrome.action.setBadgeText({ 
+                text: '⚠️', 
+                tabId: tabId 
+              });
+              chrome.action.setBadgeBackgroundColor({ 
+                color: warning.type === 'danger' ? '#dc3545' : '#ffc107',
+                tabId: tabId 
+              });
+              
+              chrome.tabs.sendMessage(tabId, {
+                action: 'showSecurityWarning',
+                warning: warning
+              });
+            } else {
+              // Clear security badge for trusted domains
+              chrome.action.setBadgeText({ text: '', tabId: tabId });
+            }
+          } else if (warning) {
+            // HTTP or other protocol with standard warning
+            chrome.action.setBadgeText({ 
+              text: '⚠️', 
+              tabId: tabId 
+            });
+            chrome.action.setBadgeBackgroundColor({ 
+              color: '#dc3545',
+              tabId: tabId 
+            });
+            
+            chrome.tabs.sendMessage(tabId, {
+              action: 'showSecurityWarning',
+              warning: warning
+            });
+          } else {
+            // Clear security badge
+            chrome.action.setBadgeText({ text: '', tabId: tabId });
+          }
+        } catch (error) {
+          console.debug('Error monitoring tab security:', error);
+        }
+      }
+    });
   }
 }
 

@@ -22,6 +22,18 @@
       </button>
     </header>
 
+    <!-- Domain Matches Section -->
+    <div id="domainMatches" class="domain-matches hidden">
+      <div class="domain-header">
+        <h3>Accounts for <span id="currentDomain"></span></h3>
+        <p class="domain-subtitle">Select an account to auto-fill</p>
+      </div>
+      <div id="matchedAccountsList" class="matched-accounts-list">
+        <!-- Matched accounts will be populated here -->
+      </div>
+      <button id="viewAllBtn" class="btn btn-outline view-all-btn">View All Accounts</button>
+    </div>
+
     <!-- Search -->
     <div class="search-container">
       <input 
@@ -30,6 +42,13 @@
         class="search-input" 
         placeholder="Search accounts..."
       >
+      <div class="search-actions">
+        <button id="filterDomainBtn" class="icon-btn hidden" title="Filter by current domain">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Account List -->
