@@ -519,7 +519,7 @@ export class LicenseManagementService {
 	private static async checkViolations(
 		userId: string,
 		usage: Usage,
-		limits: unknown
+		limits: any
 	): Promise<string[]> {
 		const violations: string[] = [];
 

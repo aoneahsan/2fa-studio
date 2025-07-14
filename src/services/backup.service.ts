@@ -209,7 +209,7 @@ export class BackupService {
 						userId
 					);
 
-					await FirestoreService.addDocument(`users/${userId}/accounts`, {
+					await FirestoreService.createDocument(`users/${userId}/accounts`, {
 						issuer: account.issuer,
 						label: account.label,
 						encryptedSecret,
@@ -344,7 +344,7 @@ export class BackupService {
 						userId
 					);
 
-					await FirestoreService.addDocument(`users/${userId}/accounts`, {
+					await FirestoreService.createDocument(`users/${userId}/accounts`, {
 						issuer: account.issuer,
 						label: account.label,
 						encryptedSecret,

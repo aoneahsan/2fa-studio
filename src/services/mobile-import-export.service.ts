@@ -6,11 +6,17 @@
 
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
-import { FilePicker } from '@capacitor/file-picker';
+// import { FilePicker } from '@capacitor/file-picker';
 // import { Share } from '@capacitor/share'; // Not available on web
+import { Encoding } from '@capacitor/filesystem';
 import { OTPAccount } from './otp.service';
 import { MobileEncryptionService } from './mobile-encryption.service';
 import { Preferences } from '@capacitor/preferences';
+import {
+	ImportExportService,
+	ExportFormat,
+	ImportFormat,
+} from './importExport.service';
 
 export interface MobileExportOptions {
 	format: ExportFormat;
