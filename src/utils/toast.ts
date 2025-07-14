@@ -15,12 +15,16 @@ export const showToast = (message: string, options: ToastOptions = {}) => {
   console.log(`[${options.type || 'info'}] ${message}`);
   
   // You can integrate with react-hot-toast, react-toastify, or Capacitor Toast here
-  if (typeof window !== 'undefined' && (window as unknown).Capacitor) {
+  if (typeof window !== 'undefined' && (window as any).Capacitor) {
     // Use Capacitor Toast for mobile
     import('@capacitor/toast').then(({ Toast }) => {
+      const duration = options.duration ? 
+        (options.duration > 3000 ? 'long' : 'short') : 
+        (options.type === 'error' ? 'long' : 'short');
+      
       Toast.show({
         text: message,
-        duration: options.duration || (options.type === 'error' ? 'long' : 'short'),
+        duration: duration,
         position: options.position || 'bottom',
       });
     });

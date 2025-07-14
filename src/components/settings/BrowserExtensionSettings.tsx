@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { QRCodeSVG } from 'qrcode.react';
+// import { QRCodeSVG } from 'qrcode.react'; // Removed - package not installed
 import { browserExtensionService } from '@services/browser-extension.service';
 import { addToast } from '@store/slices/uiSlice';
 import { AppDispatch } from '@src/store';
