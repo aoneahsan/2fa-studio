@@ -19,6 +19,7 @@ import {
 	serverTimestamp,
 	Timestamp,
 	runTransaction,
+	QueryConstraint,
 } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db, auth } from '@src/config/firebase';
@@ -119,7 +120,7 @@ export class AdminService {
 	}> {
 		try {
 			const q = collection(db, 'users');
-			const constraints: unknown[] = [];
+			const constraints: QueryConstraint[] = [];
 
 			// Add filters
 			if (params.subscriptionTier) {
@@ -386,7 +387,7 @@ export class AdminService {
 		hasMore: boolean;
 	}> {
 		try {
-			const constraints: unknown[] = [];
+			const constraints: QueryConstraint[] = [];
 
 			// Add filters
 			if (params.adminId) {
