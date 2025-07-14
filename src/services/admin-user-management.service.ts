@@ -103,7 +103,6 @@ export class AdminUserManagementService {
 
 			const result = await FirestoreService.getCollection('users', filters, {
 				limit,
-				offset: (page - 1) * limit,
 			});
 
 			if (!result.success) {
@@ -411,7 +410,7 @@ export class AdminUserManagementService {
 			const result = await FirestoreService.getCollection(
 				'user_actions',
 				[{ field: 'userId', operator: '==', value: userId }],
-				{ limit, orderBy: { field: 'createdAt', direction: 'desc' } }
+				{ limit }
 			);
 
 			return result.success ? (result.data as UserAction[]) : [];
@@ -510,27 +509,29 @@ export class AdminUserManagementService {
 			// Calculate risk score (simplified)
 			const riskScore = this.calculateRiskScore(user, violations, usage);
 
+			const { subscription: _, ...userWithoutSubscription } = user;
 			return {
-				...user,
+				...userWithoutSubscription,
 				subscription,
 				accountsCount: usage.accounts,
 				backupsCount: usage.backups,
 				storageUsed: usage.storageUsed,
 				violations,
 				riskScore,
-				status: user.status || 'active',
-			};
+				status: (user as any).status || 'active',
+			} as AdminUser;
 		} catch (error) {
 			console.error('Error enhancing user with admin data:', error);
+			const { subscription: _, ...userWithoutSubscription } = user;
 			return {
-				...user,
+				...userWithoutSubscription,
 				accountsCount: 0,
 				backupsCount: 0,
 				storageUsed: 0,
 				violations: 0,
 				riskScore: 0,
 				status: 'active',
-			};
+			} as AdminUser;
 		}
 	}
 
@@ -551,11 +552,11 @@ export class AdminUserManagementService {
 		else if (daysSinceRegistration < 30) score += 10;
 
 		// Factor in usage patterns
-		if (usage.accounts > 100) score += 15; // Unusually high account count
-		if (usage.apiCalls > 10000) score += 10; // High API usage
+		if ((usage as any).accounts > 100) score += 15; // Unusually high account count
+		if ((usage as any).apiCalls > 10000) score += 10; // High API usage
 
 		// Factor in login patterns
-		const lastLogin = user.lastLoginAt || user.createdAt;
+		const lastLogin = user.lastLogin || user.createdAt;
 		const daysSinceLogin =
 			(Date.now() - lastLogin.getTime()) / (24 * 60 * 60 * 1000);
 		if (daysSinceLogin > 90) score += 5; // Inactive users
