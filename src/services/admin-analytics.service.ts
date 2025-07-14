@@ -500,13 +500,13 @@ export class AdminAnalyticsService {
 			free: 0,
 			premium: 0,
 			family: 0,
-			enterprise: 0,
+			business: 0,
 		};
 
 		// This would correlate invoices with subscription tiers
 		// For now, return estimated distribution
 		const totalRevenue =
-			invoices.reduce((sum, invoice) => sum + invoice.amount, 0) / 100;
+			invoices.reduce((sum, invoice: any) => sum + invoice.amount, 0) / 100;
 
 		revenueByTier.premium = totalRevenue * 0.4;
 		revenueByTier.family = totalRevenue * 0.35;
