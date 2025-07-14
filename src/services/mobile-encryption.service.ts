@@ -10,268 +10,349 @@ import { Preferences } from '@capacitor/preferences';
 import { EncryptionService } from './encryption.service';
 
 export interface SecureData {
-  encrypted: string;
-  timestamp: string;
-  deviceId: string;
-  version: string;
+	encrypted: string;
+	timestamp: string;
+	deviceId: string;
+	version: string;
 }
 
 export class MobileEncryptionService extends EncryptionService {
-  private static deviceKey: string | null = null;
-  private static readonly DEVICE_KEY_NAME = 'device_encryption_key';
-  private static readonly SECURE_STORAGE_AVAILABLE = Capacitor.isNativePlatform() && 
-    Capacitor.isPluginAvailable('SecureStoragePlugin');
+	private static deviceKey: string | null = null;
+	private static readonly DEVICE_KEY_NAME = 'device_encryption_key';
+	private static readonly SECURE_STORAGE_AVAILABLE =
+		Capacitor.isNativePlatform() &&
+		Capacitor.isPluginAvailable('SecureStoragePlugin');
 
-  /**
-   * Initialize encryption service with device-specific key
-   */
-  static async initialize(): Promise<void> {
-    try {
-      // Get or generate device-specific key
-      this.deviceKey = await this.getOrCreateDeviceKey();
-    } catch (error) {
-      console.error('Failed to initialize encryption:', error);
-      throw new Error('Encryption initialization failed');
-    }
-  }
+	/**
+	 * Initialize encryption service with device-specific key
+	 */
+	static async initialize(): Promise<void> {
+		try {
+			// Get or generate device-specific key
+			this.deviceKey = await this.getOrCreateDeviceKey();
+		} catch (error) {
+			console.error('Failed to initialize encryption:', error);
+			throw new Error('Encryption initialization failed');
+		}
+	}
 
-  /**
-   * Get or create a device-specific encryption key
-   */
-  private static async getOrCreateDeviceKey(): Promise<string> {
-    try {
-      if (this.SECURE_STORAGE_AVAILABLE) {
-        // Try to get from secure storage first
-        try {
-          const { value } = await SecureStoragePlugin.get({ key: this.DEVICE_KEY_NAME });
-          if (value) return value;
-        } catch (_e) {
-          // Key doesn't exist yet
-        }
+	/**
+	 * Get or create a device-specific encryption key
+	 */
+	private static async getOrCreateDeviceKey(): Promise<string> {
+		try {
+			if (this.SECURE_STORAGE_AVAILABLE) {
+				// Try to get from secure storage first
+				try {
+					const { value } = await SecureStoragePlugin.get({
+						key: this.DEVICE_KEY_NAME,
+					});
+					if (value) return value;
+				} catch (_e) {
+					// Key doesn't exist yet
+				}
 
-        // Generate new key
-        const newKey = this.generateDeviceKey();
-        await SecureStoragePlugin.set({
-          key: this.DEVICE_KEY_NAME,
-          value: newKey
-        });
-        return newKey;
-      } else {
-        // Fallback to Preferences for web
-        const { value } = await Preferences.get({ key: this.DEVICE_KEY_NAME });
-        if (value) return value;
+				// Generate new key
+				const newKey = this.generateDeviceKey();
+				await SecureStoragePlugin.set({
+					key: this.DEVICE_KEY_NAME,
+					value: newKey,
+				});
+				return newKey;
+			} else {
+				// Fallback to Preferences for web
+				const { value } = await Preferences.get({ key: this.DEVICE_KEY_NAME });
+				if (value) return value;
 
-        const newKey = this.generateDeviceKey();
-        await Preferences.set({
-          key: this.DEVICE_KEY_NAME,
-          value: newKey
-        });
-        return newKey;
-      }
-    } catch (error) {
-      console.error('Failed to get device key:', error);
-      throw error;
-    }
-  }
+				const newKey = this.generateDeviceKey();
+				await Preferences.set({
+					key: this.DEVICE_KEY_NAME,
+					value: newKey,
+				});
+				return newKey;
+			}
+		} catch (error) {
+			console.error('Failed to get device key:', error);
+			throw error;
+		}
+	}
 
-  /**
-   * Generate a device-specific encryption key
-   */
-  private static generateDeviceKey(): string {
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return btoa(String.fromCharCode(...array));
-  }
+	/**
+	 * Generate a device-specific encryption key
+	 */
+	private static generateDeviceKey(): string {
+		const array = new Uint8Array(32);
+		crypto.getRandomValues(array);
+		return btoa(String.fromCharCode(...array));
+	}
 
-  /**
-   * Encrypt data with device-specific key
-   */
-  static async encryptData(data: string): Promise<string> {
-    if (!this.deviceKey) {
-      await this.initialize();
-    }
+	/**
+	 * Encrypt data with device-specific key
+	 */
+	static async encryptData(data: string): Promise<string> {
+		if (!this.deviceKey) {
+			await this.initialize();
+		}
 
-    const deviceInfo = await Device.getInfo();
-    const encrypted = await super.encrypt({
-      data,
-      password: this.deviceKey!
-    });
+		const deviceInfo = await Device.getInfo();
+		const encrypted = await super.encrypt(data);
 
-    const secureData: SecureData = {
-      encrypted: JSON.stringify(encrypted),
-      timestamp: new Date().toISOString(),
-      deviceId: deviceInfo.identifier || 'unknown',
-      version: '1.0'
-    };
+		const secureData: SecureData = {
+			encrypted: JSON.stringify(encrypted),
+			timestamp: new Date().toISOString(),
+			deviceId: deviceInfo.webViewVersion || 'unknown',
+			version: '1.0',
+		};
 
-    return JSON.stringify(secureData);
-  }
+		return JSON.stringify(secureData);
+	}
 
-  /**
-   * Decrypt data with device-specific key
-   */
-  static async decryptData(encryptedData: string): Promise<string> {
-    if (!this.deviceKey) {
-      await this.initialize();
-    }
+	/**
+	 * Decrypt data with device-specific key
+	 */
+	static async decryptData(encryptedData: string): Promise<string> {
+		if (!this.deviceKey) {
+			await this.initialize();
+		}
 
-    try {
-      const secureData: SecureData = JSON.parse(encryptedData);
-      
-      // Verify device ID if available
-      const deviceInfo = await Device.getInfo();
-      if (secureData.deviceId !== 'unknown' && 
-          deviceInfo.identifier && 
-          secureData.deviceId !== deviceInfo.identifier) {
-        throw new Error('Data encrypted on different device');
-      }
+		try {
+			const secureData: SecureData = JSON.parse(encryptedData);
 
-      return await super.decrypt({
-        encryptedData: secureData.encrypted,
-        password: this.deviceKey!
-      });
-    } catch (error) {
-      // Try direct decryption for backward compatibility
-      if (typeof encryptedData === 'string' && encryptedData.includes('"data"')) {
-        return await super.decrypt({
-          encryptedData,
-          password: this.deviceKey!
-        });
-      }
-      throw error;
-    }
-  }
+			// Verify device ID if available
+			const deviceInfo = await Device.getInfo();
+			if (
+				secureData.deviceId !== 'unknown' &&
+				deviceInfo.webViewVersion &&
+				secureData.deviceId !== deviceInfo.webViewVersion
+			) {
+				throw new Error('Device verification failed');
+			}
 
-  /**
-   * Encrypt data with user password (for backups)
-   */
-  static async encryptWithPassword(data: string, password: string): Promise<string> {
-    const encrypted = await super.encrypt({ data, password });
-    return JSON.stringify(encrypted);
-  }
+			const encrypted = JSON.parse(secureData.encrypted);
+			const decrypted = await super.decrypt(encrypted);
 
-  /**
-   * Decrypt data with user password (for restoring backups)
-   */
-  static async decryptWithPassword(encryptedData: string, password: string): Promise<string> {
-    return await super.decrypt({ encryptedData, password });
-  }
+			return decrypted;
+		} catch (error) {
+			throw new Error('Failed to decrypt data');
+		}
+	}
 
-  /**
-   * Secure store for small sensitive data (uses platform secure storage)
-   */
-  static async secureStore(key: string, value: string): Promise<void> {
-    if (this.SECURE_STORAGE_AVAILABLE) {
-      await SecureStoragePlugin.set({ key, value });
-    } else {
-      // Fallback to encrypted preferences
-      const encrypted = await this.encryptData(value);
-      await Preferences.set({ key, value: encrypted });
-    }
-  }
+	/**
+	 * Encrypt data with password
+	 */
+	static async encryptWithPassword(
+		data: string,
+		password: string
+	): Promise<string> {
+		const encrypted = await super.encrypt(data);
+		return JSON.stringify(encrypted);
+	}
 
-  /**
-   * Secure retrieve for small sensitive data
-   */
-  static async secureRetrieve(key: string): Promise<string | null> {
-    try {
-      if (this.SECURE_STORAGE_AVAILABLE) {
-        const { value } = await SecureStoragePlugin.get({ key });
-        return value || null;
-      } else {
-        // Fallback to encrypted preferences
-        const { value } = await Preferences.get({ key });
-        if (!value) return null;
-        return await this.decryptData(value);
-      }
-    } catch (error) {
-      return null;
-    }
-  }
+	/**
+	 * Decrypt data with password
+	 */
+	static async decryptWithPassword(
+		encryptedData: string,
+		password: string
+	): Promise<string> {
+		const encrypted = JSON.parse(encryptedData);
+		return await super.decrypt(encrypted);
+	}
 
-  /**
-   * Secure remove for small sensitive data
-   */
-  static async secureRemove(key: string): Promise<void> {
-    if (this.SECURE_STORAGE_AVAILABLE) {
-      await SecureStoragePlugin.remove({ key });
-    } else {
-      await Preferences.remove({ key });
-    }
-  }
+	/**
+	 * Secure store for small sensitive data (uses platform secure storage)
+	 */
+	static async secureStore(key: string, value: string): Promise<void> {
+		if (this.SECURE_STORAGE_AVAILABLE) {
+			await SecureStoragePlugin.set({ key, value });
+		} else {
+			// Fallback to encrypted preferences
+			const encrypted = await this.encryptData(value);
+			await Preferences.set({ key, value: encrypted });
+		}
+	}
 
-  /**
-   * Clear all secure storage (use with caution)
-   */
-  static async clearSecureStorage(): Promise<void> {
-    if (this.SECURE_STORAGE_AVAILABLE) {
-      await SecureStoragePlugin.clear();
-    }
-    // Don't clear preferences as it might contain other app data
-  }
+	/**
+	 * Secure retrieve for small sensitive data
+	 */
+	static async secureRetrieve(key: string): Promise<string | null> {
+		try {
+			if (this.SECURE_STORAGE_AVAILABLE) {
+				const { value } = await SecureStoragePlugin.get({ key });
+				return value || null;
+			} else {
+				// Fallback to encrypted preferences
+				const { value } = await Preferences.get({ key });
+				if (!value) return null;
+				return await this.decryptData(value);
+			}
+		} catch (error) {
+			return null;
+		}
+	}
 
-  /**
-   * Generate encryption key from biometric data (future enhancement)
-   */
-  static async generateBiometricKey(): Promise<string> {
-    // This would integrate with biometric APIs to derive a key
-    // For now, return a secure random key
-    return this.generatePassword(32);
-  }
+	/**
+	 * Secure remove for small sensitive data
+	 */
+	static async secureRemove(key: string): Promise<void> {
+		if (this.SECURE_STORAGE_AVAILABLE) {
+			await SecureStoragePlugin.remove({ key });
+		} else {
+			await Preferences.remove({ key });
+		}
+	}
 
-  /**
-   * Export encryption status
-   */
-  static async getEncryptionStatus(): Promise<{
-    initialized: boolean;
-    secureStorageAvailable: boolean;
-    deviceId: string;
-    lastKeyRotation?: string;
-  }> {
-    const deviceInfo = await Device.getInfo();
-    
-    return {
-      initialized: this.deviceKey !== null,
-      secureStorageAvailable: this.SECURE_STORAGE_AVAILABLE,
-      deviceId: deviceInfo.identifier || 'unknown',
-      lastKeyRotation: await Preferences.get({ key: 'last_key_rotation' })
-        .then(r => r.value || undefined)
-    };
-  }
+	/**
+	 * Clear all secure storage (use with caution)
+	 */
+	static async clearSecureStorage(): Promise<void> {
+		if (this.SECURE_STORAGE_AVAILABLE) {
+			await SecureStoragePlugin.clear();
+		}
+		// Don't clear preferences as it might contain other app data
+	}
 
-  /**
-   * Rotate device encryption key (requires re-encryption of all data)
-   */
-  static async rotateDeviceKey(): Promise<void> {
-    const oldKey = this.deviceKey;
-    if (!oldKey) {
-      throw new Error('No existing key to rotate');
-    }
+	/**
+	 * Generate encryption key from biometric data (future enhancement)
+	 */
+	static async generateBiometricKey(): Promise<string> {
+		// This would integrate with biometric APIs to derive a key
+		// For now, return a secure random key
+		return this.generatePassword(32);
+	}
 
-    // Generate new key
-    const newKey = this.generateDeviceKey();
-    
-    // Store new key
-    if (this.SECURE_STORAGE_AVAILABLE) {
-      await SecureStoragePlugin.set({
-        key: this.DEVICE_KEY_NAME,
-        value: newKey
-      });
-    } else {
-      await Preferences.set({
-        key: this.DEVICE_KEY_NAME,
-        value: newKey
-      });
-    }
+	/**
+	 * Get encryption status
+	 */
+	static async getEncryptionStatus(): Promise<{
+		initialized: boolean;
+		secureStorageAvailable: boolean;
+		deviceId: string;
+		lastKeyRotation?: string;
+	}> {
+		const deviceInfo = await Device.getInfo();
 
-    // Update timestamp
-    await Preferences.set({
-      key: 'last_key_rotation',
-      value: new Date().toISOString()
-    });
+		return {
+			initialized: !!this.deviceKey,
+			secureStorageAvailable: this.SECURE_STORAGE_AVAILABLE,
+			deviceId: deviceInfo.webViewVersion || 'unknown',
+			lastKeyRotation: await this.getLastKeyRotation(),
+		};
+	}
 
-    this.deviceKey = newKey;
-    
-    // Note: Caller must re-encrypt all data with the new key
-  }
+	/**
+	 * Get last key rotation timestamp
+	 */
+	private static async getLastKeyRotation(): Promise<string | undefined> {
+		const result = await Preferences.get({ key: 'last_key_rotation' });
+		return result.value || undefined;
+	}
+
+	/**
+	 * Rotate device key
+	 */
+	static async rotateDeviceKey(): Promise<void> {
+		// Generate new key
+		const newKey = this.generateDeviceKey();
+
+		// Store new key
+		await Preferences.set({
+			key: this.DEVICE_KEY_NAME,
+			value: newKey,
+		});
+
+		// Update in memory
+		this.deviceKey = newKey;
+
+		// Record rotation timestamp
+		await Preferences.set({
+			key: 'last_key_rotation',
+			value: new Date().toISOString(),
+		});
+
+		// Note: Caller must re-encrypt all data with the new key
+	}
+
+	/**
+	 * Encrypt data with device binding
+	 */
+	static async encryptWithDeviceBinding(
+		data: string,
+		userId: string
+	): Promise<string> {
+		const deviceInfo = await Device.getInfo();
+		const key = await this.deriveDeviceKey(userId);
+
+		const secureData = {
+			data,
+			timestamp: Date.now(),
+			deviceId: deviceInfo.webViewVersion || 'unknown',
+			platform: deviceInfo.platform,
+			version: deviceInfo.osVersion,
+		};
+
+		return this.encryptData(JSON.stringify(secureData));
+	}
+
+	/**
+	 * Decrypt data with device binding verification
+	 */
+	static async decryptWithDeviceBinding(
+		encryptedData: string,
+		userId: string
+	): Promise<string> {
+		const deviceInfo = await Device.getInfo();
+		const key = await this.deriveDeviceKey(userId);
+
+		const decryptedJson = await this.decryptData(encryptedData);
+		const secureData = JSON.parse(decryptedJson);
+
+		// Verify device binding
+		if (
+			deviceInfo.webViewVersion &&
+			secureData.deviceId !== deviceInfo.webViewVersion
+		) {
+			throw new Error('Device binding verification failed');
+		}
+
+		return secureData.data;
+	}
+
+	/**
+	 * Derive device key for user
+	 */
+	private static async deriveDeviceKey(userId: string): Promise<string> {
+		const baseKey = this.deviceKey || (await this.getOrCreateDeviceKey());
+		return await this.hashData(baseKey + userId);
+	}
+
+	/**
+	 * Hash data using crypto
+	 */
+	private static async hashData(data: string): Promise<string> {
+		const encoder = new TextEncoder();
+		const dataBuffer = encoder.encode(data);
+		const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+		const hashArray = Array.from(new Uint8Array(hashBuffer));
+		return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+	}
+
+	/**
+	 * Generate device fingerprint
+	 */
+	static async generateDeviceFingerprint(): Promise<string> {
+		const deviceInfo = await Device.getInfo();
+
+		const fingerprint = {
+			webViewVersion: deviceInfo.webViewVersion || 'unknown',
+			platform: deviceInfo.platform,
+			model: deviceInfo.model,
+			osVersion: deviceInfo.osVersion,
+			manufacturer: deviceInfo.manufacturer,
+			isVirtual: deviceInfo.isVirtual,
+			timestamp: Date.now(),
+		};
+
+		return this.hashData(JSON.stringify(fingerprint));
+	}
 }

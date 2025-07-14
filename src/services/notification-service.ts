@@ -19,93 +19,158 @@ class NotificationService {
 		return NotificationService.instance;
 	}
 
-	async initialize(config: NotificationConfig): Promise<void> {
-		if (this.initialized) {
-			console.warn('NotificationService already initialized');
+	/**
+	 * Initialize OneSignal
+	 */
+	static async initialize(): Promise<void> {
+		if (!this.isWebEnvironment()) {
+			console.log('OneSignal not available in non-web environment');
 			return;
 		}
 
 		try {
-			if (Capacitor.isNativePlatform()) {
-				// Native platform initialization
-				await OneSignal.init({
-					appId: config.appId,
-					safari_web_id: config.safariWebId,
-					allowLocalhostAsSecureOrigin: true,
-					notifyButton: {
-						enable: false,
-						prenotify: false,
-						showCredit: false,
-						position: 'bottom-left',
-						size: 'small',
-						offset: { bottom: '10px', left: '10px', right: '10px' },
-						text: {
-							'dialog.main.title': 'Enable Notifications',
-							'dialog.main.button.unsubscribe': 'Disable Notifications',
-							'dialog.main.button.subscribe': 'Enable Notifications',
-						},
+			await OneSignal.init({
+				appId: this.APP_ID,
+				allowLocalhostAsSecureOrigin: true,
+				text: {
+					'dialog.main.title': 'Manage Notifications',
+					'dialog.main.button.subscribe': 'Subscribe',
+					'dialog.main.button.unsubscribe': 'Unsubscribe',
+					'dialog.blocked.title': 'Notifications Blocked',
+					'dialog.blocked.message':
+						'Please allow notifications to receive updates',
+					'message.action.subscribed': 'Thanks for subscribing!',
+					'message.action.resubscribed': "You're subscribed to notifications",
+					'message.action.unsubscribed':
+						"You won't receive notifications anymore",
+					'message.prenotify': 'Click to subscribe to notifications',
+					'tip.state.unsubscribed': "You're subscribed to notifications",
+					'tip.state.subscribed': "You're subscribed to notifications",
+					'tip.state.blocked': "You've blocked notifications",
+				},
+				notifyButton: {
+					enable: false,
+					prenotify: false,
+					showCredit: false,
+					text: {
+						'tip.state.unsubscribed': 'Subscribe to notifications',
+						'tip.state.subscribed': 'Thanks for subscribing!',
+						'tip.state.blocked': "You've blocked notifications",
+						'message.prenotify': 'Click to subscribe to notifications',
+						'message.action.subscribed': 'Thanks for subscribing!',
+						'message.action.resubscribed': "You're subscribed to notifications",
+						'message.action.unsubscribed':
+							"You won't receive notifications anymore",
+						'dialog.main.title': 'Manage Notifications',
+						'dialog.main.button.subscribe': 'Subscribe',
+						'dialog.main.button.unsubscribe': 'Unsubscribe',
+						'dialog.blocked.title': 'Notifications Blocked',
+						'dialog.blocked.message':
+							'Please allow notifications to receive updates',
 					},
-				});
+				},
+			});
 
-				// Request permission
-				const permission =
-					await OneSignal.Notifications.requestPermission(true);
-				console.log('Push notification permission:', permission);
+			// Request permission
+			await OneSignal.Notifications.requestPermission();
 
-				// Set up handlers
-				this.setupHandlers();
-			} else {
-				// Web initialization
-				await OneSignal.init({
-					appId: config.appId,
-					safari_web_id: config.safariWebId,
-					allowLocalhostAsSecureOrigin: true,
-					notifyButton: {
-						enable: false,
-					},
-				});
-			}
+			// Set up event listeners
+			this.setupEventListeners();
 
-			this.initialized = true;
-			console.log('NotificationService initialized successfully');
+			console.log('OneSignal initialized successfully');
 		} catch (error) {
-			console.error('Failed to initialize NotificationService:', error);
-			throw error;
+			console.error('Failed to initialize OneSignal:', error);
 		}
 	}
 
-	private setupHandlers(): void {
-		// Handle notification opened
-		OneSignal.Notifications.addEventListener('click', (event) => {
+	/**
+	 * Setup event listeners
+	 */
+	private static setupEventListeners(): void {
+		// Notification received
+		OneSignal.Notifications.addEventListener('click', (event: any) => {
 			console.log('Notification clicked:', event);
-			this.handleNotificationClick(event.notification);
+			// event.notification.display();
 		});
 
-		// Handle foreground notification
+		// Notification permission changed
 		OneSignal.Notifications.addEventListener(
-			'foregroundWillDisplay',
-			(event) => {
-				console.log('Notification will display:', event);
-				// You can modify the notification here
-				event.preventDefault();
-				event.notification.display();
+			'permissionChange',
+			(granted: boolean) => {
+				console.log('Notification permission changed:', granted);
 			}
 		);
+
+		// Subscription changed
+		OneSignal.User.PushSubscription.addEventListener('change', (event: any) => {
+			console.log('Push subscription changed:', event);
+			const data = event.current || {};
+			this.handleSubscriptionChange(data);
+		});
 	}
 
-	private handleNotificationClick(notification: unknown): void {
-		const data = notification.additionalData;
+	/**
+	 * Handle subscription change
+	 */
+	private static handleSubscriptionChange(data: any): void {
+		console.log('Subscription changed:', data);
+		// Handle subscription change logic
+	}
 
-		if (data?.type === 'security_alert') {
-			// Navigate to security settings
-			window.location.href = '/settings/security';
-		} else if (data?.type === 'backup_reminder') {
-			// Navigate to backup settings
-			window.location.href = '/settings/backup';
-		} else if (data?.type === 'new_feature') {
-			// Navigate to what's new
-			window.location.href = '/whats-new';
+	/**
+	 * Check if notifications are supported
+	 */
+	static async isSupported(): Promise<boolean> {
+		if (!this.isWebEnvironment()) {
+			return false;
 		}
+
+		try {
+			return OneSignal.Notifications.permission !== 'default';
+		} catch (error) {
+			console.error('Error checking notification support:', error);
+			return false;
+		}
+	}
+
+	/**
+	 * Get notification permission
+	 */
+	static async getPermission(): Promise<boolean> {
+		if (!this.isWebEnvironment()) {
+			return false;
+		}
+
+		try {
+			return OneSignal.Notifications.permission === 'granted';
+		} catch (error) {
+			console.error('Error getting notification permission:', error);
+			return false;
+		}
+	}
+
+	/**
+	 * Request notification permission
+	 */
+	static async requestPermission(): Promise<boolean> {
+		if (!this.isWebEnvironment()) {
+			return false;
+		}
+
+		try {
+			await OneSignal.Notifications.requestPermission();
+			return OneSignal.Notifications.permission === 'granted';
+		} catch (error) {
+			console.error('Error requesting notification permission:', error);
+			return false;
+		}
+	}
+
+	/**
+	 * Check if web environment
+	 */
+	private static isWebEnvironment(): boolean {
+		return typeof window !== 'undefined' && typeof document !== 'undefined';
 	}
 
 	async setExternalUserId(userId: string): Promise<void> {

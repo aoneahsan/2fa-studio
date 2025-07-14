@@ -260,11 +260,11 @@ export class SyncService {
     this.conflictQueue.push(newConflict);
 
     // Notify user about conflict
-    NotificationService.showNotification({
-      title: 'Sync Conflict Detected',
-      body: `A sync conflict was detected for ${conflict.type}. Please resolve it.`,
-      icon: 'warning',
-    });
+    this.showSyncNotification(
+      'Sync Conflict Detected',
+      `A sync conflict was detected for ${conflict.type}. Please resolve it.`,
+      'warning'
+    );
   }
 
   /**
@@ -342,4 +342,58 @@ export class SyncService {
     this.eventHandlers.clear();
     this.conflictQueue = [];
   }
+
+	/**
+	 * Broadcast sync event to other tabs/windows
+	 */
+	private static broadcastSyncEvent(event: SyncEvent): void {
+		if (typeof window !== 'undefined' && window.BroadcastChannel) {
+			const channel = new BroadcastChannel('sync-events');
+			channel.postMessage(event);
+		}
+	}
+
+	/**
+	 * Show sync notification
+	 */
+	private static showSyncNotification(
+		title: string,
+		message: string,
+		type: 'success' | 'error' | 'warning' = 'success'
+	): void {
+		// Use a simple notification approach instead of the missing method
+		if (typeof window !== 'undefined' && window.Notification) {
+			if (Notification.permission === 'granted') {
+				new Notification(title, {
+					body: message,
+					icon: '/favicon.ico',
+				});
+			}
+		} else {
+			// Fallback to console log
+			console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+		}
+	}
+
+	/**
+	 * Notify about sync completion
+	 */
+	private static notifySyncCompletion(
+		syncedCount: number,
+		failedCount: number
+	): void {
+		if (failedCount > 0) {
+			this.showSyncNotification(
+				'Sync Completed with Errors',
+				`${syncedCount} items synced, ${failedCount} failed`,
+				'warning'
+			);
+		} else {
+			this.showSyncNotification(
+				'Sync Completed',
+				`${syncedCount} items synced successfully`,
+				'success'
+			);
+		}
+	}
 }

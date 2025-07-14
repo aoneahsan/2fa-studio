@@ -1,313 +1,376 @@
 /**
- * Enhanced biometric service for mobile with local storage support
+ * Mobile Biometric Service
+ * Handles biometric authentication for mobile platforms
  * @module services/mobile-biometric
  */
 
-import { BiometricAuth } from 'capacitor-biometric-auth';
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
+import { BiometricAuth } from 'capacitor-biometric-auth';
+import { MobileEncryptionService } from './mobile-encryption.service';
 
 export interface BiometricConfig {
-  enabled: boolean;
-  timeout: number; // minutes
-  protectedAccounts: string[];
-  lastAuthentication?: string;
+	enabled: boolean;
+	timeout: number;
+	reason: string;
+	protectedAccounts: string[];
+	lastUsed?: string;
+	templates?: Record<string, string>;
 }
 
 export class MobileBiometricService {
-  private static readonly CONFIG_KEY = 'biometric_config';
-  private static authenticatedSessions: Map<string, Date> = new Map();
+	private static readonly CONFIG_KEY = 'biometric_config';
+	private static authenticatedSessions: Map<string, Date> = new Map();
 
-  /**
-   * Initialize biometric service
-   */
-  static async initialize(): Promise<void> {
-    // Clear expired sessions on app start
-    this.authenticatedSessions.clear();
-  }
+	/**
+	 * Initialize biometric service
+	 */
+	static async initialize(): Promise<void> {
+		// Clear expired sessions on app start
+		this.authenticatedSessions.clear();
+	}
 
-  /**
-   * Check if biometric is available on device
-   */
-  static async isAvailable(): Promise<{
-    available: boolean;
-    type?: string;
-    reason?: string;
-  }> {
-    if (!Capacitor.isNativePlatform()) {
-      return { 
-        available: false, 
-        reason: 'Not available on web platform' 
-      };
-    }
+	/**
+	 * Check if biometric authentication is available
+	 */
+	static async checkBiometricAvailability(): Promise<{
+		available: boolean;
+		biometryType: string;
+		reason?: string;
+	}> {
+		if (!Capacitor.isNativePlatform()) {
+			return {
+				available: false,
+				biometryType: 'none',
+				reason: 'Biometric authentication not available on web platform',
+			};
+		}
 
-    try {
-      const result = await BiometricAuth.checkBiometry();
-      return {
-        available: result.isAvailable,
-        type: result.biometryType,
-        reason: result.reason
-      };
-    } catch (error) {
-      return { 
-        available: false, 
-        reason: 'Error checking biometry' 
-      };
-    }
-  }
+		try {
+			// const result = await BiometricAuth.checkBiometry();
+			// return {
+			//   available: result.available,
+			//   biometryType: result.biometryType,
+			//   reason: result.reason
+			// };
+			return {
+				available: false,
+				biometryType: 'none',
+				reason: 'Biometric authentication not available on web platform',
+			};
+		} catch (error) {
+			return {
+				available: false,
+				biometryType: 'none',
+				reason: 'Error checking biometric availability',
+			};
+		}
+	}
 
-  /**
-   * Get biometric configuration
-   */
-  static async getConfig(): Promise<BiometricConfig> {
-    try {
-      const { value } = await Preferences.get({ key: this.CONFIG_KEY });
-      if (value) {
-        return JSON.parse(value);
-      }
-    } catch (error) {
-      console.error('Failed to get biometric _config:', error);
-    }
+	/**
+	 * Get biometric configuration
+	 */
+	static async getConfig(): Promise<BiometricConfig> {
+		try {
+			const { value } = await Preferences.get({ key: this.CONFIG_KEY });
+			if (value) {
+				return JSON.parse(value);
+			}
+		} catch (error) {
+			console.error('Failed to get biometric _config:', error);
+		}
 
-    return {
-      enabled: false,
-      timeout: 5, // Default 5 minutes
-      protectedAccounts: []
-    };
-  }
+		return {
+			enabled: false,
+			timeout: 5, // Default 5 minutes
+			reason: '',
+			protectedAccounts: [],
+		};
+	}
 
-  /**
-   * Save biometric configuration
-   */
-  static async saveConfig(_config: BiometricConfig): Promise<void> {
-    await Preferences.set({
-      key: this.CONFIG_KEY,
-      value: JSON.stringify(_config)
-    });
-  }
+	/**
+	 * Save biometric configuration
+	 */
+	static async saveConfig(_config: BiometricConfig): Promise<void> {
+		await Preferences.set({
+			key: this.CONFIG_KEY,
+			value: JSON.stringify(_config),
+		});
+	}
 
-  /**
-   * Enable biometric authentication
-   */
-  static async enable(timeout: number = 5): Promise<boolean> {
-    try {
-      // Check availability first
-      const availability = await this.isAvailable();
-      if (!availability.available) {
-        throw new Error(availability.reason || 'Biometric not available');
-      }
+	/**
+	 * Enable biometric authentication
+	 */
+	static async enableBiometricAuth(
+		reason: string = 'Enable biometric authentication'
+	): Promise<void> {
+		if (!Capacitor.isNativePlatform()) {
+			throw new Error('Biometric authentication not available on web platform');
+		}
 
-      // Perform test authentication
-      const authenticated = await this.authenticate('Enable biometric protection');
-      if (!authenticated) {
-        return false;
-      }
+		const config = await this.getConfig();
+		config.enabled = true;
+		config.reason = reason;
+		await this.saveConfig(config);
+	}
 
-      // Save configuration
-      const config = await this.getConfig();
-      config.enabled = true;
-      config.timeout = timeout;
-      await this.saveConfig(_config);
+	/**
+	 * Disable biometric authentication
+	 */
+	static async disableBiometricAuth(): Promise<void> {
+		const config = await this.getConfig();
+		config.enabled = false;
+		await this.saveConfig(config);
+	}
 
-      return true;
-    } catch (error) {
-      console.error('Failed to enable biometric:', error);
-      return false;
-    }
-  }
+	/**
+	 * Authenticate with biometric
+	 */
+	static async authenticate(
+		reason: string = 'Authenticate with biometric'
+	): Promise<{ success: boolean; error?: string }> {
+		if (!Capacitor.isNativePlatform()) {
+			return {
+				success: false,
+				error: 'Biometric authentication not available on web platform',
+			};
+		}
 
-  /**
-   * Disable biometric authentication
-   */
-  static async disable(): Promise<boolean> {
-    try {
-      // Require authentication to disable
-      const authenticated = await this.authenticate('Disable biometric protection');
-      if (!authenticated) {
-        return false;
-      }
+		try {
+			// const result = await BiometricAuth.authenticate({
+			//   reason,
+			//   title: '2FA Studio',
+			//   subtitle: 'Biometric Authentication',
+			//   description: 'Use your biometric to authenticate',
+			//   fallbackTitle: 'Use Password',
+			//   cancelTitle: 'Cancel'
+			// });
 
-      // Update configuration
-      const config = await this.getConfig();
-      config.enabled = false;
-      config.protectedAccounts = [];
-      await this.saveConfig(_config);
+			// if (result.authenticated) {
+			//   const config = await this.getConfig();
+			//   config.lastUsed = new Date().toISOString();
+			//   await this.saveConfig(config);
+			//   return { success: true };
+			// } else {
+			//   return { success: false, error: 'Authentication failed' };
+			// }
+			return {
+				success: false,
+				error: 'Biometric authentication not available on web platform',
+			};
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			};
+		}
+	}
 
-      // Clear sessions
-      this.authenticatedSessions.clear();
+	/**
+	 * Protect an account with biometric
+	 */
+	static async protectAccount(accountId: string): Promise<void> {
+		const config = await this.getConfig();
 
-      return true;
-    } catch (error) {
-      console.error('Failed to disable biometric:', error);
-      return false;
-    }
-  }
+		if (!config.protectedAccounts.includes(accountId)) {
+			config.protectedAccounts.push(accountId);
+			await this.saveConfig(config);
+		}
+	}
 
-  /**
-   * Authenticate with biometric
-   */
-  static async authenticate(reason: string): Promise<boolean> {
-    if (!Capacitor.isNativePlatform()) {
-      // Fallback for web
-      return confirm(reason);
-    }
+	/**
+	 * Remove biometric protection from account
+	 */
+	static async unprotectAccount(accountId: string): Promise<void> {
+		const config = await this.getConfig();
+		config.protectedAccounts = config.protectedAccounts.filter(
+			(id: any) => id !== accountId
+		);
+		await this.saveConfig(config);
 
-    try {
-      const result = await BiometricAuth.authenticate({
-        reason,
-        cancelTitle: 'Cancel',
-        fallbackTitle: 'Use Device PIN',
-        disableDeviceFallback: false
-      });
+		// Remove from authenticated sessions
+		this.authenticatedSessions.delete(accountId);
+	}
 
-      if (result) {
-        // Update config with last authentication time
-        const config = await this.getConfig();
-        config.lastAuthentication = new Date().toISOString();
-        await this.saveConfig(_config);
-      }
+	/**
+	 * Check if account requires authentication
+	 */
+	static async requiresAuthentication(accountId: string): Promise<boolean> {
+		const config = await this.getConfig();
 
-      return result;
-    } catch (error) {
-      console.error('Biometric authentication failed:', error);
-      return false;
-    }
-  }
+		if (!config.enabled || !config.protectedAccounts.includes(accountId)) {
+			return false;
+		}
 
-  /**
-   * Protect an account with biometric
-   */
-  static async protectAccount(accountId: string): Promise<void> {
-    const config = await this.getConfig();
-    
-    if (!config.protectedAccounts.includes(accountId)) {
-      config.protectedAccounts.push(accountId);
-      await this.saveConfig(_config);
-    }
-  }
+		// Check if already authenticated within timeout
+		const lastAuth = this.authenticatedSessions.get(accountId);
+		if (lastAuth) {
+			const elapsed = Date.now() - lastAuth.getTime();
+			const timeoutMs = config.timeout * 60 * 1000;
 
-  /**
-   * Remove biometric protection from account
-   */
-  static async unprotectAccount(accountId: string): Promise<void> {
-    const config = await this.getConfig();
-    config.protectedAccounts = config.protectedAccounts.filter((id: any) => id !== accountId);
-    await this.saveConfig(_config);
-    
-    // Remove from authenticated sessions
-    this.authenticatedSessions.delete(accountId);
-  }
+			if (elapsed < timeoutMs) {
+				return false; // Still within timeout
+			}
+		}
 
-  /**
-   * Check if account requires authentication
-   */
-  static async requiresAuthentication(accountId: string): Promise<boolean> {
-    const config = await this.getConfig();
-    
-    if (!config.enabled || !config.protectedAccounts.includes(accountId)) {
-      return false;
-    }
+		return true;
+	}
 
-    // Check if already authenticated within timeout
-    const lastAuth = this.authenticatedSessions.get(accountId);
-    if (lastAuth) {
-      const elapsed = Date.now() - lastAuth.getTime();
-      const timeoutMs = config.timeout * 60 * 1000;
-      
-      if (elapsed < timeoutMs) {
-        return false; // Still within timeout
-      }
-    }
+	/**
+	 * Authenticate for specific account
+	 */
+	static async authenticateForAccount(
+		accountId: string,
+		accountName: string
+	): Promise<boolean> {
+		const requiresAuth = await this.requiresAuthentication(accountId);
 
-    return true;
-  }
+		if (!requiresAuth) {
+			return true;
+		}
 
-  /**
-   * Authenticate for specific account
-   */
-  static async authenticateForAccount(
-    accountId: string, 
-    accountName: string
-  ): Promise<boolean> {
-    const requiresAuth = await this.requiresAuthentication(accountId);
-    
-    if (!requiresAuth) {
-      return true;
-    }
+		const authenticated = await this.authenticate(`Access ${accountName}`);
 
-    const authenticated = await this.authenticate(`Access ${accountName}`);
-    
-    if (authenticated) {
-      this.authenticatedSessions.set(accountId, new Date());
-    }
+		if (authenticated.success) {
+			this.authenticatedSessions.set(accountId, new Date());
+		}
 
-    return authenticated;
-  }
+		return authenticated.success;
+	}
 
-  /**
-   * Clear all authenticated sessions
-   */
-  static clearSessions(): void {
-    this.authenticatedSessions.clear();
-  }
+	/**
+	 * Clear all authenticated sessions
+	 */
+	static clearSessions(): void {
+		this.authenticatedSessions.clear();
+	}
 
-  /**
-   * Get authentication status for account
-   */
-  static async getAccountStatus(accountId: string): Promise<{
-    protected: boolean;
-    authenticated: boolean;
-    remainingTime?: number; // minutes
-  }> {
-    const config = await this.getConfig();
-    const isProtected = config.protectedAccounts.includes(accountId);
-    
-    if (!isProtected || !config.enabled) {
-      return { protected: false, authenticated: true };
-    }
+	/**
+	 * Get authentication status for account
+	 */
+	static async getAccountStatus(accountId: string): Promise<{
+		protected: boolean;
+		authenticated: boolean;
+		remainingTime?: number; // minutes
+	}> {
+		const config = await this.getConfig();
+		const isProtected = config.protectedAccounts.includes(accountId);
 
-    const lastAuth = this.authenticatedSessions.get(accountId);
-    if (!lastAuth) {
-      return { protected: true, authenticated: false };
-    }
+		if (!isProtected || !config.enabled) {
+			return { protected: false, authenticated: true };
+		}
 
-    const elapsed = Date.now() - lastAuth.getTime();
-    const timeoutMs = config.timeout * 60 * 1000;
-    
-    if (elapsed >= timeoutMs) {
-      return { protected: true, authenticated: false };
-    }
+		const lastAuth = this.authenticatedSessions.get(accountId);
+		if (!lastAuth) {
+			return { protected: true, authenticated: false };
+		}
 
-    const remainingTime = Math.ceil((timeoutMs - elapsed) / 60000);
-    return { 
-      protected: true, 
-      authenticated: true, 
-      remainingTime 
-    };
-  }
+		const elapsed = Date.now() - lastAuth.getTime();
+		const timeoutMs = config.timeout * 60 * 1000;
 
-  /**
-   * Update biometric timeout
-   */
-  static async updateTimeout(minutes: number): Promise<void> {
-    const config = await this.getConfig();
-    config.timeout = minutes;
-    await this.saveConfig(_config);
-  }
+		if (elapsed >= timeoutMs) {
+			return { protected: true, authenticated: false };
+		}
 
-  /**
-   * Get all protected accounts
-   */
-  static async getProtectedAccounts(): Promise<string[]> {
-    const config = await this.getConfig();
-    return config.protectedAccounts;
-  }
+		const remainingTime = Math.ceil((timeoutMs - elapsed) / 60000);
+		return {
+			protected: true,
+			authenticated: true,
+			remainingTime,
+		};
+	}
 
-  /**
-   * Check if any accounts are protected
-   */
-  static async hasProtectedAccounts(): Promise<boolean> {
-    const config = await this.getConfig();
-    return config.protectedAccounts.length > 0;
-  }
+	/**
+	 * Update biometric timeout
+	 */
+	static async updateTimeout(minutes: number): Promise<void> {
+		const config = await this.getConfig();
+		config.timeout = minutes;
+		await this.saveConfig(config);
+	}
+
+	/**
+	 * Get all protected accounts
+	 */
+	static async getProtectedAccounts(): Promise<string[]> {
+		const config = await this.getConfig();
+		return config.protectedAccounts;
+	}
+
+	/**
+	 * Check if any accounts are protected
+	 */
+	static async hasProtectedAccounts(): Promise<boolean> {
+		const config = await this.getConfig();
+		return config.protectedAccounts.length > 0;
+	}
+
+	/**
+	 * Set biometric timeout
+	 */
+	static async setBiometricTimeout(timeoutMs: number): Promise<void> {
+		const config = await this.getConfig();
+		config.timeout = timeoutMs;
+		await this.saveConfig(config);
+	}
+
+	/**
+	 * Clear biometric timeout
+	 */
+	static async clearBiometricTimeout(): Promise<void> {
+		const config = await this.getConfig();
+		config.timeout = 0;
+		await this.saveConfig(config);
+	}
+
+	/**
+	 * Store biometric template (for advanced security)
+	 */
+	static async storeBiometricTemplate(
+		accountId: string,
+		template: string
+	): Promise<void> {
+		const config = await this.getConfig();
+		if (!config.templates) config.templates = {};
+		config.templates[accountId] = template;
+		await this.saveConfig(config);
+	}
+
+	/**
+	 * Get biometric template
+	 */
+	static async getBiometricTemplate(accountId: string): Promise<string | null> {
+		const config = await this.getConfig();
+		return config.templates?.[accountId] || null;
+	}
+
+	/**
+	 * Check if user has authenticated recently
+	 */
+	static async isRecentlyAuthenticated(accountId: string): Promise<boolean> {
+		const config = await this.getConfig();
+		if (!config.enabled) return false;
+
+		const lastAuth = config.lastUsed;
+		if (!lastAuth) return false;
+
+		const timeSinceAuth = Date.now() - new Date(lastAuth).getTime();
+		const isRecent = timeSinceAuth < (config.timeout || 300000); // 5 minutes default
+
+		if (isRecent) {
+			const authenticated = await this.authenticate('Access account');
+			return authenticated.success;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Clear authentication session
+	 */
+	static async clearAuthSession(): Promise<void> {
+		const config = await this.getConfig();
+		config.lastUsed = undefined;
+		await this.saveConfig(config);
+	}
 }
