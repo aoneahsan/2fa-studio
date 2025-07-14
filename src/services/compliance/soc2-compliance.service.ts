@@ -19,7 +19,12 @@ import {
 	limit,
 } from 'firebase/firestore';
 import { db } from '@src/config/firebase';
-import { AuditLoggingService, AuditLog } from './audit-logging.service';
+import {
+	AuditLoggingService,
+	AuditLog,
+	AuditAction,
+	AuditResource,
+} from './audit-logging.service';
 import { DataRetentionService } from './data-retention.service';
 import { AuthService } from '@services/auth.service';
 import { EncryptionService } from '@services/encryption.service';
@@ -385,8 +390,8 @@ export class SOC2ComplianceService {
 				await AuditLoggingService.log({
 					userId: 'system',
 					userEmail: 'system',
-					action: 'compliance.soc2_controls_initialized' as unknown,
-					resource: 'system' as unknown,
+					action: 'compliance.soc2_controls_initialized' as AuditAction,
+					resource: AuditResource.SYSTEM,
 					details: { controlsCount: this.DEFAULT_CONTROLS.length },
 					severity: 'info',
 					success: true,
@@ -458,8 +463,8 @@ export class SOC2ComplianceService {
 			await AuditLoggingService.log({
 				userId: AuthService.getCurrentUser()?.uid || 'system',
 				userEmail: AuthService.getCurrentUser()?.email || 'system',
-				action: 'compliance.control_updated' as unknown,
-				resource: 'system' as unknown,
+				action: 'compliance.control_updated' as AuditAction,
+				resource: AuditResource.SYSTEM,
 				details: { controlId, status, implementation },
 				severity: 'info',
 				success: true,
@@ -501,8 +506,8 @@ export class SOC2ComplianceService {
 			await AuditLoggingService.log({
 				userId: incident.reportedBy,
 				userEmail: AuthService.getCurrentUser()?.email || 'system',
-				action: 'security.incident_reported' as unknown,
-				resource: 'system' as unknown,
+				action: 'security.incident_reported' as AuditAction,
+				resource: AuditResource.SYSTEM,
 				details: {
 					incidentId,
 					severity: incident.severity,
@@ -545,8 +550,8 @@ export class SOC2ComplianceService {
 			await AuditLoggingService.log({
 				userId: AuthService.getCurrentUser()?.uid || 'system',
 				userEmail: AuthService.getCurrentUser()?.email || 'system',
-				action: 'security.incident_updated' as unknown,
-				resource: 'system' as unknown,
+				action: 'security.incident_updated' as AuditAction,
+				resource: AuditResource.SYSTEM,
 				details: { incidentId, updates },
 				severity: 'info',
 				success: true,
@@ -619,8 +624,8 @@ export class SOC2ComplianceService {
 			await AuditLoggingService.log({
 				userId: AuthService.getCurrentUser()?.uid || 'system',
 				userEmail: AuthService.getCurrentUser()?.email || 'system',
-				action: 'compliance.report_generated' as unknown,
-				resource: 'system' as unknown,
+				action: 'compliance.report_generated' as AuditAction,
+				resource: AuditResource.SYSTEM,
 				details: {
 					reportId: docRef.id,
 					reportType,
@@ -1005,8 +1010,8 @@ export class SOC2ComplianceService {
 		await AuditLoggingService.log({
 			userId: 'system',
 			userEmail: 'system',
-			action: 'security.alert_sent' as unknown,
-			resource: 'system' as unknown,
+			action: 'security.alert_sent' as AuditAction,
+			resource: AuditResource.SYSTEM,
 			details: {
 				incidentId: incident.incidentId,
 				severity: incident.severity,

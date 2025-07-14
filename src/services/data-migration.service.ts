@@ -313,7 +313,7 @@ export class DataMigrationService {
 				} else {
 					// Use regular decryption
 					decryptedSecret = await EncryptionService.decrypt({
-						encryptedData: account.encryptedSecret,
+						encryptedData: account.encryptedSecret as string,
 						password: 'legacy-key', // This would be user's actual key
 					});
 				}
@@ -426,12 +426,12 @@ export class DataMigrationService {
 				const category = account.category || 'default';
 
 				if (!categoryMap.has(category as string) && category !== 'default') {
-					const folderId = await FolderService.createFolder({
+					const folderId = await FolderService.createFolder(userId, {
 						name: category as string,
 						color: this.getCategoryColor(category as string),
 						icon: this.getCategoryIcon(category as string),
 					});
-					categoryMap.set(category as string, folderId);
+					categoryMap.set(category as string, folderId.id);
 				}
 			}
 
