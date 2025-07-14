@@ -41,7 +41,7 @@ export class AdminSupportService {
 		priority?: string;
 		assignedTo?: string;
 	}): Promise<SupportTicket[]> {
-		const queryFilters: unknown[] = [];
+		const queryFilters: { field: string; operator: string; value: any }[] = [];
 
 		if (filters?.status) {
 			queryFilters.push({
@@ -72,7 +72,7 @@ export class AdminSupportService {
 			'support_tickets',
 			newTicket
 		);
-		return result.id;
+		return (result as any).id || 'unknown';
 	}
 
 	static async respondToTicket(
@@ -110,7 +110,7 @@ export class AdminSupportService {
 		status: SupportTicket['status'],
 		adminId: string
 	): Promise<void> {
-		const updateData: unknown = {
+		const updateData: any = {
 			status,
 			updatedAt: new Date(),
 		};

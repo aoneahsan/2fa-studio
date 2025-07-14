@@ -8,7 +8,7 @@ import { UserSubscription, SubscriptionTier } from '@src/types/subscription';
 import { FirestoreService } from './firestore.service';
 import { LicenseManagementService } from './license-management.service';
 
-export interface AdminUser extends User {
+export interface AdminUser extends Omit<User, 'subscription'> {
 	subscription?: UserSubscription;
 	lastLoginAt?: Date;
 	accountsCount: number;
@@ -74,7 +74,7 @@ export class AdminUserManagementService {
 		totalPages: number;
 	}> {
 		try {
-			const filters: unknown[] = [];
+			const filters: { field: string; operator: string; value: any }[] = [];
 
 			// Apply filters
 			if (filter?.tier) {
@@ -146,7 +146,7 @@ export class AdminUserManagementService {
 
 			// Sort users
 			filteredUsers.sort((a, b) => {
-				let aValue: unknown, bValue: unknown;
+				let aValue: any, bValue: any;
 
 				switch (sortBy) {
 					case 'email':

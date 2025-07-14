@@ -506,7 +506,10 @@ export class AdminAnalyticsService {
 		// This would correlate invoices with subscription tiers
 		// For now, return estimated distribution
 		const totalRevenue =
-			invoices.reduce((sum, invoice: any) => sum + invoice.amount, 0) / 100;
+			invoices.reduce(
+				(sum: number, invoice: any) => sum + (invoice.amount || 0),
+				0
+			) / 100;
 
 		revenueByTier.premium = totalRevenue * 0.4;
 		revenueByTier.family = totalRevenue * 0.35;
