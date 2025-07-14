@@ -28,8 +28,8 @@ export class AdminNotificationsService {
       createdAt: new Date(),
     };
     
-    const result = await FirestoreService.addDocument('push_notifications', newNotification);
-    return result.id;
+    const result = await FirestoreService.createDocument('push_notifications', newNotification);
+    return result;
   }
 
   static async sendNotification(notificationId: string): Promise<void> {
