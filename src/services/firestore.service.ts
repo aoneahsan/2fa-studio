@@ -83,7 +83,7 @@ export class FirestoreService {
 			const sanitized: unknown = {};
 			Object.keys(data).forEach((key) => {
 				const sanitizedKey = this.sanitizeInput(key);
-				(sanitized as any)[sanitizedKey] = this.sanitizeInput(
+				(sanitized as any)[sanitizedKey as string] = this.sanitizeInput(
 					(data as any)[key]
 				);
 			});
