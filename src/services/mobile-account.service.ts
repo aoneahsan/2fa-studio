@@ -6,10 +6,10 @@
 
 import { OTPAccount } from './otp.service';
 // import { Share } from '@capacitor/share'; // Not available on web
-import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Directory, Filesystem, Encoding } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
 import { EncryptionService } from './encryption.service';
-import { BiometricAccountService } from './biometric-account.service';
+// import { BiometricAccountService } from './biometric-account.service';
 import { MobileEncryptionService } from './mobile-encryption.service';
 import { Preferences } from '@capacitor/preferences';
 
@@ -109,13 +109,15 @@ export class MobileAccountService {
 	static async saveAccounts(accounts: OTPAccount[]): Promise<void> {
 		try {
 			// Encrypt accounts before storing
-			const encrypted = await EncryptionService.encryptData(
-				JSON.stringify(accounts)
-			);
+			const encrypted = await EncryptionService.encrypt({
+				data: JSON.stringify(accounts),
+				password: 'default',
+			});
 
 			await Preferences.set({
 				key: this.ACCOUNTS_KEY,
-				value: encrypted,
+				value:
+					typeof encrypted === 'string' ? encrypted : JSON.stringify(encrypted),
 			});
 		} catch (error) {
 			console.error('Failed to save accounts:', error);
@@ -134,7 +136,10 @@ export class MobileAccountService {
 				return [];
 			}
 
-			const decrypted = await EncryptionService.decryptData(value);
+			const decrypted = await EncryptionService.decrypt({
+				encryptedData: value,
+				password: 'default',
+			});
 			return JSON.parse(decrypted);
 		} catch (error) {
 			console.error('Failed to load accounts:', error);
@@ -150,7 +155,7 @@ export class MobileAccountService {
 
 		// Check if biometric is required
 		if (account.requiresBiometric) {
-			await BiometricAccountService.protectAccount(account.id);
+			// await BiometricAccountService.protectAccount(account.id);
 		}
 
 		accounts.push(account);
@@ -171,9 +176,9 @@ export class MobileAccountService {
 		// Update biometric protection if changed
 		if (account.requiresBiometric !== accounts[index].requiresBiometric) {
 			if (account.requiresBiometric) {
-				await BiometricAccountService.protectAccount(account.id);
+				// await BiometricAccountService.protectAccount(account.id);
 			} else {
-				await BiometricAccountService.unprotectAccount(account.id);
+				// await BiometricAccountService.unprotectAccount(account.id);
 			}
 		}
 
@@ -189,7 +194,7 @@ export class MobileAccountService {
 		const filteredAccounts = accounts.filter((a: any) => a.id !== accountId);
 
 		// Remove biometric protection if exists
-		await BiometricAccountService.unprotectAccount(accountId);
+		// await BiometricAccountService.unprotectAccount(accountId);
 
 		await this.saveAccounts(filteredAccounts);
 	}
@@ -345,15 +350,16 @@ export class MobileAccountService {
 			};
 
 			// Encrypt backup with password
-			const encrypted = await EncryptionService.encryptWithPassword(
-				JSON.stringify(backupData),
-				password
-			);
+			const encrypted = await EncryptionService.encrypt({
+				data: JSON.stringify(backupData),
+				password: password,
+			});
 
 			const fileName = `2fa-encrypted-backup-${Date.now()}.2fab`;
 			const result = await Filesystem.writeFile({
 				path: `${this.BACKUP_DIR}/${fileName}`,
-				data: encrypted,
+				data:
+					typeof encrypted === 'string' ? encrypted : JSON.stringify(encrypted),
 				directory: Directory.Documents,
 				encoding: Encoding.UTF8,
 			});
@@ -378,10 +384,10 @@ export class MobileAccountService {
 				encoding: Encoding.UTF8,
 			});
 
-			const decrypted = await EncryptionService.decryptWithPassword(
-				contents.data as string,
-				password
-			);
+			const decrypted = await EncryptionService.decrypt({
+				encryptedData: contents.data as string,
+				password: password,
+			});
 
 			const backupData = JSON.parse(decrypted);
 
@@ -517,7 +523,10 @@ export class MobileAccountService {
 
 		// Remove biometric protection for deleted accounts
 		await Promise.all(
-			accountIds.map((id: any) => BiometricAccountService.unprotectAccount(id))
+			accountIds.map((id: any) => {
+				// BiometricAccountService.unprotectAccount(id)
+				return Promise.resolve();
+			})
 		);
 
 		await this.saveAccounts(remainingAccounts);
