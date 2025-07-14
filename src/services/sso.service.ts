@@ -84,11 +84,14 @@ export class SSOService {
 			await this.loadSSOConfigurations();
 		} catch (error) {
 			console.error('Failed to initialize SSO service:', error);
-			await ErrorMonitoringService.reportError(error, {
-				category: 'auth',
-				severity: 'high',
-				_context: { operation: 'sso_initialization' },
-			});
+			await ErrorMonitoringService.reportError(
+				error instanceof Error ? error : new Error(String(error)),
+				{
+					category: 'auth',
+					severity: 'high',
+					context: { operation: 'sso_initialization' },
+				}
+			);
 		}
 	}
 
@@ -404,8 +407,8 @@ export class SSOService {
 			await FirestoreService.getCollection<SSOConfig>('sso_configurations');
 
 		if (result.success) {
-			result.data.forEach((config) => {
-				this.ssoConfigs.set(config.id, _config);
+			result.data.forEach((config: SSOConfig) => {
+				this.ssoConfigs.set(config.id, config);
 			});
 		}
 	}
@@ -437,35 +440,39 @@ export class SSOService {
 	}
 
 	private static async validateSSOConfig(_config: SSOConfig): Promise<void> {
-		switch (config.provider) {
+		switch (_config.provider) {
 			case 'saml':
-				this.validateSAMLConfig(config.configuration as SAMLConfig);
+				this.validateSAMLConfig(_config.configuration as SAMLConfig);
 				break;
 			case 'oidc':
-				this.validateOIDCConfig(config.configuration as OIDCConfig);
+				this.validateOIDCConfig(_config.configuration as OIDCConfig);
 				break;
 			case 'ldap':
-				this.validateLDAPConfig(config.configuration as LDAPConfig);
+				this.validateLDAPConfig(_config.configuration as LDAPConfig);
 				break;
 			default:
-				throw new Error(`Unsupported SSO provider: ${config.provider}`);
+				throw new Error(`Unsupported SSO provider: ${_config.provider}`);
 		}
 	}
 
 	private static validateSAMLConfig(_config: SAMLConfig): void {
-		if (!config.entityId || !config.ssoUrl || !config.x509Certificate) {
+		if (!_config.entityId || !_config.ssoUrl || !_config.x509Certificate) {
 			throw new Error('Missing required SAML configuration fields');
 		}
 	}
 
 	private static validateOIDCConfig(_config: OIDCConfig): void {
-		if (!config.issuer || !config.clientId || !config.authorizationEndpoint) {
+		if (
+			!_config.issuer ||
+			!_config.clientId ||
+			!_config.authorizationEndpoint
+		) {
 			throw new Error('Missing required OIDC configuration fields');
 		}
 	}
 
 	private static validateLDAPConfig(_config: LDAPConfig): void {
-		if (!config.url || !config.searchBase || !config.searchFilter) {
+		if (!_config.url || !_config.searchBase || !_config.searchFilter) {
 			throw new Error('Missing required LDAP configuration fields');
 		}
 	}
@@ -514,14 +521,14 @@ export class SSOService {
 		state?: string
 	): string {
 		const params = new URLSearchParams({
-			response_type: config.responseType,
-			client_id: config.clientId,
-			scope: config.scopes.join(' '),
+			response_type: _config.responseType,
+			client_id: _config.clientId,
+			scope: _config.scopes.join(' '),
 			redirect_uri: `${window.location.origin}/auth/oidc/callback`,
 			state: state || Math.random().toString(36),
 		});
 
-		return `${config.authorizationEndpoint}?${params.toString()}`;
+		return `${_config.authorizationEndpoint}?${params.toString()}`;
 	}
 
 	private static async exchangeOIDCCode(

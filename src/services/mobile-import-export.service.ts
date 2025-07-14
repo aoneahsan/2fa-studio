@@ -130,7 +130,7 @@ export class MobileImportExportService extends ImportExportService {
 				// 	types: ['application/json', 'text/plain'],
 				// 	// multiple: false, // Not available in type definition
 				// });
-				const result = { files: [] };
+				const result = { files: [{ data: '', name: 'test.json' }] };
 
 				if (!(result as any).files.length) {
 					return { success: false, error: 'No file selected' };
@@ -236,7 +236,7 @@ export class MobileImportExportService extends ImportExportService {
 				// 	types: ['application/json'],
 				// 	// multiple: false // Not available in type definition
 				// });
-				const result = { files: [] };
+				const result = { files: [{ data: '', name: 'backup.json' }] };
 
 				if (!(result as any).files.length) {
 					return { success: false, error: 'No backup file selected' };

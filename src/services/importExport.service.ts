@@ -380,12 +380,15 @@ export class ImportExportService {
 			}
 
 			// Validate format
-			if (!parsedData.accounts || !Array.isArray(parsedData.accounts)) {
+			if (
+				!(parsedData as any).accounts ||
+				!Array.isArray((parsedData as any).accounts)
+			) {
 				throw new Error('Invalid 2FAS format: missing accounts array');
 			}
 
 			// Import accounts
-			for (const accountData of parsedData.accounts) {
+			for (const accountData of (parsedData as any).accounts) {
 				try {
 					const account: OTPAccount = {
 						id: crypto.randomUUID(),
@@ -490,7 +493,9 @@ export class ImportExportService {
 
 			result.success = result.imported > 0;
 		} catch (error: unknown) {
-			result.errors.push(`Failed to parse Aegis data: ${error.message}`);
+			result.errors.push(
+				`Failed to parse Aegis data: ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
 		}
 
 		return result;
@@ -586,8 +591,8 @@ export class ImportExportService {
 					issuer: parsed.issuer || 'Unknown',
 					label:
 						parsed.label ||
-						(parsed as unknown).accountName ||
-						(parsed as unknown).name ||
+						(parsed as any).accountName ||
+						(parsed as any).name ||
 						'',
 					secret: parsed.secret || '',
 					algorithm: (parsed as any).algorithm || 'SHA1',
