@@ -3,359 +3,410 @@
  * @module services/backup-scheduler
  */
 
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
-  query, 
-  where, 
-  onSnapshot,
-  serverTimestamp,
-  Timestamp,
+import {
+	collection,
+	doc,
+	addDoc,
+	updateDoc,
+	deleteDoc,
+	getDocs,
+	query,
+	where,
+	onSnapshot,
+	serverTimestamp,
+	Timestamp,
 } from 'firebase/firestore';
 import { db } from '@src/config/firebase';
 import { BackupSchedule, BackupHistory } from '@app-types/backup';
 import { BackupService } from '@services/backup.service';
-import { NotificationService } from '@services/notification.service';
-import { addDays, addWeeks, addMonths, setHours, setMinutes, parseISO, format } from 'date-fns';
+import { NotificationService } from '@services/notification-service';
+import {
+	addDays,
+	addWeeks,
+	addMonths,
+	setHours,
+	setMinutes,
+	parseISO,
+	format,
+} from 'date-fns';
 
 export class BackupSchedulerService {
-  private static SCHEDULES_COLLECTION = 'backupSchedules';
-  private static HISTORY_COLLECTION = 'backupHistory';
-  private static timers: Map<string, NodeJS.Timeout> = new Map();
-  private static listeners: Map<string, () => void> = new Map();
+	private static SCHEDULES_COLLECTION = 'backupSchedules';
+	private static HISTORY_COLLECTION = 'backupHistory';
+	private static timers: Map<string, NodeJS.Timeout> = new Map();
+	private static listeners: Map<string, () => void> = new Map();
 
-  /**
-   * Initialize backup scheduler for a user
-   */
-  static async initialize(userId: string): Promise<void> {
-    // Listen for schedule changes
-    const schedulesRef = collection(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`);
-    const unsubscribe = onSnapshot(schedulesRef, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const schedule = { 
-          id: (change as any).doc.id, 
-          ...change.doc.data() 
-        } as BackupSchedule;
+	/**
+	 * Initialize backup scheduler for a user
+	 */
+	static async initialize(userId: string): Promise<void> {
+		// Listen for schedule changes
+		const schedulesRef = collection(
+			db,
+			`users/${userId}/${this.SCHEDULES_COLLECTION}`
+		);
+		const unsubscribe = onSnapshot(schedulesRef, (snapshot) => {
+			snapshot.docChanges().forEach((change) => {
+				const schedule = {
+					id: (change as any).doc.id,
+					...change.doc.data(),
+				} as BackupSchedule;
 
-        if (change.type === 'added' || change.type === 'modified') {
-          this.scheduleBackup(userId, schedule);
-        } else if (change.type === 'removed') {
-          this.cancelSchedule(schedule.id);
-        }
-      });
-    });
+				if (change.type === 'added' || change.type === 'modified') {
+					this.scheduleBackup(userId, schedule);
+				} else if (change.type === 'removed') {
+					this.cancelSchedule(schedule.id);
+				}
+			});
+		});
 
-    this.listeners.set(userId, unsubscribe);
-  }
+		this.listeners.set(userId, unsubscribe);
+	}
 
-  /**
-   * Cleanup scheduler for a user
-   */
-  static cleanup(userId: string): void {
-    const unsubscribe = this.listeners.get(userId);
-    if (unsubscribe) {
-      unsubscribe();
-      this.listeners.delete(userId);
-    }
+	/**
+	 * Cleanup scheduler for a user
+	 */
+	static cleanup(userId: string): void {
+		const unsubscribe = this.listeners.get(userId);
+		if (unsubscribe) {
+			unsubscribe();
+			this.listeners.delete(userId);
+		}
 
-    // Cancel all timers for this user
-    this.timers.forEach((timer, scheduleId) => {
-      if (scheduleId.startsWith(userId)) {
-        clearTimeout(timer);
-        this.timers.delete(scheduleId);
-      }
-    });
-  }
+		// Cancel all timers for this user
+		this.timers.forEach((timer, scheduleId) => {
+			if (scheduleId.startsWith(userId)) {
+				clearTimeout(timer);
+				this.timers.delete(scheduleId);
+			}
+		});
+	}
 
-  /**
-   * Create a new backup schedule
-   */
-  static async createSchedule(
-    userId: string, 
-    schedule: Omit<BackupSchedule, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'nextRun'>
-  ): Promise<BackupSchedule> {
-    const schedulesRef = collection(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`);
-    
-    const nextRun = this.calculateNextRun(schedule);
-    
-    const docRef = await addDoc(schedulesRef, {
-      ...schedule,
-      userId,
-      nextRun: Timestamp.fromDate(nextRun),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
+	/**
+	 * Create a new backup schedule
+	 */
+	static async createSchedule(
+		userId: string,
+		schedule: Omit<
+			BackupSchedule,
+			'id' | 'userId' | 'createdAt' | 'updatedAt' | 'nextRun'
+		>
+	): Promise<BackupSchedule> {
+		const schedulesRef = collection(
+			db,
+			`users/${userId}/${this.SCHEDULES_COLLECTION}`
+		);
 
-    const newSchedule = {
-      id: docRef.id,
-      ...schedule,
-      userId,
-      nextRun,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+		const nextRun = this.calculateNextRun(schedule);
 
-    // Send notification about new schedule
-    await NotificationService.sendBackupReminder(
-      userId,
-      `Backup schedule created: ${schedule.frequency} at ${schedule.time}`
-    );
+		const docRef = await addDoc(schedulesRef, {
+			...schedule,
+			userId,
+			nextRun: Timestamp.fromDate(nextRun),
+			createdAt: serverTimestamp(),
+			updatedAt: serverTimestamp(),
+		});
 
-    return newSchedule;
-  }
+		const newSchedule = {
+			id: docRef.id,
+			...schedule,
+			userId,
+			nextRun,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
 
-  /**
-   * Update an existing backup schedule
-   */
-  static async updateSchedule(
-    userId: string, 
-    scheduleId: string, 
-    updates: Partial<BackupSchedule>
-  ): Promise<void> {
-    const scheduleRef = doc(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`, scheduleId);
-    
-    // Recalculate next run if frequency or time changed
-    const updateData: unknown = {
-      ...updates,
-      updatedAt: serverTimestamp(),
-    };
+		// Send notification about new schedule
+		await NotificationService.sendBackupReminder(
+			userId,
+			`Backup schedule created: ${schedule.frequency} at ${schedule.time}`
+		);
 
-    if (updates.frequency || updates.time || updates.dayOfWeek || updates.dayOfMonth) {
-      const currentSchedule = { ...updates } as BackupSchedule;
-      const nextRun = this.calculateNextRun(currentSchedule);
-      updateData.nextRun = Timestamp.fromDate(nextRun);
-    }
+		return newSchedule;
+	}
 
-    await updateDoc(scheduleRef, updateData);
-  }
+	/**
+	 * Update an existing backup schedule
+	 */
+	static async updateSchedule(
+		userId: string,
+		scheduleId: string,
+		updates: Partial<BackupSchedule>
+	): Promise<void> {
+		const scheduleRef = doc(
+			db,
+			`users/${userId}/${this.SCHEDULES_COLLECTION}`,
+			scheduleId
+		);
 
-  /**
-   * Delete a backup schedule
-   */
-  static async deleteSchedule(userId: string, scheduleId: string): Promise<void> {
-    const scheduleRef = doc(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`, scheduleId);
-    await deleteDoc(scheduleRef);
-    this.cancelSchedule(scheduleId);
-  }
+		// Recalculate next run if frequency or time changed
+		const updateData: unknown = {
+			...updates,
+			updatedAt: serverTimestamp(),
+		};
 
-  /**
-   * Get all schedules for a user
-   */
-  static async getSchedules(userId: string): Promise<BackupSchedule[]> {
-    const schedulesRef = collection(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`);
-    const snapshot = await getDocs(schedulesRef);
-    
-    return snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      nextRun: doc.data().nextRun?.toDate(),
-      lastRun: doc.data().lastRun?.toDate(),
-      createdAt: doc.data().createdAt?.toDate(),
-      updatedAt: doc.data().updatedAt?.toDate(),
-    })) as BackupSchedule[];
-  }
+		if (
+			updates.frequency ||
+			updates.time ||
+			updates.dayOfWeek ||
+			updates.dayOfMonth
+		) {
+			const currentSchedule = { ...updates } as BackupSchedule;
+			const nextRun = this.calculateNextRun(currentSchedule);
+			updateData.nextRun = Timestamp.fromDate(nextRun);
+		}
 
-  /**
-   * Get backup history for a user
-   */
-  static async getBackupHistory(
-    userId: string, 
-    limit: number = 50
-  ): Promise<BackupHistory[]> {
-    const historyRef = collection(db, `users/${userId}/${this.HISTORY_COLLECTION}`);
-    const snapshot = await getDocs(query(historyRef, where('userId', '==', userId)));
-    
-    return snapshot.docs
-      .map((doc: any) => ({
-        id: doc.id,
-        ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate(),
-      }))
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit) as BackupHistory[];
-  }
+		await updateDoc(scheduleRef, updateData);
+	}
 
-  /**
-   * Schedule a backup
-   */
-  private static scheduleBackup(userId: string, schedule: BackupSchedule): void {
-    if (!schedule.enabled) {
-      this.cancelSchedule(schedule.id);
-      return;
-    }
+	/**
+	 * Delete a backup schedule
+	 */
+	static async deleteSchedule(
+		userId: string,
+		scheduleId: string
+	): Promise<void> {
+		const scheduleRef = doc(
+			db,
+			`users/${userId}/${this.SCHEDULES_COLLECTION}`,
+			scheduleId
+		);
+		await deleteDoc(scheduleRef);
+		this.cancelSchedule(scheduleId);
+	}
 
-    const now = new Date();
-    const nextRun = new Date(schedule.nextRun);
-    const delay = nextRun.getTime() - now.getTime();
+	/**
+	 * Get all schedules for a user
+	 */
+	static async getSchedules(userId: string): Promise<BackupSchedule[]> {
+		const schedulesRef = collection(
+			db,
+			`users/${userId}/${this.SCHEDULES_COLLECTION}`
+		);
+		const snapshot = await getDocs(schedulesRef);
 
-    // Cancel existing timer
-    this.cancelSchedule(schedule.id);
+		return snapshot.docs.map((doc: any) => ({
+			id: doc.id,
+			...doc.data(),
+			nextRun: doc.data().nextRun?.toDate(),
+			lastRun: doc.data().lastRun?.toDate(),
+			createdAt: doc.data().createdAt?.toDate(),
+			updatedAt: doc.data().updatedAt?.toDate(),
+		})) as BackupSchedule[];
+	}
 
-    // If next run is in the past, calculate the next occurrence
-    if (delay < 0) {
-      const newNextRun = this.calculateNextRun(schedule);
-      this.updateSchedule(userId, schedule.id, { nextRun: newNextRun });
-      return;
-    }
+	/**
+	 * Get backup history for a user
+	 */
+	static async getBackupHistory(
+		userId: string,
+		limit: number = 50
+	): Promise<BackupHistory[]> {
+		const historyRef = collection(
+			db,
+			`users/${userId}/${this.HISTORY_COLLECTION}`
+		);
+		const snapshot = await getDocs(
+			query(historyRef, where('userId', '==', userId))
+		);
 
-    // Schedule the backup
-    const timer = setTimeout(async () => {
-      await this.executeBackup(userId, schedule);
-      
-      // Calculate and set next run
-      const nextRun = this.calculateNextRun(schedule);
-      await this.updateSchedule(userId, schedule.id, { 
-        lastRun: new Date(),
-        nextRun,
-      });
-      
-      // Reschedule
-      this.scheduleBackup(userId, { ...schedule, nextRun });
-    }, delay);
+		return snapshot.docs
+			.map((doc: any) => ({
+				id: doc.id,
+				...doc.data(),
+				timestamp: doc.data().timestamp?.toDate(),
+			}))
+			.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+			.slice(0, limit) as BackupHistory[];
+	}
 
-    this.timers.set(schedule.id, timer);
-  }
+	/**
+	 * Schedule a backup
+	 */
+	private static scheduleBackup(
+		userId: string,
+		schedule: BackupSchedule
+	): void {
+		if (!schedule.enabled) {
+			this.cancelSchedule(schedule.id);
+			return;
+		}
 
-  /**
-   * Cancel a scheduled backup
-   */
-  private static cancelSchedule(scheduleId: string): void {
-    const timer = this.timers.get(scheduleId);
-    if (timer) {
-      clearTimeout(timer);
-      this.timers.delete(scheduleId);
-    }
-  }
+		const now = new Date();
+		const nextRun = new Date(schedule.nextRun);
+		const delay = nextRun.getTime() - now.getTime();
 
-  /**
-   * Execute a scheduled backup
-   */
-  private static async executeBackup(
-    userId: string, 
-    schedule: BackupSchedule
-  ): Promise<void> {
-    const startTime = Date.now();
-    let status: BackupHistory['status'] = 'success';
-    let error: string | undefined;
-    let accountsCount = 0;
+		// Cancel existing timer
+		this.cancelSchedule(schedule.id);
 
-    try {
-      // Execute backup based on destination
-      if (schedule.destination === 'googledrive' || schedule.destination === 'both') {
-        const result = await BackupService.backupToGoogleDrive(
-          userId,
-          schedule.encryptionEnabled,
-          schedule.includeSettings
-        );
-        accountsCount = result.accountsCount;
-      }
+		// If next run is in the past, calculate the next occurrence
+		if (delay < 0) {
+			const newNextRun = this.calculateNextRun(schedule);
+			this.updateSchedule(userId, schedule.id, { nextRun: newNextRun });
+			return;
+		}
 
-      if (schedule.destination === 'local' || schedule.destination === 'both') {
-        await BackupService.exportBackup(
-          userId,
-          'encrypted',
-          schedule.includeSettings
-        );
-      }
+		// Schedule the backup
+		const timer = setTimeout(async () => {
+			await this.executeBackup(userId, schedule);
 
-      // Send success notification
-      await NotificationService.sendBackupReminder(
-        userId,
-        `Backup completed successfully: ${accountsCount} accounts backed up`
-      );
-    } catch (err) {
-      status = 'failed';
-      error = err instanceof Error ? err.message : 'Unknown error';
-      
-      // Send failure notification
-      await NotificationService.sendBackupReminder(
-        userId,
-        `Backup failed: ${error}`
-      );
-    }
+			// Calculate and set next run
+			const nextRun = this.calculateNextRun(schedule);
+			await this.updateSchedule(userId, schedule.id, {
+				lastRun: new Date(),
+				nextRun,
+			});
 
-    // Record backup history
-    const duration = Math.round((Date.now() - startTime) / 1000);
-    await this.recordBackupHistory(userId, {
-      scheduleId: schedule.id,
-      timestamp: new Date(),
-      status,
-      destination: schedule.destination === 'both' ? 'googledrive' : schedule.destination,
-      accountsCount,
-      error,
-      duration,
-    });
-  }
+			// Reschedule
+			this.scheduleBackup(userId, { ...schedule, nextRun });
+		}, delay);
 
-  /**
-   * Record backup history
-   */
-  private static async recordBackupHistory(
-    userId: string, 
-    history: Omit<BackupHistory, 'id' | 'userId'>
-  ): Promise<void> {
-    const historyRef = collection(db, `users/${userId}/${this.HISTORY_COLLECTION}`);
-    await addDoc(historyRef, {
-      ...history,
-      userId,
-      timestamp: Timestamp.fromDate(history.timestamp),
-    });
-  }
+		this.timers.set(schedule.id, timer);
+	}
 
-  /**
-   * Calculate next run time for a schedule
-   */
-  private static calculateNextRun(schedule: Partial<BackupSchedule>): Date {
-    const now = new Date();
-    const [hours, minutes] = (schedule.time || '00:00').split(':').map(Number);
-    let nextRun = setMinutes(setHours(now, hours), minutes);
+	/**
+	 * Cancel a scheduled backup
+	 */
+	private static cancelSchedule(scheduleId: string): void {
+		const timer = this.timers.get(scheduleId);
+		if (timer) {
+			clearTimeout(timer);
+			this.timers.delete(scheduleId);
+		}
+	}
 
-    // If the time has already passed today, start from tomorrow
-    if (nextRun <= now) {
-      nextRun = addDays(nextRun, 1);
-    }
+	/**
+	 * Execute a scheduled backup
+	 */
+	private static async executeBackup(
+		userId: string,
+		schedule: BackupSchedule
+	): Promise<void> {
+		const startTime = Date.now();
+		let status: BackupHistory['status'] = 'success';
+		let error: string | undefined;
+		let accountsCount = 0;
 
-    switch (schedule.frequency) {
-      case 'daily':
-        // Already set to next occurrence
-        break;
+		try {
+			// Execute backup based on destination
+			if (
+				schedule.destination === 'googledrive' ||
+				schedule.destination === 'both'
+			) {
+				const result = await BackupService.backupToGoogleDrive(
+					userId,
+					schedule.encryptionEnabled,
+					schedule.includeSettings
+				);
+				accountsCount = result.accountsCount;
+			}
 
-      case 'weekly': {
-        const targetDay = schedule.dayOfWeek || 0;
-        while (nextRun.getDay() !== targetDay) {
-          nextRun = addDays(nextRun, 1);
-        }
-        break;
-      }
+			if (schedule.destination === 'local' || schedule.destination === 'both') {
+				await BackupService.exportBackup(
+					userId,
+					'encrypted',
+					schedule.includeSettings
+				);
+			}
 
-      case 'monthly': {
-        const targetDate = schedule.dayOfMonth || 1;
-        nextRun.setDate(targetDate);
-        if (nextRun <= now) {
-          nextRun = addMonths(nextRun, 1);
-        }
-        break;
-      }
-    }
+			// Send success notification
+			await NotificationService.sendBackupReminder(
+				userId,
+				`Backup completed successfully: ${accountsCount} accounts backed up`
+			);
+		} catch (err) {
+			status = 'failed';
+			error = err instanceof Error ? err.message : 'Unknown error';
 
-    return nextRun;
-  }
+			// Send failure notification
+			await NotificationService.sendBackupReminder(
+				userId,
+				`Backup failed: ${error}`
+			);
+		}
 
-  /**
-   * Run backup immediately (manual trigger)
-   */
-  static async runBackupNow(userId: string, scheduleId: string): Promise<void> {
-    const schedules = await this.getSchedules(userId);
-    const schedule = schedules.find((s: any) => s.id === scheduleId);
-    
-    if (!schedule) {
-      throw new Error('Schedule not found');
-    }
+		// Record backup history
+		const duration = Math.round((Date.now() - startTime) / 1000);
+		await this.recordBackupHistory(userId, {
+			scheduleId: schedule.id,
+			timestamp: new Date(),
+			status,
+			destination:
+				schedule.destination === 'both' ? 'googledrive' : schedule.destination,
+			accountsCount,
+			error,
+			duration,
+		});
+	}
 
-    await this.executeBackup(userId, schedule);
-  }
+	/**
+	 * Record backup history
+	 */
+	private static async recordBackupHistory(
+		userId: string,
+		history: Omit<BackupHistory, 'id' | 'userId'>
+	): Promise<void> {
+		const historyRef = collection(
+			db,
+			`users/${userId}/${this.HISTORY_COLLECTION}`
+		);
+		await addDoc(historyRef, {
+			...history,
+			userId,
+			timestamp: Timestamp.fromDate(history.timestamp),
+		});
+	}
+
+	/**
+	 * Calculate next run time for a schedule
+	 */
+	private static calculateNextRun(schedule: Partial<BackupSchedule>): Date {
+		const now = new Date();
+		const [hours, minutes] = (schedule.time || '00:00').split(':').map(Number);
+		let nextRun = setMinutes(setHours(now, hours), minutes);
+
+		// If the time has already passed today, start from tomorrow
+		if (nextRun <= now) {
+			nextRun = addDays(nextRun, 1);
+		}
+
+		switch (schedule.frequency) {
+			case 'daily':
+				// Already set to next occurrence
+				break;
+
+			case 'weekly': {
+				const targetDay = schedule.dayOfWeek || 0;
+				while (nextRun.getDay() !== targetDay) {
+					nextRun = addDays(nextRun, 1);
+				}
+				break;
+			}
+
+			case 'monthly': {
+				const targetDate = schedule.dayOfMonth || 1;
+				nextRun.setDate(targetDate);
+				if (nextRun <= now) {
+					nextRun = addMonths(nextRun, 1);
+				}
+				break;
+			}
+		}
+
+		return nextRun;
+	}
+
+	/**
+	 * Run backup immediately (manual trigger)
+	 */
+	static async runBackupNow(userId: string, scheduleId: string): Promise<void> {
+		const schedules = await this.getSchedules(userId);
+		const schedule = schedules.find((s: any) => s.id === scheduleId);
+
+		if (!schedule) {
+			throw new Error('Schedule not found');
+		}
+
+		await this.executeBackup(userId, schedule);
+	}
 }

@@ -17,7 +17,7 @@ import {
   writeBatch,
   doc
 } from 'firebase/firestore';
-import { db } from '@services/firebase';
+import { db } from '@src/config/firebase';
 import { FirestoreService } from '@services/firestore.service';
 import { AuthService } from '@services/auth.service';
 

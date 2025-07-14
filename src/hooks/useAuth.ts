@@ -61,19 +61,22 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
-  const signUpWithEmail = useCallback(async (email: string, password: string, displayName?: string) => {
+  const signUp = async (email: string, password: string) => {
     try {
       dispatch(setLoading(true) as any);
       dispatch(clearError() as any);
-      const user = await AuthService.signUp({ email, password, displayName });
-      return user;
-    } catch (error: unknown) {
-      dispatch(setError((error as Error).message || 'Sign up failed') as any);
-      throw error;
+      const user = await AuthService.signUp({ 
+        email, 
+        password
+      });
+      dispatch(setUser(user) as any);
+    } catch (err: unknown) {
+      dispatch(setError((err as Error).message || 'Sign up failed') as any);
+      throw err;
     } finally {
       dispatch(setLoading(false) as any);
     }
-  }, [dispatch]);
+  };
 
   const signInWithGoogle = useCallback(async () => {
     try {
@@ -116,63 +119,63 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
-  const resetPassword = useCallback(async (email: string) => {
+  const resetPassword = async (email: string) => {
     try {
       dispatch(setLoading(true) as any);
       dispatch(clearError() as any);
-      await AuthService.resetPassword(email);
-    } catch (error: unknown) {
-      dispatch(setError((error as Error).message || 'Password reset failed') as any);
-      throw error;
+      await AuthService.sendPasswordResetEmail(email);
+    } catch (err: unknown) {
+      dispatch(setError((err as Error).message || 'Password reset failed') as any);
+      throw err;
     } finally {
       dispatch(setLoading(false) as any);
     }
-  }, [dispatch]);
+  };
 
-  const updateProfile = useCallback(async (data: { displayName?: string; photoURL?: string }) => {
+  const updateProfile = async (displayName: string, photoURL?: string) => {
     try {
       dispatch(setLoading(true) as any);
       dispatch(clearError() as any);
-      const updatedUser = await AuthService.updateProfile(data);
-      dispatch(setUser(updatedUser) as any);
-      return updatedUser;
-    } catch (error: unknown) {
-      dispatch(setError((error as Error).message || 'Profile update failed') as any);
-      throw error;
+      await AuthService.updateProfile(displayName, photoURL);
+      // Update local user state if needed
+      if (authState.user) {
+        dispatch(setUser({ ...authState.user, displayName, photoURL: photoURL || authState.user.photoURL }) as any);
+      }
+    } catch (err: unknown) {
+      dispatch(setError((err as Error).message || 'Profile update failed') as any);
+      throw err;
     } finally {
       dispatch(setLoading(false) as any);
     }
-  }, [dispatch]);
+  };
 
-  const linkAccount = useCallback(async (provider: 'google' | 'apple') => {
+  const linkProvider = async (provider: string) => {
     try {
       dispatch(setLoading(true) as any);
       dispatch(clearError() as any);
-      const linkedUser = await AuthService.linkAccount(provider);
-      dispatch(setUser(linkedUser) as any);
-      return linkedUser;
-    } catch (error: unknown) {
-      dispatch(setError((error as Error).message || 'Account linking failed') as any);
-      throw error;
+      if (provider === 'google') {
+        await AuthService.linkWithGoogle();
+      }
+    } catch (err: unknown) {
+      dispatch(setError((err as Error).message || 'Account linking failed') as any);
+      throw err;
     } finally {
       dispatch(setLoading(false) as any);
     }
-  }, [dispatch]);
+  };
 
-  const unlinkAccount = useCallback(async (providerId: string) => {
+  const unlinkProvider = async (providerId: string) => {
     try {
       dispatch(setLoading(true) as any);
       dispatch(clearError() as any);
-      const updatedUser = await AuthService.unlinkAccount(providerId);
-      dispatch(setUser(updatedUser) as any);
-      return updatedUser;
-    } catch (error: unknown) {
-      dispatch(setError((error as Error).message || 'Account unlinking failed') as any);
-      throw error;
+      await AuthService.unlinkProvider(providerId);
+    } catch (err: unknown) {
+      dispatch(setError((err as Error).message || 'Account unlinking failed') as any);
+      throw err;
     } finally {
       dispatch(setLoading(false) as any);
     }
-  }, [dispatch]);
+  };
 
   const deleteAccount = useCallback(async () => {
     try {
@@ -196,14 +199,14 @@ export const useAuth = () => {
     
     // Enhanced authentication methods
     signInWithEmail,
-    signUpWithEmail,
+    signUp,
     signInWithGoogle,
     signInWithApple,
     signOut,
     resetPassword,
     updateProfile,
-    linkAccount,
-    unlinkAccount,
+    linkProvider,
+    unlinkProvider,
     deleteAccount,
   };
 };

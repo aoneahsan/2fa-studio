@@ -6,258 +6,277 @@
 import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Device } from '@capacitor/device';
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { Keyboard } from '@capacitor/keyboard';
+// import { StatusBar } from '@capacitor/status-bar'; // Package not available
+// import { Keyboard } from '@capacitor/keyboard'; // Package not available
 import { App } from '@capacitor/app';
 
 export interface PlatformInfo {
-  isNative: boolean;
-  isIOS: boolean;
-  isAndroid: boolean;
-  isWeb: boolean;
-  isPWA: boolean;
-  isTablet: boolean;
-  isDarkMode: boolean;
-  hasNotch: boolean;
-  platform: string;
+	isNative: boolean;
+	isIOS: boolean;
+	isAndroid: boolean;
+	isWeb: boolean;
+	isPWA: boolean;
+	isTablet: boolean;
+	isDarkMode: boolean;
+	hasNotch: boolean;
+	platform: string;
 }
 
 export interface PlatformFeatures {
-  hasBiometric: boolean;
-  hasCamera: boolean;
-  hasHaptics: boolean;
-  hasStatusBar: boolean;
-  hasKeyboard: boolean;
-  hasSafeArea: boolean;
+	hasBiometric: boolean;
+	hasCamera: boolean;
+	hasHaptics: boolean;
+	hasStatusBar: boolean;
+	hasKeyboard: boolean;
+	hasSafeArea: boolean;
 }
 
 /**
  * Hook for platform detection and native UI adaptations
  */
 export const usePlatform = () => {
-  const [platformInfo, setPlatformInfo] = useState<PlatformInfo>({
-    isNative: Capacitor.isNativePlatform(),
-    isIOS: false,
-    isAndroid: false,
-    isWeb: !Capacitor.isNativePlatform(),
-    isPWA: false,
-    isTablet: false,
-    isDarkMode: false,
-    hasNotch: false,
-    platform: 'web'
-  });
+	const [platformInfo, setPlatformInfo] = useState<PlatformInfo>({
+		isNative: Capacitor.isNativePlatform(),
+		isIOS: false,
+		isAndroid: false,
+		isWeb: !Capacitor.isNativePlatform(),
+		isPWA: false,
+		isTablet: false,
+		isDarkMode: false,
+		hasNotch: false,
+		platform: 'web',
+	});
 
-  const [platformFeatures, setPlatformFeatures] = useState<PlatformFeatures>({
-    hasBiometric: false,
-    hasCamera: false,
-    hasHaptics: false,
-    hasStatusBar: false,
-    hasKeyboard: false,
-    hasSafeArea: false
-  });
+	const [platformFeatures, setPlatformFeatures] = useState<PlatformFeatures>({
+		hasBiometric: false,
+		hasCamera: false,
+		hasHaptics: false,
+		hasStatusBar: false,
+		hasKeyboard: false,
+		hasSafeArea: false,
+	});
 
-  useEffect(() => {
-    const detectPlatform = async () => {
-      try {
-        const info = await Device.getInfo();
-        const isIOS = info.platform === 'ios';
-        const isAndroid = info.platform === 'android';
-        const isWeb = info.platform === 'web';
-        
-        // Check if PWA
-        const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
-                     (window.navigator as unknown).standalone === true;
-        
-        // Check if tablet
-        const isTablet = (isIOS && info.model?.includes('iPad')) ||
-                        (isAndroid && info.model?.toLowerCase().includes('tablet')) ||
-                        (isWeb && window.innerWidth >= 768);
-        
-        // Check dark mode
-        const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        // Check for notch (iPhone X and later)
-        const hasNotch = isIOS && (
-          info.model?.includes('iPhone X') ||
-          info.model?.includes('iPhone 11') ||
-          info.model?.includes('iPhone 12') ||
-          info.model?.includes('iPhone 13') ||
-          info.model?.includes('iPhone 14') ||
-          info.model?.includes('iPhone 15')
-        );
+	useEffect(() => {
+		const detectPlatform = async () => {
+			try {
+				const info = await Device.getInfo();
+				const isIOS = info.platform === 'ios';
+				const isAndroid = info.platform === 'android';
+				const isWeb = info.platform === 'web';
 
-        setPlatformInfo({
-          isNative: Capacitor.isNativePlatform(),
-          isIOS,
-          isAndroid,
-          isWeb,
-          isPWA,
-          isTablet,
-          isDarkMode,
-          hasNotch,
-          platform: info.platform
-        });
+				// Check if PWA
+				const isPWA =
+					window.matchMedia('(display-mode: standalone)').matches ||
+					(window.navigator as unknown).standalone === true;
 
-        // Detect features
-        setPlatformFeatures({
-          hasBiometric: Capacitor.isPluginAvailable('BiometricAuth'),
-          hasCamera: Capacitor.isPluginAvailable('Camera') || Capacitor.isPluginAvailable('BarcodeScanner'),
-          hasHaptics: Capacitor.isPluginAvailable('Haptics'),
-          hasStatusBar: Capacitor.isPluginAvailable('StatusBar'),
-          hasKeyboard: Capacitor.isPluginAvailable('Keyboard'),
-          hasSafeArea: isIOS || (isAndroid && parseInt(info.osVersion || '0') >= 9)
-        });
-      } catch (error) {
-        console.error('Failed to detect platform:', error);
-      }
-    };
+				// Check if tablet
+				const isTablet =
+					(isIOS && info.model?.includes('iPad')) ||
+					(isAndroid && info.model?.toLowerCase().includes('tablet')) ||
+					(isWeb && window.innerWidth >= 768);
 
-    detectPlatform();
+				// Check dark mode
+				const isDarkMode = window.matchMedia(
+					'(prefers-color-scheme: dark)'
+				).matches;
 
-    // Listen for color scheme changes
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleDarkModeChange = (_e: MediaQueryListEvent) => {
-      setPlatformInfo(prev => ({ ...prev, isDarkMode: e.matches }));
-    };
-    darkModeQuery.addEventListener('change', handleDarkModeChange);
+				// Check for notch (iPhone X and later)
+				const hasNotch =
+					isIOS &&
+					(info.model?.includes('iPhone X') ||
+						info.model?.includes('iPhone 11') ||
+						info.model?.includes('iPhone 12') ||
+						info.model?.includes('iPhone 13') ||
+						info.model?.includes('iPhone 14') ||
+						info.model?.includes('iPhone 15'));
 
-    return () => {
-      darkModeQuery.removeEventListener('change', handleDarkModeChange);
-    };
-  }, []);
+				setPlatformInfo({
+					isNative: Capacitor.isNativePlatform(),
+					isIOS,
+					isAndroid,
+					isWeb,
+					isPWA,
+					isTablet,
+					isDarkMode,
+					hasNotch,
+					platform: info.platform,
+				});
 
-  /**
-   * Set status bar style
-   */
-  const setStatusBarStyle = async (style: 'dark' | 'light' | 'auto') => {
-    if (!platformFeatures.hasStatusBar) return;
+				// Detect features
+				setPlatformFeatures({
+					hasBiometric: Capacitor.isPluginAvailable('BiometricAuth'),
+					hasCamera:
+						Capacitor.isPluginAvailable('Camera') ||
+						Capacitor.isPluginAvailable('BarcodeScanner'),
+					hasHaptics: Capacitor.isPluginAvailable('Haptics'),
+					hasStatusBar: Capacitor.isPluginAvailable('StatusBar'),
+					hasKeyboard: Capacitor.isPluginAvailable('Keyboard'),
+					hasSafeArea:
+						isIOS || (isAndroid && parseInt(info.osVersion || '0') >= 9),
+				});
+			} catch (error) {
+				console.error('Failed to detect platform:', error);
+			}
+		};
 
-    try {
-      if (style === 'auto') {
-        await StatusBar.setStyle({ 
-          style: platformInfo.isDarkMode ? Style.Dark : Style.Light 
-        });
-      } else {
-        await StatusBar.setStyle({ 
-          style: style === 'dark' ? Style.Dark : Style.Light 
-        });
-      }
-    } catch (error) {
-      console.error('Failed to set status bar style:', error);
-    }
-  };
+		detectPlatform();
 
-  /**
-   * Set status bar background color (Android only)
-   */
-  const setStatusBarColor = async (color: string) => {
-    if (!platformFeatures.hasStatusBar || !platformInfo.isAndroid) return;
+		// Listen for color scheme changes
+		const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+		const handleDarkModeChange = (_e: MediaQueryListEvent) => {
+			setPlatformInfo((prev) => ({ ...prev, isDarkMode: e.matches }));
+		};
+		darkModeQuery.addEventListener('change', handleDarkModeChange);
 
-    try {
-      await StatusBar.setBackgroundColor({ color });
-    } catch (error) {
-      console.error('Failed to set status bar color:', error);
-    }
-  };
+		return () => {
+			darkModeQuery.removeEventListener('change', handleDarkModeChange);
+		};
+	}, []);
 
-  /**
-   * Hide/show status bar
-   */
-  const setStatusBarVisibility = async (visible: boolean) => {
-    if (!platformFeatures.hasStatusBar) return;
+	/**
+	 * Set status bar style
+	 */
+	const setStatusBarStyle = async (style: 'dark' | 'light' | 'auto') => {
+		if (!platformFeatures.hasStatusBar) return;
 
-    try {
-      if (visible) {
-        await StatusBar.show();
-      } else {
-        await StatusBar.hide();
-      }
-    } catch (error) {
-      console.error('Failed to set status bar visibility:', error);
-    }
-  };
+		try {
+			if (style === 'auto') {
+				await StatusBar.setStyle({
+					style: platformInfo.isDarkMode ? Style.Dark : Style.Light,
+				});
+			} else {
+				await StatusBar.setStyle({
+					style: style === 'dark' ? Style.Dark : Style.Light,
+				});
+			}
+		} catch (error) {
+			console.error('Failed to set status bar style:', error);
+		}
+	};
 
-  /**
-   * Setup keyboard listeners
-   */
-  const setupKeyboardListeners = (
-    onShow?: (height: number) => void,
-    onHide?: () => void
-  ) => {
-    if (!platformFeatures.hasKeyboard) return () => {};
+	/**
+	 * Set status bar background color (Android only)
+	 */
+	const setStatusBarColor = async (color: string) => {
+		if (!platformFeatures.hasStatusBar || !platformInfo.isAndroid) return;
 
-    const showListener = Keyboard.addListener('keyboardWillShow', info => {
-      onShow?.(info.keyboardHeight);
-    });
+		try {
+			await StatusBar.setBackgroundColor({ color });
+		} catch (error) {
+			console.error('Failed to set status bar color:', error);
+		}
+	};
 
-    const hideListener = Keyboard.addListener('keyboardWillHide', () => {
-      onHide?.();
-    });
+	/**
+	 * Hide/show status bar
+	 */
+	const setStatusBarVisibility = async (visible: boolean) => {
+		if (!platformFeatures.hasStatusBar) return;
 
-    return () => {
-      showListener.remove();
-      hideListener.remove();
-    };
-  };
+		try {
+			if (visible) {
+				await StatusBar.show();
+			} else {
+				await StatusBar.hide();
+			}
+		} catch (error) {
+			console.error('Failed to set status bar visibility:', error);
+		}
+	};
 
-  /**
-   * Handle back button (Android)
-   */
-  const setupBackButtonHandler = (handler: () => boolean | Promise<boolean>) => {
-    if (!platformInfo.isAndroid) return () => {};
+	/**
+	 * Setup keyboard listeners
+	 */
+	const setupKeyboardListeners = (
+		onShow?: (height: number) => void,
+		onHide?: () => void
+	) => {
+		if (!platformFeatures.hasKeyboard) return () => {};
 
-    const listener = App.addListener('backButton', async ({ canGoBack }) => {
-      const handled = await handler();
-      if (!handled && !canGoBack) {
-        App.exitApp();
-      }
-    });
+		const showListener = Keyboard.addListener('keyboardWillShow', (info) => {
+			onShow?.(info.keyboardHeight);
+		});
 
-    return () => listener.remove();
-  };
+		const hideListener = Keyboard.addListener('keyboardWillHide', () => {
+			onHide?.();
+		});
 
-  /**
-   * Get safe area insets
-   */
-  const getSafeAreaInsets = () => {
-    const root = document.documentElement;
-    const style = getComputedStyle(root);
-    
-    return {
-      top: parseInt(style.getPropertyValue('--safe-area-inset-top') || '0'),
-      right: parseInt(style.getPropertyValue('--safe-area-inset-right') || '0'),
-      bottom: parseInt(style.getPropertyValue('--safe-area-inset-bottom') || '0'),
-      left: parseInt(style.getPropertyValue('--safe-area-inset-left') || '0')
-    };
-  };
+		return () => {
+			showListener.remove();
+			hideListener.remove();
+		};
+	};
 
-  /**
-   * Apply platform-specific CSS classes
-   */
-  useEffect(() => {
-    const root = document.documentElement;
-    
-    // Remove all platform classes
-    root.classList.remove('ios', 'android', 'web', 'native', 'pwa', 'tablet', 'notch');
-    
-    // Add current platform classes
-    if (platformInfo.isIOS) root.classList.add('ios');
-    if (platformInfo.isAndroid) root.classList.add('android');
-    if (platformInfo.isWeb) root.classList.add('web');
-    if (platformInfo.isNative) root.classList.add('native');
-    if (platformInfo.isPWA) root.classList.add('pwa');
-    if (platformInfo.isTablet) root.classList.add('tablet');
-    if (platformInfo.hasNotch) root.classList.add('notch');
-  }, [platformInfo]);
+	/**
+	 * Handle back button (Android)
+	 */
+	const setupBackButtonHandler = (
+		handler: () => boolean | Promise<boolean>
+	) => {
+		if (!platformInfo.isAndroid) return () => {};
 
-  return {
-    ...platformInfo,
-    features: platformFeatures,
-    setStatusBarStyle,
-    setStatusBarColor,
-    setStatusBarVisibility,
-    setupKeyboardListeners,
-    setupBackButtonHandler,
-    getSafeAreaInsets
-  };
+		const listener = App.addListener('backButton', async ({ canGoBack }) => {
+			const handled = await handler();
+			if (!handled && !canGoBack) {
+				App.exitApp();
+			}
+		});
+
+		return () => listener.remove();
+	};
+
+	/**
+	 * Get safe area insets
+	 */
+	const getSafeAreaInsets = () => {
+		const root = document.documentElement;
+		const style = getComputedStyle(root);
+
+		return {
+			top: parseInt(style.getPropertyValue('--safe-area-inset-top') || '0'),
+			right: parseInt(style.getPropertyValue('--safe-area-inset-right') || '0'),
+			bottom: parseInt(
+				style.getPropertyValue('--safe-area-inset-bottom') || '0'
+			),
+			left: parseInt(style.getPropertyValue('--safe-area-inset-left') || '0'),
+		};
+	};
+
+	/**
+	 * Apply platform-specific CSS classes
+	 */
+	useEffect(() => {
+		const root = document.documentElement;
+
+		// Remove all platform classes
+		root.classList.remove(
+			'ios',
+			'android',
+			'web',
+			'native',
+			'pwa',
+			'tablet',
+			'notch'
+		);
+
+		// Add current platform classes
+		if (platformInfo.isIOS) root.classList.add('ios');
+		if (platformInfo.isAndroid) root.classList.add('android');
+		if (platformInfo.isWeb) root.classList.add('web');
+		if (platformInfo.isNative) root.classList.add('native');
+		if (platformInfo.isPWA) root.classList.add('pwa');
+		if (platformInfo.isTablet) root.classList.add('tablet');
+		if (platformInfo.hasNotch) root.classList.add('notch');
+	}, [platformInfo]);
+
+	return {
+		...platformInfo,
+		features: platformFeatures,
+		setStatusBarStyle,
+		setStatusBarColor,
+		setStatusBarVisibility,
+		setupKeyboardListeners,
+		setupBackButtonHandler,
+		getSafeAreaInsets,
+	};
 };
