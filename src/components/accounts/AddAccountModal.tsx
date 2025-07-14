@@ -158,7 +158,7 @@ const AddAccountModal: React.FC = () => {
 
       dispatch(closeModal());
     } catch (_error) {
-      console.error('Failed to add account:', _error);
+      console.error('Failed to add account:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to add account'

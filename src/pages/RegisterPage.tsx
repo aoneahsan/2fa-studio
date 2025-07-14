@@ -116,7 +116,7 @@ const RegisterPage: React.FC = () => {
       
       navigate('/dashboard');
     } catch (_error: unknown) {
-      console.error('Registration _error:', _error);
+      console.error('Registration _error:', error);
       dispatch(addToast({
         type: 'error',
         message: error.message || 'Failed to create account',

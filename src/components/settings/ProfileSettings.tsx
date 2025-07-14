@@ -62,7 +62,7 @@ const ProfileSettings: React.FC = () => {
         message: 'Profile updated successfully'
       }));
     } catch (_error) {
-      console.error('Profile update _error:', _error);
+      console.error('Profile update _error:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update profile'

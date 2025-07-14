@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
       
       navigate('/dashboard');
     } catch (_error: unknown) {
-      console.error('Login _error:', _error);
+      console.error('Login _error:', error);
       dispatch(addToast({
         type: 'error',
         message: error.message || 'Failed to sign in',

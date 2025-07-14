@@ -167,7 +167,7 @@ export class AdminUserManagementService {
         totalPages,
       };
     } catch (_error) {
-      console.error('Error getting users:', _error);
+      console.error('Error getting users:', error);
       throw error;
     }
   }
@@ -185,7 +185,7 @@ export class AdminUserManagementService {
 
       return await this.enhanceUserWithAdminData(userResult.data as User);
     } catch (_error) {
-      console.error('Error getting user details:', _error);
+      console.error('Error getting user details:', error);
       throw error;
     }
   }
@@ -225,7 +225,7 @@ export class AdminUserManagementService {
         suspendedUntil,
       });
     } catch (_error) {
-      console.error('Error suspending user:', _error);
+      console.error('Error suspending user:', error);
       throw error;
     }
   }
@@ -256,7 +256,7 @@ export class AdminUserManagementService {
       // Send notification
       await this.sendUserNotification(userId, 'account_banned', { reason });
     } catch (_error) {
-      console.error('Error banning user:', _error);
+      console.error('Error banning user:', error);
       throw error;
     }
   }
@@ -287,7 +287,7 @@ export class AdminUserManagementService {
       // Send notification
       await this.sendUserNotification(userId, 'account_reactivated', { reason });
     } catch (_error) {
-      console.error('Error unsuspending user:', _error);
+      console.error('Error unsuspending user:', error);
       throw error;
     }
   }
@@ -327,7 +327,7 @@ export class AdminUserManagementService {
       // Log admin action
       await this.logUserAction(userId, adminId, 'delete', reason);
     } catch (_error) {
-      console.error('Error deleting user:', _error);
+      console.error('Error deleting user:', error);
       throw error;
     }
   }
@@ -396,7 +396,7 @@ export class AdminUserManagementService {
 
       return result.success ? result.data as UserAction[] : [];
     } catch (_error) {
-      console.error('Error getting user action history:', _error);
+      console.error('Error getting user action history:', error);
       return [];
     }
   }
@@ -442,7 +442,7 @@ export class AdminUserManagementService {
         actions,
       };
     } catch (_error) {
-      console.error('Error exporting user data:', _error);
+      console.error('Error exporting user data:', error);
       throw error;
     }
   }
@@ -485,7 +485,7 @@ export class AdminUserManagementService {
         status: user.status || 'active',
       };
     } catch (_error) {
-      console.error('Error enhancing user with admin data:', _error);
+      console.error('Error enhancing user with admin data:', error);
       return {
         ...user,
         accountsCount: 0,
@@ -542,7 +542,7 @@ export class AdminUserManagementService {
 
       await FirestoreService.addDocument('user_actions', userAction);
     } catch (_error) {
-      console.error('Error logging user action:', _error);
+      console.error('Error logging user action:', error);
     }
   }
 
@@ -555,7 +555,7 @@ export class AdminUserManagementService {
       // This would integrate with a notification service
       console.log(`Sending ${type} notification to user ${userId}:`, data);
     } catch (_error) {
-      console.error('Error sending user notification:', _error);
+      console.error('Error sending user notification:', error);
     }
   }
 
@@ -581,7 +581,7 @@ export class AdminUserManagementService {
         }
       }
     } catch (_error) {
-      console.error('Error canceling user subscriptions:', _error);
+      console.error('Error canceling user subscriptions:', error);
     }
   }
 }

@@ -154,7 +154,7 @@ export class AdminAnalyticsService {
       this.setCache(cacheKey, metrics);
       return metrics;
     } catch (_error) {
-      console.error('Error getting dashboard metrics:', _error);
+      console.error('Error getting dashboard metrics:', error);
       throw error;
     }
   }
@@ -207,7 +207,7 @@ export class AdminAnalyticsService {
         topCountries,
       };
     } catch (_error) {
-      console.error('Error getting user metrics:', _error);
+      console.error('Error getting user metrics:', error);
       throw error;
     }
   }
@@ -277,7 +277,7 @@ export class AdminAnalyticsService {
         refundRate,
       };
     } catch (_error) {
-      console.error('Error getting revenue metrics:', _error);
+      console.error('Error getting revenue metrics:', error);
       throw error;
     }
   }
@@ -319,7 +319,7 @@ export class AdminAnalyticsService {
         topFeatures,
       };
     } catch (_error) {
-      console.error('Error getting usage metrics:', _error);
+      console.error('Error getting usage metrics:', error);
       throw error;
     }
   }
@@ -349,7 +349,7 @@ export class AdminAnalyticsService {
           return [];
       }
     } catch (_error) {
-      console.error('Error getting time series data:', _error);
+      console.error('Error getting time series data:', error);
       return [];
     }
   }
@@ -373,7 +373,7 @@ export class AdminAnalyticsService {
         responseTime: Math.floor(Math.random() * 200) + 100, // 100-300ms
       };
     } catch (_error) {
-      console.error('Error getting real-time metrics:', _error);
+      console.error('Error getting real-time metrics:', error);
       return {
         activeUsers: 0,
         requestsPerSecond: 0,
@@ -403,7 +403,7 @@ export class AdminAnalyticsService {
       
       return { data, summary };
     } catch (_error) {
-      console.error('Error generating custom report:', _error);
+      console.error('Error generating custom report:', error);
       throw error;
     }
   }

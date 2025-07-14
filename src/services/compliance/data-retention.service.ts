@@ -177,7 +177,7 @@ export class DataRetentionService {
         );
       }
     } catch (_error) {
-      console.error('Failed to initialize retention policies:', _error);
+      console.error('Failed to initialize retention policies:', error);
       throw error;
     }
   }
@@ -197,7 +197,7 @@ export class DataRetentionService {
         updatedAt: doc.data().updatedAt?.toDate()
       } as RetentionPolicy));
     } catch (_error) {
-      console.error('Failed to get retention policies:', _error);
+      console.error('Failed to get retention policies:', error);
       throw error;
     }
   }
@@ -238,7 +238,7 @@ export class DataRetentionService {
       
       return policyId!;
     } catch (_error) {
-      console.error('Failed to upsert retention policy:', _error);
+      console.error('Failed to upsert retention policy:', error);
       throw error;
     }
   }
@@ -359,7 +359,7 @@ export class DataRetentionService {
       
       return result;
     } catch (_error) {
-      console.error('Failed to execute retention policy:', _error);
+      console.error('Failed to execute retention policy:', error);
       
       const endTime = new Date();
       const _result: RetentionExecutionResult = {
@@ -400,7 +400,7 @@ export class DataRetentionService {
       
       return results;
     } catch (_error) {
-      console.error('Failed to execute all policies:', _error);
+      console.error('Failed to execute all policies:', error);
       throw error;
     }
   }
@@ -423,7 +423,7 @@ export class DataRetentionService {
         endTime: doc.data().endTime?.toDate()
       } as RetentionExecutionResult));
     } catch (_error) {
-      console.error('Failed to get execution history:', _error);
+      console.error('Failed to get execution history:', error);
       throw error;
     }
   }
@@ -730,7 +730,7 @@ export class DataRetentionService {
         }
       );
     } catch (_error) {
-      console.error('Failed to log retention execution:', _error);
+      console.error('Failed to log retention execution:', error);
     }
   }
 }

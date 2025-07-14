@@ -134,7 +134,7 @@ const EditAccountModal: React.FC = () => {
       
       handleClose();
     } catch (_error) {
-      console.error('Error updating account:', _error);
+      console.error('Error updating account:', error);
     } finally {
       setIsSubmitting(false);
     }

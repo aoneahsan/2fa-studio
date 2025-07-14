@@ -100,7 +100,7 @@ export class BackupService {
 
       return backupData;
     } catch (_error) {
-      console.error('Error creating backup:', _error);
+      console.error('Error creating backup:', error);
       throw error;
     }
   }
@@ -161,7 +161,7 @@ export class BackupService {
         URL.revokeObjectURL(url);
       }
     } catch (_error) {
-      console.error('Error exporting backup:', _error);
+      console.error('Error exporting backup:', error);
       throw error;
     }
   }
@@ -249,7 +249,7 @@ export class BackupService {
         accountsCount: importedCount,
       };
     } catch (_error) {
-      console.error('Error importing backup:', _error);
+      console.error('Error importing backup:', error);
       return {
         success: false,
         accountsCount: 0,
@@ -306,7 +306,7 @@ export class BackupService {
         _error: result._error,
       };
     } catch (_error) {
-      console.error('Error backing up to Google Drive:', _error);
+      console.error('Error backing up to Google Drive:', error);
       return {
         success: false,
         accountsCount: 0,
@@ -379,7 +379,7 @@ export class BackupService {
         accountsCount: importedCount,
       };
     } catch (_error) {
-      console.error('Error restoring from Google Drive:', _error);
+      console.error('Error restoring from Google Drive:', error);
       return {
         success: false,
         accountsCount: 0,

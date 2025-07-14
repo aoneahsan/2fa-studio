@@ -184,7 +184,7 @@ export class TeamVaultService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to create vault:', _error);
+      console.error('Failed to create vault:', error);
       throw error;
     }
   }
@@ -244,7 +244,7 @@ export class TeamVaultService {
         { updates: Object.keys(updates) }
       );
     } catch (_error) {
-      console.error('Failed to update vault:', _error);
+      console.error('Failed to update vault:', error);
       throw error;
     }
   }
@@ -327,7 +327,7 @@ export class TeamVaultService {
         { action: 'added_to_vault', vaultId, vaultName: vault.name }
       );
     } catch (_error) {
-      console.error('Failed to add account to vault:', _error);
+      console.error('Failed to add account to vault:', error);
       throw error;
     }
   }
@@ -401,7 +401,7 @@ export class TeamVaultService {
         { action: 'removed_from_vault', vaultId, vaultName: vault.name }
       );
     } catch (_error) {
-      console.error('Failed to remove account from vault:', _error);
+      console.error('Failed to remove account from vault:', error);
       throw error;
     }
   }
@@ -459,7 +459,7 @@ export class TeamVaultService {
         { action: 'member_added', memberId }
       );
     } catch (_error) {
-      console.error('Failed to add member to vault:', _error);
+      console.error('Failed to add member to vault:', error);
       throw error;
     }
   }
@@ -518,7 +518,7 @@ export class TeamVaultService {
         { action: 'member_removed', memberId }
       );
     } catch (_error) {
-      console.error('Failed to remove member from vault:', _error);
+      console.error('Failed to remove member from vault:', error);
       throw error;
     }
   }
@@ -540,7 +540,7 @@ export class TeamVaultService {
         updatedAt: docSnap.data().updatedAt?.toDate()
       } as TeamVault;
     } catch (_error) {
-      console.error('Failed to get vault:', _error);
+      console.error('Failed to get vault:', error);
       throw error;
     }
   }
@@ -576,7 +576,7 @@ export class TeamVaultService {
         updatedAt: doc.data().updatedAt?.toDate()
       } as TeamVault));
     } catch (_error) {
-      console.error('Failed to get team vaults:', _error);
+      console.error('Failed to get team vaults:', error);
       throw error;
     }
   }
@@ -599,7 +599,7 @@ export class TeamVaultService {
         lastAccessedAt: doc.data().lastAccessedAt?.toDate()
       } as VaultAccount));
     } catch (_error) {
-      console.error('Failed to get vault accounts:', _error);
+      console.error('Failed to get vault accounts:', error);
       throw error;
     }
   }
@@ -666,7 +666,7 @@ export class TeamVaultService {
 
       return account;
     } catch (_error) {
-      console.error('Failed to access vault account:', _error);
+      console.error('Failed to access vault account:', error);
       throw error;
     }
   }
@@ -708,7 +708,7 @@ export class TeamVaultService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to request approval:', _error);
+      console.error('Failed to request approval:', error);
       throw error;
     }
   }
@@ -770,7 +770,7 @@ export class TeamVaultService {
         await this.executeApprovedAction(approval);
       }
     } catch (_error) {
-      console.error('Failed to process approval:', _error);
+      console.error('Failed to process approval:', error);
       throw error;
     }
   }
@@ -801,7 +801,7 @@ export class TeamVaultService {
         timestamp: doc.data().timestamp?.toDate()
       } as VaultAccessLog));
     } catch (_error) {
-      console.error('Failed to get vault access logs:', _error);
+      console.error('Failed to get vault access logs:', error);
       throw error;
     }
   }
@@ -856,7 +856,7 @@ export class TeamVaultService {
 
       await addDoc(collection(db, this.VAULT_ACCESS_LOGS), log);
     } catch (_error) {
-      console.error('Failed to log vault access:', _error);
+      console.error('Failed to log vault access:', error);
     }
   }
 

@@ -87,7 +87,7 @@ export class BrowserExtensionService {
         }
       });
     } catch (_error) {
-      console.error('Failed to initialize browser extension service:', _error);
+      console.error('Failed to initialize browser extension service:', error);
     }
   }
 
@@ -125,7 +125,7 @@ export class BrowserExtensionService {
         timestamp: Date.now(),
       });
     } catch (_error) {
-      console.error('Failed to generate pairing code:', _error);
+      console.error('Failed to generate pairing code:', error);
       throw error;
     }
   }
@@ -169,7 +169,7 @@ export class BrowserExtensionService {
         message: 'Connected to browser extension',
       }));
     } catch (_error) {
-      console.error('Failed to connect to extension:', _error);
+      console.error('Failed to connect to extension:', error);
       throw error;
     }
   }
@@ -230,7 +230,7 @@ export class BrowserExtensionService {
       const messageRef = ref(this.db, `messages/${user.uid}/${this.deviceId}/${messageId}`);
       await remove(messageRef);
     } catch (_error) {
-      console.error('Failed to handle message:', _error);
+      console.error('Failed to handle message:', error);
     }
   }
 
@@ -245,7 +245,7 @@ export class BrowserExtensionService {
       // Send accounts to extension
       await this.sendMessage('sync_response', { accounts });
     } catch (_error) {
-      console.error('Failed to handle sync request:', _error);
+      console.error('Failed to handle sync request:', error);
     }
   }
 
@@ -276,7 +276,7 @@ export class BrowserExtensionService {
         }
       }
     } catch (_error) {
-      console.error('Failed to handle autofill request:', _error);
+      console.error('Failed to handle autofill request:', error);
     }
   }
 
@@ -314,7 +314,7 @@ export class BrowserExtensionService {
         data: encryptedData,
       });
     } catch (_error) {
-      console.error('Failed to send message:', _error);
+      console.error('Failed to send message:', error);
       throw error;
     }
   }
@@ -357,7 +357,7 @@ export class BrowserExtensionService {
         message: `Sent code for ${account.issuer} to browser`,
       }));
     } catch (_error) {
-      console.error('Failed to send account code:', _error);
+      console.error('Failed to send account code:', error);
       store.dispatch(addToast({
         type: 'error',
         message: 'Failed to send code to browser',
@@ -392,7 +392,7 @@ export class BrowserExtensionService {
         message: 'Disconnected from browser extension',
       }));
     } catch (_error) {
-      console.error('Failed to disconnect:', _error);
+      console.error('Failed to disconnect:', error);
     }
   }
 

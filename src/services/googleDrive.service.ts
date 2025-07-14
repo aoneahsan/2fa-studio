@@ -217,7 +217,7 @@ export class GoogleDriveService {
 
       return response.result.id;
     } catch (_error) {
-      console.error('Failed to create backup:', _error);
+      console.error('Failed to create backup:', error);
       throw error;
     }
   }
@@ -252,7 +252,7 @@ export class GoogleDriveService {
           size: file.size || '0'
         }));
     } catch (_error) {
-      console.error('Failed to list backups:', _error);
+      console.error('Failed to list backups:', error);
       throw error;
     }
   }
@@ -294,7 +294,7 @@ export class GoogleDriveService {
 
       return data;
     } catch (_error) {
-      console.error('Failed to get backup:', _error);
+      console.error('Failed to get backup:', error);
       throw error;
     }
   }
@@ -313,7 +313,7 @@ export class GoogleDriveService {
         fileId: fileId,
       });
     } catch (_error) {
-      console.error('Failed to delete backup:', _error);
+      console.error('Failed to delete backup:', error);
       throw error;
     }
   }
@@ -338,7 +338,7 @@ export class GoogleDriveService {
         limit: parseInt(quota?.limit || '0'),
       };
     } catch (_error) {
-      console.error('Failed to get storage quota:', _error);
+      console.error('Failed to get storage quota:', error);
       throw error;
     }
   }
@@ -373,7 +373,7 @@ export class GoogleDriveService {
         }
       }
     } catch (_error) {
-      console.error('Failed to sync backup:', _error);
+      console.error('Failed to sync backup:', error);
       throw error;
     }
   }

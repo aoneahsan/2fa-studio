@@ -52,7 +52,7 @@ const AuditLogViewer: React.FC = () => {
       });
       setLogs(auditLogs);
     } catch (_error) {
-      console.error('Failed to load audit logs:', _error);
+      console.error('Failed to load audit logs:', error);
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ const AuditLogViewer: React.FC = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (_error) {
-      console.error('Failed to export audit logs:', _error);
+      console.error('Failed to export audit logs:', error);
     }
   };
 

@@ -137,7 +137,7 @@ export class LicenseManagementService {
         violations,
       };
     } catch (_error) {
-      console.error('Error getting license info:', _error);
+      console.error('Error getting license info:', error);
       
       // Return default free license on error
       return {
@@ -249,7 +249,7 @@ export class LicenseManagementService {
         allowed: true,
       };
     } catch (_error) {
-      console.error('Error checking feature access:', _error);
+      console.error('Error checking feature access:', error);
       return {
         allowed: false,
         reason: 'Unable to verify license',
@@ -357,7 +357,7 @@ export class LicenseManagementService {
         timestamp: Date.now(),
       });
     } catch (_error) {
-      console.error('Error tracking usage:', _error);
+      console.error('Error tracking usage:', error);
     }
   }
 
@@ -408,7 +408,7 @@ export class LicenseManagementService {
 
       return usage;
     } catch (_error) {
-      console.error('Error getting current usage:', _error);
+      console.error('Error getting current usage:', error);
       return {
         userId,
         period: new Date().toISOString().slice(0, 7),
@@ -479,7 +479,7 @@ export class LicenseManagementService {
         cost,
       };
     } catch (_error) {
-      console.error('Error generating usage report:', _error);
+      console.error('Error generating usage report:', error);
       throw error;
     }
   }
@@ -532,7 +532,7 @@ export class LicenseManagementService {
         console.warn(`Critical license violation for user ${userId}:`, violation);
       }
     } catch (_error) {
-      console.error('Error logging violation:', _error);
+      console.error('Error logging violation:', error);
     }
   }
 
@@ -594,7 +594,7 @@ export class LicenseManagementService {
 
       return null;
     } catch (_error) {
-      console.error('Error getting current subscription:', _error);
+      console.error('Error getting current subscription:', error);
       return null;
     }
   }

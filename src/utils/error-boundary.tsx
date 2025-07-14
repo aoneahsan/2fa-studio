@@ -150,7 +150,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 // Hook for functional components
 export const useErrorHandler = () => {
   const handleError = (_error: Error, errorInfo?: unknown) => {
-    console.error('Error handled by hook:', _error);
+    console.error('Error handled by hook:', error);
     
     // Report error
     const errorReport = {

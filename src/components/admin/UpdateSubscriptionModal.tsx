@@ -58,7 +58,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
       showToast('success', 'Subscription updated successfully');
       onSuccess();
     } catch (_error) {
-      console.error('Error updating subscription:', _error);
+      console.error('Error updating subscription:', error);
       showToast('error', 'Failed to update subscription');
     } finally {
       setLoading(false);

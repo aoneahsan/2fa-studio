@@ -54,7 +54,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
           await refreshBackups();
         }
       } catch (_error) {
-        console.error('Failed to initialize Google Drive:', _error);
+        console.error('Failed to initialize Google Drive:', error);
       }
     };
 
@@ -96,7 +96,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
         return false;
       }
     } catch (_error) {
-      console.error('Google Drive connection _error:', _error);
+      console.error('Google Drive connection _error:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to connect to Google Drive',
@@ -154,7 +154,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       // Refresh backup list
       await refreshBackups();
     } catch (_error) {
-      console.error('Failed to create backup:', _error);
+      console.error('Failed to create backup:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to create backup',
@@ -196,7 +196,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
         message: 'Backup restored successfully',
       }));
     } catch (_error) {
-      console.error('Failed to restore backup:', _error);
+      console.error('Failed to restore backup:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to restore backup. Check your encryption password.',
@@ -226,7 +226,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       // Refresh backup list
       await refreshBackups();
     } catch (_error) {
-      console.error('Failed to delete backup:', _error);
+      console.error('Failed to delete backup:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to delete backup',
@@ -262,7 +262,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
 
       setBackups(formattedBackups);
     } catch (_error) {
-      console.error('Failed to refresh backups:', _error);
+      console.error('Failed to refresh backups:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to load backups',
@@ -299,7 +299,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       // Refresh backup list
       await refreshBackups();
     } catch (_error) {
-      console.error('Failed to sync:', _error);
+      console.error('Failed to sync:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to sync with Google Drive',

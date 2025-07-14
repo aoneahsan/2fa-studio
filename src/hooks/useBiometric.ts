@@ -52,7 +52,7 @@ export const useBiometric = () => {
           reason: result.reason,
         });
       } catch (_error) {
-        console.error('Error checking biometric:', _error);
+        console.error('Error checking biometric:', error);
         setBiometricStatus({
           isAvailable: false,
           reason: 'Failed to check biometric availability',
@@ -100,7 +100,7 @@ export const useBiometric = () => {
         throw new Error('Authentication failed');
       }
     } catch (_error: unknown) {
-      console.error('Biometric authentication _error:', _error);
+      console.error('Biometric authentication _error:', error);
       
       if (error.code === 'UserCancel') {
         dispatch(addToast({
@@ -149,7 +149,7 @@ export const useBiometric = () => {
       
       return true;
     } catch (_error) {
-      console.error('Failed to enable biometric:', _error);
+      console.error('Failed to enable biometric:', error);
       return false;
     }
   }, [biometricStatus, authenticate, dispatch]);
@@ -171,7 +171,7 @@ export const useBiometric = () => {
       
       return true;
     } catch (_error) {
-      console.error('Failed to disable biometric:', _error);
+      console.error('Failed to disable biometric:', error);
       return false;
     }
   }, [authenticate, dispatch]);

@@ -70,7 +70,7 @@ export class MobileNotificationsService {
       console.log('Push notifications initialized successfully');
       return true;
     } catch (_error) {
-      console.error('Failed to initialize push notifications:', _error);
+      console.error('Failed to initialize push notifications:', error);
       return false;
     }
   }
@@ -99,7 +99,7 @@ export class MobileNotificationsService {
 
     // Registration error
     PushNotifications.addListener('registrationError', (_error: unknown) => {
-      console.error('Error on _registration:', _error);
+      console.error('Error on _registration:', error);
     });
 
     // Notification received (app in foreground)
@@ -147,7 +147,7 @@ export class MobileNotificationsService {
 
       console.log('Local notifications initialized');
     } catch (_error) {
-      console.error('Failed to initialize local notifications:', _error);
+      console.error('Failed to initialize local notifications:', error);
     }
   }
 
@@ -239,7 +239,7 @@ export class MobileNotificationsService {
         return JSON.parse(value);
       }
     } catch (_error) {
-      console.error('Failed to get notification settings:', _error);
+      console.error('Failed to get notification settings:', error);
     }
 
     // Default settings
@@ -397,7 +397,7 @@ export class MobileNotificationsService {
       //   body: JSON.stringify({ token, platform, userId: getCurrentUserId() })
       // });
     } catch (_error) {
-      console.error('Failed to send token to server:', _error);
+      console.error('Failed to send token to server:', error);
     }
   }
 

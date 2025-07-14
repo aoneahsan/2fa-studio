@@ -260,7 +260,7 @@ export class ProvisioningAPIService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to initialize provisioning:', _error);
+      console.error('Failed to initialize provisioning:', error);
       throw error;
     }
   }
@@ -307,7 +307,7 @@ export class ProvisioningAPIService {
         }
       );
     } catch (_error) {
-      console.error('Failed to update provisioning _config:', _error);
+      console.error('Failed to update provisioning _config:', error);
       throw error;
     }
   }
@@ -408,7 +408,7 @@ export class ProvisioningAPIService {
         keyId: apiKey.id
       };
     } catch (_error) {
-      console.error('Failed to add API key:', _error);
+      console.error('Failed to add API key:', error);
       throw error;
     }
   }
@@ -456,7 +456,7 @@ export class ProvisioningAPIService {
         keyName: config.apiKeys[keyIndex].name
       }, 'success');
     } catch (_error) {
-      console.error('Failed to revoke API key:', _error);
+      console.error('Failed to revoke API key:', error);
       throw error;
     }
   }
@@ -745,7 +745,7 @@ export class ProvisioningAPIService {
         updatedAt: doc.data().updatedAt?.toDate()
       } as ProvisioningConfig;
     } catch (_error) {
-      console.error('Failed to get provisioning _config:', _error);
+      console.error('Failed to get provisioning _config:', error);
       throw error;
     }
   }
@@ -772,7 +772,7 @@ export class ProvisioningAPIService {
         timestamp: doc.data().timestamp?.toDate()
       } as ProvisioningLog));
     } catch (_error) {
-      console.error('Failed to get provisioning logs:', _error);
+      console.error('Failed to get provisioning logs:', error);
       throw error;
     }
   }

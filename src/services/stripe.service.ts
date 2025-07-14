@@ -177,7 +177,7 @@ export class StripeService {
         clientSecret: result.clientSecret,
       };
     } catch (_error) {
-      console.error('Error creating subscription:', _error);
+      console.error('Error creating subscription:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -235,7 +235,7 @@ export class StripeService {
         subscription: result.subscription,
       };
     } catch (_error) {
-      console.error('Error updating subscription:', _error);
+      console.error('Error updating subscription:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -296,7 +296,7 @@ export class StripeService {
         subscription: result.subscription,
       };
     } catch (_error) {
-      console.error('Error canceling subscription:', _error);
+      console.error('Error canceling subscription:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -329,7 +329,7 @@ export class StripeService {
         paymentMethods: result.paymentMethods,
       };
     } catch (_error) {
-      console.error('Error getting payment methods:', _error);
+      console.error('Error getting payment methods:', error);
       return {
         success: false,
         paymentMethods: [],
@@ -375,7 +375,7 @@ export class StripeService {
         paymentMethod: result.paymentMethod,
       };
     } catch (_error) {
-      console.error('Error attaching payment method:', _error);
+      console.error('Error attaching payment method:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -414,7 +414,7 @@ export class StripeService {
         success: true,
       };
     } catch (_error) {
-      console.error('Error detaching payment method:', _error);
+      console.error('Error detaching payment method:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -447,7 +447,7 @@ export class StripeService {
         invoices: result.invoices,
       };
     } catch (_error) {
-      console.error('Error getting invoices:', _error);
+      console.error('Error getting invoices:', error);
       return {
         success: false,
         invoices: [],
@@ -490,7 +490,7 @@ export class StripeService {
         url: result.url,
       };
     } catch (_error) {
-      console.error('Error creating portal session:', _error);
+      console.error('Error creating portal session:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -557,7 +557,7 @@ export class StripeService {
         );
       }
     } catch (_error) {
-      console.error('Error handling subscription update:', _error);
+      console.error('Error handling subscription update:', error);
     }
   }
 
@@ -583,7 +583,7 @@ export class StripeService {
         );
       }
     } catch (_error) {
-      console.error('Error handling subscription deletion:', _error);
+      console.error('Error handling subscription deletion:', error);
     }
   }
 
@@ -610,7 +610,7 @@ export class StripeService {
         updatedAt: new Date(),
       });
     } catch (_error) {
-      console.error('Error handling invoice payment succeeded:', _error);
+      console.error('Error handling invoice payment succeeded:', error);
     }
   }
 
@@ -636,7 +636,7 @@ export class StripeService {
         );
       }
     } catch (_error) {
-      console.error('Error handling invoice payment failed:', _error);
+      console.error('Error handling invoice payment failed:', error);
     }
   }
 
@@ -667,7 +667,7 @@ export class StripeService {
         });
       }
     } catch (_error) {
-      console.error('Error handling payment method attached:', _error);
+      console.error('Error handling payment method attached:', error);
     }
   }
 }

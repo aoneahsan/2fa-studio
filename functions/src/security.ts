@@ -53,7 +53,7 @@ export const monitorSuspiciousActivity = onDocumentCreated(
 				await handleSuspiciousUser(userId, recentLogsSnapshot.docs);
 			}
 		} catch (_error) {
-			console.error('Error monitoring activity:', _error);
+			console.error('Error monitoring activity:', error);
 		}
 	});
 
@@ -124,7 +124,7 @@ export const enforceRateLimit = onCall(
 			if ((error as unknown).code === 'resource-exhausted') {
 				throw error;
 			}
-			console.error('Error enforcing rate limit:', _error);
+			console.error('Error enforcing rate limit:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to check rate limit'
@@ -225,7 +225,7 @@ export const createAuditLog = onCall(
 
 			return { success: true };
 		} catch (_error) {
-			console.error('Error creating audit log:', _error);
+			console.error('Error creating audit log:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to create audit log'
@@ -284,7 +284,7 @@ export async function cleanupOldAuditLogs() {
 			rateLimits: oldRateLimitsSnapshot.size,
 		};
 	} catch (_error) {
-		console.error('Error cleaning up logs:', _error);
+		console.error('Error cleaning up logs:', error);
 		throw error;
 	}
 }
@@ -331,7 +331,7 @@ async function handleSuspiciousUser(
 			severity: 'high',
 		});
 	} catch (_error) {
-		console.error('Error handling suspicious user:', _error);
+		console.error('Error handling suspicious user:', error);
 	}
 }
 
@@ -371,7 +371,7 @@ async function alertAdmins(alert: unknown) {
 		// TODO: Send push notifications via OneSignal
 		// TODO: Send email alerts
 	} catch (_error) {
-		console.error('Error alerting admins:', _error);
+		console.error('Error alerting admins:', error);
 	}
 }
 
@@ -420,7 +420,7 @@ export const checkIPReputation = onCall(
 				recentSuspiciousActivity: suspiciousCount,
 			};
 		} catch (_error) {
-			console.error('Error checking IP reputation:', _error);
+			console.error('Error checking IP reputation:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to check IP reputation'

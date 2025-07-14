@@ -61,7 +61,7 @@ const BackupScheduler: React.FC = () => {
       const userSchedules = await BackupSchedulerService.getSchedules(user.id);
       setSchedules(userSchedules);
     } catch (_error) {
-      console.error('Error loading schedules:', _error);
+      console.error('Error loading schedules:', error);
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +95,7 @@ const BackupScheduler: React.FC = () => {
       await loadSchedules();
       resetForm();
     } catch (_error) {
-      console.error('Error saving schedule:', _error);
+      console.error('Error saving schedule:', error);
     }
   };
 
@@ -106,7 +106,7 @@ const BackupScheduler: React.FC = () => {
       await BackupSchedulerService.deleteSchedule(user.id, scheduleId);
       await loadSchedules();
     } catch (_error) {
-      console.error('Error deleting schedule:', _error);
+      console.error('Error deleting schedule:', error);
     }
   };
 
@@ -116,7 +116,7 @@ const BackupScheduler: React.FC = () => {
     try {
       await BackupSchedulerService.runBackupNow(user.id, scheduleId);
     } catch (_error) {
-      console.error('Error running backup:', _error);
+      console.error('Error running backup:', error);
     }
   };
 

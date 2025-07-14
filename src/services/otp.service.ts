@@ -113,7 +113,7 @@ export class OTPService {
         counter: parsed instanceof OTPAuth.HOTP ? parsed.counter : undefined
       };
     } catch (_error) {
-      console.error('Failed to parse OTP URI:', _error);
+      console.error('Failed to parse OTP URI:', error);
       throw new Error('Invalid OTP URI');
     }
   }

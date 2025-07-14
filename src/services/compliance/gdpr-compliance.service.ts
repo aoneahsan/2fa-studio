@@ -160,7 +160,7 @@ export class GDPRComplianceService {
         }
       );
     } catch (_error) {
-      console.error('Failed to record consent:', _error);
+      console.error('Failed to record consent:', error);
       throw error;
     }
   }
@@ -195,7 +195,7 @@ export class GDPRComplianceService {
 
       return Array.from(consentMap.values());
     } catch (_error) {
-      console.error('Failed to get user consents:', _error);
+      console.error('Failed to get user consents:', error);
       throw error;
     }
   }
@@ -251,7 +251,7 @@ export class GDPRComplianceService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to request data export:', _error);
+      console.error('Failed to request data export:', error);
       throw error;
     }
   }
@@ -370,7 +370,7 @@ export class GDPRComplianceService {
       // NotificationService.send(userId, 'Your data export is ready', { downloadUrl });
 
     } catch (_error) {
-      console.error('Failed to process data export:', _error);
+      console.error('Failed to process data export:', error);
       
       await updateDoc(doc(db, this.EXPORT_REQUESTS, requestId), {
         status: 'failed',
@@ -432,7 +432,7 @@ export class GDPRComplianceService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to request deletion:', _error);
+      console.error('Failed to request deletion:', error);
       throw error;
     }
   }
@@ -476,7 +476,7 @@ export class GDPRComplianceService {
         }
       );
     } catch (_error) {
-      console.error('Failed to cancel deletion:', _error);
+      console.error('Failed to cancel deletion:', error);
       throw error;
     }
   }
@@ -503,7 +503,7 @@ export class GDPRComplianceService {
         await this.executeDeleteion(request);
       }
     } catch (_error) {
-      console.error('Failed to process scheduled deletions:', _error);
+      console.error('Failed to process scheduled deletions:', error);
     }
   }
 
@@ -605,7 +605,7 @@ export class GDPRComplianceService {
         }
       );
     } catch (_error) {
-      console.error('Failed to execute deletion:', _error);
+      console.error('Failed to execute deletion:', error);
       
       await updateDoc(doc(db, this.DELETION_REQUESTS, request.id!), {
         status: 'failed',
@@ -666,7 +666,7 @@ export class GDPRComplianceService {
         }
       );
     } catch (_error) {
-      console.error('Failed to update privacy settings:', _error);
+      console.error('Failed to update privacy settings:', error);
       throw error;
     }
   }
@@ -688,7 +688,7 @@ export class GDPRComplianceService {
         updatedAt: docSnap.data().updatedAt?.toDate()
       } as PrivacySettings;
     } catch (_error) {
-      console.error('Failed to get privacy settings:', _error);
+      console.error('Failed to get privacy settings:', error);
       throw error;
     }
   }
@@ -711,7 +711,7 @@ export class GDPRComplianceService {
 
       return consent?.granted || false;
     } catch (_error) {
-      console.error('Failed to check processing lawfulness:', _error);
+      console.error('Failed to check processing lawfulness:', error);
       return false;
     }
   }

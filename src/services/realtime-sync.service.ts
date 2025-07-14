@@ -424,7 +424,7 @@ export class RealtimeSyncService {
         } 
       });
     } catch (_error) {
-      console.error('Failed to resolve conflict:', _error);
+      console.error('Failed to resolve conflict:', error);
       throw error;
     }
   }
@@ -490,7 +490,7 @@ export class RealtimeSyncService {
       this.syncState.pendingChanges = 0;
       
     } catch (_error) {
-      console.error('Failed to sync pending changes:', _error);
+      console.error('Failed to sync pending changes:', error);
       throw error;
     } finally {
       this.syncState.isSyncing = false;
@@ -553,7 +553,7 @@ export class RealtimeSyncService {
       try {
         listener(event);
       } catch (_error) {
-        console.error('Event listener _error:', _error);
+        console.error('Event listener _error:', error);
       }
     });
   }

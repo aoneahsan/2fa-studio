@@ -45,7 +45,7 @@ export class AppShortcutsService {
       
       console.log('App shortcuts initialized');
     } catch (_error) {
-      console.error('Failed to initialize app shortcuts:', _error);
+      console.error('Failed to initialize app shortcuts:', error);
     }
   }
 
@@ -59,7 +59,7 @@ export class AppShortcutsService {
         return JSON.parse(value);
       }
     } catch (_error) {
-      console.error('Failed to get shortcuts:', _error);
+      console.error('Failed to get shortcuts:', error);
     }
     return [];
   }
@@ -96,7 +96,7 @@ export class AppShortcutsService {
 
       return true;
     } catch (_error) {
-      console.error('Failed to add shortcut:', _error);
+      console.error('Failed to add shortcut:', error);
       throw error;
     }
   }
@@ -117,7 +117,7 @@ export class AppShortcutsService {
       await this.saveShortcuts(filtered);
       await this.updateShortcuts();
     } catch (_error) {
-      console.error('Failed to remove shortcut:', _error);
+      console.error('Failed to remove shortcut:', error);
       throw error;
     }
   }
@@ -135,7 +135,7 @@ export class AppShortcutsService {
       await this.saveShortcuts(shortcuts);
       await this.updateShortcuts();
     } catch (_error) {
-      console.error('Failed to reorder shortcuts:', _error);
+      console.error('Failed to reorder shortcuts:', error);
       throw error;
     }
   }
@@ -166,7 +166,7 @@ export class AppShortcutsService {
         label: account.label
       };
     } catch (_error) {
-      console.error('Failed to generate shortcut code:', _error);
+      console.error('Failed to generate shortcut code:', error);
       return null;
     }
   }
@@ -181,7 +181,7 @@ export class AppShortcutsService {
         return JSON.parse(value);
       }
     } catch (_error) {
-      console.error('Failed to get widget accounts:', _error);
+      console.error('Failed to get widget accounts:', error);
     }
     return [];
   }
@@ -202,7 +202,7 @@ export class AppShortcutsService {
       // Update widget data
       await this.updateWidgetData();
     } catch (_error) {
-      console.error('Failed to set widget accounts:', _error);
+      console.error('Failed to set widget accounts:', error);
       throw error;
     }
   }
@@ -242,7 +242,7 @@ export class AppShortcutsService {
       // Send data to native layer for widget update
       await this.sendWidgetData(widgetData);
     } catch (_error) {
-      console.error('Failed to update widget data:', _error);
+      console.error('Failed to update widget data:', error);
     }
   }
 
@@ -280,7 +280,7 @@ export class AppShortcutsService {
       // Send to native layer
       await this.sendShortcutsData(shortcutsData);
     } catch (_error) {
-      console.error('Failed to update platform shortcuts:', _error);
+      console.error('Failed to update platform shortcuts:', error);
     }
   }
 
@@ -302,7 +302,7 @@ export class AppShortcutsService {
         await Capacitor.Plugins.TwoFAShortcuts?.updateSiriShortcuts({ shortcuts });
       }
     } catch (_error) {
-      console.error('Failed to send shortcuts data to native layer:', _error);
+      console.error('Failed to send shortcuts data to native layer:', error);
     }
   }
 
@@ -319,7 +319,7 @@ export class AppShortcutsService {
         await Capacitor.Plugins.TwoFAWidget?.updateWidget({ accounts: data });
       }
     } catch (_error) {
-      console.error('Failed to send widget data to native layer:', _error);
+      console.error('Failed to send widget data to native layer:', error);
     }
   }
 
@@ -337,7 +337,7 @@ export class AppShortcutsService {
         }
       }
     } catch (_error) {
-      console.error('Failed to handle shortcut intent:', _error);
+      console.error('Failed to handle shortcut intent:', error);
     }
   }
 
@@ -360,7 +360,7 @@ export class AppShortcutsService {
         duration: 'short'
       });
     } catch (_error) {
-      console.error('Failed to show shortcut _result:', _error);
+      console.error('Failed to show shortcut _result:', error);
     }
   }
 

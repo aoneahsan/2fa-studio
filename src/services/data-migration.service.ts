@@ -75,7 +75,7 @@ export class DataMigrationService {
         plan
       };
     } catch (_error) {
-      console.error('Failed to check migration:', _error);
+      console.error('Failed to check migration:', error);
       throw error;
     }
   }

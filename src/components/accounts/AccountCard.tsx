@@ -79,7 +79,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
         setProgress(result.progress || 0);
       }
     } catch (_error) {
-      console.error('Failed to generate code:', _error);
+      console.error('Failed to generate code:', error);
       setOtpCode('ERROR');
     }
   }, [account, isLocked]);
@@ -155,7 +155,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
 
       setTimeout(() => setIsCopying(false), 1000);
     } catch (_error) {
-      console.error('Failed to copy:', _error);
+      console.error('Failed to copy:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to copy code'

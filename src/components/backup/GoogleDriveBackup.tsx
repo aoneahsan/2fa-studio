@@ -48,7 +48,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
       await createBackup(encryptionPassword || backupPassword);
       setBackupPassword('');
     } catch (_error) {
-      console.error('Backup failed:', _error);
+      console.error('Backup failed:', error);
     }
   };
 
@@ -63,7 +63,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
       await restoreBackup(backupId, encryptionPassword || backupPassword);
       setBackupPassword('');
     } catch (_error) {
-      console.error('Restore failed:', _error);
+      console.error('Restore failed:', error);
     }
   };
 
@@ -77,7 +77,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
     try {
       await deleteBackup(backupId);
     } catch (_error) {
-      console.error('Delete failed:', _error);
+      console.error('Delete failed:', error);
     }
   };
 

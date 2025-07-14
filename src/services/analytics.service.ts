@@ -54,7 +54,7 @@ export class AnalyticsService {
         timestamp: serverTimestamp(),
       });
     } catch (_error) {
-      console.error('Error tracking usage:', _error);
+      console.error('Error tracking usage:', error);
       // Don't throw - analytics should not break the app
     }
   }
@@ -87,7 +87,7 @@ export class AnalyticsService {
 
       return this.calculateUsageStats(accountId, usageData);
     } catch (_error) {
-      console.error('Error getting account usage stats:', _error);
+      console.error('Error getting account usage stats:', error);
       return this.getEmptyStats(accountId);
     }
   }
@@ -191,7 +191,7 @@ export class AnalyticsService {
         accountsNotUsedInDays,
       };
     } catch (_error) {
-      console.error('Error getting global usage stats:', _error);
+      console.error('Error getting global usage stats:', error);
       return {
         userId,
         totalAccounts: accounts.length,
@@ -346,7 +346,7 @@ export class AnalyticsService {
         await this.cleanupOldData(userId, daysToKeep);
       }
     } catch (_error) {
-      console.error('Error cleaning up old usage data:', _error);
+      console.error('Error cleaning up old usage data:', error);
     }
   }
 }

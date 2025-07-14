@@ -40,7 +40,7 @@ const BackupHistory: React.FC = () => {
       const backupHistory = await BackupSchedulerService.getBackupHistory(user.id);
       setHistory(backupHistory);
     } catch (_error) {
-      console.error('Error loading backup history:', _error);
+      console.error('Error loading backup history:', error);
     } finally {
       setIsLoading(false);
     }

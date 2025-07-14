@@ -128,7 +128,7 @@ export class BiometricAccountService {
         };
       }
     } catch (_error) {
-      console.error('Biometric authentication _error:', _error);
+      console.error('Biometric authentication _error:', error);
       return { 
         success: false, 
         _error: error instanceof Error ? error.message : 'Authentication error' 
@@ -190,7 +190,7 @@ export class BiometricAccountService {
         }
       });
     } catch (_error) {
-      console.error('Error enabling biometric:', _error);
+      console.error('Error enabling biometric:', error);
       
       // Log failed attempt
       await AuditLogService.log({
@@ -255,7 +255,7 @@ export class BiometricAccountService {
         }
       });
     } catch (_error) {
-      console.error('Error disabling biometric:', _error);
+      console.error('Error disabling biometric:', error);
       
       // Log failed attempt
       await AuditLogService.log({
@@ -286,7 +286,7 @@ export class BiometricAccountService {
         updatedAt: new Date(),
       });
     } catch (_error) {
-      console.error('Error updating biometric timeout:', _error);
+      console.error('Error updating biometric timeout:', error);
       throw error;
     }
   }
@@ -304,7 +304,7 @@ export class BiometricAccountService {
         lastBiometricAuth: new Date(),
       });
     } catch (_error) {
-      console.error('Error updating last biometric _auth:', _error);
+      console.error('Error updating last biometric _auth:', error);
     }
   }
 

@@ -105,7 +105,7 @@ export const createCheckoutSession = onCall(
 
 			return { sessionId: session.id, url: session.url };
 		} catch (_error) {
-			console.error('Error creating checkout session:', _error);
+			console.error('Error creating checkout session:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to create checkout session'
@@ -153,7 +153,7 @@ export const createPortalSession = onCall(
 
 			return { url: session.url };
 		} catch (_error) {
-			console.error('Error creating portal session:', _error);
+			console.error('Error creating portal session:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to create portal session'
@@ -227,7 +227,7 @@ export const handleStripeWebhook = onRequest(
 
 			res.json({ received: true });
 		} catch (_error) {
-			console.error('Error processing webhook:', _error);
+			console.error('Error processing webhook:', error);
 			res.status(500).send('Webhook processing failed');
 		}
 	}
@@ -264,7 +264,7 @@ export const checkAccountLimits = onCall(
 				canAdd: limits.accounts === -1 || currentCount < limits.accounts,
 			};
 		} catch (_error) {
-			console.error('Error checking limits:', _error);
+			console.error('Error checking limits:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to check limits'
@@ -312,7 +312,7 @@ export const updateUsageStats = onCall(
 
 			return { success: true };
 		} catch (_error) {
-			console.error('Error updating usage stats:', _error);
+			console.error('Error updating usage stats:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to update usage stats'
@@ -354,7 +354,7 @@ export async function enforceUsageLimits() {
 
 		return { violations };
 	} catch (_error) {
-		console.error('Error enforcing limits:', _error);
+		console.error('Error enforcing limits:', error);
 		throw error;
 	}
 }

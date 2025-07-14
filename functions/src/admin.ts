@@ -101,7 +101,7 @@ export const getUserStats = onCall(
 				lastUpdated: new Date().toISOString(),
 			};
 		} catch (_error) {
-			console.error('Error getting user stats:', _error);
+			console.error('Error getting user stats:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to get user statistics'
@@ -175,7 +175,7 @@ export const updateUserSubscription = onCall(
 
 			return { success: true };
 		} catch (_error) {
-			console.error('Error updating subscription:', _error);
+			console.error('Error updating subscription:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to update subscription'
@@ -263,7 +263,7 @@ export const deleteUser = onCall(
 
 			return { success: true };
 		} catch (_error) {
-			console.error('Error deleting user:', _error);
+			console.error('Error deleting user:', error);
 			throw new HttpsError('internal', 'Failed to delete user');
 		}
 	}
@@ -347,7 +347,7 @@ export const getSystemStats = onCall(
 				lastUpdated: new Date().toISOString(),
 			};
 		} catch (_error) {
-			console.error('Error getting system stats:', _error);
+			console.error('Error getting system stats:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to get system statistics'
@@ -421,7 +421,7 @@ export const sendNotification = onCall(
 
 			return { success: true, notificationsSent: userIds.length };
 		} catch (_error) {
-			console.error('Error sending notifications:', _error);
+			console.error('Error sending notifications:', error);
 			throw new HttpsError(
 				'internal',
 				'Failed to send notifications'
@@ -489,7 +489,7 @@ export const exportUsers = onCall(
 				exportedBy: context.uid,
 			};
 		} catch (_error) {
-			console.error('Error exporting users:', _error);
+			console.error('Error exporting users:', error);
 			throw new HttpsError('internal', 'Failed to export users');
 		}
 	}
@@ -541,7 +541,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
 			res.status(404).json({ _error: 'Not found' });
 		}
 	} catch (_error) {
-		console.error('Admin API _error:', _error);
+		console.error('Admin API _error:', error);
 		res.status(500).json({ _error: 'Internal server error' });
 	}
 }

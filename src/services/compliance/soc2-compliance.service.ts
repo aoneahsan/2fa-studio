@@ -361,7 +361,7 @@ export class SOC2ComplianceService {
         });
       }
     } catch (_error) {
-      console.error('Failed to initialize SOC 2 controls:', _error);
+      console.error('Failed to initialize SOC 2 controls:', error);
       throw error;
     }
   }
@@ -389,7 +389,7 @@ export class SOC2ComplianceService {
         }
       } as SecurityControl));
     } catch (_error) {
-      console.error('Failed to get controls:', _error);
+      console.error('Failed to get controls:', error);
       throw error;
     }
   }
@@ -428,7 +428,7 @@ export class SOC2ComplianceService {
         success: true
       });
     } catch (_error) {
-      console.error('Failed to update control status:', _error);
+      console.error('Failed to update control status:', error);
       throw error;
     }
   }
@@ -467,7 +467,7 @@ export class SOC2ComplianceService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to report incident:', _error);
+      console.error('Failed to report incident:', error);
       throw error;
     }
   }
@@ -502,7 +502,7 @@ export class SOC2ComplianceService {
         success: true
       });
     } catch (_error) {
-      console.error('Failed to update incident:', _error);
+      console.error('Failed to update incident:', error);
       throw error;
     }
   }
@@ -564,7 +564,7 @@ export class SOC2ComplianceService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to generate compliance report:', _error);
+      console.error('Failed to generate compliance report:', error);
       throw error;
     }
   }
@@ -603,7 +603,7 @@ export class SOC2ComplianceService {
         await this.handleCriticalMetric(metric, value, details);
       }
     } catch (_error) {
-      console.error('Failed to record metric:', _error);
+      console.error('Failed to record metric:', error);
     }
   }
 
@@ -636,7 +636,7 @@ export class SOC2ComplianceService {
         timestamp: doc.data().timestamp?.toDate()
       } as SystemMonitoring));
     } catch (_error) {
-      console.error('Failed to get monitoring metrics:', _error);
+      console.error('Failed to get monitoring metrics:', error);
       throw error;
     }
   }
@@ -696,7 +696,7 @@ export class SOC2ComplianceService {
         recommendations
       };
     } catch (_error) {
-      console.error('Failed to perform security assessment:', _error);
+      console.error('Failed to perform security assessment:', error);
       throw error;
     }
   }

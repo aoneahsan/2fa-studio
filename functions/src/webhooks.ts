@@ -48,7 +48,7 @@ export const handleOneSignalWebhook = onRequest(
 
 			res.status(200).json({ received: true });
 		} catch (_error) {
-			console.error('Error processing OneSignal webhook:', _error);
+			console.error('Error processing OneSignal webhook:', error);
 			res.status(500).send('Webhook processing failed');
 		}
 	}
@@ -100,7 +100,7 @@ export const handleGoogleDriveWebhook = onRequest(
 
 			res.status(200).send('OK');
 		} catch (_error) {
-			console.error('Error processing Google Drive webhook:', _error);
+			console.error('Error processing Google Drive webhook:', error);
 			res.status(500).send('Webhook processing failed');
 		}
 	}
@@ -187,7 +187,7 @@ async function handleNotificationClicked(event: unknown) {
 				});
 		}
 	} catch (_error) {
-		console.error('Error handling notification click:', _error);
+		console.error('Error handling notification click:', error);
 	}
 }
 
@@ -206,7 +206,7 @@ async function handleNotificationViewed(event: unknown) {
 			timestamp: admin.firestore.FieldValue.serverTimestamp(),
 		});
 	} catch (_error) {
-		console.error('Error handling notification view:', _error);
+		console.error('Error handling notification view:', error);
 	}
 }
 
@@ -231,7 +231,7 @@ async function handleSubscriptionChanged(event: unknown) {
 			await db.collection('users').doc(userId).update(updates);
 		}
 	} catch (_error) {
-		console.error('Error handling subscription change:', _error);
+		console.error('Error handling subscription change:', error);
 	}
 }
 
@@ -265,7 +265,7 @@ async function handleDriveFileChange(data: unknown) {
 			// TODO: Trigger sync process
 		}
 	} catch (_error) {
-		console.error('Error handling Drive file change:', _error);
+		console.error('Error handling Drive file change:', error);
 	}
 }
 
@@ -304,7 +304,7 @@ async function handleDriveFileRemoval(data: unknown) {
 			});
 		}
 	} catch (_error) {
-		console.error('Error handling Drive file removal:', _error);
+		console.error('Error handling Drive file removal:', error);
 	}
 }
 
@@ -358,7 +358,7 @@ export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{servi
 			message: 'Webhook registered successfully',
 		};
 	} catch (_error) {
-		console.error('Error registering webhook:', _error);
+		console.error('Error registering webhook:', error);
 		throw new HttpsError(
 			'internal',
 			'Failed to register webhook'
@@ -400,7 +400,7 @@ export const listWebhooks = onCall(async (request: FirebaseAuthRequest) => {
 
 		return { webhooks };
 	} catch (_error) {
-		console.error('Error listing webhooks:', _error);
+		console.error('Error listing webhooks:', error);
 		throw new HttpsError('internal', 'Failed to list webhooks');
 	}
 });

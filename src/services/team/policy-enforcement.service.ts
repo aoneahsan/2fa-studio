@@ -231,7 +231,7 @@ export class PolicyEnforcementService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to create policy:', _error);
+      console.error('Failed to create policy:', error);
       throw error;
     }
   }
@@ -282,7 +282,7 @@ export class PolicyEnforcementService {
       // Clear cache for this team
       this.clearTeamCache(policy.teamId);
     } catch (_error) {
-      console.error('Failed to update policy:', _error);
+      console.error('Failed to update policy:', error);
       throw error;
     }
   }
@@ -352,7 +352,7 @@ export class PolicyEnforcementService {
 
       return evaluation;
     } catch (_error) {
-      console.error('Failed to evaluate policies:', _error);
+      console.error('Failed to evaluate policies:', error);
       throw error;
     }
   }
@@ -375,7 +375,7 @@ export class PolicyEnforcementService {
         lastEnforcedAt: docSnap.data().lastEnforcedAt?.toDate()
       } as TeamPolicy;
     } catch (_error) {
-      console.error('Failed to get policy:', _error);
+      console.error('Failed to get policy:', error);
       throw error;
     }
   }
@@ -410,7 +410,7 @@ export class PolicyEnforcementService {
 
       return policies;
     } catch (_error) {
-      console.error('Failed to get team policies:', _error);
+      console.error('Failed to get team policies:', error);
       throw error;
     }
   }
@@ -451,7 +451,7 @@ export class PolicyEnforcementService {
         resolvedAt: doc.data().resolvedAt?.toDate()
       } as PolicyViolation));
     } catch (_error) {
-      console.error('Failed to get policy violations:', _error);
+      console.error('Failed to get policy violations:', error);
       throw error;
     }
   }
@@ -488,7 +488,7 @@ export class PolicyEnforcementService {
         }
       );
     } catch (_error) {
-      console.error('Failed to resolve violation:', _error);
+      console.error('Failed to resolve violation:', error);
       throw error;
     }
   }
@@ -537,7 +537,7 @@ export class PolicyEnforcementService {
         errors
       };
     } catch (_error) {
-      console.error('Failed to check password policy:', _error);
+      console.error('Failed to check password policy:', error);
       return { valid: true, errors: [] };
     }
   }
@@ -569,7 +569,7 @@ export class PolicyEnforcementService {
 
       return { allowed: true };
     } catch (_error) {
-      console.error('Failed to check session policy:', _error);
+      console.error('Failed to check session policy:', error);
       return { allowed: true };
     }
   }
@@ -628,7 +628,7 @@ export class PolicyEnforcementService {
 
       return { allowed: true };
     } catch (_error) {
-      console.error('Failed to check IP policy:', _error);
+      console.error('Failed to check IP policy:', error);
       return { allowed: true };
     }
   }

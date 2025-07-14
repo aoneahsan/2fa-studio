@@ -30,7 +30,7 @@ export const useAuth = () => {
         try {
           await RealtimeSyncService.initialize(user.uid);
         } catch (_error) {
-          console.error('Failed to initialize sync service:', _error);
+          console.error('Failed to initialize sync service:', error);
         }
       } else {
         // Cleanup sync service when user logs out

@@ -157,7 +157,7 @@ export class SyncService {
         'pending'
       );
     } catch (_error) {
-      console.error('Error publishing sync event:', _error);
+      console.error('Error publishing sync event:', error);
       this.queuePendingChange({ type, data });
     }
   }
@@ -227,7 +227,7 @@ export class SyncService {
         await RealtimeSyncService.syncPendingChanges();
         processedIds.push(change.id);
       } catch (_error) {
-        console.error('Error processing pending change:', _error);
+        console.error('Error processing pending change:', error);
       }
     }
 
@@ -283,7 +283,7 @@ export class SyncService {
         // Remove from queue
         this.conflictQueue = this.conflictQueue.filter(c => c.id !== conflictId);
       } catch (_error) {
-        console.error('Error resolving conflict:', _error);
+        console.error('Error resolving conflict:', error);
       }
     }
   }
@@ -317,7 +317,7 @@ export class SyncService {
           lastSyncTime: parsed.lastSyncTime ? new Date(parsed.lastSyncTime) : null,
         };
       } catch (_error) {
-        console.error('Error loading sync status:', _error);
+        console.error('Error loading sync status:', error);
       }
     }
   }

@@ -45,7 +45,7 @@ const GlobalUsageStats: React.FC = () => {
       );
       setStats(globalStats);
     } catch (_error) {
-      console.error('Error loading global stats:', _error);
+      console.error('Error loading global stats:', error);
     } finally {
       setIsLoading(false);
     }

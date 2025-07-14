@@ -245,7 +245,7 @@ export const registerServiceWorker = (): void => {
           }
         });
       } catch (_error) {
-        console.error('Service Worker registration failed:', _error);
+        console.error('Service Worker registration failed:', error);
       }
     });
   }

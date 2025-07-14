@@ -55,7 +55,7 @@ export const onUserCreate = beforeUserCreated(async (event) => {
 
 		console.log(`User created: ${user.uid}`);
 	} catch (_error) {
-		console.error('Error creating user document:', _error);
+		console.error('Error creating user document:', error);
 	}
 });
 
@@ -103,7 +103,7 @@ export async function onUserDelete(userId: string) {
 
 		console.log(`User deleted: ${userId}`);
 	} catch (_error) {
-		console.error('Error deleting user data:', _error);
+		console.error('Error deleting user data:', error);
 	}
 }
 
@@ -132,7 +132,7 @@ export const validateAdmin = onCall(async (request: FirebaseAuthRequest) => {
 			role: userData?.role || 'user',
 		};
 	} catch (_error) {
-		console.error('Error validating admin:', _error);
+		console.error('Error validating admin:', error);
 		throw new HttpsError(
 			'internal',
 			'Failed to validate admin status'
@@ -188,7 +188,7 @@ export async function cleanupExpiredSessions() {
 
 		return { cleaned: count };
 	} catch (_error) {
-		console.error('Error cleaning up sessions:', _error);
+		console.error('Error cleaning up sessions:', error);
 		throw new HttpsError(
 			'internal',
 			'Failed to cleanup sessions'
@@ -214,7 +214,7 @@ async function sendWelcomeNotification(user: unknown) {
 		// TODO: Send welcome email via SendGrid or other email service
 		// TODO: Send push notification via OneSignal
 	} catch (_error) {
-		console.error('Error sending welcome notification:', _error);
+		console.error('Error sending welcome notification:', error);
 	}
 }
 
@@ -262,7 +262,7 @@ export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceI
 			expiresAt: expiresAt.toISOString(),
 		};
 	} catch (_error) {
-		console.error('Error creating session:', _error);
+		console.error('Error creating session:', error);
 		throw new HttpsError(
 			'internal',
 			'Failed to create session'
@@ -311,7 +311,7 @@ export const revokeSession = onCall(async (request: FirebaseAuthRequest<{session
 
 		return { success: true };
 	} catch (_error) {
-		console.error('Error revoking session:', _error);
+		console.error('Error revoking session:', error);
 		throw new HttpsError(
 			'internal',
 			'Failed to revoke session'
@@ -347,7 +347,7 @@ export const getUserSessions = onCall(async (request: FirebaseAuthRequest) => {
 
 		return { sessions };
 	} catch (_error) {
-		console.error('Error getting sessions:', _error);
+		console.error('Error getting sessions:', error);
 		throw new HttpsError('internal', 'Failed to get sessions');
 	}
 });

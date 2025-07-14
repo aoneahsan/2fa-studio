@@ -62,7 +62,7 @@ const AdminUsers: React.FC = () => {
       setLastDoc(result.lastDoc);
       setHasMore(result.hasMore);
     } catch (_error) {
-      console.error('Error loading users:', _error);
+      console.error('Error loading users:', error);
     } finally {
       setLoading(false);
     }
@@ -181,7 +181,7 @@ const AdminUsers: React.FC = () => {
 
               <select
                 value={sortBy}
-                onChange={(_e) => setSortBy(e.target.value as unknown)}
+                onChange={(_e) => setSortBy(e.target.value as any)}
                 className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm"
               >
                 <option value="createdAt">Created Date</option>

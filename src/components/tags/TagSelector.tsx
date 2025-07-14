@@ -87,7 +87,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       }
       setQuery('');
     } catch (_error) {
-      console.error('Failed to create tag:', _error);
+      console.error('Failed to create tag:', error);
     } finally {
       setIsCreating(false);
     }

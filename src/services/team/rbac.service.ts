@@ -285,7 +285,7 @@ export class RBACService {
         );
       }
     } catch (_error) {
-      console.error('Failed to initialize roles:', _error);
+      console.error('Failed to initialize roles:', error);
       throw error;
     }
   }
@@ -363,7 +363,7 @@ export class RBACService {
         reason: 'No matching permissions'
       });
     } catch (_error) {
-      console.error('Failed to check permission:', _error);
+      console.error('Failed to check permission:', error);
       return {
         allowed: false,
         reason: 'Permission check failed'
@@ -430,7 +430,7 @@ export class RBACService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to assign role:', _error);
+      console.error('Failed to assign role:', error);
       throw error;
     }
   }
@@ -479,7 +479,7 @@ export class RBACService {
       // Clear cache for this user
       this.clearUserCache(userId);
     } catch (_error) {
-      console.error('Failed to revoke role:', _error);
+      console.error('Failed to revoke role:', error);
       throw error;
     }
   }
@@ -528,7 +528,7 @@ export class RBACService {
 
       return docRef.id;
     } catch (_error) {
-      console.error('Failed to create role:', _error);
+      console.error('Failed to create role:', error);
       throw error;
     }
   }
@@ -577,7 +577,7 @@ export class RBACService {
       // Clear cache for all users with this role
       await this.clearRoleCache(roleId);
     } catch (_error) {
-      console.error('Failed to update role:', _error);
+      console.error('Failed to update role:', error);
       throw error;
     }
   }
@@ -621,7 +621,7 @@ export class RBACService {
         }
       );
     } catch (_error) {
-      console.error('Failed to delete role:', _error);
+      console.error('Failed to delete role:', error);
       throw error;
     }
   }
@@ -639,7 +639,7 @@ export class RBACService {
         updatedAt: doc.data().updatedAt?.toDate()
       } as Role));
     } catch (_error) {
-      console.error('Failed to get roles:', _error);
+      console.error('Failed to get roles:', error);
       throw error;
     }
   }
@@ -681,7 +681,7 @@ export class RBACService {
 
       return { roles, permissions, isAdmin };
     } catch (_error) {
-      console.error('Failed to get user permissions:', _error);
+      console.error('Failed to get user permissions:', error);
       throw error;
     }
   }

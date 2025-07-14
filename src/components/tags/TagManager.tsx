@@ -100,7 +100,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
       }
       resetForm();
     } catch (_error) {
-      console.error('Failed to save tag:', _error);
+      console.error('Failed to save tag:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -116,7 +116,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
       })).unwrap();
       setDeleteConfirm(null);
     } catch (_error) {
-      console.error('Failed to delete tag:', _error);
+      console.error('Failed to delete tag:', error);
     }
   };
 

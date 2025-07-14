@@ -69,7 +69,7 @@ export class GoogleDriveBackupService {
       // Ensure app folder exists
       await this.ensureAppFolder();
     } catch (_error) {
-      console.error('Failed to initialize Google Drive:', _error);
+      console.error('Failed to initialize Google Drive:', error);
       throw new Error('Google Drive initialization failed');
     }
   }
@@ -168,7 +168,7 @@ export class GoogleDriveBackupService {
 
       return { success: true, fileId: response.data.id };
     } catch (_error) {
-      console.error('Backup failed:', _error);
+      console.error('Backup failed:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Backup failed'
@@ -217,7 +217,7 @@ export class GoogleDriveBackupService {
         };
       });
     } catch (_error) {
-      console.error('Failed to list backups:', _error);
+      console.error('Failed to list backups:', error);
       throw error;
     }
   }
@@ -293,7 +293,7 @@ export class GoogleDriveBackupService {
 
       return { success: true, accounts };
     } catch (_error) {
-      console.error('Restore failed:', _error);
+      console.error('Restore failed:', error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Restore failed'
@@ -313,7 +313,7 @@ export class GoogleDriveBackupService {
       await this.drive.files.delete({ fileId });
       return true;
     } catch (_error) {
-      console.error('Failed to delete backup:', _error);
+      console.error('Failed to delete backup:', error);
       return false;
     }
   }
@@ -353,7 +353,7 @@ export class GoogleDriveBackupService {
         checksum: appProperties.checksum || ''
       };
     } catch (_error) {
-      console.error('Failed to get backup info:', _error);
+      console.error('Failed to get backup info:', error);
       return null;
     }
   }
@@ -385,7 +385,7 @@ export class GoogleDriveBackupService {
         available: limit - usage
       };
     } catch (_error) {
-      console.error('Failed to get quota info:', _error);
+      console.error('Failed to get quota info:', error);
       throw error;
     }
   }
@@ -438,7 +438,7 @@ export class GoogleDriveBackupService {
         }
       }
     } catch (_error) {
-      console.error('Failed to cleanup old backups:', _error);
+      console.error('Failed to cleanup old backups:', error);
     }
   }
 
@@ -503,7 +503,7 @@ export class GoogleDriveBackupService {
       });
       return response.data;
     } catch (_error) {
-      console.error('Failed to get user info:', _error);
+      console.error('Failed to get user info:', error);
       throw error;
     }
   }
