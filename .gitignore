@@ -38,3 +38,5 @@ android/
 
 # OS files
 Thumbs.db
+
+*.ignore.*
