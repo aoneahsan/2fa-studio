@@ -19,7 +19,7 @@ import {
   Timestamp,
   writeBatch
 } from 'firebase/firestore';
-import { db } from '@services/firebase';
+import { db } from '@src/config/firebase';
 import { AuditHelper } from '@services/compliance/audit-helper';
 import { AuthService } from '@services/auth.service';
 

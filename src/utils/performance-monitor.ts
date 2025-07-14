@@ -116,7 +116,7 @@ export class PerformanceMonitor {
    */
   static getMemoryUsage(): number {
     if ('memory' in performance) {
-      const memory = (performance as unknown).memory;
+      const memory = (performance as any).memory;
       return memory.usedJSHeapSize / (1024 * 1024); // MB
     }
     return 0;
@@ -141,7 +141,7 @@ export class PerformanceMonitor {
       .sort((a, b) => b.renderTime - a.renderTime)
       .slice(0, 5);
     
-    const memoryTrend = recentMetrics.map((m: any) => m.memoryUsage);
+    const memoryTrend = recentMetrics.map(m => m.memoryUsage);
     const errorRate = recentMetrics.reduce((sum, m) => sum + m.errors, 0) / recentMetrics.length || 0;
 
     return {
@@ -181,7 +181,7 @@ export class PerformanceMonitor {
     try {
       const layoutShiftObserver = new PerformanceObserver((list) => {
         let cumulativeLayoutShift = 0;
-        list.getEntries().forEach((entry: unknown) => {
+        list.getEntries().forEach((entry: any) => {
           if (!entry.hadRecentInput) {
             cumulativeLayoutShift += entry.value;
           }
@@ -219,7 +219,7 @@ export class PerformanceMonitor {
   private static setupMemoryMonitoring(): void {
     if ('memory' in performance) {
       setInterval(() => {
-        const memory = (performance as unknown).memory;
+        const memory = (performance as any).memory;
         const usedMB = memory.usedJSHeapSize / (1024 * 1024);
         const limitMB = memory.jsHeapSizeLimit / (1024 * 1024);
         
@@ -236,7 +236,7 @@ export class PerformanceMonitor {
    */
   private static setupNetworkMonitoring(): void {
     if ('navigator' in window && 'connection' in navigator) {
-      const connection = (navigator as unknown).connection;
+      const connection = (navigator as any).connection;
       
       if (connection) {
         const logConnectionInfo = () => {
@@ -255,7 +255,7 @@ export class PerformanceMonitor {
   private static calculateBundleSize(): number {
     const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
     return resources
-      .filter((resource: any) => resource.name.includes('.js') || resource.name.includes('.css'))
+      .filter(resource => resource.name.includes('.js') || resource.name.includes('.css'))
       .reduce((total, resource) => total + (resource.transferSize || 0), 0);
   }
 
@@ -307,9 +307,9 @@ export const withPerformanceMonitoring = <P extends object>(
   WrappedComponent: React.ComponentType<P>,
   componentName: string
 ) => {
-  return React.memo((props: P) => {
-    const renderStart = React.useRef<number>();
-    const mountStart = React.useRef<number>();
+  const MemoizedComponent = React.memo((props: P) => {
+    const renderStart = React.useRef<number>(0);
+    const mountStart = React.useRef<number>(0);
 
     React.useEffect(() => {
       mountStart.current = performance.now();
@@ -333,4 +333,6 @@ export const withPerformanceMonitoring = <P extends object>(
 
     return React.createElement(WrappedComponent, props);
   });
+  
+  return MemoizedComponent;
 };

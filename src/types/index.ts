@@ -135,12 +135,6 @@ export interface FeatureFlag {
   rolloutPercentage: number;
 }
 
-// Admin types
-export interface AdminUser extends User {
-  role: 'admin' | 'super_admin';
-  permissions: string[];
-}
-
 // Audit log types
 export interface AuditLog {
   id: string;

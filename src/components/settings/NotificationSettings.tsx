@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@comp
 import { Switch } from '@components/ui/switch';
 import { Button } from '@components/ui/button';
 import { useNotifications } from '@hooks/useNotifications';
-import { showToast } from '@utils/toast';
+import { showSuccess, showError } from '@utils/toast';
 
 const NotificationSettings: React.FC = () => {
   const { 
@@ -18,9 +18,9 @@ const NotificationSettings: React.FC = () => {
   const handleEnableNotifications = async () => {
     const granted = await requestPermission();
     if (granted) {
-      showToast('success', 'Push notifications enabled');
+      showSuccess('Push notifications enabled');
     } else {
-      showToast('error', 'Push notifications permission denied');
+      showError('Push notifications permission denied');
     }
   };
 
@@ -30,9 +30,9 @@ const NotificationSettings: React.FC = () => {
   ) => {
     try {
       await updatePreferences({ [key]: value });
-      showToast('success', 'Notification preferences updated');
+      showSuccess('Notification preferences updated');
     } catch (error) {
-      showToast('error', 'Failed to update preferences');
+      showError('Failed to update preferences');
     }
   };
 

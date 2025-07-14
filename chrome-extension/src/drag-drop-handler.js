@@ -119,7 +119,7 @@ class DragDropHandler {
   /**
    * Handle drag end
    */
-  handleDragEnd(_e) {
+  handleDragEnd() {
     if (!this.draggedElement) return;
     
     // Remove dragging class

@@ -36,14 +36,14 @@ const TagPill: React.FC<TagPillProps> = ({
     lg: 'h-5 w-5',
   };
 
-  const handleClick = (_e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
       e.stopPropagation();
       onClick();
     }
   };
 
-  const handleRemove = (_e: React.MouseEvent) => {
+  const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onRemove) {
       onRemove();

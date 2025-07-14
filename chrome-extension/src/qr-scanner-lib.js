@@ -13,29 +13,29 @@ export class QRScanner {
     try {
       // Create canvas
       const canvas = document.createElement('canvas');
-      const _ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d');
       
       canvas.width = imageData.width;
       canvas.height = imageData.height;
-      _ctx.putImageData(imageData, 0, 0);
+      ctx.putImageData(imageData, 0, 0);
       
       // Try to detect QR code patterns
-      const qrData = this.detectQRPattern(_ctx, imageData.width, imageData.height);
+      const qrData = this.detectQRPattern(ctx, imageData.width, imageData.height);
       
       if (qrData) {
         return { data: qrData };
       }
       
       throw new Error('No QR code found');
-    } catch (_error) {
-      throw _error;
+    } catch (error) {
+      throw error;
     }
   }
 
   /**
    * Simple QR pattern detection
    */
-  static detectQRPattern(_ctx, _width, _height) {
+  static detectQRPattern(ctx, width, height) {
     // This is a placeholder for actual QR detection
     // In a real implementation, use jsQR or similar library
     

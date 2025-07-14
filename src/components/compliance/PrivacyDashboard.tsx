@@ -55,8 +55,8 @@ const PrivacyDashboard: React.FC = () => {
     try {
       setLoading(true);
       const [userConsents, settings] = await Promise.all([
-        GDPRComplianceService.getUserConsents(user.uid),
-        GDPRComplianceService.getPrivacySettings(user.uid)
+        GDPRComplianceService.getUserConsents(user?.uid || ''),
+        GDPRComplianceService.getPrivacySettings(user?.uid || '')
       ]);
 
       setConsents(userConsents);
@@ -72,7 +72,7 @@ const PrivacyDashboard: React.FC = () => {
     if (!user) return;
 
     try {
-      await GDPRComplianceService.recordConsent(user.uid, type, granted);
+      await GDPRComplianceService.recordConsent(user?.uid || '', type, granted);
       await loadPrivacyData();
     } catch (error) {
       console.error('Failed to update consent:', error);
@@ -84,7 +84,7 @@ const PrivacyDashboard: React.FC = () => {
 
     try {
       setExportInProgress(true);
-      const requestId = await GDPRComplianceService.requestDataExport(user.uid, format);
+      const requestId = await GDPRComplianceService.requestDataExport(user?.uid || '', format);
       
       // Show success message
       alert(`Data export requested. Request ID: ${requestId}. You will receive an email when it's ready.`);
@@ -101,7 +101,7 @@ const PrivacyDashboard: React.FC = () => {
 
     try {
       const reason = prompt('Please provide a reason for deletion (optional):');
-      const requestId = await GDPRComplianceService.requestDeletion(user.uid, reason || undefined);
+      const requestId = await GDPRComplianceService.requestDeletion(user?.uid || '', reason || undefined);
       
       alert(`Account deletion scheduled for ${format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'PPP')}. You will receive an email with instructions to cancel if needed.`);
       setShowDeletionConfirm(false);
@@ -127,7 +127,7 @@ const PrivacyDashboard: React.FC = () => {
         }
       };
 
-      await GDPRComplianceService.updatePrivacySettings(user.uid, updatedSettings);
+      await GDPRComplianceService.updatePrivacySettings(user?.uid || '', updatedSettings);
       setPrivacySettings(updatedSettings);
     } catch (error) {
       console.error('Failed to update privacy settings:', error);
@@ -410,7 +410,7 @@ const PrivacyDashboard: React.FC = () => {
                         type="text"
                         placeholder="Type DELETE"
                         className="px-3 py-2 border rounded-md"
-                        onChange={(_e) => {
+                        onChange={(e) => {
                           if (e.target.value === 'DELETE') {
                             handleDeletionRequest();
                           }

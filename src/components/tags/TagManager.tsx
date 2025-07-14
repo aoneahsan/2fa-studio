@@ -80,7 +80,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
     });
   };
 
-  const handleSubmit = async (_e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !formData.name.trim()) return;
 

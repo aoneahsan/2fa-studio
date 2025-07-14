@@ -22,6 +22,19 @@ import { MobileEncryptionService } from '@services/mobile-encryption.service';
 import { RealtimeSyncService } from '@services/realtime-sync.service';
 import { Preferences } from '@capacitor/preferences';
 import { AuditLogService } from '@services/audit-log.service';
+import { Tag } from '@app-types/tag';
+
+interface SearchOptions {
+  searchIn: {
+    issuer?: boolean;
+    label?: boolean;
+    tags?: boolean;
+    notes?: boolean;
+  };
+  regex?: boolean;
+  exactMatch?: boolean;
+  caseSensitive?: boolean;
+}
 
 /**
  * Hook for managing OTP accounts
@@ -101,7 +114,7 @@ export const useAccounts = () => {
           dispatch(setLoading(false) as any);
         }
       },
-      (error) => {
+      (error: Error) => {
         console.error('Firestore subscription error:', error);
         dispatch(setError('Failed to sync accounts') as any);
         dispatch(setLoading(false) as any);
@@ -308,7 +321,7 @@ export const useAccounts = () => {
     // Apply search filter
     if (accountsState.searchQuery) {
       // Check if it's an enhanced search query
-      let searchOptions: unknown = null;
+      let searchOptions: SearchOptions | null = null;
       let query = accountsState.searchQuery;
       
       try {
@@ -321,20 +334,20 @@ export const useAccounts = () => {
         // Not JSON, use as plain query
       }
       
-      filtered = filtered.filter((account: any) => {
+      filtered = filtered.filter((account: OTPAccount) => {
         // Prepare search text based on options
         const searchTexts: string[] = [];
         
-        if (!searchOptions || (searchOptions as any).searchIn.issuer) {
+        if (!searchOptions || searchOptions.searchIn.issuer) {
           searchTexts.push(account.issuer);
         }
-        if (!searchOptions || (searchOptions as any).searchIn.label) {
+        if (!searchOptions || searchOptions.searchIn.label) {
           searchTexts.push(account.label);
         }
-        if ((!searchOptions || (searchOptions as any).searchIn.tags) && account.tags) {
+        if ((!searchOptions || searchOptions.searchIn.tags) && account.tags) {
           // For tags, we need to get the tag names from the tags slice
-          const tagNames = ((account.tags) || []).map((tagId: any) => {
-            const tag = store.getState().tags.tags.find((t: any) => t.id === tagId);
+          const tagNames = ((account.tags) || []).map((tagId: string) => {
+            const tag = store.getState().tags.tags.find((t: Tag) => t.id === tagId);
             return tag?.name || '';
           }).filter(Boolean);
           searchTexts.push(...tagNames);
@@ -373,25 +386,25 @@ export const useAccounts = () => {
     
     // Apply favorites filter
     if (accountsState.showFavoritesOnly) {
-      filtered = filtered.filter((account: any) => account.isFavorite);
+      filtered = filtered.filter((account: OTPAccount) => account.isFavorite);
     }
     
     // Apply folder filter
     if (selectedFolderId !== null) {
-      filtered = filtered.filter((account: any) => account.folderId === selectedFolderId);
+      filtered = filtered.filter((account: OTPAccount) => account.folderId === selectedFolderId);
     }
     
     // Apply tag filter from tags slice
     if (activeTags.length > 0) {
-      filtered = filtered.filter((account: any) => {
+      filtered = filtered.filter((account: OTPAccount) => {
         if (!account.tags || account.tags.length === 0) return false;
         
         if (filterMode === 'OR') {
           // Account must have at least one of the selected tags
-          return account.tags?.some(tag => activeTags.includes(tag)) || false;
+          return account.tags?.some((tag: string) => activeTags.includes(tag)) || false;
         } else {
           // Account must have all selected tags
-          return activeTags.every(tag => account.tags?.includes(tag) || false);
+          return activeTags.every((tag: string) => account.tags?.includes(tag) || false);
         }
       });
     }

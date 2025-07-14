@@ -145,7 +145,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
   const handleFolderSelect = (folderId: string | null) => {
     setSelectedFolderId(folderId);
     if (folderId) {
-      const folder = folders.find((f: any) => f.id === folderId);
+      const folder = folders.find((f: Folder) => f.id === folderId);
       if (folder) {
         setFormData({
           name: folder.name,
@@ -159,7 +159,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
 
   const handleStartEdit = () => {
     if (!selectedFolderId) return;
-    const folder = folders.find((f: any) => f.id === selectedFolderId);
+    const folder = folders.find((f: Folder) => f.id === selectedFolderId);
     if (folder) {
       setEditingFolder(folder);
       setFormData({
@@ -171,7 +171,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const selectedFolder = selectedFolderId ? folders.find((f: any) => f.id === selectedFolderId) : null;
+  const selectedFolder = selectedFolderId ? folders.find((f: Folder) => f.id === selectedFolderId) : null;
 
   if (!isOpen) return null;
 
@@ -256,7 +256,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                       className="select select-bordered w-full"
                     >
                       <option value="">Root Level</option>
-                      {(folders || []).map((folder) => (
+                      {(folders || []).map((folder: Folder) => (
                         <option key={folder.id} value={folder.id}>
                           {folder.name}
                         </option>
@@ -358,7 +358,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                     <p>
                       <span className="text-muted-foreground">Parent:</span>{' '}
                       <span className="font-medium">
-                        {folders.find((f: any) => f.id === selectedFolder.parentId)?.name || 'Unknown'}
+                        {folders.find((f: Folder) => f.id === selectedFolder.parentId)?.name || 'Unknown'}
                       </span>
                     </p>
                   )}
@@ -413,8 +413,8 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                 >
                   <option value="">Root Level</option>
                   {folders
-                    .filter((f: any) => f.id !== deleteConfirm.folderId)
-                    .map((folder) => (
+                    .filter((f: Folder) => f.id !== deleteConfirm.folderId)
+                    .map((folder: Folder) => (
                       <option key={folder.id} value={folder.id}>
                         {folder.name}
                       </option>

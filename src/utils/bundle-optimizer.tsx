@@ -58,17 +58,17 @@ export const createLazyComponent = <T extends React.ComponentType<any>>(
  */
 export const preloadComponents = {
   // Auth components
-  LoginPage: () => import('@/pages/auth/LoginPage'),
-  RegisterPage: () => import('@/pages/auth/RegisterPage'),
+  LoginPage: () => import('@pages/LoginPage'),
+  RegisterPage: () => import('@pages/RegisterPage'),
   
   // Core components
   AccountsList: () => import('@components/accounts/AccountsList'),
   AddAccountModal: () => import('@components/accounts/AddAccountModal'),
-  SettingsPage: () => import('@/pages/settings/SettingsPage'),
+  SettingsPage: () => import('@pages/SettingsPage'),
   
   // Admin components (only preload for admin users)
-  AdminDashboard: () => import('@/pages/admin/AdminDashboard'),
-  UserManagement: () => import('@/pages/admin/UserManagement')
+  AdminDashboard: () => import('@pages/admin/AdminDashboard'),
+  AdminUsers: () => import('@pages/admin/AdminUsers')
 };
 
 /**
@@ -101,7 +101,7 @@ export class PreloadManager {
       '/accounts': 'AccountsList',
       '/settings': 'SettingsPage',
       '/admin': 'AdminDashboard',
-      '/admin/users': 'UserManagement'
+      '/admin/users': 'AdminUsers'
     };
 
     const componentName = routeComponentMap[route];
@@ -119,7 +119,7 @@ export class PreloadManager {
   static preloadForUserRole(role: 'admin' | 'user'): void {
     if (role === 'admin') {
       this.preloadOnHover('AdminDashboard');
-      this.preloadOnHover('UserManagement');
+      this.preloadOnHover('AdminUsers');
     }
     
     // Always preload core components
@@ -187,7 +187,7 @@ export class ImageOptimizer {
    */
   static preloadImages(urls: string[]): Promise<void[]> {
     return Promise.all(
-      urls.map((url: any) => this.preloadImage(url))
+      urls.map((url) => this.preloadImage(url))
     );
   }
 
@@ -309,8 +309,8 @@ export class MemoryManager {
    * Force garbage collection (for debugging)
    */
   static forceGC(): void {
-    if ('gc' in window && typeof (window as unknown).gc === 'function') {
-      (window as unknown).gc();
+    if ('gc' in window && typeof (window as any).gc === 'function') {
+      (window as any).gc();
     }
   }
 }

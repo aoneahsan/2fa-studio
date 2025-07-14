@@ -22,13 +22,13 @@ import {
   orderBy,
   limit
 } from 'firebase/firestore';
-import { db } from '@services/firebase';
+import { db } from '@src/config/firebase';
 import { EncryptionService } from '@services/encryption.service';
-import { AccountService } from '@services/account.service';
+import { AccountService } from '@src/services/accounts/account.service';
 import { RBACService, Resource, Action } from './rbac.service';
 import { AuditHelper } from '@services/compliance/audit-helper';
 import { AuthService } from '@services/auth.service';
-import { TwoFactorAccount } from '@app-types/index';
+import { Account } from '@src/types/account';
 
 export interface TeamVault {
   id?: string;
@@ -160,10 +160,6 @@ export class TeamVaultService {
         memberIds: [creatorId], // Creator is automatically a member
         accountIds: [],
         settings: {
-          requireApproval: false,
-          allowExport: true,
-          allowSharing: true,
-          accessLog: true,
           ...vault.settings
         }
       };
@@ -611,7 +607,7 @@ export class TeamVaultService {
     vaultId: string,
     accountId: string,
     userId: string
-  ): Promise<TwoFactorAccount> {
+  ): Promise<Account> {
     try {
       const vault = await this.getVault(vaultId);
       if (!vault) {

@@ -48,7 +48,7 @@ const FolderNode: React.FC<FolderNodeProps> = ({
   const isSelected = selectedFolderId === folder.id;
   const hasChildren = folder.children && folder.children.length > 0;
 
-  const handleToggle = (_e: React.MouseEvent) => {
+  const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasChildren) {
       dispatch(toggleFolderExpanded(folder.id) as any);

@@ -723,7 +723,7 @@ class ContentScript {
           chrome.runtime.sendMessage({ action: 'openPopup' });
         }
       } catch (_error) {
-        console.error('Failed to get code:', error);
+        console.error('Failed to get code:', _error);
       }
     });
   }
@@ -781,7 +781,7 @@ class ContentScript {
           chrome.runtime.sendMessage({ action: 'openPopup' });
         }
       } catch (_error) {
-        console.error('Failed to get code:', error);
+        console.error('Failed to get code:', _error);
       }
     });
   }
@@ -1182,7 +1182,7 @@ class ContentScript {
       
       return count;
     } catch (_error) {
-      console.error('Failed to scan for QR codes:', error);
+      console.error('Failed to scan for QR codes:', _error);
       return 0;
     }
   }
@@ -1560,7 +1560,7 @@ class ContentScript {
         this.showNotification('Failed to report site', 'error');
       }
     } catch (_error) {
-      console.error('Failed to report phishing site:', error);
+      console.error('Failed to report phishing site:', _error);
       this.showNotification('Error reporting site', 'error');
     }
   }
@@ -1605,7 +1605,7 @@ class ContentScript {
 
       return response;
     } catch (_error) {
-      console.error('Failed to request code with security:', error);
+      console.error('Failed to request code with security:', _error);
       return null;
     }
   }

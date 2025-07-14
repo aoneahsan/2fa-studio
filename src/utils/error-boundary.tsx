@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.reportError(error, errorInfo);
     
     // Call custom error handler if provided
-    if ((this as any).props.onError) {
+    if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
   }

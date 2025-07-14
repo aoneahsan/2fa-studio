@@ -38,11 +38,11 @@ const TagSelector: React.FC<TagSelectorProps> = ({
 
   const filteredTags = query === ''
     ? tags
-    : tags.filter((tag: any) =>
+    : tags.filter((tag: Tag) =>
         tag.name.toLowerCase().includes(query.toLowerCase())
       );
 
-  const selectedTagObjects = tags.filter((tag: any) => selectedTags.includes(tag.id));
+  const selectedTagObjects = tags.filter((tag: Tag) => selectedTags.includes(tag.id));
 
   const handleSelect = (value: string | string[] | null) => {
     if (!value) return;
@@ -65,7 +65,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
 
     setIsCreating(true);
     try {
-      const user = store.getState().auth.user;
+      const user = store.getState()._auth.user;
       if (!user) return;
 
       // Pick a random color
@@ -94,12 +94,12 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   };
 
   const handleRemoveTag = (tagId: string) => {
-    onChange(selectedTags.filter((id: any) => id !== tagId));
+    onChange(selectedTags.filter((id: string) => id !== tagId));
   };
 
   const showCreateOption = allowCreate && 
     query.trim() !== '' && 
-    !tags.some(tag => tag.name.toLowerCase() === query.toLowerCase().trim());
+    !tags.some((tag: Tag) => tag.name.toLowerCase() === query.toLowerCase().trim());
 
   return (
     <div className={className}>
@@ -142,7 +142,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
               </Combobox.Option>
             )}
             
-            {filteredTags.map((tag) => (
+            {filteredTags.map((tag: Tag) => (
               <Combobox.Option
                 key={tag.id}
                 value={tag.id}
@@ -199,7 +199,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       {/* Selected tags display */}
       {selectedTagObjects.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
-          {selectedTagObjects.map((tag: any) => (
+          {selectedTagObjects.map((tag: Tag) => (
             <TagPill
               key={tag.id}
               tag={tag}
