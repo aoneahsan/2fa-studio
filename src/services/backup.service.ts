@@ -293,9 +293,9 @@ export class BackupService {
 
 			// Use GoogleDriveBackupService for the actual backup
 			const result = await GoogleDriveBackupService.createBackup(accounts, {
-				encrypted,
-				includeSettings,
-				settings: backupData.settings,
+				password: encrypted ? 'encrypted' : undefined,
+				description: `2FA Studio Backup - ${backupData.accountsCount} accounts`,
+				includeMetadata: includeSettings,
 			});
 
 			return {
@@ -341,8 +341,7 @@ export class BackupService {
 				try {
 					// Encrypt the secret before storing
 					const encryptedSecret = await MobileEncryptionService.encryptData(
-						account.secret,
-						userId
+						account.secret
 					);
 
 					await FirestoreService.createDocument(`users/${userId}/accounts`, {

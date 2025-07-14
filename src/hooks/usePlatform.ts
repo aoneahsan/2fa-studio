@@ -67,7 +67,7 @@ export const usePlatform = () => {
 				// Check if PWA
 				const isPWA =
 					window.matchMedia('(display-mode: standalone)').matches ||
-					(window.navigator as unknown).standalone === true;
+					(window.navigator as any).standalone === true;
 
 				// Check if tablet
 				const isTablet =
@@ -215,14 +215,18 @@ export const usePlatform = () => {
 	) => {
 		if (!platformInfo.isAndroid) return () => {};
 
-		const listener = App.addListener('backButton', async ({ canGoBack }) => {
+		let cleanup: (() => void) | undefined;
+
+		App.addListener('backButton', async ({ canGoBack }) => {
 			const handled = await handler();
 			if (!handled && !canGoBack) {
 				App.exitApp();
 			}
+		}).then((listener) => {
+			cleanup = () => listener.remove();
 		});
 
-		return () => listener.remove();
+		return () => cleanup?.();
 	};
 
 	/**
