@@ -1,21 +1,53 @@
 /**
- * Biometric account protection service
+ * Biometric Account Service - Manages biometric authentication for OTP accounts
  * @module services/biometric-account
  */
 
-import { BiometricAuth } from 'capacitor-biometric-auth';
-import { Capacitor } from '@capacitor/core';
-import { OTPAccount } from '@services/otp.service';
-import { updateDoc, doc } from 'firebase/firestore';
-import { db, auth } from '@src/config/firebase';
-import { AuditLogService } from '@services/audit-log.service';
+import {
+	collection,
+	doc,
+	updateDoc,
+	serverTimestamp,
+	getFirestore,
+} from 'firebase/firestore';
 
-export interface BiometricAuthResult {
+// Try to import biometric auth, fallback to mock if not available
+let BiometricAuth: any = null;
+try {
+	BiometricAuth = require('@capacitor-community/biometric-auth').BiometricAuth;
+} catch (error) {
+	console.warn('Biometric auth not available, using mock implementation');
+	BiometricAuth = {
+		isAvailable: () => Promise.resolve({ isAvailable: false }),
+		authenticate: () =>
+			Promise.reject(new Error('Biometric auth not available')),
+	};
+}
+
+import { auth } from '../config/firebase';
+import { AuditLogService } from './audit-log.service';
+import { ErrorMonitoringService } from './error-monitoring.service';
+
+interface BiometricAuthResult {
 	success: boolean;
 	account?: OTPAccount;
 	error?: string;
 }
 
+interface OTPAccount {
+	id: string;
+	userId?: string;
+	label: string;
+	requiresBiometric?: boolean;
+	biometricTimeout?: number;
+	lastBiometricAuth?: Date;
+}
+
+const db = getFirestore();
+
+/**
+ * Service for managing biometric authentication on OTP accounts
+ */
 export class BiometricAccountService {
 	private static authenticatedAccounts: Map<string, Date> = new Map();
 
@@ -27,52 +59,37 @@ export class BiometricAccountService {
 			return false;
 		}
 
-		// Check if already authenticated recently
 		const lastAuth = this.authenticatedAccounts.get(account.id);
-		if (lastAuth && account.biometricTimeout) {
-			const timeoutMs = account.biometricTimeout * 60 * 1000; // Convert minutes to ms
-			const elapsed = Date.now() - lastAuth.getTime();
-
-			if (elapsed < timeoutMs) {
-				return false; // Still within timeout period
-			}
+		if (!lastAuth) {
+			return true;
 		}
 
-		return true;
+		const timeoutMinutes = account.biometricTimeout || 5;
+		const timeoutMs = timeoutMinutes * 60 * 1000;
+		const now = new Date();
+
+		return now.getTime() - lastAuth.getTime() > timeoutMs;
 	}
 
 	/**
-	 * Authenticate biometric for an account
+	 * Authenticate an account using biometric authentication
 	 */
 	static async authenticateAccount(
 		account: OTPAccount,
 		reason?: string
 	): Promise<BiometricAuthResult> {
 		try {
+			// Check if biometric is required
 			if (!this.isBiometricRequired(account)) {
-				return { success: true, account };
-			}
-
-			if (!Capacitor.isNativePlatform()) {
-				// On web, we can't use biometric _auth, so we'll simulate with a prompt
-				const confirmed = window.confirm(
-					reason || `Biometric authentication required for ${account.label}`
-				);
-
-				if (confirmed) {
-					this.authenticatedAccounts.set(account.id, new Date());
-					return { success: true, account };
-				} else {
-					return {
-						success: false,
-						error: 'Authentication cancelled',
-					};
-				}
+				return {
+					success: true,
+					account,
+				};
 			}
 
 			// Check if biometric is available
-			const checkResult = await BiometricAuth.isAvailable();
-			if (!checkResult.has) {
+			const available = await BiometricAuth.isAvailable();
+			if (!available.isAvailable) {
 				return {
 					success: false,
 					error: 'Biometric authentication not available',
@@ -80,7 +97,7 @@ export class BiometricAccountService {
 			}
 
 			// Perform biometric authentication
-			await BiometricAuth.verifyIdentity({
+			await BiometricAuth.authenticate({
 				reason: reason || `Access ${account.label}`,
 				title: 'Authentication Required',
 				subtitle: 'Please authenticate to continue',
@@ -92,47 +109,51 @@ export class BiometricAccountService {
 			this.authenticatedAccounts.set(account.id, new Date());
 
 			// Update in database
-			await this.updateLastBiometricAuth(account.id, account.userId);
+			await this.updateLastBiometricAuth(account.id, account.userId || '');
 
 			// Log successful biometric auth
 			await AuditLogService.log({
 				userId: account.userId || auth.currentUser?.uid || 'unknown',
 				action: 'security.biometric_auth_success',
-				resource: `account/${account.id}`,
-				severity: 'info',
+				resource: 'account',
 				success: true,
+				severity: 'info',
 				details: {
-					accountIssuer: account.issuer,
-					accountLabel: account.label,
-				},
-			});
-
-			return { success: true, account };
-		} catch (error) {
-			console.error('Biometric authentication error:', error);
-
-			// Log failed biometric auth
-			await AuditLogService.log({
-				userId: account.userId || auth.currentUser?.uid || 'unknown',
-				action: 'security.biometric_auth_failed',
-				resource: `account/${account.id}`,
-				severity: 'warning',
-				success: false,
-				details: {
-					accountIssuer: account.issuer,
+					accountId: account.id,
 					accountLabel: account.label,
 				},
 			});
 
 			return {
+				success: true,
+				account,
+			};
+		} catch (error) {
+			console.error('Biometric authentication failed:', error);
+
+			// Log failed biometric auth
+			await AuditLogService.log({
+				userId: account.userId || auth.currentUser?.uid || 'unknown',
+				action: 'security.biometric_auth_failed',
+				resource: 'account',
 				success: false,
-				error: error instanceof Error ? error.message : 'Authentication error',
+				severity: 'warning',
+				details: {
+					accountId: account.id,
+					accountLabel: account.label,
+					error: error instanceof Error ? error.message : 'Unknown error',
+				},
+			});
+
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Authentication failed',
 			};
 		}
 	}
 
 	/**
-	 * Enable biometric protection for an account
+	 * Enable biometric authentication for an account
 	 */
 	static async enableBiometric(
 		userId: string,
@@ -140,126 +161,98 @@ export class BiometricAccountService {
 		timeout: number = 5 // Default 5 minutes
 	): Promise<void> {
 		try {
-			// First verify biometric is available
-			if (Capacitor.isNativePlatform()) {
-				const checkResult = await BiometricAuth.isAvailable();
-				if (!checkResult.has) {
-					throw new Error(
-						'Biometric authentication not available on this device'
-					);
-				}
-
-				// Perform a test authentication
-				await BiometricAuth.verifyIdentity({
-					reason: 'Enable biometric protection',
-					title: 'Enable Protection',
-					subtitle: 'Authenticate to enable biometric protection',
-					description:
-						'This will enable biometric authentication for this account',
-					negativeButtonText: 'Cancel',
-				});
+			// Check if biometric is available
+			const available = await BiometricAuth.isAvailable();
+			if (!available.isAvailable) {
+				throw new Error(
+					'Biometric authentication not available on this device'
+				);
 			}
 
-			// Update account in Firestore
-			const accountRef = doc(db, `users/${userId}/accounts`, accountId);
+			// Perform initial biometric authentication to confirm setup
+			await BiometricAuth.authenticate({
+				reason: 'Confirm biometric setup',
+				title: 'Enable Biometric Authentication',
+				subtitle: 'Authenticate to enable biometric protection',
+				description:
+					'This will enable biometric authentication for this account',
+				negativeButtonText: 'Cancel',
+			});
+
+			// Update account in database
+			const accountRef = doc(db, 'accounts', accountId);
 			await updateDoc(accountRef, {
 				requiresBiometric: true,
 				biometricTimeout: timeout,
-				lastBiometricAuth: new Date(),
-				updatedAt: new Date(),
+				lastBiometricAuth: serverTimestamp(),
+				updatedAt: serverTimestamp(),
 			});
 
-			// Update local cache
-			this.authenticatedAccounts.set(accountId, new Date());
-
-			// Log biometric enabled
+			// Log biometric enablement
 			await AuditLogService.log({
-				userId,
+				userId: userId,
 				action: 'security.biometric_enabled',
-				resource: `account/${accountId}`,
-				severity: 'info',
+				resource: 'account',
 				success: true,
+				severity: 'info',
 				details: {
+					accountId,
 					timeout,
-					platform: Capacitor.getPlatform(),
 				},
 			});
+
+			console.log('Biometric authentication enabled for account:', accountId);
 		} catch (error) {
-			console.error('Error enabling biometric:', error);
-
-			// Log failed attempt
-			await AuditLogService.log({
-				userId,
-				action: 'security.biometric_enabled',
-				resource: `account/${accountId}`,
-				severity: 'warning',
-				success: false,
-				errorMessage: error instanceof Error ? error.message : 'Unknown error',
-				details: {
-					timeout,
-				},
-			});
-
+			console.error('Failed to enable biometric authentication:', error);
 			throw error;
 		}
 	}
 
 	/**
-	 * Disable biometric protection for an account
+	 * Disable biometric authentication for an account
 	 */
 	static async disableBiometric(
 		userId: string,
 		accountId: string
 	): Promise<void> {
 		try {
-			// Verify with biometric before disabling
-			if (Capacitor.isNativePlatform()) {
-				await BiometricAuth.verifyIdentity({
-					reason: 'Disable biometric protection',
-					title: 'Disable Protection',
-					subtitle: 'Authenticate to disable biometric protection',
-					description:
-						'This will disable biometric authentication for this account',
-					negativeButtonText: 'Cancel',
-				});
-			}
+			// Perform biometric authentication to confirm disabling
+			await BiometricAuth.authenticate({
+				reason: 'Confirm biometric disable',
+				title: 'Disable Biometric Authentication',
+				subtitle: 'Authenticate to disable biometric protection',
+				description:
+					'This will disable biometric authentication for this account',
+				negativeButtonText: 'Cancel',
+			});
 
-			// Update account in Firestore
-			const accountRef = doc(db, `users/${userId}/accounts`, accountId);
+			// Update account in database
+			const accountRef = doc(db, 'accounts', accountId);
 			await updateDoc(accountRef, {
 				requiresBiometric: false,
 				biometricTimeout: null,
 				lastBiometricAuth: null,
-				updatedAt: new Date(),
+				updatedAt: serverTimestamp(),
 			});
 
-			// Remove from local cache
+			// Remove from authenticated accounts
 			this.authenticatedAccounts.delete(accountId);
 
-			// Log biometric disabled
+			// Log biometric disablement
 			await AuditLogService.log({
-				userId,
+				userId: userId,
 				action: 'security.biometric_disabled',
-				resource: `account/${accountId}`,
-				severity: 'warning',
+				resource: 'account',
 				success: true,
+				severity: 'info',
 				details: {
-					platform: Capacitor.getPlatform(),
+					accountId,
 				},
 			});
+
+			console.log('Biometric authentication disabled for account:', accountId);
 		} catch (error) {
-			console.error('Error disabling biometric:', error);
-
-			// Log failed attempt
-			await AuditLogService.log({
-				userId,
-				action: 'security.biometric_disabled',
-				resource: `account/${accountId}`,
-				severity: 'warning',
-				success: false,
-				errorMessage: error instanceof Error ? error.message : 'Unknown error',
-			});
-
+			console.error('Failed to disable biometric authentication:', error);
 			throw error;
 		}
 	}
@@ -273,13 +266,27 @@ export class BiometricAccountService {
 		timeout: number
 	): Promise<void> {
 		try {
-			const accountRef = doc(db, `users/${userId}/accounts`, accountId);
+			// Update account in database
+			const accountRef = doc(db, 'accounts', accountId);
 			await updateDoc(accountRef, {
 				biometricTimeout: timeout,
-				updatedAt: new Date(),
+				updatedAt: serverTimestamp(),
+			});
+
+			// Log timeout update
+			await AuditLogService.log({
+				userId: userId,
+				action: 'security.biometric_enabled',
+				resource: 'account',
+				success: true,
+				severity: 'info',
+				details: {
+					accountId,
+					newTimeout: timeout,
+				},
 			});
 		} catch (error) {
-			console.error('Error updating biometric timeout:', error);
+			console.error('Failed to update biometric timeout:', error);
 			throw error;
 		}
 	}
@@ -292,17 +299,19 @@ export class BiometricAccountService {
 		userId: string
 	): Promise<void> {
 		try {
-			const accountRef = doc(db, `users/${userId}/accounts`, accountId);
+			const accountRef = doc(db, 'accounts', accountId);
 			await updateDoc(accountRef, {
-				lastBiometricAuth: new Date(),
+				lastBiometricAuth: serverTimestamp(),
+				updatedAt: serverTimestamp(),
 			});
 		} catch (error) {
-			console.error('Error updating last biometric _auth:', error);
+			console.error('Failed to update last biometric auth timestamp:', error);
+			// Don't throw error as this is not critical
 		}
 	}
 
 	/**
-	 * Clear all authenticated accounts (on app lock or logout)
+	 * Clear all authenticated accounts (e.g., on app backgrounding)
 	 */
 	static clearAuthenticatedAccounts(): void {
 		this.authenticatedAccounts.clear();
@@ -318,26 +327,29 @@ export class BiometricAccountService {
 		remainingMinutes?: number;
 	} {
 		const isEnabled = account.requiresBiometric || false;
-		let isAuthenticated = false;
-		let remainingMinutes: number | undefined;
+		const isAuthenticated = !this.isBiometricRequired(account);
 
-		if (isEnabled) {
-			const lastAuth = this.authenticatedAccounts.get(account.id);
-			if (lastAuth && account.biometricTimeout) {
-				const elapsed = Date.now() - lastAuth.getTime();
-				const timeoutMs = account.biometricTimeout * 60 * 1000;
+		if (!isEnabled) {
+			return {
+				isEnabled: false,
+				isAuthenticated: true,
+			};
+		}
 
-				if (elapsed < timeoutMs) {
-					isAuthenticated = true;
-					remainingMinutes = Math.ceil((timeoutMs - elapsed) / 60000);
-				}
-			}
+		const lastAuth = this.authenticatedAccounts.get(account.id);
+		const timeoutMinutes = account.biometricTimeout || 5;
+
+		let remainingMinutes = 0;
+		if (lastAuth) {
+			const elapsed = new Date().getTime() - lastAuth.getTime();
+			const remaining = timeoutMinutes * 60 * 1000 - elapsed;
+			remainingMinutes = Math.max(0, Math.ceil(remaining / (60 * 1000)));
 		}
 
 		return {
 			isEnabled,
 			isAuthenticated,
-			timeoutMinutes: account.biometricTimeout,
+			timeoutMinutes,
 			remainingMinutes,
 		};
 	}

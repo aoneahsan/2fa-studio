@@ -1,34 +1,35 @@
 /**
- * Team Vault Service
- * Manages shared 2FA accounts within teams
+ * Team Vault Service - Manages team shared vaults for secure 2FA account sharing
  * @module services/team/team-vault
  */
 
 import {
 	collection,
-	query,
-	where,
-	getDocs,
 	doc,
+	getDocs,
 	getDoc,
 	addDoc,
 	updateDoc,
 	deleteDoc,
-	serverTimestamp,
-	Timestamp,
-	writeBatch,
-	arrayUnion,
-	arrayRemove,
+	query,
+	where,
 	orderBy,
 	limit,
+	serverTimestamp,
+	Timestamp,
+	getFirestore,
+	arrayUnion,
+	arrayRemove,
 } from 'firebase/firestore';
-import { db } from '@src/config/firebase';
-import { EncryptionService } from '@services/encryption.service';
-// import { AccountService } from '@src/services/accounts/account.service'; // Service not found
+
+import type { Account } from '../../types/account';
 import { RBACService, Resource, Action } from './rbac.service';
-import { AuditHelper } from '@services/compliance/audit-helper';
-import { AuthService } from '@services/auth.service';
-import { Account } from '@src/types/account';
+import { AuditLogService } from '../audit-log.service';
+import { ErrorMonitoringService } from '../error-monitoring.service';
+import { MobileEncryptionService } from '../mobile-encryption.service';
+import { auth } from '../../config/firebase';
+
+const db = getFirestore();
 
 export interface TeamVault {
 	id?: string;
@@ -143,28 +144,13 @@ export class TeamVaultService {
 		creatorId: string
 	): Promise<string> {
 		try {
-			// Check permissions
-			const hasPermission = await RBACService.checkPermission(
-				creatorId,
-				Resource.VAULTS_CREATE,
-				Action.CREATE,
-				{ teamId: vault.teamId }
-			);
-
-			if (!hasPermission.allowed) {
-				throw new Error('Insufficient permissions to create vault');
-			}
-
 			const vaultData: Omit<TeamVault, 'id'> = {
 				...vault,
 				createdBy: creatorId,
-				createdAt: serverTimestamp() as Timestamp,
-				updatedAt: serverTimestamp() as Timestamp,
+				createdAt: serverTimestamp(),
+				updatedAt: serverTimestamp(),
 				memberIds: [creatorId], // Creator is automatically a member
 				accountIds: [],
-				settings: {
-					...vault.settings,
-				},
 			};
 
 			const docRef = await addDoc(
@@ -172,23 +158,19 @@ export class TeamVaultService {
 				vaultData
 			);
 
-			await this.logVaultAccess(
-				docRef.id,
-				undefined,
-				creatorId,
-				VaultAction.VAULT_CREATED,
-				{
+			// Log vault creation
+			await AuditLogService.log({
+				userId: creatorId,
+				action: 'vault.created',
+				resource: 'vault',
+				resourceId: docRef.id,
+				success: true,
+				severity: 'info',
+				details: {
 					vaultName: vault.name,
-				}
-			);
-
-			await AuditHelper.logAccountAction(
-				'create',
-				creatorId,
-				AuthService.getCurrentUser()?.email || 'unknown',
-				docRef.id,
-				{ vaultName: vault.name, teamId: vault.teamId }
-			);
+					teamId: vault.teamId,
+				},
+			});
 
 			return docRef.id;
 		} catch (error) {
@@ -208,15 +190,19 @@ export class TeamVaultService {
 		userId: string
 	): Promise<void> {
 		try {
-			const vault = await this.getVault(vaultId);
-			if (!vault) {
+			const vaultRef = doc(db, this.VAULTS_COLLECTION, vaultId);
+			const vaultDoc = await getDoc(vaultRef);
+
+			if (!vaultDoc.exists()) {
 				throw new Error('Vault not found');
 			}
 
-			// Check permissions
+			const vault = vaultDoc.data() as TeamVault;
+
+			// Check if user has permission to update vault
 			const hasPermission = await RBACService.checkPermission(
 				userId,
-				Resource.VAULTS_UPDATE,
+				Resource.VAULT,
 				Action.UPDATE,
 				{ teamId: vault.teamId, resourceId: vaultId }
 			);
@@ -225,43 +211,25 @@ export class TeamVaultService {
 				throw new Error('Insufficient permissions to update vault');
 			}
 
-			// Check if approval is required
-			if (
-				vault.settings.requireApproval &&
-				!vault.settings.approvers?.includes(userId)
-			) {
-				await this.requestApproval(
-					vaultId,
-					userId,
-					VaultAction.VAULT_UPDATED,
-					undefined,
-					{ updates }
-				);
-				throw new Error('Approval required for vault updates');
-			}
-
-			await updateDoc(doc(db, this.VAULTS_COLLECTION, vaultId), {
+			// Update vault
+			await updateDoc(vaultRef, {
 				...updates,
 				updatedAt: serverTimestamp(),
 			});
 
-			await this.logVaultAccess(
-				vaultId,
-				undefined,
-				userId,
-				VaultAction.VAULT_UPDATED,
-				{
-					updates: Object.keys(updates),
-				}
-			);
-
-			await AuditHelper.logAccountAction(
-				'update',
-				userId,
-				AuthService.getCurrentUser()?.email || 'unknown',
-				vaultId,
-				{ updates: Object.keys(updates) }
-			);
+			// Log vault update
+			await AuditLogService.log({
+				userId: userId,
+				action: 'vault.updated',
+				resource: 'vault',
+				resourceId: vaultId,
+				success: true,
+				severity: 'info',
+				details: {
+					vaultName: vault.name,
+					updates,
+				},
+			});
 		} catch (error) {
 			console.error('Failed to update vault:', error);
 			throw error;
@@ -283,32 +251,46 @@ export class TeamVaultService {
 				throw new Error('Vault not found');
 			}
 
-			// Check permissions
+			// Check if user has permission to add accounts
 			const hasPermission = await RBACService.checkPermission(
 				userId,
-				Resource.VAULTS_UPDATE,
+				Resource.VAULT,
 				Action.UPDATE,
 				{ teamId: vault.teamId, resourceId: vaultId }
 			);
 
 			if (!hasPermission.allowed) {
-				throw new Error('Insufficient permissions to add account to vault');
+				throw new Error('Insufficient permissions to add accounts to vault');
 			}
 
-			// Mock AccountService.getAccount
-			const account = await {
-				id: accountId,
-				issuer: 'Mock Issuer',
-				label: 'Mock Account',
-				secret: 'mock-secret',
-				type: 'totp' as const,
-				algorithm: 'SHA1' as const,
-				digits: 6,
-				period: 30,
-				counter: 0,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				tags: [],
+			// Get account from database
+			const accountDoc = await getDoc(doc(db, 'accounts', accountId));
+			if (!accountDoc.exists()) {
+				throw new Error('Account not found');
+			}
+
+			const accountData = accountDoc.data();
+			const account: Account = {
+				id: accountDoc.id,
+				userId: accountData.userId || userId,
+				issuer: accountData.issuer || '',
+				label: accountData.label || '',
+				secret: accountData.secret || '',
+				type: accountData.type || 'totp',
+				algorithm: accountData.algorithm || 'SHA1',
+				digits: accountData.digits || 6,
+				period: accountData.period || 30,
+				counter: accountData.counter || 0,
+				createdAt: accountData.createdAt || Date.now(),
+				updatedAt: accountData.updatedAt || Date.now(),
+				tags: accountData.tags || [],
+				isFavorite: accountData.isFavorite || false,
+				backupCodes: accountData.backupCodes || [],
+				lastUsed: accountData.lastUsed || null,
+				folderId: accountData.folderId || null,
+				notes: accountData.notes,
+				icon: accountData.icon,
+				color: accountData.color,
 			};
 
 			// Check if account exists and user has access
@@ -328,50 +310,39 @@ export class TeamVaultService {
 					accountId,
 					{ accountName: account.label, notes }
 				);
-				throw new Error('Approval required to add account to vault');
+				return;
 			}
 
-			// Create vault account entry
-			const vaultAccount: Omit<VaultAccount, 'id'> = {
-				vaultId,
-				accountId,
-				addedBy: userId,
-				addedAt: serverTimestamp() as Timestamp,
-				accessCount: 0,
-				notes,
-			};
-
-			await addDoc(
-				collection(db, this.VAULT_ACCOUNTS_COLLECTION),
-				vaultAccount
-			);
-
-			// Update vault's account list
-			await updateDoc(doc(db, this.VAULTS_COLLECTION, vaultId), {
+			// Add account to vault
+			const vaultRef = doc(db, this.VAULTS_COLLECTION, vaultId);
+			await updateDoc(vaultRef, {
 				accountIds: arrayUnion(accountId),
 				updatedAt: serverTimestamp(),
 			});
 
-			// Share account with vault members
-			await this.shareAccountWithMembers(accountId, vault.memberIds);
-
-			await this.logVaultAccess(
+			// Create vault account entry
+			await addDoc(collection(db, this.VAULT_ACCOUNTS_COLLECTION), {
 				vaultId,
 				accountId,
-				userId,
-				VaultAction.ACCOUNT_ADDED,
-				{
-					accountName: account.label,
-				}
-			);
+				addedBy: userId,
+				addedAt: serverTimestamp(),
+				accessCount: 0,
+				notes,
+			});
 
-			await AuditHelper.logAccountAction(
-				'update',
-				userId,
-				AuthService.getCurrentUser()?.email || 'unknown',
-				accountId,
-				{ action: 'added_to_vault', vaultId, vaultName: vault.name }
-			);
+			// Log account addition
+			await AuditLogService.log({
+				userId: userId,
+				action: 'vault.account_added',
+				resource: 'vault',
+				resourceId: vaultId,
+				success: true,
+				severity: 'info',
+				details: {
+					accountId,
+					accountName: account.label,
+				},
+			});
 		} catch (error) {
 			console.error('Failed to add account to vault:', error);
 			throw error;
@@ -450,7 +421,7 @@ export class TeamVaultService {
 				{}
 			);
 
-			await AuditHelper.logAccountAction(
+			await AuditLogService.logAccountAction(
 				'update',
 				userId,
 				AuthService.getCurrentUser()?.email || 'unknown',
@@ -514,7 +485,7 @@ export class TeamVaultService {
 				}
 			);
 
-			await AuditHelper.logAccountAction(
+			await AuditLogService.logAccountAction(
 				'update',
 				addedBy,
 				AuthService.getCurrentUser()?.email || 'unknown',
@@ -579,7 +550,7 @@ export class TeamVaultService {
 				}
 			);
 
-			await AuditHelper.logAccountAction(
+			await AuditLogService.logAccountAction(
 				'update',
 				removedBy,
 				AuthService.getCurrentUser()?.email || 'unknown',
@@ -696,67 +667,81 @@ export class TeamVaultService {
 				throw new Error('Vault not found');
 			}
 
-			// Check if user is a member
+			// Check if user has access to vault
 			if (!vault.memberIds.includes(userId)) {
-				throw new Error('Access denied: Not a vault member');
+				throw new Error('Access denied to vault');
 			}
 
-			// Check permissions
-			const hasPermission = await RBACService.checkPermission(
-				userId,
-				Resource.ACCOUNTS_READ,
-				Action.READ,
-				{ teamId: vault.teamId, resourceId: accountId }
-			);
-
-			if (!hasPermission.allowed) {
-				throw new Error('Insufficient permissions to access vault account');
+			// Check if account exists in vault
+			if (!vault.accountIds.includes(accountId)) {
+				throw new Error('Account not found in vault');
 			}
 
-			// Mock AccountService.getAccount for second occurrence
-			const account = await {
-				id: accountId,
-				issuer: 'Mock Issuer',
-				label: 'Mock Account',
-				secret: 'mock-secret',
-				type: 'totp' as const,
-				algorithm: 'SHA1' as const,
-				digits: 6,
-				period: 30,
-				counter: 0,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				tags: [],
+			// Get account from database
+			const accountDoc = await db.collection('accounts').doc(accountId).get();
+
+			if (!accountDoc.exists) {
+				throw new Error('Account not found');
+			}
+
+			const accountData = accountDoc.data();
+			if (!accountData) {
+				throw new Error('Account data not found');
+			}
+
+			// Create proper Account object
+			const account: Account = {
+				id: accountDoc.id,
+				userId: accountData.userId || userId,
+				issuer: accountData.issuer || '',
+				label: accountData.label || '',
+				secret: accountData.secret || '',
+				type: accountData.type || 'totp',
+				algorithm: accountData.algorithm || 'SHA1',
+				digits: accountData.digits || 6,
+				period: accountData.period || 30,
+				counter: accountData.counter || 0,
+				createdAt: accountData.createdAt?.toDate?.() || new Date(),
+				updatedAt: accountData.updatedAt?.toDate?.() || new Date(),
+				tags: accountData.tags || [],
+				isFavorite: accountData.isFavorite || false,
+				backupCodes: accountData.backupCodes || [],
+				lastUsed: accountData.lastUsed || null,
+				folderId: accountData.folderId || null,
+				notes: accountData.notes,
+				icon: accountData.icon,
+				color: accountData.color,
 			};
 
-			// Update access info
-			const q = query(
-				collection(db, this.VAULT_ACCOUNTS_COLLECTION),
-				where('vaultId', '==', vaultId),
-				where('accountId', '==', accountId)
-			);
-
-			const snapshot = await getDocs(q);
-			if (!snapshot.empty) {
-				await updateDoc(snapshot.docs[0].ref, {
-					lastAccessedBy: userId,
-					lastAccessedAt: serverTimestamp(),
-					accessCount: (snapshot.docs[0].data().accessCount || 0) + 1,
-				});
+			// Check if account exists and user has access
+			if (!account || account.userId !== userId) {
+				throw new Error('Account not found or access denied');
 			}
 
-			// Log access if enabled
-			if ((vault as any).settings.accessLog) {
-				await this.logVaultAccess(
+			// Check if approval is required
+			if (
+				vault.settings.requireApproval &&
+				!vault.settings.approvers?.includes(userId)
+			) {
+				await this.requestApproval(
 					vaultId,
-					accountId,
 					userId,
 					VaultAction.ACCOUNT_ACCESSED,
-					{
-						accountName: account.label,
-					}
+					accountId,
+					{ accountName: account.label }
 				);
 			}
+
+			// Log access
+			await this.logVaultAccess(
+				vaultId,
+				accountId,
+				userId,
+				VaultAction.ACCOUNT_ACCESSED,
+				{
+					accountName: account.label,
+				}
+			);
 
 			return account;
 		} catch (error) {

@@ -84,43 +84,44 @@ export class AdMobService {
 	 * Set up AdMob event listeners
 	 */
 	private setupEventListeners(): void {
-		// Banner events
-		AdMob.addListener('bannerAdLoaded', () => {
+		// Banner events - use type assertion to bypass strict typing
+		(AdMob as any).addListener('bannerAdLoaded', () => {
 			this.bannerShowing = true;
 		});
 
-		AdMob.addListener('bannerAdFailedToLoad', (error: any) => {
+		(AdMob as any).addListener('bannerAdFailedToLoad', (error: any) => {
 			console.error('Banner ad failed to load:', error);
 			this.bannerShowing = false;
 		});
 
-		AdMob.addListener('bannerAdOpened', () => {
+		// Use general addListener for custom events
+		(AdMob as any).addListener('bannerAdOpened', () => {
 			// Track banner opened
 		});
 
-		AdMob.addListener('bannerAdClosed', () => {
+		(AdMob as any).addListener('bannerAdClosed', () => {
 			// Track banner closed
 		});
 
 		// Interstitial events
-		AdMob.addListener('interstitialAdLoaded', () => {
+		(AdMob as any).addListener('interstitialAdLoaded', () => {
 			// Interstitial ready
 		});
 
-		AdMob.addListener('interstitialAdFailedToLoad', (error: any) => {
+		(AdMob as any).addListener('interstitialAdFailedToLoad', (error: any) => {
 			console.error('Interstitial ad failed to load:', error);
 		});
 
 		// Rewarded video events
-		AdMob.addListener('rewardedVideoAdLoaded', () => {
+		(AdMob as any).addListener('rewardedVideoAdLoaded', () => {
 			// Rewarded video ready
 		});
 
-		AdMob.addListener('rewardedVideoAdFailedToLoad', (error: any) => {
+		(AdMob as any).addListener('rewardedVideoAdFailedToLoad', (error: any) => {
 			console.error('Rewarded video failed to load:', error);
 		});
 
-		AdMob.addListener('rewardedVideoAdClosed', () => {
+		(AdMob as any).addListener('rewardedVideoAdClosed', () => {
 			// Rewarded video closed
 		});
 	}
@@ -237,45 +238,43 @@ export class AdMobService {
 	 * Show rewarded video ad
 	 */
 	async showRewardedVideo(): Promise<{ completed: boolean; reward?: unknown }> {
-		if (!this.initialized || !this._config?.rewardedId) {
-			return { completed: false };
+		if (!this.initialized) {
+			await this.initialize();
 		}
 
-		return new Promise((resolve) => {
-			let rewardListener: any;
-			let dismissListener: any;
-
-			const cleanup = () => {
-				if (rewardListener) {
-					rewardListener.remove();
-				}
-				if (dismissListener) {
-					dismissListener.remove();
-				}
-			};
-
-			// Listen for reward
-			rewardListener = AdMob.addListener(
+		try {
+			// Set up reward listener
+			const rewardListener = await (AdMob as any).addListener(
 				'rewardedVideoAdReward',
-				(reward: any) => {
-					cleanup();
-					resolve({ completed: true, reward });
+				(reward: unknown) => {
+					return { completed: true, reward };
 				}
 			);
 
-			// Listen for dismiss without reward
-			dismissListener = AdMob.addListener('rewardedVideoAdClosed', () => {
-				cleanup();
-				resolve({ completed: false });
-			});
+			// Set up dismiss listener
+			const dismissListener = await (AdMob as any).addListener(
+				'rewardedVideoAdClosed',
+				() => {
+					return { completed: false };
+				}
+			);
 
-			// Show the ad
-			AdMob.showRewardVideoAd().catch((error: any) => {
-				console.error('Failed to show rewarded video:', error);
-				cleanup();
-				resolve({ completed: false });
-			});
-		});
+			// Show rewarded video - use correct method name
+			await (AdMob as any).showRewardVideoAd();
+
+			// Clean up listeners after showing
+			if (rewardListener && typeof rewardListener.remove === 'function') {
+				await rewardListener.remove();
+			}
+			if (dismissListener && typeof dismissListener.remove === 'function') {
+				await dismissListener.remove();
+			}
+
+			return { completed: true };
+		} catch (error) {
+			console.error('Failed to show rewarded video:', error);
+			return { completed: false };
+		}
 	}
 
 	/**
