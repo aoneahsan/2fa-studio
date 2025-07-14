@@ -50,8 +50,7 @@ export class BackupService {
 			for (const accountData of result.data) {
 				// Decrypt the secret for backup using MobileEncryptionService
 				const decryptedSecret = await MobileEncryptionService.decryptData(
-					accountData.encryptedSecret,
-					userId
+					accountData.encryptedSecret
 				);
 
 				accounts.push({
@@ -122,8 +121,7 @@ export class BackupService {
 			if (format === 'encrypted') {
 				// Encrypt the entire backup using MobileEncryptionService
 				const encryptedData = await MobileEncryptionService.encryptData(
-					JSON.stringify(backupData),
-					userId
+					JSON.stringify(backupData)
 				);
 				fileContent = encryptedData;
 				fileName = `2fa-studio-backup-encrypted-${Date.now()}.2fas`;
@@ -179,10 +177,8 @@ export class BackupService {
 			// Try to parse as encrypted backup first
 			try {
 				// Try to decrypt using MobileEncryptionService
-				const decrypted = await MobileEncryptionService.decryptData(
-					fileContent,
-					userId
-				);
+				const decrypted =
+					await MobileEncryptionService.decryptData(fileContent);
 				backupData = JSON.parse(decrypted);
 			} catch {
 				// If decryption fails, try as plain JSON
@@ -203,27 +199,28 @@ export class BackupService {
 
 			for (const account of backupData.accounts) {
 				try {
+					const accountData = account as any;
+
 					// Encrypt the secret before storing
 					const encryptedSecret = await MobileEncryptionService.encryptData(
-						account.secret,
-						userId
+						accountData.secret
 					);
 
 					await FirestoreService.createDocument(`users/${userId}/accounts`, {
-						issuer: account.issuer,
-						label: account.label,
+						issuer: accountData.issuer,
+						label: accountData.label,
 						encryptedSecret,
-						algorithm: (account as any).algorithm || 'SHA1',
-						digits: account.digits || 6,
-						period: account.period || 30,
-						type: account.type || 'totp',
-						counter: account.counter,
-						iconUrl: account.iconUrl,
-						tags: account.tags || [],
-						notes: account.notes,
-						backupCodes: account.backupCodes || [],
-						isFavorite: account.isFavorite || false,
-						folderId: account.folderId || null,
+						algorithm: accountData.algorithm || 'SHA1',
+						digits: accountData.digits || 6,
+						period: accountData.period || 30,
+						type: accountData.type || 'totp',
+						counter: accountData.counter,
+						iconUrl: accountData.iconUrl,
+						tags: accountData.tags || [],
+						notes: accountData.notes,
+						backupCodes: accountData.backupCodes || [],
+						isFavorite: accountData.isFavorite || false,
+						folderId: accountData.folderId || null,
 						userId,
 						createdAt: new Date(),
 						updatedAt: new Date(),
@@ -231,7 +228,11 @@ export class BackupService {
 
 					importedCount++;
 				} catch (error) {
-					console.error('Error importing account:', account.label, error);
+					console.error(
+						'Error importing account:',
+						(account as any).label,
+						error
+					);
 				}
 			}
 

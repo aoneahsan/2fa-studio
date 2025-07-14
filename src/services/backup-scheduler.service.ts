@@ -117,7 +117,7 @@ export class BackupSchedulerService {
 		};
 
 		// Send notification about new schedule
-		await NotificationService.sendBackupReminder(
+		await this.sendBackupReminder(
 			userId,
 			`Backup schedule created: ${schedule.frequency} at ${schedule.time}`
 		);
@@ -140,7 +140,7 @@ export class BackupSchedulerService {
 		);
 
 		// Recalculate next run if frequency or time changed
-		const updateData: unknown = {
+		const updateData: any = {
 			...updates,
 			updatedAt: serverTimestamp(),
 		};
@@ -310,7 +310,7 @@ export class BackupSchedulerService {
 			}
 
 			// Send success notification
-			await NotificationService.sendBackupReminder(
+			await this.sendBackupReminder(
 				userId,
 				`Backup completed successfully: ${accountsCount} accounts backed up`
 			);
@@ -319,10 +319,7 @@ export class BackupSchedulerService {
 			error = err instanceof Error ? err.message : 'Unknown error';
 
 			// Send failure notification
-			await NotificationService.sendBackupReminder(
-				userId,
-				`Backup failed: ${error}`
-			);
+			await this.sendBackupReminder(userId, `Backup failed: ${error}`);
 		}
 
 		// Record backup history
@@ -355,6 +352,17 @@ export class BackupSchedulerService {
 			userId,
 			timestamp: Timestamp.fromDate(history.timestamp),
 		});
+	}
+
+	/**
+	 * Send backup reminder notification
+	 */
+	private static async sendBackupReminder(
+		userId: string,
+		message: string
+	): Promise<void> {
+		// Skip notification for now - will be implemented when NotificationService is complete
+		console.log(`Backup reminder for user ${userId}: ${message}`);
 	}
 
 	/**
