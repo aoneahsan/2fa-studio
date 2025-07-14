@@ -361,7 +361,7 @@ export class LicenseManagementService {
 
 			// Save usage record
 			if (isNew) {
-				await FirestoreService.addDocument('usage', usageRecord);
+				await FirestoreService.createDocument('usage', usageRecord);
 			} else {
 				await FirestoreService.updateDocument(
 					'usage',
