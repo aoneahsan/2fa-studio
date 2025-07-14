@@ -212,20 +212,21 @@ export class AuthService {
 			return userData;
 		} catch (error: unknown) {
 			// Log failed signup attempt
+			const authError = error as any;
 			await AuditLogService.log({
 				userId: credentials.email,
 				action: 'auth.signup',
 				resource: 'auth',
 				severity: 'warning',
 				success: false,
-				errorMessage: error.code,
+				errorMessage: authError.code,
 				details: {
 					email: credentials.email,
-					errorCode: error.code,
+					errorCode: authError.code,
 				},
 			});
 
-			throw new Error(this.getErrorMessage(error.code));
+			throw new Error(this.getErrorMessage(authError.code));
 		}
 	}
 
@@ -301,16 +302,17 @@ export class AuthService {
 			authRateLimiter.recordAttempt(rateLimitKey);
 
 			// Log failed login
+			const authError = error as any;
 			await AuditLogService.log({
 				userId: credentials.email,
 				action: 'auth.failed_login',
 				resource: 'auth',
 				severity: 'warning',
 				success: false,
-				errorMessage: error.code,
+				errorMessage: authError.code,
 				details: {
 					email: credentials.email,
-					errorCode: error.code,
+					errorCode: authError.code,
 				},
 			});
 
@@ -318,10 +320,10 @@ export class AuthService {
 				authRateLimiter.getRemainingAttempts(rateLimitKey);
 			if (remainingAttempts > 0) {
 				throw new Error(
-					`${this.getErrorMessage(error.code)} (${remainingAttempts} attempts remaining)`
+					`${this.getErrorMessage(authError.code)} (${remainingAttempts} attempts remaining)`
 				);
 			} else {
-				throw new Error(this.getErrorMessage(error.code));
+				throw new Error(this.getErrorMessage(authError.code));
 			}
 		}
 	}
@@ -350,7 +352,8 @@ export class AuthService {
 
 			return await this.handleSocialSignIn(userCredential, 'google');
 		} catch (error: unknown) {
-			throw new Error(this.getErrorMessage(error.code));
+			const authError = error as any;
+			throw new Error(this.getErrorMessage(authError.code));
 		}
 	}
 
@@ -379,7 +382,8 @@ export class AuthService {
 
 			return await this.handleSocialSignIn(userCredential, 'apple');
 		} catch (error: unknown) {
-			throw new Error(this.getErrorMessage(error.code));
+			const authError = error as any;
+			throw new Error(this.getErrorMessage(authError.code));
 		}
 	}
 
@@ -390,14 +394,14 @@ export class AuthService {
 		userCredential: unknown,
 		provider: 'google' | 'apple'
 	): Promise<User> {
+		const cred = userCredential as any;
+
 		// Check if user exists
-		const userDoc = await getDoc(
-			doc(db, 'users', (userCredential as any).user.uid)
-		);
+		const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
 
 		if (userDoc.exists()) {
 			// Existing user
-			const user = await this.getUserData(userCredential.user);
+			const user = await this.getUserData(cred.user);
 			await this.registerDevice(user.id);
 
 			// Update last login
@@ -422,10 +426,10 @@ export class AuthService {
 		} else {
 			// New user - create profile
 			const userData: User = {
-				id: (userCredential as any).user.uid,
-				email: userCredential.user.email!,
-				displayName: userCredential.user.displayName || '',
-				photoURL: userCredential.user.photoURL || '',
+				id: cred.user.uid,
+				email: cred.user.email!,
+				displayName: cred.user.displayName || '',
+				photoURL: cred.user.photoURL || '',
 				createdAt: new Date(),
 				updatedAt: new Date(),
 				subscription: {
@@ -496,8 +500,9 @@ export class AuthService {
 	static async signOut(): Promise<void> {
 		try {
 			// Remove device registration
+			const currentUserId = this.currentUser?.id;
 			if (this.currentUser) {
-				await this.unregisterDevice((this as any).currentUser.id);
+				await this.unregisterDevice(this.currentUser.id);
 			}
 
 			await signOut(auth);
@@ -505,7 +510,7 @@ export class AuthService {
 
 			// Log signout
 			await AuditLogService.log({
-				userId: this.currentUser?.id || 'unknown',
+				userId: currentUserId || 'unknown',
 				action: 'auth.logout',
 				resource: 'auth',
 				severity: 'info',
@@ -513,7 +518,8 @@ export class AuthService {
 				details: {},
 			});
 		} catch (error: unknown) {
-			throw new Error(this.getErrorMessage(error.code));
+			const authError = error as any;
+			throw new Error(this.getErrorMessage(authError.code));
 		}
 	}
 
@@ -534,7 +540,8 @@ export class AuthService {
 				details: { email },
 			});
 		} catch (error: unknown) {
-			throw new Error(this.getErrorMessage(error.code));
+			const authError = error as any;
+			throw new Error(this.getErrorMessage(authError.code));
 		}
 	}
 
@@ -936,7 +943,8 @@ export class AuthService {
 
 			this.currentUser = null;
 		} catch (error: unknown) {
-			throw new Error(this.getErrorMessage(error.code));
+			const authError = error as any;
+			throw new Error(this.getErrorMessage(authError.code));
 		}
 	}
 
