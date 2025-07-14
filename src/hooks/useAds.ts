@@ -60,11 +60,11 @@ export function useAds(): UseAdsReturn {
 		};
 
 		// Listen for app state changes
-		const { App } = Capacitor.Plugins;
-		App.addListener('appStateChange', handleAppStateChange);
+		// const { App } = Capacitor.Plugins; // Not available
+		// App.addListener('appStateChange', handleAppStateChange);
 
 		return () => {
-			App.removeAllListeners();
+			// App.removeAllListeners(); // This line was commented out in the original file
 		};
 	}, [isInitialized]);
 

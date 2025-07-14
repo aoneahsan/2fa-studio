@@ -48,7 +48,7 @@ const AdminUsers: React.FC = () => {
         subscriptionStatus: filterStatus || undefined,
         sortBy,
         pageSize: 20,
-        lastDoc: loadMore ? lastDoc : undefined
+        lastDoc: loadMore ? (lastDoc || undefined) : undefined
       };
 
       const result = await adminService.searchUsers(params);

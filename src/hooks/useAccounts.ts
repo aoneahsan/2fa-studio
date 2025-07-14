@@ -176,7 +176,7 @@ export const useAccounts = () => {
 
 				// Log account creation
 				await AuditLogService.log({
-					userId: user.uid,
+					userId: user.uid!,
 					action: 'account.created',
 					resource: `account/${documentId || 'unknown'}`,
 					severity: 'info',
@@ -252,7 +252,7 @@ export const useAccounts = () => {
 
 				// Log account update
 				await AuditLogService.log({
-					userId: user.uid,
+					userId: user.uid!,
 					action: 'account.updated',
 					resource: `account/${account.id || 'unknown'}`,
 					severity: 'info',
@@ -316,7 +316,7 @@ export const useAccounts = () => {
 
 				// Log account deletion
 				await AuditLogService.log({
-					userId: user.uid,
+					userId: user.uid!,
 					action: 'account.deleted',
 					resource: `account/${accountId || 'unknown'}`,
 					severity: 'warning',

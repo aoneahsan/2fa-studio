@@ -85,7 +85,7 @@ const LoginPage: React.FC = () => {
 			dispatch(
 				addToast({
 					type: 'error',
-					message: error.message || 'Failed to sign in',
+					message: (error as Error).message || 'Failed to sign in',
 				}) as any
 			);
 			setShowEncryptionField(false);

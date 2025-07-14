@@ -144,7 +144,7 @@ const RegisterPage: React.FC = () => {
 			dispatch(
 				addToast({
 					type: 'error',
-					message: error.message || 'Failed to create account',
+					message: (error as Error).message || 'Failed to create account',
 				}) as any
 			);
 		} finally {

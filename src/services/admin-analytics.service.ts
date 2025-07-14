@@ -124,7 +124,7 @@ export class AdminAnalyticsService {
   static async getDashboardMetrics(filter?: AnalyticsFilter): Promise<DashboardMetrics> {
     const cacheKey = `dashboard_${JSON.stringify(filter)}`;
     const cached = this.getFromCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as DashboardMetrics;
 
     try {
       const [

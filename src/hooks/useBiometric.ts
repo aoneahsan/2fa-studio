@@ -117,7 +117,7 @@ export const useBiometric = () => {
 							message: 'Authentication cancelled',
 						}) as any
 					);
-				} else if (error.code === 'UserFallback') {
+				} else if (errorObj.code === 'UserFallback') {
 					// Handle fallback to passcode
 					dispatch(
 						addToast({
