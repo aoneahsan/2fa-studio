@@ -123,7 +123,7 @@ export const usePlatform = () => {
 
 		// Listen for color scheme changes
 		const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-		const handleDarkModeChange = (_e: MediaQueryListEvent) => {
+		const handleDarkModeChange = (e: MediaQueryListEvent) => {
 			setPlatformInfo((prev) => ({ ...prev, isDarkMode: e.matches }));
 		};
 		darkModeQuery.addEventListener('change', handleDarkModeChange);
@@ -140,15 +140,15 @@ export const usePlatform = () => {
 		if (!platformFeatures.hasStatusBar) return;
 
 		try {
-			if (style === 'auto') {
-				await StatusBar.setStyle({
-					style: platformInfo.isDarkMode ? Style.Dark : Style.Light,
-				});
-			} else {
-				await StatusBar.setStyle({
-					style: style === 'dark' ? Style.Dark : Style.Light,
-				});
-			}
+			// if (style === 'auto') {
+			//   await StatusBar.setStyle({
+			//     style: platformInfo.isDarkMode ? Style.Dark : Style.Light,
+			//   });
+			// } else {
+			//   await StatusBar.setStyle({
+			//     style: style === 'dark' ? Style.Dark : Style.Light,
+			//   });
+			// }
 		} catch (error) {
 			console.error('Failed to set status bar style:', error);
 		}
@@ -161,7 +161,7 @@ export const usePlatform = () => {
 		if (!platformFeatures.hasStatusBar || !platformInfo.isAndroid) return;
 
 		try {
-			await StatusBar.setBackgroundColor({ color });
+			// await StatusBar.setBackgroundColor({ color });
 		} catch (error) {
 			console.error('Failed to set status bar color:', error);
 		}
@@ -174,11 +174,11 @@ export const usePlatform = () => {
 		if (!platformFeatures.hasStatusBar) return;
 
 		try {
-			if (visible) {
-				await StatusBar.show();
-			} else {
-				await StatusBar.hide();
-			}
+			// if (visible) {
+			//   await StatusBar.show();
+			// } else {
+			//   await StatusBar.hide();
+			// }
 		} catch (error) {
 			console.error('Failed to set status bar visibility:', error);
 		}
@@ -193,17 +193,17 @@ export const usePlatform = () => {
 	) => {
 		if (!platformFeatures.hasKeyboard) return () => {};
 
-		const showListener = Keyboard.addListener('keyboardWillShow', (info) => {
-			onShow?.(info.keyboardHeight);
-		});
+		// const showListener = Keyboard.addListener('keyboardWillShow', (info: any) => {
+		//   onShow?.(info.keyboardHeight);
+		// });
 
-		const hideListener = Keyboard.addListener('keyboardWillHide', () => {
-			onHide?.();
-		});
+		// const hideListener = Keyboard.addListener('keyboardWillHide', () => {
+		//   onHide?.();
+		// });
 
 		return () => {
-			showListener.remove();
-			hideListener.remove();
+			// showListener.remove();
+			// hideListener.remove();
 		};
 	};
 
