@@ -589,13 +589,14 @@ export class ApplePayService {
 	 */
 	private static async handleRenewal(receiptInfo: unknown): Promise<void> {
 		try {
+			const receipt = receiptInfo as any;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: receiptInfo.original_transaction_id,
+						value: receipt.original_transaction_id,
 					},
 				]
 			);
@@ -606,7 +607,7 @@ export class ApplePayService {
 					firestoreResult.data[0].id,
 					{
 						status: 'active',
-						currentPeriodEnd: new Date(parseInt(receiptInfo.expires_date_ms)),
+						currentPeriodEnd: new Date(parseInt(receipt.expires_date_ms)),
 						updatedAt: new Date(),
 					}
 				);
@@ -643,13 +644,14 @@ export class ApplePayService {
 		receiptInfo: unknown
 	): Promise<void> {
 		try {
+			const receipt = receiptInfo as any;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: receiptInfo.original_transaction_id,
+						value: receipt.original_transaction_id,
 					},
 				]
 			);
@@ -659,7 +661,7 @@ export class ApplePayService {
 					'subscriptions',
 					firestoreResult.data[0].id,
 					{
-						cancelAtPeriodEnd: receiptInfo.auto_renew_status === '0',
+						cancelAtPeriodEnd: receipt.auto_renew_status === '0',
 						updatedAt: new Date(),
 					}
 				);
@@ -676,13 +678,14 @@ export class ApplePayService {
 		receiptInfo: unknown
 	): Promise<void> {
 		try {
+			const receipt = receiptInfo as any;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: receiptInfo.original_transaction_id,
+						value: receipt.original_transaction_id,
 					},
 				]
 			);
@@ -707,13 +710,14 @@ export class ApplePayService {
 	 */
 	private static async handleRecovery(receiptInfo: unknown): Promise<void> {
 		try {
+			const receipt = receiptInfo as any;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: receiptInfo.original_transaction_id,
+						value: receipt.original_transaction_id,
 					},
 				]
 			);
@@ -738,13 +742,14 @@ export class ApplePayService {
 	 */
 	private static async handleRefund(receiptInfo: unknown): Promise<void> {
 		try {
+			const receipt = receiptInfo as any;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: receiptInfo.transaction_id,
+						value: receipt.transaction_id,
 					},
 				]
 			);
