@@ -85,46 +85,43 @@ export class AdMobService {
 	 */
 	private setupEventListeners(): void {
 		// Banner events
-		(AdMob as any).addListener('bannerAdLoaded', () => {
-			console.log('Banner ad loaded');
+		AdMob.addListener('bannerAdLoaded', () => {
+			this.bannerShowing = true;
 		});
 
-		(AdMob as any).addListener('bannerAdFailedToLoad', (error: AdMobError) => {
+		AdMob.addListener('bannerAdFailedToLoad', (error: any) => {
 			console.error('Banner ad failed to load:', error);
 			this.bannerShowing = false;
 		});
 
+		AdMob.addListener('bannerAdOpened', () => {
+			// Track banner opened
+		});
+
+		AdMob.addListener('bannerAdClosed', () => {
+			// Track banner closed
+		});
+
 		// Interstitial events
-		(AdMob as any).addListener('interstitialAdLoaded', (info: AdLoadInfo) => {
-			console.log('Interstitial ad loaded:', info);
+		AdMob.addListener('interstitialAdLoaded', () => {
+			// Interstitial ready
 		});
 
-		(AdMob as any).addListener(
-			'interstitialAdFailedToLoad',
-			(error: AdMobError) => {
-				console.error('Interstitial ad failed to load:', error);
-			}
-		);
-
-		(AdMob as any).addListener('interstitialAdDismissed', () => {
-			console.log('Interstitial ad dismissed');
-			// Preload next interstitial
-			this.prepareInterstitial();
+		AdMob.addListener('interstitialAdFailedToLoad', (error: any) => {
+			console.error('Interstitial ad failed to load:', error);
 		});
 
-		// Rewarded events
-		AdMob.addListener('rewardedAdLoaded', (info: AdLoadInfo) => {
-			console.log('Rewarded ad loaded:', info);
+		// Rewarded video events
+		AdMob.addListener('rewardedVideoAdLoaded', () => {
+			// Rewarded video ready
 		});
 
-		AdMob.addListener('rewardedAdFailedToLoad', (error: AdMobError) => {
-			console.error('Rewarded ad failed to load:', error);
+		AdMob.addListener('rewardedVideoAdFailedToLoad', (error: any) => {
+			console.error('Rewarded video failed to load:', error);
 		});
 
-		AdMob.addListener('rewardedAdDismissed', () => {
-			console.log('Rewarded ad dismissed');
-			// Preload next rewarded ad
-			this.prepareRewardedVideo();
+		AdMob.addListener('rewardedVideoAdClosed', () => {
+			// Rewarded video closed
 		});
 	}
 
@@ -132,23 +129,22 @@ export class AdMobService {
 	 * Show banner ad
 	 */
 	async showBanner(position: 'top' | 'bottom' = 'bottom'): Promise<void> {
-		if (!this.initialized || !this.config?.bannerId || this.bannerShowing) {
+		if (!this.initialized || !this._config?.bannerId || this.bannerShowing) {
 			return;
 		}
 
 		try {
 			const options: AdOptions = {
-				adId: (this as any).config.bannerId,
-				adSize: 'BANNER',
+				adId: this._config.bannerId,
 				position: position === 'top' ? 'TOP_CENTER' : 'BOTTOM_CENTER',
 				margin: 0,
 				isTesting: (import.meta as any).env.DEV,
-			};
+			} as any;
 
 			await AdMob.showBanner(options);
 			this.bannerShowing = true;
 		} catch (error) {
-			console.error('Failed to show banner:', error);
+			console.error('Failed to show banner ad:', error);
 		}
 	}
 
@@ -164,7 +160,7 @@ export class AdMobService {
 			await AdMob.hideBanner();
 			this.bannerShowing = false;
 		} catch (error) {
-			console.error('Failed to hide banner:', error);
+			console.error('Failed to hide banner ad:', error);
 		}
 	}
 
@@ -176,7 +172,7 @@ export class AdMobService {
 			await AdMob.removeBanner();
 			this.bannerShowing = false;
 		} catch (error) {
-			console.error('Failed to remove banner:', error);
+			console.error('Failed to remove banner ad:', error);
 		}
 	}
 
@@ -184,19 +180,19 @@ export class AdMobService {
 	 * Prepare interstitial ad
 	 */
 	async prepareInterstitial(): Promise<void> {
-		if (!this.initialized || !this.config?.interstitialId) {
+		if (!this.initialized || !this._config?.interstitialId) {
 			return;
 		}
 
 		try {
 			const options: AdOptions = {
-				adId: (this as any).config.interstitialId,
+				adId: this._config.interstitialId,
 				isTesting: (import.meta as any).env.DEV,
 			};
 
 			await AdMob.prepareInterstitial(options);
 		} catch (error) {
-			console.error('Failed to prepare interstitial:', error);
+			console.error('Failed to prepare interstitial ad:', error);
 		}
 	}
 
@@ -204,7 +200,7 @@ export class AdMobService {
 	 * Show interstitial ad
 	 */
 	async showInterstitial(): Promise<boolean> {
-		if (!this.initialized || !this.config?.interstitialId) {
+		if (!this.initialized || !this._config?.interstitialId) {
 			return false;
 		}
 
@@ -212,9 +208,7 @@ export class AdMobService {
 			await AdMob.showInterstitial();
 			return true;
 		} catch (error) {
-			console.error('Failed to show interstitial:', error);
-			// Try to prepare for next time
-			this.prepareInterstitial();
+			console.error('Failed to show interstitial ad:', error);
 			return false;
 		}
 	}
@@ -223,17 +217,17 @@ export class AdMobService {
 	 * Prepare rewarded video ad
 	 */
 	async prepareRewardedVideo(): Promise<void> {
-		if (!this.initialized || !this.config?.rewardedId) {
+		if (!this.initialized || !this._config?.rewardedId) {
 			return;
 		}
 
 		try {
 			const options: AdOptions = {
-				adId: (this as any).config.rewardedId,
+				adId: this._config.rewardedId,
 				isTesting: (import.meta as any).env.DEV,
 			};
 
-			await AdMob.prepareRewardVideo(options);
+			await AdMob.prepareRewardVideoAd(options);
 		} catch (error) {
 			console.error('Failed to prepare rewarded video:', error);
 		}
@@ -243,99 +237,96 @@ export class AdMobService {
 	 * Show rewarded video ad
 	 */
 	async showRewardedVideo(): Promise<{ completed: boolean; reward?: unknown }> {
-		if (!this.initialized || !this.config?.rewardedId) {
+		if (!this.initialized || !this._config?.rewardedId) {
 			return { completed: false };
 		}
 
 		return new Promise((resolve) => {
-			let rewarded = false;
+			let rewardListener: any;
+			let dismissListener: any;
 
-			// Set up one-time reward listener
-			const rewardListener = AdMob.addListener(
+			const cleanup = () => {
+				if (rewardListener) {
+					rewardListener.remove();
+				}
+				if (dismissListener) {
+					dismissListener.remove();
+				}
+			};
+
+			// Listen for reward
+			rewardListener = AdMob.addListener(
 				'rewardedVideoAdReward',
-				(reward) => {
-					console.log('User earned reward:', reward);
-					rewarded = true;
+				(reward: any) => {
+					cleanup();
+					resolve({ completed: true, reward });
 				}
 			);
 
-			// Set up one-time dismiss listener
-			const dismissListener = AdMob.addListener('rewardedAdDismissed', () => {
-				// Clean up listeners
-				rewardListener.remove();
-				dismissListener.remove();
-
-				resolve({
-					completed: rewarded,
-					reward: rewarded ? { amount: 1 } : undefined,
-				});
-
-				// Prepare next ad
-				this.prepareRewardedVideo();
+			// Listen for dismiss without reward
+			dismissListener = AdMob.addListener('rewardedVideoAdClosed', () => {
+				cleanup();
+				resolve({ completed: false });
 			});
 
 			// Show the ad
-			AdMob.showRewardVideo().catch((error) => {
+			AdMob.showRewardVideoAd().catch((error: any) => {
 				console.error('Failed to show rewarded video:', error);
-				rewardListener.remove();
-				dismissListener.remove();
+				cleanup();
 				resolve({ completed: false });
-
-				// Try to prepare for next time
-				this.prepareRewardedVideo();
 			});
 		});
 	}
 
 	/**
-	 * Check if user has premium (no ads)
+	 * Check if ads should be shown based on user subscription
 	 */
 	async shouldShowAds(userSubscriptionTier?: string): Promise<boolean> {
-		// Don't show ads in web version
-		if (!Capacitor.isNativePlatform()) {
+		// Don't show ads for premium users
+		if (
+			userSubscriptionTier === 'premium' ||
+			userSubscriptionTier === 'business'
+		) {
 			return false;
 		}
 
-		// Don't show ads to premium users
-		if (userSubscriptionTier && userSubscriptionTier !== 'free') {
-			return false;
-		}
-
-		// Don't show ads in development
-		if (import.meta.env.DEV && !(import.meta as any).env.VITE_FORCE_ADS) {
-			return false;
-		}
-
+		// Show ads for free and trial users
 		return true;
 	}
 
 	/**
-	 * Resume ads (after app comes to foreground)
+	 * Set ad configuration
+	 */
+	setConfig(config: AdConfig): void {
+		this._config = config;
+	}
+
+	/**
+	 * Get current configuration
+	 */
+	getConfig(): AdConfig | null {
+		return this._config;
+	}
+
+	/**
+	 * Resume ads (for app lifecycle)
 	 */
 	async resume(): Promise<void> {
-		if (!this.initialized) {
-			return;
-		}
-
-		try {
-			await AdMob.resume();
-		} catch (error) {
-			console.error('Failed to resume ads:', error);
+		// AdMob plugin doesn't have resume method, this is a placeholder
+		if (this.initialized) {
+			// Re-prepare ads if needed
+			await this.prepareInterstitial();
+			await this.prepareRewardedVideo();
 		}
 	}
 
 	/**
-	 * Pause ads (when app goes to background)
+	 * Pause ads (for app lifecycle)
 	 */
 	async pause(): Promise<void> {
-		if (!this.initialized) {
-			return;
-		}
-
-		try {
-			await AdMob.pause();
-		} catch (error) {
-			console.error('Failed to pause ads:', error);
+		// AdMob plugin doesn't have pause method, this is a placeholder
+		if (this.bannerShowing) {
+			await this.hideBanner();
 		}
 	}
 }
