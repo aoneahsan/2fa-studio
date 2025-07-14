@@ -229,7 +229,7 @@ const AdminUsers: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {users.map((user) => (
+                  {(users || []).map((user) => (
                     <tr 
                       key={user.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
@@ -257,13 +257,13 @@ const AdminUsers: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTierBadgeColor(user.subscription.tier)}`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTierBadgeColor((user as any).subscription.tier)}`}>
                           {user.subscription.tier}
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1">
-                          {getStatusIcon(user.subscription.status)}
+                          {getStatusIcon((user as any).subscription.status)}
                           <span className="text-sm text-gray-900 dark:text-white">
                             {user.subscription.status}
                           </span>

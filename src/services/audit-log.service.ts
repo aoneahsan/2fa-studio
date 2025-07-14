@@ -393,8 +393,8 @@ export class AuditLogService {
       });
 
       // Check for access from multiple devices/IPs
-      const uniqueDevices = new Set(recentAccess.logs.map(log => log.deviceId));
-      const uniqueIPs = new Set(recentAccess.logs.map(log => log.ipAddress));
+      const uniqueDevices = new Set(recentAccess.logs.map((log: any) => log.deviceId));
+      const uniqueIPs = new Set(recentAccess.logs.map((log: any) => log.ipAddress));
 
       if (uniqueDevices.size > 3 || uniqueIPs.size > 5) {
         await this.log({
@@ -472,9 +472,7 @@ export class AuditLogService {
    * Export audit logs for compliance
    */
   static async exportLogs(
-    userId: string,
-    startDate: Date,
-    endDate: Date
+    params: AuditLogSearchParams
   ): Promise<string> {
     try {
       const allLogs: AuditLog[] = [];
@@ -483,9 +481,7 @@ export class AuditLogService {
 
       while (hasMore) {
         const result = await this.searchLogs({
-          userId,
-          startDate,
-          endDate,
+          ...params,
           pageSize: this.BATCH_SIZE,
           lastDoc: lastDoc || undefined
         });
@@ -532,7 +528,7 @@ export class AuditLogService {
       'Details'
     ];
 
-    const rows = logs.map(log => [
+    const rows = logs.map((log: any) => [
       log.timestamp.toISOString(),
       log.action,
       log.resource,
@@ -543,7 +539,7 @@ export class AuditLogService {
 
     const csv = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map((row: any) => row.map((cell: any) => `"${cell}"`).join(','))
     ].join('\n');
 
     return csv;

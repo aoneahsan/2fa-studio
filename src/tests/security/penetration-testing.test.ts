@@ -16,7 +16,7 @@ describe('Security Penetration Testing', () => {
       try {
         await AuthService.signInWithEmail(maliciousEmail, 'password');
       } catch (error) {
-        expect(_error).toBeDefined();
+        expect(error).toBeDefined();
         expect(error.message).not.toContain('SQL');
       }
     });
@@ -41,7 +41,7 @@ describe('Security Penetration Testing', () => {
           // Should not reach here
           expect(false).toBe(true);
         } catch (error) {
-          expect(_error).toBeDefined();
+          expect(error).toBeDefined();
         }
       }
     });
@@ -110,7 +110,7 @@ describe('Security Penetration Testing', () => {
         // Should not reach here without proper authorization
         expect(false).toBe(true);
       } catch (error) {
-        expect(_error).toBeDefined();
+        expect(error).toBeDefined();
       }
     });
 

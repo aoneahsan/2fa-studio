@@ -45,14 +45,14 @@ const AddAccountModal: React.FC = () => {
   const dispatch = useDispatch();
   const { addAccount } = useAccounts();
   const tags = useAppSelector(selectTags);
-  const user = useAppSelector(state => state._auth.user);
+  const user = useAppSelector(state => (state as any)._auth.user);
   const [mode, setMode] = useState<'choice' | 'scan' | 'manual'>('choice');
   const [isLoading, setIsLoading] = useState(false);
   
   // Load tags on mount
   useEffect(() => {
     if (user && tags.length === 0) {
-      dispatch(fetchTags(user.id));
+      dispatch(fetchTags(user.id) as any);
     }
   }, [user, tags.length, dispatch]);
   
@@ -79,7 +79,7 @@ const AddAccountModal: React.FC = () => {
       issuer: data.issuer || '',
       label: data.label || '',
       secret: data.secret || '',
-      algorithm: data.algorithm || 'SHA1',
+      algorithm: (data as any).algorithm || 'SHA1',
       digits: data.digits || 6,
       period: data.period || 30,
       type: data.type || 'totp',
@@ -128,8 +128,8 @@ const AddAccountModal: React.FC = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (_e: React.FormEvent) => {
-    _e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     if (!validateForm()) {
       return;
@@ -154,15 +154,15 @@ const AddAccountModal: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Account added successfully'
-      }));
+      }) as any);
 
-      dispatch(closeModal());
+      dispatch(closeModal() as any);
     } catch (error) {
       console.error('Failed to add account:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to add account'
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }
@@ -181,7 +181,7 @@ const AddAccountModal: React.FC = () => {
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold text-foreground">Add Account</h2>
           <button
-            onClick={() => dispatch(closeModal())}
+            onClick={() => dispatch(closeModal() as any)}
             className="p-1 rounded hover:bg-muted transition-colors"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -205,7 +205,7 @@ const AddAccountModal: React.FC = () => {
                     dispatch(addToast({
                       type: 'error',
                       message: 'Camera access requires HTTPS or mobile app'
-                    }));
+                    }) as any);
                   }
                 }}
                 className="w-full flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-muted transition-colors"
@@ -251,7 +251,7 @@ const AddAccountModal: React.FC = () => {
                 <input
                   type="text"
                   value={formData.issuer}
-                  onChange={(e) => setFormData({ ...formData, issuer: _e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
                   className="input"
                   placeholder="e.g., Google, GitHub, etc."
                 />
@@ -324,7 +324,7 @@ const AddAccountModal: React.FC = () => {
                     </label>
                     <select
                       value={formData.algorithm}
-                      onChange={(e) => setFormData({ ...formData, algorithm: e.target.value as unknown })}
+                      onChange={(e) => setFormData({ ...formData, algorithm: e.target.value as "SHA1" | "SHA256" | "SHA512" })}
                       className="input"
                     >
                       <option value="SHA1">SHA1</option>
@@ -409,7 +409,7 @@ const AddAccountModal: React.FC = () => {
                   const suggestions = TagService.getTagSuggestions(formData.issuer);
                   const availableSuggestions = suggestions.filter(
                     name => !formData.tags.some(tagId => {
-                      const tag = tags.find(t => t.id === tagId);
+                      const tag = tags.find((t: any) => t.id === tagId);
                       return tag?.name === name;
                     })
                   );
@@ -419,7 +419,7 @@ const AddAccountModal: React.FC = () => {
                     <div className="mt-2 text-xs text-muted-foreground">
                       Suggestions: 
                       {availableSuggestions.map((name) => {
-                        const matchingTag = tags.find(t => t.name === name);
+                        const matchingTag = tags.find((t: any) => t.name === name);
                         if (!matchingTag) return null;
                         
                         return (
@@ -449,7 +449,7 @@ const AddAccountModal: React.FC = () => {
           <div className="flex gap-3 p-4 border-t border-border">
             <button
               type="button"
-              onClick={() => dispatch(closeModal())}
+              onClick={() => dispatch(closeModal() as any)}
               className="btn btn-outline flex-1"
             >
               Cancel

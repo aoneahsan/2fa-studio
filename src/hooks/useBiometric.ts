@@ -94,30 +94,30 @@ export const useBiometric = () => {
       });
 
       if (result.authenticated) {
-        dispatch(setLocked(false));
+        dispatch(setLocked(false) as any);
         return true;
       } else {
         throw new Error('Authentication failed');
       }
-    } catch (_error: unknown) {
-      console.error('Biometric authentication _error:', error);
+    } catch (error: unknown) {
+      console.error('Biometric authentication error:', error);
       
       if (error.code === 'UserCancel') {
         dispatch(addToast({
           type: 'info',
           message: 'Authentication cancelled',
-        }));
+        }) as any);
       } else if (error.code === 'UserFallback') {
         // Handle fallback to passcode
         dispatch(addToast({
           type: 'info',
           message: 'Please use your device passcode',
-        }));
+        }) as any);
       } else {
         dispatch(addToast({
           type: 'error',
           message: 'Biometric authentication failed',
-        }));
+        }) as any);
       }
       
       throw error;
@@ -130,7 +130,7 @@ export const useBiometric = () => {
       dispatch(addToast({
         type: 'error',
         message: biometricStatus.reason || 'Biometric authentication not available',
-      }));
+      }) as any);
       return false;
     }
 
@@ -141,11 +141,11 @@ export const useBiometric = () => {
         subtitle: 'Enable biometric authentication',
       });
 
-      dispatch(setBiometricEnabled(true));
+      dispatch(setBiometricEnabled(true) as any);
       dispatch(addToast({
         type: 'success',
         message: 'Biometric authentication enabled',
-      }));
+      }) as any);
       
       return true;
     } catch (error) {
@@ -163,11 +163,11 @@ export const useBiometric = () => {
         subtitle: 'Disable biometric authentication',
       });
 
-      dispatch(setBiometricEnabled(false));
+      dispatch(setBiometricEnabled(false) as any);
       dispatch(addToast({
         type: 'success',
         message: 'Biometric authentication disabled',
-      }));
+      }) as any);
       
       return true;
     } catch (error) {
@@ -180,13 +180,13 @@ export const useBiometric = () => {
   const lockApp = useCallback(() => {
     // Clear all authenticated biometric sessions
     BiometricAccountService.clearAuthenticatedAccounts();
-    dispatch(setLocked(true));
+    dispatch(setLocked(true) as any);
   }, [dispatch]);
 
   // Unlock app with biometric
   const unlockApp = useCallback(async () => {
     if (!biometricEnabled) {
-      dispatch(setLocked(false));
+      dispatch(setLocked(false) as any);
       return true;
     }
 

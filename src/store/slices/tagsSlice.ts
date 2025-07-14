@@ -13,7 +13,7 @@ interface TagsState {
   activeTags: string[]; // Currently selected filter tags
   filterMode: 'AND' | 'OR';
   isLoading: boolean;
-  _error: string | null;
+  error: string | null;
   lastFetch: number | null;
 }
 
@@ -22,7 +22,7 @@ const initialState: TagsState = {
   activeTags: [],
   filterMode: 'OR',
   isLoading: false,
-  _error: null,
+  error: null,
   lastFetch: null,
 };
 
@@ -165,8 +165,8 @@ const tagsSlice = createSlice({
     // Delete tag
     builder
       .addCase(deleteTag.fulfilled, (state, action) => {
-        state.tags = state.tags.filter(tag => tag.id !== action.payload);
-        state.activeTags = state.activeTags.filter(id => id !== action.payload);
+        state.tags = state.tags.filter((tag: any) => tag.id !== action.payload);
+        state.activeTags = state.activeTags.filter((id: any) => id !== action.payload);
       })
       .addCase(deleteTag.rejected, (state, action) => {
         state.error = action.error.message || 'Failed to delete tag';
@@ -184,7 +184,7 @@ const tagsSlice = createSlice({
       .addCase(addTagsToAccount.fulfilled, (state, action) => {
         const { tagIds } = action.payload;
         tagIds.forEach(tagId => {
-          const tag = state.tags.find(t => t.id === tagId);
+          const tag = state.tags.find((t: any) => t.id === tagId);
           if (tag) {
             tag.accountCount = (tag.accountCount || 0) + 1;
           }
@@ -196,7 +196,7 @@ const tagsSlice = createSlice({
       .addCase(removeTagsFromAccount.fulfilled, (state, action) => {
         const { tagIds } = action.payload;
         tagIds.forEach(tagId => {
-          const tag = state.tags.find(t => t.id === tagId);
+          const tag = state.tags.find((t: any) => t.id === tagId);
           if (tag && tag.accountCount) {
             tag.accountCount = Math.max(0, tag.accountCount - 1);
           }
@@ -215,21 +215,21 @@ export const {
 } = tagsSlice.actions;
 
 // Selectors
-export const selectTags = (state: RootState) => state.tags.tags;
-export const selectActiveTags = (state: RootState) => state.tags.activeTags;
-export const selectFilterMode = (state: RootState) => state.tags.filterMode;
-export const selectTagsLoading = (state: RootState) => state.tags.isLoading;
-export const selectTagsError = (state: RootState) => state.tags.error;
+export const selectTags = (state: RootState) => (state as any).tags.tags;
+export const selectActiveTags = (state: RootState) => (state as any).tags.activeTags;
+export const selectFilterMode = (state: RootState) => (state as any).tags.filterMode;
+export const selectTagsLoading = (state: RootState) => (state as any).tags.isLoading;
+export const selectTagsError = (state: RootState) => (state as any).tags.error;
 
 export const selectTagById = (tagId: string) => (state: RootState) =>
-  state.tags.tags.find(tag => tag.id === tagId);
+  state.tags.tags.find((tag: any) => tag.id === tagId);
 
 export const selectActiveTagObjects = (state: RootState) =>
-  state.tags.activeTags.map(id => state.tags.tags.find(tag => tag.id === id)).filter(Boolean) as Tag[];
+  state.tags.activeTags.map((id: any) => state.tags.tags.find((tag: any) => tag.id === id)).filter(Boolean) as Tag[];
 
 export const selectTagFilter = (state: RootState): TagFilter => ({
-  tagIds: state.tags.activeTags,
-  mode: state.tags.filterMode,
+  tagIds: (state as any).tags.activeTags,
+  mode: (state as any).tags.filterMode,
 });
 
 // Reducer

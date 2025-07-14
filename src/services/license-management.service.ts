@@ -208,8 +208,8 @@ export class LicenseManagementService {
 
       // Check usage limits for quantified features
       if (feature === 'maxAccounts' && requestedUsage) {
-        const currentUsage = license.usage.accounts;
-        const limit = license.limits.accounts;
+        const currentUsage = (license as any).usage.accounts;
+        const limit = (license as any).limits.accounts;
         
         if (limit !== -1 && (currentUsage + requestedUsage) > limit) {
           return {
@@ -223,8 +223,8 @@ export class LicenseManagementService {
       }
 
       if (feature === 'maxBackups' && requestedUsage) {
-        const currentUsage = license.usage.backups;
-        const limit = license.limits.backups;
+        const currentUsage = (license as any).usage.backups;
+        const limit = (license as any).limits.backups;
         
         if (limit !== -1 && (currentUsage + requestedUsage) > limit) {
           return {
@@ -454,8 +454,8 @@ export class LicenseManagementService {
       const license = await this.getLicenseInfo(userId);
       
       const overage = {
-        accounts: Math.max(0, usage.accounts - (license.limits.accounts === -1 ? 0 : license.limits.accounts)),
-        backups: Math.max(0, usage.backups - (license.limits.backups === -1 ? 0 : license.limits.backups)),
+        accounts: Math.max(0, usage.accounts - (license.limits.accounts === -1 ? 0 : (license as any).limits.accounts)),
+        backups: Math.max(0, usage.backups - (license.limits.backups === -1 ? 0 : (license as any).limits.backups)),
         apiCalls: Math.max(0, usage.apiCalls - 10000), // Assume 10k API calls included
         storage: Math.max(0, usage.storageUsed - (1024 * 1024 * 1024)), // 1GB included
       };
@@ -627,7 +627,7 @@ export class LicenseManagementService {
    */
   static getCacheStats(): { size: number; entries: string[] } {
     return {
-      size: this.usageCache.size,
+      size: (this as any).usageCache.size,
       entries: Array.from(this.usageCache.keys()),
     };
   }

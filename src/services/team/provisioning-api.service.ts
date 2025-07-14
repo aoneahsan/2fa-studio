@@ -192,7 +192,7 @@ export interface SyncStatus {
   errors?: Array<{
     timestamp: Date;
     operation: string;
-    _error: string;
+    error: string;
     resourceId?: string;
   }>;
 }
@@ -476,7 +476,7 @@ export class ProvisioningAPIService {
       // Create user in auth
       const authUser = await AuthService.createUser({
         email: user.emails[0].value,
-        displayName: user.displayName || user.name.formatted,
+        displayName: user.displayName || (user as any).name.formatted,
         disabled: !user.active
       });
 
@@ -519,7 +519,7 @@ export class ProvisioningAPIService {
     } catch (error) {
       await this.logProvisioningActivity(teamId, 'user_created', 'user', undefined, {
         email: user.emails[0].value,
-        _error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -586,7 +586,7 @@ export class ProvisioningAPIService {
       return updatedUser;
     } catch (error) {
       await this.logProvisioningActivity(teamId, 'user_updated', 'user', userId, {
-        _error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -616,7 +616,7 @@ export class ProvisioningAPIService {
       await this.logProvisioningActivity(teamId, 'user_deleted', 'user', userId, {}, 'success', apiKeyId);
     } catch (error) {
       await this.logProvisioningActivity(teamId, 'user_deleted', 'user', userId, {
-        _error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -676,7 +676,7 @@ export class ProvisioningAPIService {
     } catch (error) {
       await this.logProvisioningActivity(teamId, 'group_created', 'group', undefined, {
         displayName: group.displayName,
-        _error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -717,7 +717,7 @@ export class ProvisioningAPIService {
         errors: [{
           timestamp: new Date(),
           operation: 'sync',
-          _error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error'
         }]
       });
       throw error;
@@ -766,7 +766,7 @@ export class ProvisioningAPIService {
       );
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
@@ -789,7 +789,7 @@ export class ProvisioningAPIService {
       throw new Error('Provisioning not configured');
     }
 
-    const apiKey = config.apiKeys.find(k => k.id === apiKeyId);
+    const apiKey = config.apiKeys.find((k: any) => k.id === apiKeyId);
     if (!apiKey || !apiKey.active) {
       throw new Error('Invalid or inactive API key');
     }
@@ -870,7 +870,7 @@ export class ProvisioningAPIService {
       ipAddress: await this.getClientIP()
     };
 
-    if (status === 'failed' && details._error) {
+    if (status === 'failed' && details.error) {
       log.error = details.error;
     }
 

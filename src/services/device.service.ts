@@ -213,7 +213,7 @@ export class DeviceService {
 
     const currentDeviceId = await this.getDeviceId();
 
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       isCurrentDevice: doc.data().deviceId === currentDeviceId,
@@ -237,7 +237,7 @@ export class DeviceService {
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       startedAt: (doc.data().startedAt as Timestamp)?.toDate() || new Date(),

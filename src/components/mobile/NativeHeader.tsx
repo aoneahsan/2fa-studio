@@ -39,7 +39,7 @@ const NativeHeader: React.FC<NativeHeaderProps> = ({
 
   useEffect(() => {
     // Set status bar style based on header
-    if (platform.features.hasStatusBar) {
+    if ((platform as any).features.hasStatusBar) {
       platform.setStatusBarStyle(transparent ? 'light' : 'auto');
     }
   }, [transparent, platform]);

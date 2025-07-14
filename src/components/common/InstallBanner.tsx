@@ -32,7 +32,7 @@ const InstallBanner: React.FC = () => {
     }
 
     // Check if iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as unknown).MSStream;
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
     if (isIOSDevice) {
@@ -47,9 +47,9 @@ const InstallBanner: React.FC = () => {
     }
 
     // Handle install prompt for other platforms
-    const handleBeforeInstallPrompt = (_e: BeforeInstallPromptEvent) => {
-      _e.preventDefault();
-      setDeferredPrompt(_e);
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
       
       const hasShownBanner = localStorage.getItem('2fa-install-banner-shown');
       if (!hasShownBanner) {
@@ -77,7 +77,7 @@ const InstallBanner: React.FC = () => {
     }
 
     // Show the install prompt
-    deferredPrompt.prompt();
+    (deferredPrompt as any).prompt();
 
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;

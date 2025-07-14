@@ -39,9 +39,9 @@ import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
  */
 const AccountsPage: React.FC = () => {
   const dispatch = useDispatch();
-  const modal = useSelector((state: RootState) => state.ui.modal);
+  const modal = useSelector((state: RootState) => (state as any).ui.modal);
   const { user } = useSelector((state: RootState) => state._auth);
-  const showFavoritesOnly = useSelector((state: RootState) => state.accounts.showFavoritesOnly);
+  const showFavoritesOnly = useSelector((state: RootState) => (state as any).accounts.showFavoritesOnly);
   const { filteredAccounts, isLoading } = useAccounts();
   const [showFilters, setShowFilters] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);
@@ -51,24 +51,24 @@ const AccountsPage: React.FC = () => {
   // Load tags on mount
   useEffect(() => {
     if (user) {
-      dispatch(fetchTags(user.id));
+      dispatch(fetchTags(user.id) as any);
     }
   }, [user, dispatch]);
 
   const handleAddAccount = () => {
-    dispatch(openModal({ type: 'addAccount' }));
+    dispatch(openModal({ type: 'addAccount' }) as any);
   };
 
   const handleImport = () => {
-    dispatch(openModal({ type: 'import' }));
+    dispatch(openModal({ type: 'import' }) as any);
   };
 
   const handleExport = () => {
-    dispatch(openModal({ type: 'export' }));
+    dispatch(openModal({ type: 'export' }) as any);
   };
 
   const handleFolderSelect = (folderId: string | null) => {
-    dispatch(selectFolder(folderId));
+    dispatch(selectFolder(folderId) as any);
   };
 
   // Check if user has reached account limit
@@ -104,7 +104,7 @@ const AccountsPage: React.FC = () => {
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
             You've reached the free account limit. 
             <button 
-              onClick={() => dispatch(openModal({ type: 'settings', data: { tab: 'subscription' } }))}
+              onClick={() => dispatch(openModal({ type: 'settings', data: { tab: 'subscription' } }) as any)}
               className="ml-1 font-medium underline hover:no-underline"
             >
               Upgrade to Premium
@@ -132,7 +132,7 @@ const AccountsPage: React.FC = () => {
             </button>
 
             <button
-              onClick={() => dispatch(toggleShowFavoritesOnly())}
+              onClick={() => dispatch(toggleShowFavoritesOnly() as any)}
             className={`btn btn-outline btn-md ${showFavoritesOnly ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500' : ''}`}
             title="Show favorites only"
           >
@@ -213,21 +213,21 @@ const AccountsPage: React.FC = () => {
         <div className="bg-card border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">TOTP</p>
           <p className="text-2xl font-bold text-foreground">
-            {filteredAccounts.filter(a => a.type === 'totp').length}
+            {filteredAccounts.filter((a: any) => a.type === 'totp').length}
           </p>
         </div>
         
         <div className="bg-card border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">HOTP</p>
           <p className="text-2xl font-bold text-foreground">
-            {filteredAccounts.filter(a => a.type === 'hotp').length}
+            {filteredAccounts.filter((a: any) => a.type === 'hotp').length}
           </p>
         </div>
         
         <div className="bg-card border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Favorites</p>
           <p className="text-2xl font-bold text-foreground">
-            {filteredAccounts.filter(a => a.isFavorite).length}
+            {filteredAccounts.filter((a: any) => a.isFavorite).length}
           </p>
         </div>
       </div>
@@ -244,11 +244,11 @@ const AccountsPage: React.FC = () => {
       {modal.type === 'editAccount' && <EditAccountModal />}
       <ImportAccountsModal 
         isOpen={modal.type === 'import'} 
-        onClose={() => dispatch(openModal({ type: null }))} 
+        onClose={() => dispatch(openModal({ type: null }) as any)} 
       />
       <ExportAccountsModal 
         isOpen={modal.type === 'export'} 
-        onClose={() => dispatch(openModal({ type: null }))} 
+        onClose={() => dispatch(openModal({ type: null }) as any)} 
       />
         <TagManager 
           isOpen={showTagManager} 

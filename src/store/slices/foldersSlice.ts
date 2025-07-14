@@ -14,7 +14,7 @@ interface FoldersState {
   selectedFolderId: string | null;
   expandedFolders: string[];
   isLoading: boolean;
-  _error: string | null;
+  error: string | null;
 }
 
 const initialState: FoldersState = {
@@ -23,7 +23,7 @@ const initialState: FoldersState = {
   selectedFolderId: null,
   expandedFolders: [],
   isLoading: false,
-  _error: null,
+  error: null,
 };
 
 // Async thunks
@@ -109,7 +109,7 @@ const foldersSlice = createSlice({
       }
     },
     expandAllFolders: (state) => {
-      state.expandedFolders = state.folders.map(f => f.id);
+      state.expandedFolders = ((state.folders) || []).map((f: any) => f.id);
     },
     collapseAllFolders: (state) => {
       state.expandedFolders = [];
@@ -127,8 +127,8 @@ const foldersSlice = createSlice({
       })
       .addCase(fetchFolders.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.folders = action.payload.folders;
-        state.folderTree = action.payload.folderTree;
+        state.folders = (action as any).payload.folders;
+        state.folderTree = (action as any).payload.folderTree;
       })
       .addCase(fetchFolders.rejected, (state, action) => {
         state.isLoading = false;
@@ -161,18 +161,18 @@ const foldersSlice = createSlice({
       })
       // Move folder
       .addCase(moveFolder.fulfilled, (state, action) => {
-        state.folders = action.payload.folders;
-        state.folderTree = action.payload.folderTree;
+        state.folders = (action as any).payload.folders;
+        state.folderTree = (action as any).payload.folderTree;
       })
       .addCase(moveFolder.rejected, (state, action) => {
         state.error = action.error.message || 'Failed to move folder';
       })
       // Delete folder
       .addCase(deleteFolder.fulfilled, (state, action) => {
-        state.folders = action.payload.folders;
-        state.folderTree = action.payload.folderTree;
+        state.folders = (action as any).payload.folders;
+        state.folderTree = (action as any).payload.folderTree;
         // Clear selection if deleted folder was selected
-        if (state.selectedFolderId && !action.payload.folders.find(f => f.id === state.selectedFolderId)) {
+        if (state.selectedFolderId && !action.payload.folders.find((f: any) => f.id === state.selectedFolderId)) {
           state.selectedFolderId = null;
         }
       })
@@ -188,8 +188,8 @@ const foldersSlice = createSlice({
       })
       // Initialize default folders
       .addCase(initializeDefaultFolders.fulfilled, (state, action) => {
-        state.folders = action.payload.folders;
-        state.folderTree = action.payload.folderTree;
+        state.folders = (action as any).payload.folders;
+        state.folderTree = (action as any).payload.folderTree;
       })
       .addCase(initializeDefaultFolders.rejected, (state, action) => {
         state.error = action.error.message || 'Failed to initialize default folders';
@@ -207,23 +207,23 @@ export const {
 } = foldersSlice.actions;
 
 // Selectors
-export const selectFolders = (state: RootState) => state.folders.folders;
-export const selectFolderTree = (state: RootState) => state.folders.folderTree;
-export const selectSelectedFolderId = (state: RootState) => state.folders.selectedFolderId;
-export const selectExpandedFolders = (state: RootState) => state.folders.expandedFolders;
-export const selectFoldersLoading = (state: RootState) => state.folders.isLoading;
-export const selectFoldersError = (state: RootState) => state.folders.error;
+export const selectFolders = (state: RootState) => (state as any).folders.folders;
+export const selectFolderTree = (state: RootState) => (state as any).folders.folderTree;
+export const selectSelectedFolderId = (state: RootState) => (state as any).folders.selectedFolderId;
+export const selectExpandedFolders = (state: RootState) => (state as any).folders.expandedFolders;
+export const selectFoldersLoading = (state: RootState) => (state as any).folders.isLoading;
+export const selectFoldersError = (state: RootState) => (state as any).folders.error;
 
 export const selectFolderById = (state: RootState, folderId: string) =>
-  state.folders.folders.find(f => f.id === folderId);
+  state.folders.folders.find((f: any) => f.id === folderId);
 
 export const selectFolderPath = (state: RootState, folderId: string): Folder[] => {
-  const folders = state.folders.folders;
+  const folders = (state as any).folders.folders;
   const path: Folder[] = [];
   let currentId: string | null = folderId;
 
   while (currentId) {
-    const folder = folders.find(f => f.id === currentId);
+    const folder = folders.find((f: any) => f.id === currentId);
     if (!folder) break;
     path.unshift(folder);
     currentId = folder.parentId;

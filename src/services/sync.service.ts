@@ -91,7 +91,7 @@ export class SyncService {
     // Check connection periodically
     setInterval(() => {
       const isOnline = navigator.onLine;
-      if (isOnline !== this.syncStatus.isOnline) {
+      if (isOnline !== (this as any).syncStatus.isOnline) {
         this.updateSyncStatus({ isOnline });
         if (isOnline) {
           this.processPendingChanges();
@@ -143,7 +143,7 @@ export class SyncService {
     type: SyncEvent['type'],
     data: any
   ): Promise<void> {
-    if (!this.syncStatus.isOnline) {
+    if (!(this as any).syncStatus.isOnline) {
       // Queue for later if offline
       this.queuePendingChange({ type, data });
       return;
@@ -212,7 +212,7 @@ export class SyncService {
    * Process pending changes using RealtimeSyncService
    */
   private static async processPendingChanges(): Promise<void> {
-    if (!this.syncStatus.isOnline || this.syncStatus.syncInProgress) {
+    if (!this.syncStatus.isOnline || (this as any).syncStatus.syncInProgress) {
       return;
     }
 
@@ -271,7 +271,7 @@ export class SyncService {
    * Resolve sync conflict using RealtimeSyncService
    */
   static async resolveConflict(conflictId: string, resolution: 'local' | 'remote' | 'merge'): Promise<void> {
-    const conflict = this.conflictQueue.find(c => c.id === conflictId);
+    const conflict = this.conflictQueue.find((c: any) => c.id === conflictId);
     if (conflict) {
       try {
         // Use RealtimeSyncService to resolve the conflict
@@ -281,7 +281,7 @@ export class SyncService {
         conflict.resolution = resolution;
         
         // Remove from queue
-        this.conflictQueue = this.conflictQueue.filter(c => c.id !== conflictId);
+        this.conflictQueue = this.conflictQueue.filter((c: any) => c.id !== conflictId);
       } catch (error) {
         console.error('Error resolving conflict:', error);
       }
@@ -292,7 +292,7 @@ export class SyncService {
    * Get unresolved conflicts
    */
   static getUnresolvedConflicts(): SyncConflict[] {
-    return this.conflictQueue.filter(c => !c.resolved);
+    return this.conflictQueue.filter((c: any) => !c.resolved);
   }
 
   /**

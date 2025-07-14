@@ -320,7 +320,7 @@ export class RBACService {
       }
 
       // Get role definitions
-      const roleIds = userRoles.map(ur => ur.roleId);
+      const roleIds = userRoles.map((ur: any) => ur.roleId);
       const roles = await this.getRolesByIds(roleIds);
       
       // Sort by priority (highest first)
@@ -632,7 +632,7 @@ export class RBACService {
   static async getRoles(): Promise<Role[]> {
     try {
       const snapshot = await getDocs(collection(db, this.ROLES_COLLECTION));
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate(),
@@ -657,7 +657,7 @@ export class RBACService {
   }> {
     try {
       const userRoles = await this.getUserRoles(userId, teamId);
-      const roleIds = userRoles.map(ur => ur.roleId);
+      const roleIds = userRoles.map((ur: any) => ur.roleId);
       const roles = await this.getRolesByIds(roleIds);
 
       const permissions = new Map<Resource, Set<Action>>();
@@ -703,13 +703,13 @@ export class RBACService {
     const now = new Date();
 
     return snapshot.docs
-      .map(doc => ({
+      .map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         grantedAt: doc.data().grantedAt?.toDate(),
         expiresAt: doc.data().expiresAt?.toDate()
       } as UserRole))
-      .filter(ur => !ur.expiresAt || ur.expiresAt > now);
+      .filter((ur: any) => !ur.expiresAt || ur.expiresAt > now);
   }
 
   private static async getUserRoleAssignment(
@@ -747,7 +747,7 @@ export class RBACService {
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     } as UserRole));
@@ -868,9 +868,9 @@ export class RBACService {
     return cached;
   }
 
-  private static cacheResult(key: string, _result: PermissionCheck): PermissionCheck {
+  private static cacheResult(key: string, result: PermissionCheck): PermissionCheck {
     (result as unknown).timestamp = Date.now();
-    this.PERMISSION_CACHE.set(key, _result);
+    this.PERMISSION_CACHE.set(key, result);
     return result;
   }
 

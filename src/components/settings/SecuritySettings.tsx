@@ -49,7 +49,7 @@ const SecuritySettings: React.FC = () => {
         dispatch(addToast({
           type: 'error',
           message: 'Failed to disable biometric authentication'
-        }));
+        }) as any);
       }
     } else {
       const success = await enableBiometric();
@@ -57,22 +57,22 @@ const SecuritySettings: React.FC = () => {
         dispatch(addToast({
           type: 'error',
           message: 'Failed to enable biometric authentication'
-        }));
+        }) as any);
       }
     }
   };
 
   const handleAutoLockChange = (_e: React.ChangeEvent<HTMLSelectElement>) => {
-    const timeout = parseInt(_e.target.value);
-    dispatch(setAutoLockTimeout(timeout));
+    const timeout = parseInt(e.target.value);
+    dispatch(setAutoLockTimeout(timeout) as any);
     dispatch(addToast({
       type: 'success',
       message: 'Auto-lock timeout updated'
-    }));
+    }) as any);
   };
 
   const handleNotificationsToggle = () => {
-    dispatch(setShowNotifications(!settings.showNotifications));
+    dispatch(setShowNotifications(!settings.showNotifications) as any);
   };
 
   const handleChangePassword = () => {
@@ -80,7 +80,7 @@ const SecuritySettings: React.FC = () => {
     dispatch(addToast({
       type: 'info',
       message: 'Password change feature coming soon'
-    }));
+    }) as any);
   };
 
   const handleChangeEncryption = () => {
@@ -88,7 +88,7 @@ const SecuritySettings: React.FC = () => {
     dispatch(addToast({
       type: 'warning',
       message: 'Changing encryption password requires re-encrypting all data'
-    }));
+    }) as any);
   };
 
   return (
@@ -148,7 +148,7 @@ const SecuritySettings: React.FC = () => {
               onChange={handleAutoLockChange}
               className="input w-32"
             >
-              {autoLockOptions.map(option => (
+              {autoLockOptions.map((option: any) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>

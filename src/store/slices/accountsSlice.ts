@@ -9,7 +9,7 @@ import { OTPAccount } from '@services/otp.service';
 interface AccountsState {
   accounts: OTPAccount[];
   isLoading: boolean;
-  _error: string | null;
+  error: string | null;
   searchQuery: string;
   selectedTags: string[];
   selectedFolderId: string | null;
@@ -21,7 +21,7 @@ interface AccountsState {
 const initialState: AccountsState = {
   accounts: [],
   isLoading: false,
-  _error: null,
+  error: null,
   searchQuery: '',
   selectedTags: [],
   selectedFolderId: null,
@@ -43,13 +43,13 @@ const accountsSlice = createSlice({
       state.accounts.push(action.payload);
     },
     updateAccount: (state, action: PayloadAction<OTPAccount>) => {
-      const index = state.accounts.findIndex(acc => acc.id === action.payload.id);
+      const index = state.accounts.findIndex(acc => acc.id === (action as any).payload.id);
       if (index !== -1) {
         state.accounts[index] = action.payload;
       }
     },
     deleteAccount: (state, action: PayloadAction<string>) => {
-      state.accounts = state.accounts.filter(acc => acc.id !== action.payload);
+      state.accounts = state.accounts.filter((acc: any) => acc.id !== action.payload);
     },
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
@@ -70,7 +70,7 @@ const accountsSlice = createSlice({
       state.error = action.payload;
     },
     incrementHOTPCounter: (state, action: PayloadAction<string>) => {
-      const account = state.accounts.find(acc => acc.id === action.payload);
+      const account = state.accounts.find((acc: any) => acc.id === action.payload);
       if (account && account.type === 'hotp' && account.counter !== undefined) {
         account.counter += 1;
         account.updatedAt = new Date();
@@ -106,6 +106,6 @@ export const {
 } = accountsSlice.actions;
 
 // Selectors
-export const selectAllAccounts = (state: { accounts: AccountsState }) => state.accounts.accounts;
+export const selectAllAccounts = (state: { accounts: AccountsState }) => (state as any).accounts.accounts;
 
 export default accountsSlice.reducer;

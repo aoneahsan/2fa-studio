@@ -82,7 +82,7 @@ export class GoogleDriveBackupService {
     options: BackupOptions = {}
   ): Promise<{ success: boolean; fileId?: string; error?: string }> {
     if (!this.isInitialized) {
-      return { success: false, _error: 'Google Drive not initialized' };
+      return { success: false, error: 'Google Drive not initialized' };
     }
 
     try {
@@ -93,7 +93,7 @@ export class GoogleDriveBackupService {
         createdAt: new Date().toISOString(),
         deviceInfo,
         accountCount: accounts.length,
-        accounts: accounts.map(account => ({
+        accounts: (accounts || []).map((account: any) => ({
           ...account,
           // Remove sensitive fields that shouldn't be backed up
           id: undefined,
@@ -171,7 +171,7 @@ export class GoogleDriveBackupService {
       console.error('Backup failed:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Backup failed'
+        error: error instanceof Error ? error.message : 'Backup failed'
       };
     }
   }
@@ -230,7 +230,7 @@ export class GoogleDriveBackupService {
     options: RestoreOptions = {}
   ): Promise<{ success: boolean; accounts?: OTPAccount[]; error?: string }> {
     if (!this.isInitialized) {
-      return { success: false, _error: 'Google Drive not initialized' };
+      return { success: false, error: 'Google Drive not initialized' };
     }
 
     try {
@@ -256,7 +256,7 @@ export class GoogleDriveBackupService {
       if (options.validateChecksum && originalChecksum) {
         const currentChecksum = await this.generateChecksum(data);
         if (currentChecksum !== originalChecksum) {
-          return { success: false, _error: 'Backup integrity check failed' };
+          return { success: false, error: 'Backup integrity check failed' };
         }
       }
 
@@ -270,7 +270,7 @@ export class GoogleDriveBackupService {
         } else if (Capacitor.isNativePlatform()) {
           data = await MobileEncryptionService.decryptData(data);
         } else {
-          return { success: false, _error: 'Password required for encrypted backup' };
+          return { success: false, error: 'Password required for encrypted backup' };
         }
       }
 
@@ -278,11 +278,11 @@ export class GoogleDriveBackupService {
       const backupData = JSON.parse(data);
       
       if (!backupData.accounts || !Array.isArray(backupData.accounts)) {
-        return { success: false, _error: 'Invalid backup format' };
+        return { success: false, error: 'Invalid backup format' };
       }
 
       // Convert to OTPAccount format
-      const accounts: OTPAccount[] = backupData.accounts.map((account: unknown) => ({
+      const accounts: OTPAccount[] = ((backupData.accounts) || []).map((account: unknown) => ({
         ...account,
         id: '', // Will be set when saving
         userId: '', // Will be set when saving
@@ -296,7 +296,7 @@ export class GoogleDriveBackupService {
       console.error('Restore failed:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Restore failed'
+        error: error instanceof Error ? error.message : 'Restore failed'
       };
     }
   }
@@ -332,7 +332,7 @@ export class GoogleDriveBackupService {
         fields: 'description,appProperties'
       });
 
-      const description = response.data.description;
+      const description = (response as any).data.description;
       const appProperties = response.data.appProperties || {};
 
       if (description) {
@@ -375,7 +375,7 @@ export class GoogleDriveBackupService {
         fields: 'storageQuota'
       });
 
-      const quota = response.data.storageQuota;
+      const quota = (response as any).data.storageQuota;
       const limit = parseInt(quota.limit || '0');
       const usage = parseInt(quota.usage || '0');
 
@@ -450,7 +450,7 @@ export class GoogleDriveBackupService {
     const dataBuffer = encoder.encode(data);
     const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b: any) => b.toString(16).padStart(2, '0')).join('');
   }
 
   /**
@@ -475,7 +475,7 @@ export class GoogleDriveBackupService {
    */
   static async testConnection(): Promise<{ success: boolean; error?: string }> {
     if (!this.isInitialized) {
-      return { success: false, _error: 'Google Drive not initialized' };
+      return { success: false, error: 'Google Drive not initialized' };
     }
 
     try {
@@ -484,7 +484,7 @@ export class GoogleDriveBackupService {
     } catch (error) {
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Connection test failed'
+        error: error instanceof Error ? error.message : 'Connection test failed'
       };
     }
   }

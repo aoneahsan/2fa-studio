@@ -75,7 +75,7 @@ export class FirestoreService {
     }
     
     if (Array.isArray(data)) {
-      return data.map(item => this.sanitizeInput(item));
+      return (data || []).map((item: any) => this.sanitizeInput(item));
     }
     
     if (data && typeof data === 'object') {
@@ -191,7 +191,7 @@ export class FirestoreService {
       // Remove the extra document if we have more
       const resultDocs = hasMore ? docs.slice(0, -1) : docs;
       
-      const data = resultDocs.map(doc => ({
+      const data = resultDocs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate(),
@@ -380,9 +380,9 @@ export class FirestoreService {
             callback(null);
           }
         },
-        (_error) => {
-          console.error('Document subscription _error:', error);
-          callback(null, _error);
+        (error) => {
+          console.error('Document subscription error:', error);
+          callback(null, error);
         }
       );
 
@@ -428,7 +428,7 @@ export class FirestoreService {
 
       const unsubscribe = onSnapshot(q,
         (querySnapshot) => {
-          const data = querySnapshot.docs.map(doc => ({
+          const data = querySnapshot.docs.map((doc: any) => ({
             id: doc.id,
             ...doc.data(),
             createdAt: doc.data().createdAt?.toDate(),
@@ -436,9 +436,9 @@ export class FirestoreService {
           })) as T[];
           callback(data);
         },
-        (_error) => {
-          console.error('Collection subscription _error:', error);
-          callback([], _error);
+        (error) => {
+          console.error('Collection subscription error:', error);
+          callback([], error);
         }
       );
 

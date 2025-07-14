@@ -10,7 +10,7 @@ import { setUser } from '@store/slices/authSlice';
 import { addToast } from '@store/slices/uiSlice';
 import { updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
-import { _auth, db } from '@src/config/firebase';
+import { auth, db } from '@src/config/firebase';
 import { CameraIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 /**
@@ -23,8 +23,8 @@ const ProfileSettings: React.FC = () => {
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [photoURL, setPhotoURL] = useState(user?.photoURL || '');
 
-  const handleUpdateProfile = async (_e: React.FormEvent) => {
-    _e.preventDefault();
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
     
     if (!auth.currentUser || !user) return;
 
@@ -60,20 +60,20 @@ const ProfileSettings: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Profile updated successfully'
-      }));
+      }) as any);
     } catch (error) {
-      console.error('Profile update _error:', error);
+      console.error('Profile update error:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update profile'
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePhotoUpload = async (_e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = _e.target.files?.[0];
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     // In a real app, you would upload to Firebase Storage
@@ -81,7 +81,7 @@ const ProfileSettings: React.FC = () => {
     dispatch(addToast({
       type: 'info',
       message: 'Photo upload feature coming soon'
-    }));
+    }) as any);
   };
 
   return (

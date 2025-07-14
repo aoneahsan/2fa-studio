@@ -7,14 +7,14 @@ import React, { Component, ReactNode } from 'react';
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  _error: Error | null;
+  error: Error | null;
   errorInfo: React.ErrorInfo | null;
 }
 
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
-  onError?: (_error: Error, errorInfo: React.ErrorInfo) => void;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -23,40 +23,40 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     
     this.state = {
       hasError: false,
-      _error: null,
+      error: null,
       errorInfo: null
     };
   }
 
-  static getDerivedStateFromError(_error: Error): Partial<ErrorBoundaryState> {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
-      _error
+      error
     };
   }
 
-  componentDidCatch(_error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by ErrorBoundary:', _error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by ErrorBoundary:', error, errorInfo);
     
     this.setState({
-      _error,
+      error,
       errorInfo
     });
 
     // Report error to monitoring service
-    this.reportError(_error, errorInfo);
+    this.reportError(error, errorInfo);
     
     // Call custom error handler if provided
-    if (this.props.onError) {
-      this.props.onError(_error, errorInfo);
+    if ((this as any).props.onError) {
+      this.props.onError(error, errorInfo);
     }
   }
 
-  private reportError(_error: Error, errorInfo: React.ErrorInfo) {
+  private reportError(error: Error, errorInfo: React.ErrorInfo) {
     // In a real app, this would send to Sentry or similar service
     const errorReport = {
-      message: _error.message,
-      stack: _error.stack,
+      message: error.message,
+      stack: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
@@ -89,15 +89,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   private handleRetry = () => {
     this.setState({
       hasError: false,
-      _error: null,
+      error: null,
       errorInfo: null
     });
   };
 
   render() {
-    if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
+    if ((this as any).state.hasError) {
+      if ((this as any).props.fallback) {
+        return (this as any).props.fallback;
       }
 
       return (
@@ -131,7 +131,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <details className="error-boundary__details">
                 <summary>Error Details (Development Only)</summary>
                 <pre className="error-boundary__error">
-                  {this.state._error?.stack}
+                  {this.state.error?.stack}
                 </pre>
                 <pre className="error-boundary__component-stack">
                   {this.state.errorInfo?.componentStack}
@@ -143,19 +143,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    return this.props.children;
+    return (this as any).props.children;
   }
 }
 
 // Hook for functional components
 export const useErrorHandler = () => {
-  const handleError = (_error: Error, errorInfo?: unknown) => {
-    console.error('Error handled by hook:', _error);
+  const handleError = (error: Error, errorInfo?: unknown) => {
+    console.error('Error handled by hook:', error);
     
     // Report error
     const errorReport = {
-      message: _error.message,
-      stack: _error.stack,
+      message: error.message,
+      stack: error.stack,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href,

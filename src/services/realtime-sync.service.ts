@@ -106,7 +106,7 @@ export class RealtimeSyncService {
       this.emitEvent({ type: 'sync_complete' });
     } catch (error) {
       this.syncState.isSyncing = false;
-      this.emitEvent({ type: 'sync_error', _error: error as Error });
+      this.emitEvent({ type: 'sync_error', error: error as Error });
     }
   }
 
@@ -123,7 +123,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(accountsQuery,
       (snapshot) => this.handleAccountsSnapshot(snapshot),
-      (_error) => this.handleSyncError('accounts', _error)
+      (error) => this.handleSyncError('accounts', error)
     );
 
     this.listeners.set('accounts', unsubscribe);
@@ -142,7 +142,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(foldersQuery,
       (snapshot) => this.handleFoldersSnapshot(snapshot),
-      (_error) => this.handleSyncError('folders', _error)
+      (error) => this.handleSyncError('folders', error)
     );
 
     this.listeners.set('folders', unsubscribe);
@@ -161,7 +161,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(tagsQuery,
       (snapshot) => this.handleTagsSnapshot(snapshot),
-      (_error) => this.handleSyncError('tags', _error)
+      (error) => this.handleSyncError('tags', error)
     );
 
     this.listeners.set('tags', unsubscribe);
@@ -177,7 +177,7 @@ export class RealtimeSyncService {
 
     const unsubscribe = onSnapshot(userDoc,
       (snapshot) => this.handleUserSnapshot(snapshot),
-      (_error) => this.handleSyncError('user', _error)
+      (error) => this.handleSyncError('user', error)
     );
 
     this.listeners.set('user', unsubscribe);
@@ -191,7 +191,7 @@ export class RealtimeSyncService {
     
     for (const change of changes) {
       const data = {
-        id: change.doc.id,
+        id: (change as any).doc.id,
         ...change.doc.data(),
         createdAt: change.doc.data().createdAt?.toDate(),
         updatedAt: change.doc.data().updatedAt?.toDate()
@@ -246,7 +246,7 @@ export class RealtimeSyncService {
     
     for (const change of changes) {
       const data = {
-        id: change.doc.id,
+        id: (change as any).doc.id,
         ...change.doc.data(),
         createdAt: change.doc.data().createdAt?.toDate(),
         updatedAt: change.doc.data().updatedAt?.toDate()
@@ -287,7 +287,7 @@ export class RealtimeSyncService {
     
     for (const change of changes) {
       const data = {
-        id: change.doc.id,
+        id: (change as any).doc.id,
         ...change.doc.data(),
         createdAt: change.doc.data().createdAt?.toDate(),
         updatedAt: change.doc.data().updatedAt?.toDate()
@@ -507,7 +507,7 @@ export class RealtimeSyncService {
     data?: unknown
   ): void {
     this.pendingOperations.set(id, { type, collection, data });
-    this.syncState.pendingChanges = this.pendingOperations.size;
+    this.syncState.pendingChanges = (this as any).pendingOperations.size;
   }
 
   /**
@@ -532,8 +532,8 @@ export class RealtimeSyncService {
   /**
    * Handle sync errors
    */
-  private static handleSyncError(collection: string, _error: FirestoreError): void {
-    console.error(`Sync error for ${collection}:`, _error);
+  private static handleSyncError(collection: string, error: FirestoreError): void {
+    console.error(`Sync error for ${collection}:`, error);
     this.emitEvent({ type: 'sync_error', error });
   }
 
@@ -553,7 +553,7 @@ export class RealtimeSyncService {
       try {
         listener(event);
       } catch (error) {
-        console.error('Event listener _error:', error);
+        console.error('Event listener error:', error);
       }
     });
   }

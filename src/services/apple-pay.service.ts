@@ -107,7 +107,7 @@ export class ApplePayService {
       if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') {
         return {
           success: false,
-          _error: 'Apple Pay is only available on iOS',
+          error: 'Apple Pay is only available on iOS',
         };
       }
 
@@ -121,7 +121,7 @@ export class ApplePayService {
       console.error('Error initializing Apple Pay:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -159,7 +159,7 @@ export class ApplePayService {
 
       // Simulate product query
       // In real implementation, this would call StoreKit
-      const mockProducts: AppleProduct[] = productIds.map(id => ({
+      const mockProducts: AppleProduct[] = productIds.map((id: any) => ({
         productIdentifier: id,
         localizedTitle: `2FA Studio ${id.replace(/_/g, ' ')}`,
         localizedDescription: `2FA Studio subscription - ${id}`,
@@ -190,7 +190,7 @@ export class ApplePayService {
       return {
         success: false,
         products: [],
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -230,7 +230,7 @@ export class ApplePayService {
       console.error('Error purchasing subscription:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -243,7 +243,7 @@ export class ApplePayService {
       if (!await this.isApplePayAvailable()) {
         return {
           success: false,
-          _error: 'Apple Pay not available',
+          error: 'Apple Pay not available',
         };
       }
 
@@ -274,7 +274,7 @@ export class ApplePayService {
       console.error('Error processing Apple Pay payment:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -305,7 +305,7 @@ export class ApplePayService {
         return {
           valid: false,
           environment: 'sandbox',
-          _error: result.error || 'Receipt validation failed',
+          error: result.error || 'Receipt validation failed',
         };
       }
 
@@ -322,7 +322,7 @@ export class ApplePayService {
       return {
         valid: false,
         environment: 'sandbox',
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -351,7 +351,7 @@ export class ApplePayService {
       return {
         success: false,
         purchases: [],
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -375,7 +375,7 @@ export class ApplePayService {
       if (!validation.valid) {
         return {
           success: false,
-          _error: validation.error || 'Invalid purchase',
+          error: validation.error || 'Invalid purchase',
         };
       }
 
@@ -418,7 +418,7 @@ export class ApplePayService {
       console.error('Error creating subscription from purchase:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -455,7 +455,7 @@ export class ApplePayService {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

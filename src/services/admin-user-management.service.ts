@@ -98,20 +98,20 @@ export class AdminUserManagementService {
 
       // Enhance users with admin-specific data
       const enhancedUsers = await Promise.all(
-        result.data.map(user => this.enhanceUserWithAdminData(user as User))
+        ((result.data) || []).map((user: any) => this.enhanceUserWithAdminData(user as User))
       );
 
       // Apply client-side filters that couldn't be done at database level
       let filteredUsers = enhancedUsers;
       
       if (filter?.tier) {
-        filteredUsers = filteredUsers.filter(user => 
+        filteredUsers = filteredUsers.filter((user: any) => 
           user.subscription?.tier === filter.tier
         );
       }
       
       if (filter?.riskScore) {
-        filteredUsers = filteredUsers.filter(user =>
+        filteredUsers = filteredUsers.filter((user: any) =>
           user.riskScore >= filter.riskScore!.min && 
           user.riskScore <= filter.riskScore!.max
         );
@@ -119,7 +119,7 @@ export class AdminUserManagementService {
       
       if (filter?.searchQuery) {
         const query = filter.searchQuery.toLowerCase();
-        filteredUsers = filteredUsers.filter(user =>
+        filteredUsers = filteredUsers.filter((user: any) =>
           user.email.toLowerCase().includes(query) ||
           user.displayName?.toLowerCase().includes(query) ||
           user.id.includes(query)
@@ -341,11 +341,11 @@ export class AdminUserManagementService {
   ): Promise<{
     success: number;
     failed: number;
-    errors: Array<{ userId: string; _error: string }>;
+    errors: Array<{ userId: string; error: string }>;
   }> {
     let success = 0;
     let failed = 0;
-    const errors: Array<{ userId: string; _error: string }> = [];
+    const errors: Array<{ userId: string; error: string }> = [];
 
     for (const userId of bulkAction.userIds) {
       try {
@@ -372,7 +372,7 @@ export class AdminUserManagementService {
         failed++;
         errors.push({
           userId,
-          _error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }

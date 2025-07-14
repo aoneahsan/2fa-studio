@@ -99,7 +99,7 @@ const SubscriptionSettings: React.FC = () => {
     }
   ];
 
-  const currentPlan = plans.find(p => p.id === user?.subscription.type) || plans[0];
+  const currentPlan = plans.find((p: any) => p.id === user?.subscription.type) || plans[0];
 
   const handleUpgrade = async (planId: string) => {
     setIsProcessing(true);
@@ -119,12 +119,12 @@ const SubscriptionSettings: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: `Successfully upgraded to ${planId} plan!`
-      }));
+      }) as any);
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Payment failed. Please try again.'
-      }));
+      }) as any);
     } finally {
       setIsProcessing(false);
     }
@@ -139,7 +139,7 @@ const SubscriptionSettings: React.FC = () => {
       dispatch(addToast({
         type: 'info',
         message: 'Subscription cancelled. You have access until the end of your billing period.'
-      }));
+      }) as any);
     }
   };
 
@@ -183,7 +183,7 @@ const SubscriptionSettings: React.FC = () => {
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <CalendarDaysIcon className="w-4 h-4 text-muted-foreground" />
-                  <span>Next billing date: {user?.subscription.expiresAt ? new Date(user.subscription.expiresAt).toLocaleDateString() : 'N/A'}</span>
+                  <span>Next billing date: {user?.subscription.expiresAt ? new Date((user as any).subscription.expiresAt).toLocaleDateString() : 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <CreditCardIcon className="w-4 h-4 text-muted-foreground" />

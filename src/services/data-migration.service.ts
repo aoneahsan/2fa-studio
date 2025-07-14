@@ -175,7 +175,7 @@ export class DataMigrationService {
     plan: MigrationPlan,
     progressCallback?: (step: string, progress: number) => void
   ): Promise<MigrationResult> {
-    const _result: MigrationResult = {
+    const result: MigrationResult = {
       success: false,
       migratedCount: 0,
       errorCount: 0,
@@ -192,9 +192,9 @@ export class DataMigrationService {
       }
 
       // Execute migration steps
-      for (let i = 0; i < plan.steps.length; i++) {
+      for (let i = 0; i < (plan as any).steps.length; i++) {
         const step = plan.steps[i];
-        const progress = 10 + ((i + 1) / plan.steps.length) * 80;
+        const progress = 10 + ((i + 1) / (plan as any).steps.length) * 80;
         
         progressCallback?.(`Executing: ${step.description}`, progress);
         
@@ -311,7 +311,7 @@ export class DataMigrationService {
         });
         
       } catch (error) {
-        console.error(`Failed to migrate encryption for account ${account.id}:`, _error);
+        console.error(`Failed to migrate encryption for account ${account.id}:`, error);
         throw error;
       }
     }
@@ -449,7 +449,7 @@ export class DataMigrationService {
 
     await FirestoreService.createBackupRecord(userId, {
       provider: 'migration',
-      accountCount: accounts.data.length,
+      accountCount: (accounts as any).data.length,
       size: JSON.stringify(backupData).length,
       encrypted: false,
       checksum: await this.generateChecksum(JSON.stringify(backupData))
@@ -485,7 +485,7 @@ export class DataMigrationService {
    * Validate backup data
    */
   static async validateBackup(backupData: unknown): Promise<BackupValidationResult> {
-    const _result: BackupValidationResult = {
+    const result: BackupValidationResult = {
       isValid: true,
       version: backupData.version || '1.0',
       accountCount: 0,
@@ -505,10 +505,10 @@ export class DataMigrationService {
         result.errors.push('Invalid backup structure: missing accounts array');
         result.isValid = false;
       } else {
-        result.accountCount = backupData.accounts.length;
+        result.accountCount = (backupData as any).accounts.length;
 
         // Validate each account
-        for (let i = 0; i < backupData.accounts.length; i++) {
+        for (let i = 0; i < (backupData as any).accounts.length; i++) {
           const account = backupData.accounts[i];
           const accountErrors = this.validateAccountData(account, result.version);
           
@@ -529,7 +529,7 @@ export class DataMigrationService {
       }
 
     } catch (error) {
-      result.errors.push(`Validation _error: ${error}`);
+      result.errors.push(`Validation error: ${error}`);
       result.isValid = false;
     }
 
@@ -578,11 +578,11 @@ export class DataMigrationService {
         settings: user?.settings,
         subscription: user?.subscription
       },
-      accounts: accounts.data.map(account => ({
+      accounts: ((accounts.data) || []).map((account: any) => ({
         label: account.label,
         issuer: account.issuer,
         type: account.type,
-        algorithm: account.algorithm,
+        algorithm: (account as any).algorithm,
         digits: account.digits,
         period: account.period,
         tags: account.tags,
@@ -631,12 +631,12 @@ export class DataMigrationService {
     const dataBuffer = encoder.encode(data);
     const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b: any) => b.toString(16).padStart(2, '0')).join('');
   }
 
   private static convertToCSV(accounts: unknown[]): string {
     const headers = ['Label', 'Issuer', 'Type', 'Algorithm', 'Digits', 'Period', 'Tags', 'Category', 'Favorite'];
-    const rows = accounts.map(account => [
+    const rows = (accounts || []).map((account: any) => [
       account.label,
       account.issuer,
       account.type,
@@ -648,8 +648,8 @@ export class DataMigrationService {
       account.isFavorite ? 'Yes' : 'No'
     ]);
 
-    return [headers, ...rows].map(row => 
-      row.map(cell => `"${cell}"`).join(',')
+    return [headers, ...rows].map((row: any) => 
+      row.map((cell: any) => `"${cell}"`).join(',')
     ).join('\n');
   }
 

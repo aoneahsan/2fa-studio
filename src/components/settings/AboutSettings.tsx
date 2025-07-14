@@ -31,13 +31,13 @@ const AboutSettings: React.FC = () => {
     dispatch(addToast({
       type: 'info',
       message: 'Checking for updates...'
-    }));
+    }) as any);
     
     setTimeout(() => {
       dispatch(addToast({
         type: 'success',
         message: 'You are running the latest version!'
-      }));
+      }) as any);
     }, 1500);
   };
 

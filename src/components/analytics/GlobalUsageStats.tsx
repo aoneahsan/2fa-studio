@@ -10,8 +10,8 @@ import { AnalyticsService } from '@services/analytics.service';
 import { GlobalUsageStats as GlobalStats } from '@app-types/analytics';
 import { 
   ChartBarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   ClockIcon,
   ExclamationTriangleIcon,
   DevicePhoneMobileIcon,
@@ -130,7 +130,7 @@ const GlobalUsageStats: React.FC = () => {
       {stats.mostUsedAccounts.length > 0 && (
         <div className="bg-card border border-border rounded-lg p-6">
           <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-            <TrendingUpIcon className="w-5 h-5 text-green-500" />
+            <ArrowTrendingUpIcon className="w-5 h-5 text-green-500" />
             Most Used Accounts
           </h3>
           <div className="space-y-3">

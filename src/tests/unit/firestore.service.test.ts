@@ -75,7 +75,7 @@ describe('FirestoreService', () => {
 
         expect(sanitized.name).not.toContain('<script>');
         expect(sanitized.description).not.toContain('javascript:');
-        expect(sanitized.nested.field).not.toContain('../');
+        expect((sanitized as any).nested.field).not.toContain('../');
         expect(sanitized.nested.array[0]).not.toContain('${');
         expect(sanitized.nested.array[1]).not.toContain('onclick=');
       });
@@ -136,7 +136,7 @@ describe('FirestoreService', () => {
         expect(sanitized.accounts[0].issuer).not.toContain('<script>');
         expect(sanitized.accounts[0].secret).not.toContain('${');
         expect(sanitized.accounts[0].label).not.toContain('../');
-        expect(sanitized.settings.theme).not.toContain('javascript:');
+        expect((sanitized as any).settings.theme).not.toContain('javascript:');
       });
     });
   });
@@ -264,7 +264,7 @@ describe('FirestoreService', () => {
       try {
         await FirestoreService.getDocument('', '');
       } catch (error) {
-        expect(_error).toBeDefined();
+        expect(error).toBeDefined();
       }
     });
   });

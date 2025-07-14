@@ -121,7 +121,7 @@ export class SubscriptionService {
    */
   static async initializeStripe(): Promise<Stripe | null> {
     if (!stripePromise) {
-      const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+      const publishableKey = (import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY;
       if (!publishableKey) {
         console.error('Stripe publishable key not configured');
         return null;
@@ -135,7 +135,7 @@ export class SubscriptionService {
    * Get available subscription plans
    */
   static getAvailablePlans(): PriceOption[] {
-    return this.prices.filter(price => price.priceId);
+    return this.prices.filter((price: any) => price.priceId);
   }
 
   /**

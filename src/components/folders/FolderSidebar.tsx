@@ -40,17 +40,17 @@ const FolderSidebar: React.FC<FolderSidebarProps> = ({
   const { user } = useSelector((state: RootState) => state._auth);
   const folderTree = useSelector(selectFolderTree);
   const selectedFolderId = useSelector(selectSelectedFolderId);
-  const isLoading = useSelector((state: RootState) => state.folders.isLoading);
+  const isLoading = useSelector((state: RootState) => (state as any).folders.isLoading);
 
   useEffect(() => {
     if (user) {
-      dispatch(fetchFolders(user.id));
+      dispatch(fetchFolders(user.id) as any);
     }
   }, [user, dispatch]);
 
   const handleInitializeDefaults = async () => {
     if (user) {
-      await dispatch(initializeDefaultFolders(user.id));
+      await dispatch(initializeDefaultFolders(user.id) as any);
     }
   };
 
@@ -62,14 +62,14 @@ const FolderSidebar: React.FC<FolderSidebarProps> = ({
           <h3 className="font-medium text-sm">Folders</h3>
           <div className="flex gap-1">
             <button
-              onClick={() => dispatch(expandAllFolders())}
+              onClick={() => dispatch(expandAllFolders() as any)}
               className="btn btn-ghost btn-xs btn-icon"
               title="Expand all"
             >
               <ChevronDoubleDownIcon className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => dispatch(collapseAllFolders())}
+              onClick={() => dispatch(collapseAllFolders() as any)}
               className="btn btn-ghost btn-xs btn-icon"
               title="Collapse all"
             >

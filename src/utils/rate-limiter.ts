@@ -41,13 +41,13 @@ export class RateLimiter {
     }
 
     // Check if window expired
-    if (now - record.firstAttempt > this.config.windowMs) {
+    if (now - record.firstAttempt > (this as any).config.windowMs) {
       this.attempts.delete(key);
       return true;
     }
 
     // Check if under limit
-    return record.count < this.config.maxAttempts;
+    return record.count < (this as any).config.maxAttempts;
   }
 
   /**
@@ -66,7 +66,7 @@ export class RateLimiter {
     }
 
     // Reset if window expired
-    if (now - record.firstAttempt > this.config.windowMs) {
+    if (now - record.firstAttempt > (this as any).config.windowMs) {
       this.attempts.set(key, {
         count: 1,
         firstAttempt: now
@@ -78,8 +78,8 @@ export class RateLimiter {
     record.count++;
 
     // Block if limit exceeded
-    if (record.count >= this.config.maxAttempts) {
-      record.blockedUntil = now + this.config.blockDurationMs;
+    if (record.count >= (this as any).config.maxAttempts) {
+      record.blockedUntil = now + (this as any).config.blockDurationMs;
     }
   }
 
@@ -89,12 +89,12 @@ export class RateLimiter {
   getRemainingAttempts(key: string): number {
     const record = this.attempts.get(key);
     if (!record) {
-      return this.config.maxAttempts;
+      return (this as any).config.maxAttempts;
     }
 
     const now = Date.now();
-    if (now - record.firstAttempt > this.config.windowMs) {
-      return this.config.maxAttempts;
+    if (now - record.firstAttempt > (this as any).config.windowMs) {
+      return (this as any).config.maxAttempts;
     }
 
     return Math.max(0, this.config.maxAttempts - record.count);

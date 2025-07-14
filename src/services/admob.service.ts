@@ -41,7 +41,7 @@ export class AdMobService {
       const isAndroid = isPlatform('android');
       const appId = isAndroid
         ? import.meta.env.VITE_ADMOB_APP_ID_ANDROID
-        : import.meta.env.VITE_ADMOB_APP_ID_IOS;
+        : (import.meta as any).env.VITE_ADMOB_APP_ID_IOS;
 
       if (!appId) {
         console.warn('AdMob app ID not configured');
@@ -51,18 +51,18 @@ export class AdMobService {
       this.config = {
         bannerId: isAndroid
           ? import.meta.env.VITE_ADMOB_BANNER_ID_ANDROID
-          : import.meta.env.VITE_ADMOB_BANNER_ID_IOS,
+          : (import.meta as any).env.VITE_ADMOB_BANNER_ID_IOS,
         interstitialId: isAndroid
           ? import.meta.env.VITE_ADMOB_INTERSTITIAL_ID_ANDROID
-          : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID_IOS,
+          : (import.meta as any).env.VITE_ADMOB_INTERSTITIAL_ID_IOS,
         rewardedId: isAndroid
           ? import.meta.env.VITE_ADMOB_REWARDED_ID_ANDROID
-          : import.meta.env.VITE_ADMOB_REWARDED_ID_IOS,
+          : (import.meta as any).env.VITE_ADMOB_REWARDED_ID_IOS,
       };
 
       // Initialize AdMob
       await AdMob.initialize({
-        initializeForTesting: import.meta.env.DEV,
+        initializeForTesting: (import.meta as any).env.DEV,
       });
 
       // Set up event listeners
@@ -84,7 +84,7 @@ export class AdMobService {
       console.log('Banner ad loaded');
     });
 
-    AdMob.addListener('bannerAdFailedToLoad', (_error: AdMobError) => {
+    AdMob.addListener('bannerAdFailedToLoad', (error: AdMobError) => {
       console.error('Banner ad failed to load:', error);
       this.bannerShowing = false;
     });
@@ -94,7 +94,7 @@ export class AdMobService {
       console.log('Interstitial ad loaded:', info);
     });
 
-    AdMob.addListener('interstitialAdFailedToLoad', (_error: AdMobError) => {
+    AdMob.addListener('interstitialAdFailedToLoad', (error: AdMobError) => {
       console.error('Interstitial ad failed to load:', error);
     });
 
@@ -109,7 +109,7 @@ export class AdMobService {
       console.log('Rewarded ad loaded:', info);
     });
 
-    AdMob.addListener('rewardedAdFailedToLoad', (_error: AdMobError) => {
+    AdMob.addListener('rewardedAdFailedToLoad', (error: AdMobError) => {
       console.error('Rewarded ad failed to load:', error);
     });
 
@@ -130,11 +130,11 @@ export class AdMobService {
 
     try {
       const options: AdOptions = {
-        adId: this.config.bannerId,
+        adId: (this as any).config.bannerId,
         adSize: 'BANNER',
         position: position === 'top' ? 'TOP_CENTER' : 'BOTTOM_CENTER',
         margin: 0,
-        isTesting: import.meta.env.DEV,
+        isTesting: (import.meta as any).env.DEV,
       };
 
       await AdMob.showBanner(options);
@@ -182,8 +182,8 @@ export class AdMobService {
 
     try {
       const options: AdOptions = {
-        adId: this.config.interstitialId,
-        isTesting: import.meta.env.DEV,
+        adId: (this as any).config.interstitialId,
+        isTesting: (import.meta as any).env.DEV,
       };
 
       await AdMob.prepareInterstitial(options);
@@ -221,8 +221,8 @@ export class AdMobService {
 
     try {
       const options: AdOptions = {
-        adId: this.config.rewardedId,
-        isTesting: import.meta.env.DEV,
+        adId: (this as any).config.rewardedId,
+        isTesting: (import.meta as any).env.DEV,
       };
 
       await AdMob.prepareRewardVideo(options);
@@ -261,7 +261,7 @@ export class AdMobService {
       });
 
       // Show the ad
-      AdMob.showRewardVideo().catch((_error) => {
+      AdMob.showRewardVideo().catch((error) => {
         console.error('Failed to show rewarded video:', error);
         rewardListener.remove();
         dismissListener.remove();
@@ -288,7 +288,7 @@ export class AdMobService {
     }
 
     // Don't show ads in development
-    if (import.meta.env.DEV && !import.meta.env.VITE_FORCE_ADS) {
+    if (import.meta.env.DEV && !(import.meta as any).env.VITE_FORCE_ADS) {
       return false;
     }
 

@@ -19,7 +19,7 @@ interface UseNotificationsReturn {
 }
 
 export function useNotifications(): UseNotificationsReturn {
-  const user = useAppSelector((state) => state._auth.user);
+  const user = useAppSelector((state) => (state as any)._auth.user);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [preferences, setPreferences] = useState<NotificationPreferences>({

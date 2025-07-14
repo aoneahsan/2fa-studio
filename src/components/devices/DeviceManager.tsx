@@ -107,8 +107,8 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
   };
 
   const getDeviceSessionInfo = (device: DeviceInfo) => {
-    const deviceSessions = sessions.filter(s => s.deviceId === device.deviceId);
-    const activeSession = deviceSessions.find(s => s.isActive);
+    const deviceSessions = sessions.filter((s: any) => s.deviceId === device.deviceId);
+    const activeSession = deviceSessions.find((s: any) => s.isActive);
     return { totalSessions: deviceSessions.length, activeSession };
   };
 

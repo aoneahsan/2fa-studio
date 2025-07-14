@@ -54,14 +54,14 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    _e.preventDefault();
+    e.preventDefault();
     
     // Validate form
     if (!email || !password || !confirmPassword || !encryptionPassword || !confirmEncryptionPassword) {
       dispatch(addToast({
         type: 'error',
         message: 'Please fill in all fields',
-      }));
+      }) as any);
       return;
     }
 
@@ -69,7 +69,7 @@ const RegisterPage: React.FC = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Passwords do not match',
-      }));
+      }) as any);
       return;
     }
 
@@ -77,7 +77,7 @@ const RegisterPage: React.FC = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Encryption passwords do not match',
-      }));
+      }) as any);
       return;
     }
 
@@ -85,7 +85,7 @@ const RegisterPage: React.FC = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Please choose a stronger password',
-      }));
+      }) as any);
       return;
     }
 
@@ -93,7 +93,7 @@ const RegisterPage: React.FC = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Please choose a stronger encryption password',
-      }));
+      }) as any);
       return;
     }
 
@@ -101,26 +101,26 @@ const RegisterPage: React.FC = () => {
 
     try {
       // Create account
-      await dispatch(signUp({ email, password })).unwrap();
+      await dispatch(signUp({ email, password }) as any).unwrap();
       
       // Set encryption key
       const encryptionKey = await EncryptionService.hashPassword(encryptionPassword);
-      dispatch(setEncryptionKey(encryptionKey));
+      dispatch(setEncryptionKey(encryptionKey) as any);
       
       // TODO: Save encryption hint to user profile in Firestore
       
       dispatch(addToast({
         type: 'success',
         message: 'Account created successfully!',
-      }));
+      }) as any);
       
       navigate('/dashboard');
-    } catch (_error: unknown) {
-      console.error('Registration _error:', error);
+    } catch (error: unknown) {
+      console.error('Registration error:', error);
       dispatch(addToast({
         type: 'error',
         message: error.message || 'Failed to create account',
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }
@@ -174,7 +174,7 @@ const RegisterPage: React.FC = () => {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(_e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="input pl-10"
                   placeholder="you@example.com"
                 />

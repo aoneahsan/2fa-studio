@@ -65,12 +65,12 @@ export class BrowserExtensionService {
     try {
       // Initialize Firebase for real-time communication
       const app = initializeApp({
-        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-        databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-        storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+        apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY,
+        authDomain: (import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN,
+        projectId: (import.meta as any).env.VITE_FIREBASE_PROJECT_ID,
+        databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL,
+        storageBucket: (import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID,
         appId: import.meta.env.VITE_FIREBASE_APP_ID
       }, 'extension-bridge');
 
@@ -167,7 +167,7 @@ export class BrowserExtensionService {
       store.dispatch(addToast({
         type: 'success',
         message: 'Connected to browser extension',
-      }));
+      }) as any);
     } catch (error) {
       console.error('Failed to connect to extension:', error);
       throw error;
@@ -257,7 +257,7 @@ export class BrowserExtensionService {
       store.dispatch(addToast({
         type: 'info',
         message: `Browser extension requesting code for ${data.domain}`,
-      }));
+      }) as any);
 
       // If specific account requested, send that
       if (data.accountId) {
@@ -272,7 +272,7 @@ export class BrowserExtensionService {
           store.dispatch(addToast({
             type: 'info',
             message: 'Multiple accounts found. Please select one in the app.',
-          }));
+          }) as any);
         }
       }
     } catch (error) {
@@ -336,7 +336,7 @@ export class BrowserExtensionService {
         store.dispatch(addToast({
           type: 'warning',
           message: 'Please authenticate in the app to send code',
-        }));
+        }) as any);
         return;
       }
 
@@ -355,13 +355,13 @@ export class BrowserExtensionService {
       store.dispatch(addToast({
         type: 'success',
         message: `Sent code for ${account.issuer} to browser`,
-      }));
+      }) as any);
     } catch (error) {
       console.error('Failed to send account code:', error);
       store.dispatch(addToast({
         type: 'error',
         message: 'Failed to send code to browser',
-      }));
+      }) as any);
     }
   }
 
@@ -390,7 +390,7 @@ export class BrowserExtensionService {
       store.dispatch(addToast({
         type: 'info',
         message: 'Disconnected from browser extension',
-      }));
+      }) as any);
     } catch (error) {
       console.error('Failed to disconnect:', error);
     }

@@ -73,7 +73,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
           />
           <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20 max-h-64 overflow-y-auto">
             <FolderTree
-              folders={folderTree.filter(f => !excludeFolders.includes(f.id))}
+              folders={folderTree.filter((f: any) => !excludeFolders.includes(f.id))}
               selectedFolderId={value}
               onFolderSelect={handleSelect}
               className="p-2"

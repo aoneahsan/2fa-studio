@@ -82,7 +82,7 @@ export class GooglePlayBillingService {
       if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
         return {
           success: false,
-          _error: 'Google Play Billing is only available on Android',
+          error: 'Google Play Billing is only available on Android',
         };
       }
 
@@ -98,7 +98,7 @@ export class GooglePlayBillingService {
       console.error('Error initializing Google Play Billing:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -118,7 +118,7 @@ export class GooglePlayBillingService {
 
       // Simulate product query
       // In real implementation, this would call the Google Play Billing API
-      const mockProducts: GooglePlayProduct[] = productIds.map(id => ({
+      const mockProducts: GooglePlayProduct[] = productIds.map((id: any) => ({
         productId: id,
         type: id.includes('monthly') ? 'subs' : 'subs',
         price: id.includes('premium') ? '$2.99' : id.includes('family') ? '$4.99' : '$9.99',
@@ -141,7 +141,7 @@ export class GooglePlayBillingService {
       return {
         success: false,
         products: [],
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -182,7 +182,7 @@ export class GooglePlayBillingService {
       console.error('Error purchasing subscription:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -208,7 +208,7 @@ export class GooglePlayBillingService {
       console.error('Error acknowledging purchase:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -237,7 +237,7 @@ export class GooglePlayBillingService {
       return {
         success: false,
         purchases: [],
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -269,7 +269,7 @@ export class GooglePlayBillingService {
       if (!response.ok) {
         return {
           valid: false,
-          _error: result.error || 'Receipt validation failed',
+          error: result.error || 'Receipt validation failed',
         };
       }
 
@@ -282,7 +282,7 @@ export class GooglePlayBillingService {
       console.error('Error validating receipt:', error);
       return {
         valid: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -310,7 +310,7 @@ export class GooglePlayBillingService {
       if (!validation.valid) {
         return {
           success: false,
-          _error: validation.error || 'Invalid purchase',
+          error: validation.error || 'Invalid purchase',
         };
       }
 
@@ -352,7 +352,7 @@ export class GooglePlayBillingService {
       console.error('Error creating subscription from purchase:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -389,7 +389,7 @@ export class GooglePlayBillingService {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

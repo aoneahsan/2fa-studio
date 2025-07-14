@@ -14,14 +14,14 @@ import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
  */
 const AccountSearch: React.FC = () => {
   const dispatch = useDispatch();
-  const searchQuery = useSelector((state: RootState) => state.accounts.searchQuery);
+  const searchQuery = useSelector((state: RootState) => (state as any).accounts.searchQuery);
 
-  const handleSearchChange = useCallback((_e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setSearchQuery(_e.target.value));
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setSearchQuery(e.target.value) as any);
   }, [dispatch]);
 
   const handleClearSearch = useCallback(() => {
-    dispatch(setSearchQuery(''));
+    dispatch(setSearchQuery('') as any);
   }, [dispatch]);
 
   return (

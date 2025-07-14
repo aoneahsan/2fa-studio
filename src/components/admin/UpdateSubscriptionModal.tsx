@@ -9,7 +9,8 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { User, SubscriptionTier, SubscriptionStatus } from '@src/types';
 import { adminService, UserUpdateParams } from '@services/admin.service';
 import { Button } from '@components/ui/button';
-import { showToast } from '@utils/toast';
+import { useDispatch } from 'react-redux';
+import { addToast } from '@store/slices/uiSlice';
 
 interface UpdateSubscriptionModalProps {
   user: User;
@@ -24,19 +25,20 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
   onClose,
   onSuccess
 }) => {
-  const [tier, setTier] = useState<SubscriptionTier>(user.subscription.tier);
-  const [status, setStatus] = useState<SubscriptionStatus>(user.subscription.status);
+  const dispatch = useDispatch();
+  const [tier, setTier] = useState<SubscriptionTier>((user as any).subscription.tier);
+  const [status, setStatus] = useState<SubscriptionStatus>((user as any).subscription.status);
   const [accountLimit, setAccountLimit] = useState<string>(
     user.subscription.accountLimit?.toString() || ''
   );
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (_e: React.FormEvent) => {
-    _e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
     if (!reason.trim()) {
-      showToast('error', 'Please provide a reason for the update');
+      dispatch(addToast({ type: 'error', message: 'Please provide a reason for the update' }) as any);
       return;
     }
 
@@ -55,11 +57,11 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
 
       await adminService.updateUserSubscription(updates);
       
-      showToast('success', 'Subscription updated successfully');
+      dispatch(addToast({ type: 'success', message: 'Subscription updated successfully' }) as any);
       onSuccess();
     } catch (error) {
       console.error('Error updating subscription:', error);
-      showToast('error', 'Failed to update subscription');
+      dispatch(addToast({ type: 'error', message: 'Failed to update subscription' }) as any);
     } finally {
       setLoading(false);
     }
@@ -102,7 +104,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
               </label>
               <select
                 value={tier}
-                onChange={(e) => setTier(_e.target.value as SubscriptionTier)}
+                onChange={(e) => setTier(e.target.value as SubscriptionTier)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
               >
                 <option value="free">Free</option>

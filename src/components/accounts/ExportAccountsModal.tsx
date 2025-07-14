@@ -32,7 +32,7 @@ export function ExportAccountsModal({ isOpen, onClose }: ExportAccountsModalProp
 
   const handleFormatChange = (format: ExportFormat) => {
     setSelectedFormat(format);
-    const selectedFormatInfo = formats.find(f => f.value === format);
+    const selectedFormatInfo = formats.find((f: any) => f.value === format);
     if (!selectedFormatInfo?.supportsEncryption) {
       setUseEncryption(false);
     }
@@ -40,21 +40,21 @@ export function ExportAccountsModal({ isOpen, onClose }: ExportAccountsModalProp
 
   const handleExport = async () => {
     if (accounts.length === 0) {
-      dispatch(showToast({ message: 'No accounts to export', type: 'warning' }));
+      dispatch(showToast({ message: 'No accounts to export', type: 'warning' }) as any);
       return;
     }
 
     if (useEncryption) {
       if (!password) {
-        dispatch(showToast({ message: 'Please enter a password', type: 'error' }));
+        dispatch(showToast({ message: 'Please enter a password', type: 'error' }) as any);
         return;
       }
       if (password !== confirmPassword) {
-        dispatch(showToast({ message: 'Passwords do not match', type: 'error' }));
+        dispatch(showToast({ message: 'Passwords do not match', type: 'error' }) as any);
         return;
       }
       if (password.length < 8) {
-        dispatch(showToast({ message: 'Password must be at least 8 characters', type: 'error' }));
+        dispatch(showToast({ message: 'Password must be at least 8 characters', type: 'error' }) as any);
         return;
       }
     }
@@ -83,7 +83,7 @@ export function ExportAccountsModal({ isOpen, onClose }: ExportAccountsModalProp
       dispatch(showToast({ 
         message: `Successfully exported ${accounts.length} accounts`, 
         type: 'success' 
-      }));
+      }) as any);
       
       // Reset form and close modal
       setPassword('');
@@ -93,13 +93,13 @@ export function ExportAccountsModal({ isOpen, onClose }: ExportAccountsModalProp
       dispatch(showToast({ 
         message: error instanceof Error ? error.message : 'Failed to export accounts', 
         type: 'error' 
-      }));
+      }) as any);
     } finally {
       setIsExporting(false);
     }
   };
 
-  const currentFormat = formats.find(f => f.value === selectedFormat);
+  const currentFormat = formats.find((f: any) => f.value === selectedFormat);
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">

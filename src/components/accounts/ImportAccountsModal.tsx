@@ -30,24 +30,24 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
     { value: 'raivo', label: 'Raivo OTP', encrypted: false },
   ];
 
-  const handleFileChange = (_e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = _e.target.files?.[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-      const format = formats.find(f => f.value === selectedFormat);
+      const format = formats.find((f: any) => f.value === selectedFormat);
       setShowPasswordField(format?.encrypted || false);
     }
   };
 
   const handleFormatChange = (format: ImportFormat) => {
     setSelectedFormat(format);
-    const selectedFormatInfo = formats.find(f => f.value === format);
+    const selectedFormatInfo = formats.find((f: any) => f.value === format);
     setShowPasswordField(selectedFormatInfo?.encrypted || false);
   };
 
   const handleImport = async () => {
     if (!file) {
-      dispatch(showToast({ message: 'Please select a file', type: 'error' }));
+      dispatch(showToast({ message: 'Please select a file', type: 'error' }) as any);
       return;
     }
 
@@ -67,7 +67,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
           issuer: account.issuer,
           label: account.label,
           secret: account.secret,
-          algorithm: account.algorithm || 'SHA1',
+          algorithm: (account as any).algorithm || 'SHA1',
           digits: account.digits || 6,
           period: account.period || 30,
           type: account.type || 'totp',
@@ -79,13 +79,13 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
           counter: account.counter,
           backupCodes: account.backupCodes || [],
         };
-        dispatch(addAccount(newAccount));
+        dispatch(addAccount(newAccount) as any);
       }
 
       dispatch(showToast({ 
         message: `Successfully imported ${importedAccounts.length} accounts`, 
         type: 'success' 
-      }));
+      }) as any);
       
       // Reset form and close modal
       setFile(null);
@@ -98,25 +98,25 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
       dispatch(showToast({ 
         message: error instanceof Error ? error.message : 'Failed to import accounts', 
         type: 'error' 
-      }));
+      }) as any);
     } finally {
       setIsImporting(false);
     }
   };
 
-  const handleDragOver = (_e: React.DragEvent) => {
-    _e.preventDefault();
-    _e.stopPropagation();
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
-  const handleDrop = (_e: React.DragEvent) => {
-    _e.preventDefault();
-    _e.stopPropagation();
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
       setFile(droppedFile);
-      const format = formats.find(f => f.value === selectedFormat);
+      const format = formats.find((f: any) => f.value === selectedFormat);
       setShowPasswordField(format?.encrypted || false);
     }
   };
@@ -147,7 +147,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
               </label>
               <select
                 value={selectedFormat}
-                onChange={(e) => handleFormatChange(_e.target.value as ImportFormat)}
+                onChange={(e) => handleFormatChange(e.target.value as ImportFormat)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent"

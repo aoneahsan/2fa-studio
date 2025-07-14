@@ -160,7 +160,7 @@ export class MobileBiometricService {
         disableDeviceFallback: false
       });
 
-      if (_result) {
+      if (result) {
         // Update config with last authentication time
         const config = await this.getConfig();
         config.lastAuthentication = new Date().toISOString();
@@ -191,7 +191,7 @@ export class MobileBiometricService {
    */
   static async unprotectAccount(accountId: string): Promise<void> {
     const config = await this.getConfig();
-    config.protectedAccounts = config.protectedAccounts.filter(id => id !== accountId);
+    config.protectedAccounts = config.protectedAccounts.filter((id: any) => id !== accountId);
     await this.saveConfig(_config);
     
     // Remove from authenticated sessions

@@ -64,7 +64,7 @@ describe('AuthService', () => {
 
       const result = await AuthService.login('test@example.com', 'password123')
 
-      expect(_result).toEqual(_mockUser)
+      expect(result).toEqual(_mockUser)
       expect(mockAuth.signInWithEmailAndPassword).toHaveBeenCalledWith(
         mockAuth,
         'test@example.com',
@@ -74,7 +74,7 @@ describe('AuthService', () => {
 
     it('should throw error for invalid credentials', async () => {
       const error = new Error('Invalid credentials')
-      vi.mocked(mockAuth.signInWithEmailAndPassword).mockRejectedValue(_error)
+      vi.mocked(mockAuth.signInWithEmailAndPassword).mockRejectedValue(error)
 
       await expect(
         AuthService.login('test@example.com', 'wrongpassword')
@@ -111,7 +111,7 @@ describe('AuthService', () => {
 
       const result = await AuthService.register('test@example.com', 'password123', 'Test User')
 
-      expect(_result).toEqual(_mockUser)
+      expect(result).toEqual(_mockUser)
       expect(mockAuth.createUserWithEmailAndPassword).toHaveBeenCalledWith(
         mockAuth,
         'test@example.com',
@@ -165,7 +165,7 @@ describe('AuthService', () => {
 
     it('should handle logout error', async () => {
       const error = new Error('Logout failed')
-      vi.mocked(mockAuth.signOut).mockRejectedValue(_error)
+      vi.mocked(mockAuth.signOut).mockRejectedValue(error)
 
       await expect(AuthService.logout()).rejects.toThrow('Logout failed')
     })
@@ -182,14 +182,14 @@ describe('AuthService', () => {
       mockAuth.currentUser = mockUser
 
       const result = AuthService.getCurrentUser()
-      expect(_result).toEqual(_mockUser)
+      expect(result).toEqual(_mockUser)
     })
 
     it('should return null when no user is logged in', () => {
       mockAuth.currentUser = null
 
       const result = AuthService.getCurrentUser()
-      expect(_result).toBeNull()
+      expect(result).toBeNull()
     })
   })
 
@@ -253,7 +253,7 @@ describe('AuthService', () => {
 
       const result = await AuthService.checkEmailExists('existing@example.com')
 
-      expect(_result).toBe(true)
+      expect(result).toBe(true)
       expect(mockCollection.where).toHaveBeenCalledWith('email', '==', 'existing@example.com')
     })
 
@@ -269,7 +269,7 @@ describe('AuthService', () => {
 
       const result = await AuthService.checkEmailExists('new@example.com')
 
-      expect(_result).toBe(false)
+      expect(result).toBe(false)
     })
   })
 

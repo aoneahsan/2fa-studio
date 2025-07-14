@@ -53,7 +53,7 @@ export class TagService {
     const q = query(tagsRef, orderBy('name'));
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: (doc.data().createdAt as Timestamp)?.toDate() || new Date(),
@@ -101,7 +101,7 @@ export class TagService {
     // If renaming, check for duplicates
     if (updates.name) {
       const existingTags = await this.getUserTags(userId);
-      const duplicate = existingTags.find(t => 
+      const duplicate = existingTags.find((t: any) => 
         t.id !== tagId && t.name.toLowerCase() === updates.name!.toLowerCase()
       );
       if (duplicate) {
@@ -132,7 +132,7 @@ export class TagService {
 
     snapshot.docs.forEach(doc => {
       const account = doc.data() as Account;
-      const updatedTags = account.tags.filter(t => t !== tagId);
+      const updatedTags = account.tags.filter((t: any) => t !== tagId);
       batch.update(doc.ref, { tags: updatedTags });
     });
 
@@ -176,7 +176,7 @@ export class TagService {
 
     const account = accountDoc.docs[0].data() as Account;
     const currentTags = account.tags || [];
-    const newTags = currentTags.filter(tag => !tagIds.includes(tag));
+    const newTags = currentTags.filter((tag: any) => !tagIds.includes(tag));
 
     await updateDoc(accountRef, {
       tags: newTags,
@@ -223,7 +223,7 @@ export class TagService {
     const q = query(accountsRef, where('tags', 'array-contains', tagId));
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     } as Account));
@@ -238,23 +238,23 @@ export class TagService {
     if (mode === 'OR') {
       // For OR mode, we need to get all accounts and filter client-side
       const snapshot = await getDocs(accountsRef);
-      const accounts = snapshot.docs.map(doc => ({
+      const accounts = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
       } as Account));
       
-      return accounts.filter(account => 
+      return accounts.filter((account: any) => 
         account.tags?.some(tag => tagIds.includes(tag))
       );
     } else {
       // For AND mode, we need to get all accounts and filter client-side
       const snapshot = await getDocs(accountsRef);
-      const accounts = snapshot.docs.map(doc => ({
+      const accounts = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
       } as Account));
       
-      return accounts.filter(account => 
+      return accounts.filter((account: any) => 
         tagIds.every(tagId => account.tags?.includes(tagId))
       );
     }
@@ -321,7 +321,7 @@ export class TagService {
     const tags = await this.getUserTags(userId);
     
     const tagUsage = await Promise.all(
-      tags.map(async tag => ({
+      (tags || []).map(async tag => ({
         tag,
         count: tag.accountCount || 0,
       }))
@@ -332,7 +332,7 @@ export class TagService {
     return {
       totalTags: tags.length,
       mostUsedTags: sortedByUsage.slice(0, 5),
-      unusedTags: tags.filter(tag => (tag.accountCount || 0) === 0),
+      unusedTags: tags.filter((tag: any) => (tag.accountCount || 0) === 0),
     };
   }
 }

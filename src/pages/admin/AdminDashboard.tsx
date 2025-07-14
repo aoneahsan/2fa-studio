@@ -20,7 +20,7 @@ import LoadingSpinner from '@components/common/LoadingSpinner';
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboardStats();
@@ -67,7 +67,7 @@ const AdminDashboard: React.FC = () => {
     },
     {
       title: 'Active Subscriptions',
-      value: (stats.subscriptions.premium + stats.subscriptions.family).toLocaleString(),
+      value: (stats.subscriptions.premium + (stats as any).subscriptions.family).toLocaleString(),
       icon: CreditCardIcon,
       change: `${stats.conversionRate.toFixed(1)}% conversion`,
       changeType: 'neutral' as const

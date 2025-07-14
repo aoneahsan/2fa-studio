@@ -24,7 +24,7 @@ export function Audited(
       const startTime = Date.now();
       let success = true;
       let errorMessage: string | undefined;
-      let _result: unknown;
+      let result: unknown;
 
       try {
         result = await originalMethod.apply(this, args);
@@ -47,7 +47,7 @@ export function Audited(
                 typeof arg === 'object' ? { ...arg, password: '[REDACTED]' } : arg
               ),
               duration: Date.now() - startTime,
-              _result: success ? 'success' : 'failure'
+              result: success ? 'success' : 'failure'
             },
             severity,
             success,
@@ -244,7 +244,7 @@ export class AuditHelper {
     action: AuditAction,
     userId: string,
     userEmail: string,
-    _error: Error,
+    error: Error,
     details?: Record<string, any>
   ) {
     await AuditLoggingService.log({
@@ -253,7 +253,7 @@ export class AuditHelper {
       action,
       resource: AuditResource.SYSTEM,
       details: {
-        _error: error.message,
+        error: error.message,
         stack: error.stack,
         ...details
       },

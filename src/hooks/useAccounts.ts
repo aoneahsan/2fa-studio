@@ -32,13 +32,13 @@ export const useAccounts = () => {
   const accountsState = useSelector((state: RootState) => state.accounts);
   const activeTags = useSelector(selectActiveTags);
   const filterMode = useSelector(selectFilterMode);
-  const selectedFolderId = useSelector((state: RootState) => state.folders.selectedFolderId);
+  const selectedFolderId = useSelector((state: RootState) => (state as any).folders.selectedFolderId);
 
   // Load accounts using FirestoreService with real-time sync
   useEffect(() => {
     if (!user || !encryptionKey) return;
 
-    dispatch(setLoading(true));
+    dispatch(setLoading(true) as any);
 
     // Subscribe to accounts collection using FirestoreService
     const unsubscribe = FirestoreService.subscribeToCollection<any>(
@@ -60,7 +60,7 @@ export const useAccounts = () => {
               issuer: doc.issuer || 'Unknown',
               label: doc.label || 'Unknown',
               secret: decryptedSecret,
-              algorithm: doc.algorithm || 'SHA1',
+              algorithm: (doc as any).algorithm || 'SHA1',
               digits: doc.digits || 6,
               period: doc.period || 30,
               type: doc.type || 'totp',
@@ -81,7 +81,7 @@ export const useAccounts = () => {
             decryptedAccounts.push(account);
           }
           
-          dispatch(setAccounts(decryptedAccounts));
+          dispatch(setAccounts(decryptedAccounts) as any);
           
           // Cache accounts locally for offline access
           await Preferences.set({
@@ -90,21 +90,21 @@ export const useAccounts = () => {
           });
         } catch (error) {
           console.error('Error loading accounts:', error);
-          dispatch(setError('Failed to load accounts'));
+          dispatch(setError('Failed to load accounts') as any);
           
           // Try to load from cache
           const cached = await Preferences.get({ key: 'cached_accounts' });
           if (cached.value) {
-            dispatch(setAccounts(JSON.parse(cached.value)));
+            dispatch(setAccounts(JSON.parse(cached.value) as any));
           }
         } finally {
-          dispatch(setLoading(false));
+          dispatch(setLoading(false) as any);
         }
       },
-      (_error) => {
-        console.error('Firestore subscription _error:', error);
-        dispatch(setError('Failed to sync accounts'));
-        dispatch(setLoading(false));
+      (error) => {
+        console.error('Firestore subscription error:', error);
+        dispatch(setError('Failed to sync accounts') as any);
+        dispatch(setLoading(false) as any);
       }
     );
 
@@ -118,7 +118,7 @@ export const useAccounts = () => {
     }
 
     try {
-      dispatch(setLoading(true));
+      dispatch(setLoading(true) as any);
       
       // Encrypt the secret using MobileEncryptionService
       const encryptedSecret = await MobileEncryptionService.encryptData(
@@ -152,7 +152,7 @@ export const useAccounts = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Account added successfully',
-      }));
+      }) as any);
       
       // Log account creation
       await AuditLogService.log({
@@ -175,10 +175,10 @@ export const useAccounts = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to add account',
-      }));
+      }) as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [user, encryptionKey, dispatch]);
 
@@ -189,7 +189,7 @@ export const useAccounts = () => {
     }
 
     try {
-      dispatch(setLoading(true));
+      dispatch(setLoading(true) as any);
       
       // Re-encrypt the secret using MobileEncryptionService
       const encryptedSecret = await MobileEncryptionService.encryptData(
@@ -222,7 +222,7 @@ export const useAccounts = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Account updated successfully',
-      }));
+      }) as any);
       
       // Log account update
       await AuditLogService.log({
@@ -234,7 +234,7 @@ export const useAccounts = () => {
         details: {
           issuer: account.issuer,
           label: account.label,
-          fieldsUpdated: Object.keys(accountData).filter(key => 
+          fieldsUpdated: Object.keys(accountData).filter((key: any) => 
             key !== 'updatedAt' && key !== 'encryptedSecret' && key !== 'secret'
           )
         }
@@ -244,10 +244,10 @@ export const useAccounts = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update account',
-      }));
+      }) as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [user, encryptionKey, dispatch]);
 
@@ -258,7 +258,7 @@ export const useAccounts = () => {
     }
 
     try {
-      dispatch(setLoading(true));
+      dispatch(setLoading(true) as any);
       
       // Use FirestoreService to delete document
       await FirestoreService.deleteDocument(
@@ -276,7 +276,7 @@ export const useAccounts = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Account deleted successfully',
-      }));
+      }) as any);
       
       // Log account deletion
       await AuditLogService.log({
@@ -294,10 +294,10 @@ export const useAccounts = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to delete account',
-      }));
+      }) as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [user, dispatch]);
 
@@ -321,20 +321,20 @@ export const useAccounts = () => {
         // Not JSON, use as plain query
       }
       
-      filtered = filtered.filter(account => {
+      filtered = filtered.filter((account: any) => {
         // Prepare search text based on options
         const searchTexts: string[] = [];
         
-        if (!searchOptions || searchOptions.searchIn.issuer) {
+        if (!searchOptions || (searchOptions as any).searchIn.issuer) {
           searchTexts.push(account.issuer);
         }
-        if (!searchOptions || searchOptions.searchIn.label) {
+        if (!searchOptions || (searchOptions as any).searchIn.label) {
           searchTexts.push(account.label);
         }
-        if ((!searchOptions || searchOptions.searchIn.tags) && account.tags) {
+        if ((!searchOptions || (searchOptions as any).searchIn.tags) && account.tags) {
           // For tags, we need to get the tag names from the tags slice
-          const tagNames = account.tags.map(tagId => {
-            const tag = store.getState().tags.tags.find(t => t.id === tagId);
+          const tagNames = ((account.tags) || []).map((tagId: any) => {
+            const tag = store.getState().tags.tags.find((t: any) => t.id === tagId);
             return tag?.name || '';
           }).filter(Boolean);
           searchTexts.push(...tagNames);
@@ -373,17 +373,17 @@ export const useAccounts = () => {
     
     // Apply favorites filter
     if (accountsState.showFavoritesOnly) {
-      filtered = filtered.filter(account => account.isFavorite);
+      filtered = filtered.filter((account: any) => account.isFavorite);
     }
     
     // Apply folder filter
     if (selectedFolderId !== null) {
-      filtered = filtered.filter(account => account.folderId === selectedFolderId);
+      filtered = filtered.filter((account: any) => account.folderId === selectedFolderId);
     }
     
     // Apply tag filter from tags slice
     if (activeTags.length > 0) {
-      filtered = filtered.filter(account => {
+      filtered = filtered.filter((account: any) => {
         if (!account.tags || account.tags.length === 0) return false;
         
         if (filterMode === 'OR') {
@@ -433,7 +433,7 @@ export const useAccounts = () => {
     accounts: accountsState.accounts,
     filteredAccounts: getFilteredAccounts(),
     isLoading: accountsState.isLoading,
-    _error: accountsState._error,
+    error: accountsState.error,
     addAccount,
     updateAccount,
     deleteAccount,

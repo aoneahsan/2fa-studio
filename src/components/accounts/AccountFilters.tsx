@@ -34,24 +34,24 @@ const AccountFilters: React.FC = () => {
 
   const handleTagToggle = (tag: string) => {
     if (selectedTags.includes(tag)) {
-      dispatch(setSelectedTags(selectedTags.filter(t => t !== tag)));
+      dispatch(setSelectedTags(selectedTags.filter((t: any) => t !== tag) as any));
     } else {
-      dispatch(setSelectedTags([...selectedTags, tag]));
+      dispatch(setSelectedTags([...selectedTags, tag]) as any);
     }
   };
 
   const handleSortChange = (newSortBy: typeof sortBy) => {
     if (sortBy === newSortBy) {
       // Toggle order if same sort field
-      dispatch(setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'));
+      dispatch(setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc') as any);
     } else {
-      dispatch(setSortBy(newSortBy));
-      dispatch(setSortOrder('asc'));
+      dispatch(setSortBy(newSortBy) as any);
+      dispatch(setSortOrder('asc') as any);
     }
   };
 
   const clearFilters = () => {
-    dispatch(setSelectedTags([]));
+    dispatch(setSelectedTags([]) as any);
   };
 
   return (

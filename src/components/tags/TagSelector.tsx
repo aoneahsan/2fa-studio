@@ -38,11 +38,11 @@ const TagSelector: React.FC<TagSelectorProps> = ({
 
   const filteredTags = query === ''
     ? tags
-    : tags.filter(tag =>
+    : tags.filter((tag: any) =>
         tag.name.toLowerCase().includes(query.toLowerCase())
       );
 
-  const selectedTagObjects = tags.filter(tag => selectedTags.includes(tag.id));
+  const selectedTagObjects = tags.filter((tag: any) => selectedTags.includes(tag.id));
 
   const handleSelect = (value: string | string[] | null) => {
     if (!value) return;
@@ -94,7 +94,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   };
 
   const handleRemoveTag = (tagId: string) => {
-    onChange(selectedTags.filter(id => id !== tagId));
+    onChange(selectedTags.filter((id: any) => id !== tagId));
   };
 
   const showCreateOption = allowCreate && 
@@ -199,7 +199,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       {/* Selected tags display */}
       {selectedTagObjects.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
-          {selectedTagObjects.map(tag => (
+          {selectedTagObjects.map((tag: any) => (
             <TagPill
               key={tag.id}
               tag={tag}

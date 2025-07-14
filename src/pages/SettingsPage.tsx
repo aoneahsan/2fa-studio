@@ -88,7 +88,7 @@ const SettingsPage: React.FC = () => {
     }
   ];
 
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || ProfileSettings;
+  const ActiveComponent = tabs.find((tab: any) => tab.id === activeTab)?.component || ProfileSettings;
 
   return (
     <div className="max-w-6xl mx-auto">

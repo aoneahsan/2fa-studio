@@ -187,7 +187,7 @@ describe('AuthService', () => {
         await AuthService.signInWithEmail(invalidEmail, weakPassword);
         expect(false).toBe(true); // Should not reach here
       } catch (error) {
-        expect(_error).toBeDefined();
+        expect(error).toBeDefined();
       }
     });
 
@@ -284,7 +284,7 @@ describe('AuthService', () => {
       try {
         await AuthService.linkAccount(invalidProvider);
       } catch (error) {
-        expect(_error).toBeDefined();
+        expect(error).toBeDefined();
       }
     });
 

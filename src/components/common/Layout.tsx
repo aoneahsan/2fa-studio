@@ -50,10 +50,10 @@ const Layout: React.FC = () => {
 
   const handleSignOut = async () => {
     try {
-      await dispatch(signOut()).unwrap();
+      await dispatch(signOut() as any).unwrap();
       navigate('/login');
     } catch (error) {
-      console.error('Sign out _error:', error);
+      console.error('Sign out error:', error);
     }
   };
 

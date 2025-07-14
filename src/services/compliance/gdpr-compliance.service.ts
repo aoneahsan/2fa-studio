@@ -278,9 +278,9 @@ export class GDPRComplianceService {
       };
 
       // Export accounts
-      if (request.includeData.accounts) {
+      if ((request as any).includeData.accounts) {
         const accounts = await AccountService.getUserAccounts(userId);
-        exportData.accounts = accounts.map(acc => ({
+        exportData.accounts = (accounts || []).map((acc: any) => ({
           ...acc,
           secret: '[ENCRYPTED]' // Don't export actual secrets
         }));
@@ -288,16 +288,16 @@ export class GDPRComplianceService {
       }
 
       // Export settings
-      if (request.includeData.settings) {
+      if ((request as any).includeData.settings) {
         const settings = await this.getUserSettings(userId);
         exportData.settings = settings;
         exportData.dataIncluded.push('settings');
       }
 
       // Export backups
-      if (request.includeData.backups) {
+      if ((request as any).includeData.backups) {
         const backups = await BackupService.listBackups(userId);
-        exportData.backups = backups.map(backup => ({
+        exportData.backups = backups.map((backup: any) => ({
           ...backup,
           encryptedData: '[ENCRYPTED]' // Don't export actual backup data
         }));
@@ -305,14 +305,14 @@ export class GDPRComplianceService {
       }
 
       // Export audit logs
-      if (request.includeData.auditLogs) {
+      if ((request as any).includeData.auditLogs) {
         const auditLogs = await this.getUserAuditLogs(userId);
         exportData.auditLogs = auditLogs;
         exportData.dataIncluded.push('auditLogs');
       }
 
       // Export devices
-      if (request.includeData.devices) {
+      if ((request as any).includeData.devices) {
         const devices = await this.getUserDevices(userId);
         exportData.devices = devices;
         exportData.dataIncluded.push('devices');
@@ -520,7 +520,7 @@ export class GDPRComplianceService {
       const batch = writeBatch(db);
 
       // Delete accounts
-      if (request.dataToDelete.accounts) {
+      if ((request as any).dataToDelete.accounts) {
         const accountsQuery = query(
           collection(db, 'accounts'),
           where('userId', '==', request.userId)
@@ -530,7 +530,7 @@ export class GDPRComplianceService {
       }
 
       // Delete personal data
-      if (request.dataToDelete.personalData) {
+      if ((request as any).dataToDelete.personalData) {
         // Delete user profile
         batch.delete(doc(db, 'users', request.userId));
         
@@ -544,7 +544,7 @@ export class GDPRComplianceService {
       }
 
       // Delete backups
-      if (request.dataToDelete.backups) {
+      if ((request as any).dataToDelete.backups) {
         // Delete from Firestore
         const backupsQuery = query(
           collection(db, 'backups'),
@@ -556,11 +556,11 @@ export class GDPRComplianceService {
         // Delete from Storage
         const backupsRef = ref(storage, `backups/${request.userId}`);
         const backupsList = await listAll(backupsRef);
-        await Promise.all(backupsList.items.map(item => deleteObject(item)));
+        await Promise.all(((backupsList.items) || []).map((item: any) => deleteObject(item)));
       }
 
       // Anonymize analytics data
-      if (request.dataToDelete.analytics) {
+      if ((request as any).dataToDelete.analytics) {
         const analyticsQuery = query(
           collection(db, 'analytics'),
           where('userId', '==', request.userId)
@@ -581,7 +581,7 @@ export class GDPRComplianceService {
       await batch.commit();
 
       // Delete auth account
-      if (request.dataToDelete.everything) {
+      if ((request as any).dataToDelete.everything) {
         await AuthService.deleteUser();
       }
 
@@ -702,7 +702,7 @@ export class GDPRComplianceService {
   ): Promise<boolean> {
     try {
       const consents = await this.getUserConsents(userId);
-      const consent = consents.find(c => c.type === processingType);
+      const consent = consents.find((c: any) => c.type === processingType);
       
       // Essential processing doesn't require consent
       if (processingType === ConsentType.ESSENTIAL) {
@@ -724,7 +724,7 @@ export class GDPRComplianceService {
       where('userId', '==', userId)
     );
     const snapshot = await getDocs(settingsQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
   }
 
   private static async getUserAuditLogs(userId: string): Promise<any[]> {
@@ -733,7 +733,7 @@ export class GDPRComplianceService {
       where('userId', '==', userId)
     );
     const snapshot = await getDocs(auditQuery);
-    return snapshot.docs.map(doc => ({ 
+    return snapshot.docs.map((doc: any) => ({ 
       id: doc.id, 
       ...doc.data(),
       timestamp: doc.data().timestamp?.toDate()
@@ -746,7 +746,7 @@ export class GDPRComplianceService {
       where('userId', '==', userId)
     );
     const snapshot = await getDocs(devicesQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
   }
 
   private static convertToCSV(data: any): string {
@@ -772,14 +772,14 @@ export class GDPRComplianceService {
 
     const flattened = flattenObject(data);
     const headers = Object.keys(flattened);
-    const values = headers.map(header => `"${flattened[header]}"`);
+    const values = headers.map((header: any) => `"${flattened[header]}"`);
 
     return [headers.join(','), values.join(',')].join('\n');
   }
 
   private static generateCancellationToken(): string {
     return Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map(b => b.toString(16).padStart(2, '0'))
+      .map((b: any) => b.toString(16).padStart(2, '0'))
       .join('');
   }
 

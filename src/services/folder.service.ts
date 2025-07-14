@@ -54,7 +54,7 @@ export class FolderService {
     const q = query(foldersRef, orderBy('name'));
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: (doc.data().createdAt as Timestamp)?.toDate() || new Date(),
@@ -75,8 +75,8 @@ export class FolderService {
    */
   private static buildFolderTree(folders: Folder[], parentId: string | null = null, level: number = 0): FolderTree[] {
     return folders
-      .filter(folder => folder.parentId === parentId)
-      .map(folder => ({
+      .filter((folder: any) => folder.parentId === parentId)
+      .map((folder: any) => ({
         ...folder,
         level,
         children: this.buildFolderTree(folders, folder.id, level + 1),
@@ -90,7 +90,7 @@ export class FolderService {
   static async createFolder(userId: string, folder: Omit<Folder, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Folder> {
     // Check if folder name already exists in the same parent
     const existingFolders = await this.getUserFolders(userId);
-    const duplicate = existingFolders.find(f => 
+    const duplicate = existingFolders.find((f: any) => 
       f.name.toLowerCase() === folder.name.toLowerCase() && 
       f.parentId === folder.parentId
     );
@@ -142,8 +142,8 @@ export class FolderService {
     // If renaming, check for duplicates
     if (updates.name) {
       const existingFolders = await this.getUserFolders(userId);
-      const currentFolder = existingFolders.find(f => f.id === folderId);
-      const duplicate = existingFolders.find(f => 
+      const currentFolder = existingFolders.find((f: any) => f.id === folderId);
+      const duplicate = existingFolders.find((f: any) => 
         f.id !== folderId && 
         f.name.toLowerCase() === updates.name!.toLowerCase() && 
         f.parentId === (updates.parentId !== undefined ? updates.parentId : currentFolder?.parentId)
@@ -176,7 +176,7 @@ export class FolderService {
     }
 
     const folders = await this.getUserFolders(userId);
-    const folder = folders.find(f => f.id === folderId);
+    const folder = folders.find((f: any) => f.id === folderId);
     if (!folder) {
       throw new Error('Folder not found');
     }
@@ -206,7 +206,7 @@ export class FolderService {
     const subfolders = this.getAllSubfolders(folders, folderId);
 
     // Get all accounts in this folder and subfolders
-    const folderIds = [folderId, ...subfolders.map(f => f.id)];
+    const folderIds = [folderId, ...subfolders.map((f: any) => f.id)];
     const accountsRef = collection(db, `users/${userId}/accounts`);
     const accountsQuery = query(accountsRef, where('folderId', 'in', folderIds));
     const accountsSnapshot = await getDocs(accountsQuery);
@@ -218,7 +218,7 @@ export class FolderService {
       });
 
       // Move all immediate subfolders to the target folder
-      const immediateSubfolders = folders.filter(f => f.parentId === folderId);
+      const immediateSubfolders = folders.filter((f: any) => f.parentId === folderId);
       immediateSubfolders.forEach(subfolder => {
         const subfolderRef = doc(db, `users/${userId}/${this.COLLECTION}`, subfolder.id);
         batch.update(subfolderRef, { parentId: moveContentsTo });
@@ -243,7 +243,7 @@ export class FolderService {
     await batch.commit();
 
     // Update parent's subfolder count
-    const folder = folders.find(f => f.id === folderId);
+    const folder = folders.find((f: any) => f.id === folderId);
     if (folder?.parentId) {
       await this.updateSubfolderCount(userId, folder.parentId);
     }
@@ -283,7 +283,7 @@ export class FolderService {
     
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     } as Account));
@@ -298,7 +298,7 @@ export class FolderService {
     let currentId: string | null = folderId;
 
     while (currentId) {
-      const folder = folders.find(f => f.id === currentId);
+      const folder = folders.find((f: any) => f.id === currentId);
       if (!folder) break;
       path.unshift(currentId);
       currentId = folder.parentId;
@@ -312,7 +312,7 @@ export class FolderService {
    */
   private static getAllSubfolders(folders: Folder[], parentId: string): Folder[] {
     const subfolders: Folder[] = [];
-    const immediateSubfolders = folders.filter(f => f.parentId === parentId);
+    const immediateSubfolders = folders.filter((f: any) => f.parentId === parentId);
 
     for (const subfolder of immediateSubfolders) {
       subfolders.push(subfolder);
@@ -327,7 +327,7 @@ export class FolderService {
    */
   private static async updateSubfolderCount(userId: string, folderId: string): Promise<void> {
     const folders = await this.getUserFolders(userId);
-    const subfolderCount = folders.filter(f => f.parentId === folderId).length;
+    const subfolderCount = folders.filter((f: any) => f.parentId === folderId).length;
 
     const folderRef = doc(db, `users/${userId}/${this.COLLECTION}`, folderId);
     await updateDoc(folderRef, {
@@ -368,7 +368,7 @@ export class FolderService {
     
     const getMaxDepth = (nodes: FolderTree[]): number => {
       if (nodes.length === 0) return 0;
-      return Math.max(...nodes.map(node => 
+      return Math.max(...nodes.map((node: any) => 
         node.children.length > 0 ? 1 + getMaxDepth(node.children) : 1
       ));
     };
@@ -380,7 +380,7 @@ export class FolderService {
       totalFolders: folders.length,
       maxDepth: getMaxDepth(tree),
       averageAccountsPerFolder,
-      emptyFolders: folders.filter(f => (f.accountCount || 0) === 0),
+      emptyFolders: folders.filter((f: any) => (f.accountCount || 0) === 0),
     };
   }
 }

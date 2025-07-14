@@ -99,7 +99,7 @@ export class MobileImportExportService extends ImportExportService {
       console.error('Export failed:', error);
       return { 
         success: false, 
-        _error: error instanceof Error ? error.message : 'Export failed' 
+        error: error instanceof Error ? error.message : 'Export failed' 
       };
     }
   }
@@ -121,8 +121,8 @@ export class MobileImportExportService extends ImportExportService {
           multiple: false
         });
 
-        if (!result.files.length) {
-          return { success: false, _error: 'No file selected' };
+        if (!(result as any).files.length) {
+          return { success: false, error: 'No file selected' };
         }
 
         const file = result.files[0];
@@ -162,7 +162,7 @@ export class MobileImportExportService extends ImportExportService {
       console.error('Import failed:', error);
       return { 
         success: false, 
-        _error: error instanceof Error ? error.message : 'Import failed' 
+        error: error instanceof Error ? error.message : 'Import failed' 
       };
     }
   }
@@ -205,7 +205,7 @@ export class MobileImportExportService extends ImportExportService {
       console.error('Backup failed:', error);
       return { 
         success: false, 
-        _error: error instanceof Error ? error.message : 'Backup failed' 
+        error: error instanceof Error ? error.message : 'Backup failed' 
       };
     }
   }
@@ -231,8 +231,8 @@ export class MobileImportExportService extends ImportExportService {
         multiple: false
       });
 
-      if (!result.files.length) {
-        return { success: false, _error: 'No backup file selected' };
+      if (!(result as any).files.length) {
+        return { success: false, error: 'No backup file selected' };
       }
 
       const file = result.files[0];
@@ -264,7 +264,7 @@ export class MobileImportExportService extends ImportExportService {
       console.error('Restore failed:', error);
       return { 
         success: false, 
-        _error: error instanceof Error ? error.message : 'Restore failed' 
+        error: error instanceof Error ? error.message : 'Restore failed' 
       };
     }
   }
@@ -290,7 +290,7 @@ export class MobileImportExportService extends ImportExportService {
 
       const backups = await Promise.all(
         files.files
-          .filter(file => file.name.endsWith('.2fab'))
+          .filter((file: any) => file.name.endsWith('.2fab'))
           .map(async (file) => {
             const stat = await Filesystem.stat({
               path: `${this.BACKUP_DIR}/${file.name}`,
@@ -331,7 +331,7 @@ export class MobileImportExportService extends ImportExportService {
           directory: Directory.Documents
         });
       } catch (error) {
-        console.error(`Failed to delete backup ${backup.filename}:`, _error);
+        console.error(`Failed to delete backup ${backup.filename}:`, error);
       }
     }
   }
@@ -433,7 +433,7 @@ export class MobileImportExportService extends ImportExportService {
           const content = await this.readFileAsText(file);
           resolve(content);
         } catch (error) {
-          reject(_error);
+          reject(error);
         }
       };
       

@@ -39,7 +39,7 @@ export interface FraudDetectionResult {
 
 export interface ValidationCache {
   receiptHash: string;
-  _result: ValidationResult;
+  result: ValidationResult;
   timestamp: Date;
   ttl: number; // Time to live in seconds
 }
@@ -61,7 +61,7 @@ export class ReceiptValidationService {
         return cached.result;
       }
 
-      let _result: ValidationResult;
+      let result: ValidationResult;
 
       switch (request.provider) {
         case 'stripe':
@@ -77,13 +77,13 @@ export class ReceiptValidationService {
           return {
             valid: false,
             fraudRisk: 'high',
-            _error: `Unsupported payment provider: ${request.provider}`,
+            error: `Unsupported payment provider: ${request.provider}`,
           };
       }
 
       // Perform fraud detection
       if (result.valid) {
-        const fraudResult = await this.performFraudDetection(request, _result);
+        const fraudResult = await this.performFraudDetection(request, result);
         result.fraudRisk = fraudResult.recommendation === 'approve' ? 'low' :
                           fraudResult.recommendation === 'review' ? 'medium' : 'high';
         result.metadata = {
@@ -94,10 +94,10 @@ export class ReceiptValidationService {
       }
 
       // Cache the result
-      this.cacheValidation(request.receiptData, _result);
+      this.cacheValidation(request.receiptData, result);
 
       // Store validation record
-      await this.storeValidationRecord(request, _result);
+      await this.storeValidationRecord(request, result);
 
       return result;
     } catch (error) {
@@ -105,7 +105,7 @@ export class ReceiptValidationService {
       return {
         valid: false,
         fraudRisk: 'high',
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -133,7 +133,7 @@ export class ReceiptValidationService {
         return {
           valid: false,
           fraudRisk: 'high',
-          _error: data.error || 'Stripe validation failed',
+          error: data.error || 'Stripe validation failed',
         };
       }
 
@@ -151,7 +151,7 @@ export class ReceiptValidationService {
       return {
         valid: false,
         fraudRisk: 'high',
-        _error: error instanceof Error ? error.message : 'Stripe validation error',
+        error: error instanceof Error ? error.message : 'Stripe validation error',
       };
     }
   }
@@ -165,7 +165,7 @@ export class ReceiptValidationService {
         return {
           valid: false,
           fraudRisk: 'high',
-          _error: 'Product ID required for Google Play validation',
+          error: 'Product ID required for Google Play validation',
         };
       }
 
@@ -179,7 +179,7 @@ export class ReceiptValidationService {
         return {
           valid: false,
           fraudRisk: 'high',
-          _error: validation.error || 'Google Play validation failed',
+          error: validation.error || 'Google Play validation failed',
         };
       }
 
@@ -218,7 +218,7 @@ export class ReceiptValidationService {
       return {
         valid: false,
         fraudRisk: 'high',
-        _error: error instanceof Error ? error.message : 'Google Play validation error',
+        error: error instanceof Error ? error.message : 'Google Play validation error',
       };
     }
   }
@@ -237,7 +237,7 @@ export class ReceiptValidationService {
         return {
           valid: false,
           fraudRisk: 'high',
-          _error: validation.error || 'App Store validation failed',
+          error: validation.error || 'App Store validation failed',
         };
       }
 
@@ -245,7 +245,7 @@ export class ReceiptValidationService {
         return {
           valid: false,
           fraudRisk: 'high',
-          _error: 'No purchase data in receipt',
+          error: 'No purchase data in receipt',
         };
       }
 
@@ -253,24 +253,24 @@ export class ReceiptValidationService {
       const subscription: UserSubscription = {
         id: `ap_${validation.purchase.transactionIdentifier}`,
         userId: request.userId,
-        planId: validation.purchase.productIdentifier,
-        tier: this.getTierFromProductId(validation.purchase.productIdentifier),
+        planId: (validation as any).purchase.productIdentifier,
+        tier: this.getTierFromProductId((validation as any).purchase.productIdentifier),
         status: this.mapAppStoreStatus(validation.purchase),
         provider: 'app_store',
-        providerSubscriptionId: validation.purchase.transactionIdentifier,
-        currentPeriodStart: new Date(validation.purchase.transactionDate),
+        providerSubscriptionId: (validation as any).purchase.transactionIdentifier,
+        currentPeriodStart: new Date((validation as any).purchase.transactionDate),
         currentPeriodEnd: new Date(validation.purchase.subscriptionExpirationDate || Date.now()),
-        cancelAtPeriodEnd: !validation.purchase.subscriptionAutoRenewStatus,
+        cancelAtPeriodEnd: !(validation as any).purchase.subscriptionAutoRenewStatus,
         createdAt: new Date(),
         updatedAt: new Date(),
-        trialStart: validation.purchase.isTrialPeriod ? new Date(validation.purchase.transactionDate) : undefined,
+        trialStart: validation.purchase.isTrialPeriod ? new Date((validation as any).purchase.transactionDate) : undefined,
         trialEnd: validation.purchase.isTrialPeriod ? 
           new Date(validation.purchase.transactionDate + (7 * 24 * 60 * 60 * 1000)) : undefined,
         metadata: {
-          transactionIdentifier: validation.purchase.transactionIdentifier,
-          originalTransactionIdentifier: validation.purchase.originalTransactionIdentifier,
+          transactionIdentifier: (validation as any).purchase.transactionIdentifier,
+          originalTransactionIdentifier: (validation as any).purchase.originalTransactionIdentifier,
           environment: validation.environment,
-          isTrialPeriod: validation.purchase.isTrialPeriod,
+          isTrialPeriod: (validation as any).purchase.isTrialPeriod,
         },
       };
 
@@ -280,7 +280,7 @@ export class ReceiptValidationService {
         fraudRisk: validation.fraudRisk || 'low',
         metadata: {
           provider: 'app_store',
-          transactionId: validation.purchase.transactionIdentifier,
+          transactionId: (validation as any).purchase.transactionIdentifier,
           environment: validation.environment,
         },
       };
@@ -288,7 +288,7 @@ export class ReceiptValidationService {
       return {
         valid: false,
         fraudRisk: 'high',
-        _error: error instanceof Error ? error.message : 'App Store validation error',
+        error: error instanceof Error ? error.message : 'App Store validation error',
       };
     }
   }
@@ -322,7 +322,7 @@ export class ReceiptValidationService {
       );
 
       if (userSubscriptions.success) {
-        const providers = new Set(userSubscriptions.data.map(sub => sub.provider));
+        const providers = new Set(((userSubscriptions.data) || []).map((sub: any) => sub.provider));
         if (providers.size > 2) {
           score += 20;
           factors.push('multiple_payment_providers');
@@ -349,7 +349,7 @@ export class ReceiptValidationService {
         if (userTrials.success && userTrials.data.length > 3) {
           score += 40;
           factors.push('excessive_trial_usage');
-          details.trialCount = userTrials.data.length;
+          details.trialCount = (userTrials as any).data.length;
         }
       }
 
@@ -398,7 +398,7 @@ export class ReceiptValidationService {
         score: 50, // Medium risk if we can't analyze
         factors: ['fraud_detection_error'],
         recommendation: 'review',
-        details: { _error: error instanceof Error ? error.message : 'Unknown error' },
+        details: { error: error instanceof Error ? error.message : 'Unknown error' },
       };
     }
   }
@@ -439,7 +439,7 @@ export class ReceiptValidationService {
    */
   private static async storeValidationRecord(
     request: ValidationRequest,
-    _result: ValidationResult
+    result: ValidationResult
   ): Promise<void> {
     try {
       await FirestoreService.addDocument('validation_records', {
@@ -464,11 +464,11 @@ export class ReceiptValidationService {
   /**
    * Cache validation result
    */
-  private static cacheValidation(receiptData: string, _result: ValidationResult): void {
+  private static cacheValidation(receiptData: string, result: ValidationResult): void {
     const hash = this.hashReceipt(receiptData);
     this.cache.set(hash, {
       receiptHash: hash,
-      _result,
+      result,
       timestamp: new Date(),
       ttl: this.CACHE_TTL,
     });
@@ -573,7 +573,7 @@ export class ReceiptValidationService {
    */
   static getCacheStats(): { size: number; hitRate: number } {
     return {
-      size: this.cache.size,
+      size: (this as any).cache.size,
       hitRate: 0, // Would need to track hits/misses for accurate calculation
     };
   }

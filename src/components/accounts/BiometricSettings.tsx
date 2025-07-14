@@ -47,13 +47,13 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
         dispatch(addToast({
           type: 'success',
           message: 'Biometric protection disabled',
-        }));
+        }) as any);
       } else {
         await BiometricAccountService.enableBiometric(user.id, account.id, timeout);
         dispatch(addToast({
           type: 'success',
           message: 'Biometric protection enabled',
-        }));
+        }) as any);
       }
       
       onUpdate?.();
@@ -61,7 +61,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       dispatch(addToast({
         type: 'error',
         message: error instanceof Error ? error.message : 'Failed to update biometric settings',
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }
@@ -82,14 +82,14 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       dispatch(addToast({
         type: 'success',
         message: 'Timeout updated successfully',
-      }));
+      }) as any);
       
       onUpdate?.();
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update timeout',
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }

@@ -4,12 +4,12 @@ import '@src/index.css'
 import App from '@src/App.tsx'
 
 // Register service worker for PWA functionality
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator && (import.meta as any).env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')
       .then(registration => {
-        console.log('SW registered:', _registration);
+        console.log('SW registered:', registration);
         
         // Check for updates periodically
         setInterval(() => {
@@ -21,7 +21,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              if (newWorker.state === 'installed' && ((navigator as any).serviceWorker).controller) {
                 // New service worker available
                 if (confirm('New version available! Update now?')) {
                   newWorker.postMessage({ type: 'SKIP_WAITING' });

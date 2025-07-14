@@ -9,7 +9,7 @@ export function securityHeaders(): Plugin {
   return {
     name: 'security-headers',
     configureServer(server) {
-      server.middlewares.use((req, res, next) => {
+      server.middlewares.use((_req, res, next) => {
         // Content Security Policy
         res.setHeader(
           'Content-Security-Policy',

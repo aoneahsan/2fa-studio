@@ -84,7 +84,7 @@ export class SSOService {
       await this.loadSSOConfigurations();
     } catch (error) {
       console.error('Failed to initialize SSO service:', error);
-      await ErrorMonitoringService.reportError(_error, {
+      await ErrorMonitoringService.reportError(error, {
         category: 'auth',
         severity: 'high',
         _context: { operation: 'sso_initialization' }
@@ -124,7 +124,7 @@ export class SSOService {
       return configId;
     } catch (error) {
       console.error('Failed to create SSO _config:', error);
-      await ErrorMonitoringService.reportError(_error, {
+      await ErrorMonitoringService.reportError(error, {
         category: 'auth',
         severity: 'high',
         _context: { operation: 'create_sso_config', organizationId }
@@ -157,7 +157,7 @@ export class SSOService {
       };
     } catch (error) {
       console.error('Failed to initiate SAML login:', error);
-      await ErrorMonitoringService.reportError(_error, {
+      await ErrorMonitoringService.reportError(error, {
         category: 'auth',
         severity: 'high',
         _context: { operation: 'saml_login_initiation', organizationId }
@@ -165,7 +165,7 @@ export class SSOService {
       
       return {
         success: false,
-        _error: error.message
+        error: error.message
       };
     }
   }
@@ -209,7 +209,7 @@ export class SSOService {
       };
     } catch (error) {
       console.error('Failed to handle SAML response:', error);
-      await ErrorMonitoringService.reportError(_error, {
+      await ErrorMonitoringService.reportError(error, {
         category: 'auth',
         severity: 'high',
         _context: { operation: 'saml_response_handling' }
@@ -217,7 +217,7 @@ export class SSOService {
       
       return {
         success: false,
-        _error: error.message
+        error: error.message
       };
     }
   }
@@ -246,7 +246,7 @@ export class SSOService {
       };
     } catch (error) {
       console.error('Failed to initiate OIDC login:', error);
-      await ErrorMonitoringService.reportError(_error, {
+      await ErrorMonitoringService.reportError(error, {
         category: 'auth',
         severity: 'high',
         _context: { operation: 'oidc_login_initiation', organizationId }
@@ -254,7 +254,7 @@ export class SSOService {
       
       return {
         success: false,
-        _error: error.message
+        error: error.message
       };
     }
   }
@@ -293,7 +293,7 @@ export class SSOService {
       };
     } catch (error) {
       console.error('Failed to handle OIDC callback:', error);
-      await ErrorMonitoringService.reportError(_error, {
+      await ErrorMonitoringService.reportError(error, {
         category: 'auth',
         severity: 'high',
         _context: { operation: 'oidc_callback_handling', organizationId }
@@ -301,7 +301,7 @@ export class SSOService {
       
       return {
         success: false,
-        _error: error.message
+        error: error.message
       };
     }
   }

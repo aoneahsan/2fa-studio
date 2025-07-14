@@ -142,7 +142,7 @@ export class AuthService {
 
       // Create user document in Firestore
       const userData: User = {
-        id: userCredential.user.uid,
+        id: (userCredential as any).user.uid,
         email: userCredential.user.email!,
         displayName: userCredential.user.displayName || '',
         photoURL: userCredential.user.photoURL || '',
@@ -207,7 +207,7 @@ export class AuthService {
       });
 
       return userData;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       // Log failed signup attempt
       await AuditLogService.log({
         userId: credentials.email,
@@ -291,7 +291,7 @@ export class AuthService {
       await AuditLogService.detectSuspiciousActivity(user.id);
 
       return user;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       // Record failed attempt
       authRateLimiter.recordAttempt(rateLimitKey);
       
@@ -341,7 +341,7 @@ export class AuthService {
       }
 
       return await this.handleSocialSignIn(userCredential, 'google');
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -370,7 +370,7 @@ export class AuthService {
       }
 
       return await this.handleSocialSignIn(userCredential, 'apple');
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -380,7 +380,7 @@ export class AuthService {
    */
   private static async handleSocialSignIn(userCredential: unknown, provider: 'google' | 'apple'): Promise<User> {
     // Check if user exists
-    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+    const userDoc = await getDoc(doc(db, 'users', (userCredential as any).user.uid));
     
     if (userDoc.exists()) {
       // Existing user
@@ -409,7 +409,7 @@ export class AuthService {
     } else {
       // New user - create profile
       const userData: User = {
-        id: userCredential.user.uid,
+        id: (userCredential as any).user.uid,
         email: userCredential.user.email!,
         displayName: userCredential.user.displayName || '',
         photoURL: userCredential.user.photoURL || '',
@@ -484,7 +484,7 @@ export class AuthService {
     try {
       // Remove device registration
       if (this.currentUser) {
-        await this.unregisterDevice(this.currentUser.id);
+        await this.unregisterDevice((this as any).currentUser.id);
       }
       
       await signOut(_auth);
@@ -499,7 +499,7 @@ export class AuthService {
         success: true,
         details: {}
       });
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -520,7 +520,7 @@ export class AuthService {
         success: true,
         details: { email }
       });
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -539,11 +539,11 @@ export class AuthService {
       });
 
       // Update Firestore document
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      await updateDoc(doc(db, 'users', (auth as any).currentUser.uid), {
         ...profile,
         updatedAt: serverTimestamp()
       });
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -552,14 +552,14 @@ export class AuthService {
    * Update password
    */
   static async updatePassword(currentPassword: string, newPassword: string): Promise<void> {
-    if (!auth.currentUser || !auth.currentUser.email) {
+    if (!auth.currentUser || !(auth as any).currentUser.email) {
       throw new Error('No authenticated user');
     }
 
     try {
       // Re-authenticate user
       const credential = EmailAuthProvider.credential(
-        auth.currentUser.email,
+        (auth as any).currentUser.email,
         currentPassword
       );
       await reauthenticateWithCredential(auth.currentUser, credential);
@@ -569,14 +569,14 @@ export class AuthService {
       
       // Log password change
       await AuditLogService.log({
-        userId: auth.currentUser.uid,
+        userId: (auth as any).currentUser.uid,
         action: 'auth.password_changed',
         resource: 'auth',
         severity: 'warning',
         success: true,
         details: {}
       });
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -754,7 +754,7 @@ export class AuthService {
    */
   static canAddMoreAccounts(currentCount: number): boolean {
     if (!this.currentUser) return false;
-    const limit = this.currentUser.subscription.accountLimit;
+    const limit = (this.currentUser as any).subscription.accountLimit;
     return limit === null || currentCount < limit;
   }
 
@@ -769,14 +769,14 @@ export class AuthService {
       
       // Log email verification sent
       await AuditLogService.log({
-        userId: auth.currentUser.uid,
+        userId: (auth as any).currentUser.uid,
         action: 'auth.email_verified',
         resource: 'auth',
         severity: 'info',
         success: true,
         details: { email: auth.currentUser.email }
       });
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -795,7 +795,7 @@ export class AuthService {
       await linkWithCredential(auth.currentUser, credential.credential!);
       
       // Update user data to enable cloud backup
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      await updateDoc(doc(db, 'users', (auth as any).currentUser.uid), {
         authProvider: 'google',
         backupEnabled: true,
         'subscription.features.cloudBackup': true,
@@ -804,14 +804,14 @@ export class AuthService {
       
       // Log provider linked
       await AuditLogService.log({
-        userId: auth.currentUser.uid,
+        userId: (auth as any).currentUser.uid,
         action: 'auth.provider_linked',
         resource: 'auth',
         severity: 'info',
         success: true,
         details: { provider: 'google' }
       });
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -827,7 +827,7 @@ export class AuthService {
       
       // Update user data if unlinking Google
       if (providerId === 'google.com') {
-        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        await updateDoc(doc(db, 'users', (auth as any).currentUser.uid), {
           backupEnabled: false,
           'subscription.features.cloudBackup': false,
           updatedAt: serverTimestamp()
@@ -836,14 +836,14 @@ export class AuthService {
       
       // Log provider unlinked
       await AuditLogService.log({
-        userId: auth.currentUser.uid,
+        userId: (auth as any).currentUser.uid,
         action: 'auth.provider_unlinked',
         resource: 'auth',
         severity: 'warning',
         success: true,
         details: { provider: providerId }
       });
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -856,12 +856,12 @@ export class AuthService {
     
     try {
       // Re-authenticate if password provided
-      if (password && auth.currentUser.email) {
-        const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
+      if (password && (auth as any).currentUser.email) {
+        const credential = EmailAuthProvider.credential((auth as any).currentUser.email, password);
         await reauthenticateWithCredential(auth.currentUser, credential);
       }
       
-      const userId = auth.currentUser.uid;
+      const userId = (auth as any).currentUser.uid;
       
       // Delete user data from Firestore (handled by security rules and cloud functions)
       await updateDoc(doc(db, 'users', userId), {
@@ -883,7 +883,7 @@ export class AuthService {
       });
       
       this.currentUser = null;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -914,6 +914,6 @@ export class AuthService {
    */
   static getLinkedProviders(): string[] {
     if (!auth.currentUser) return [];
-    return auth.currentUser.providerData.map(provider => provider.providerId);
+    return auth.currentUser.providerData.map((provider: any) => provider.providerId);
   }
 }

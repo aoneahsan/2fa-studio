@@ -138,7 +138,7 @@ describe('User Registration Integration Tests', () => {
         await AuthService.signUpWithEmail(invalidEmail, testUser.password);
         expect(false).toBe(true); // Should not reach here
       } catch (error) {
-        expect(_error).toBeDefined();
+        expect(error).toBeDefined();
       }
     });
 
@@ -151,7 +151,7 @@ describe('User Registration Integration Tests', () => {
         await AuthService.signUpWithEmail(testUser.email, weakPassword);
         expect(false).toBe(true); // Should not reach here
       } catch (error) {
-        expect(_error).toBeDefined();
+        expect(error).toBeDefined();
       }
     });
 
@@ -275,7 +275,7 @@ describe('User Registration Integration Tests', () => {
           await AuthService.signUpWithEmail(input.email, input.password);
           expect(false).toBe(true); // Should not reach here
         } catch (error) {
-          expect(_error).toBeDefined();
+          expect(error).toBeDefined();
         }
       }
     });
@@ -296,7 +296,7 @@ describe('User Registration Integration Tests', () => {
         } as unknown)
       );
 
-      const promises = users.map(user => 
+      const promises = (users || []).map((user: any) => 
         AuthService.signUpWithEmail(user.email, user.password)
       );
 

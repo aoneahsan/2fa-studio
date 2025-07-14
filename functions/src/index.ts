@@ -108,12 +108,12 @@ export const api = onRequest(async (req, res) => {
 			res.json({ status: 'ok', timestamp: new Date().toISOString() });
 		} else if (path[0] === 'admin' && path[1]) {
 			// Admin API routes - cast to proper types
-			await adminFunctions.handleAdminAPI(req as unknown, res as unknown);
+			await adminFunctions.handleAdminAPI(req as any, res as any);
 		} else if (path[0] === 'webhook' && path[1]) {
 			// Webhook routes - cast to proper types
-			await webhookFunctions.handleWebhook(req as unknown, res as unknown);
+			await webhookFunctions.handleWebhook(req as any, res as any);
 		} else {
-			res.status(404).json({ _error: 'Not found' });
+			res.status(404).json({ error: 'Not found' });
 		}
 	} catch (error) {
 		console.error('API Error:', error);

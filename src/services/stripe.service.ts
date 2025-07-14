@@ -154,7 +154,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          _error: result.error || 'Failed to create subscription',
+          error: result.error || 'Failed to create subscription',
         };
       }
 
@@ -180,7 +180,7 @@ export class StripeService {
       console.error('Error creating subscription:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -207,7 +207,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          _error: result.error || 'Failed to update subscription',
+          error: result.error || 'Failed to update subscription',
         };
       }
 
@@ -238,7 +238,7 @@ export class StripeService {
       console.error('Error updating subscription:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -268,7 +268,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          _error: result.error || 'Failed to cancel subscription',
+          error: result.error || 'Failed to cancel subscription',
         };
       }
 
@@ -299,7 +299,7 @@ export class StripeService {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -320,7 +320,7 @@ export class StripeService {
         return {
           success: false,
           paymentMethods: [],
-          _error: result.error || 'Failed to get payment methods',
+          error: result.error || 'Failed to get payment methods',
         };
       }
 
@@ -333,7 +333,7 @@ export class StripeService {
       return {
         success: false,
         paymentMethods: [],
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -366,7 +366,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          _error: result.error || 'Failed to attach payment method',
+          error: result.error || 'Failed to attach payment method',
         };
       }
 
@@ -378,7 +378,7 @@ export class StripeService {
       console.error('Error attaching payment method:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -406,7 +406,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          _error: result.error || 'Failed to detach payment method',
+          error: result.error || 'Failed to detach payment method',
         };
       }
 
@@ -417,7 +417,7 @@ export class StripeService {
       console.error('Error detaching payment method:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -438,7 +438,7 @@ export class StripeService {
         return {
           success: false,
           invoices: [],
-          _error: result.error || 'Failed to get invoices',
+          error: result.error || 'Failed to get invoices',
         };
       }
 
@@ -451,7 +451,7 @@ export class StripeService {
       return {
         success: false,
         invoices: [],
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -481,7 +481,7 @@ export class StripeService {
       if (!response.ok) {
         return {
           success: false,
-          _error: result.error || 'Failed to create portal session',
+          error: result.error || 'Failed to create portal session',
         };
       }
 
@@ -493,7 +493,7 @@ export class StripeService {
       console.error('Error creating portal session:', error);
       return {
         success: false,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

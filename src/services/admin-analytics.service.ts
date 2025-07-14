@@ -140,7 +140,7 @@ export class AdminAnalyticsService {
       const metrics: DashboardMetrics = {
         totalUsers: userMetrics.totalUsers,
         activeUsers: userMetrics.activeUsers,
-        newUsersToday: userMetrics.newUsers.today,
+        newUsersToday: (userMetrics as any).newUsers.today,
         totalRevenue: revenueMetrics.totalRevenue,
         monthlyRevenue: revenueMetrics.monthlyRevenue,
         activeSubscriptions: Object.values(userMetrics.usersByTier).reduce((a, b) => a + b, 0),
@@ -227,12 +227,12 @@ export class AdminAnalyticsService {
 
       // Calculate total revenue
       const totalRevenue = invoices
-        .filter(invoice => invoice.status === 'paid')
+        .filter((invoice: any) => invoice.status === 'paid')
         .reduce((sum, invoice) => sum + invoice.amount, 0) / 100; // Convert from cents
 
       // Calculate monthly revenue
       const monthlyRevenue = invoices
-        .filter(invoice => 
+        .filter((invoice: any) => 
           invoice.status === 'paid' && 
           invoice.paidAt >= startOfMonth
         )
@@ -240,7 +240,7 @@ export class AdminAnalyticsService {
 
       // Calculate yearly revenue
       const yearlyRevenue = invoices
-        .filter(invoice => 
+        .filter((invoice: any) => 
           invoice.status === 'paid' && 
           invoice.paidAt >= startOfYear
         )
@@ -296,7 +296,7 @@ export class AdminAnalyticsService {
       const totalApiCalls = usage.reduce((sum, u) => sum + u.apiCalls, 0);
       const storageUsed = usage.reduce((sum, u) => sum + u.storageUsed, 0);
 
-      const uniqueUsers = new Set(usage.map(u => u.userId)).size;
+      const uniqueUsers = new Set(usage.map((u: any) => u.userId)).size;
       const averageAccountsPerUser = uniqueUsers > 0 ? totalAccounts / uniqueUsers : 0;
       const averageBackupsPerUser = uniqueUsers > 0 ? totalBackups / uniqueUsers : 0;
 

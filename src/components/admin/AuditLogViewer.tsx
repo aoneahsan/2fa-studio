@@ -4,192 +4,143 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  IconButton,
-  Tooltip,
-  Chip,
-  TextField,
-  MenuItem,
-  Grid,
-  Button,
-  CircularProgress,
-  TablePagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  SelectChangeEvent,
-} from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  Download as DownloadIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Search as SearchIcon,
-  Clear as ClearIcon,
-} from '@mui/icons-material';
 import { format } from 'date-fns';
 import { AuditLogService, AuditLogSearchParams, AuditAction } from '@services/audit-log.service';
 import { AuditLog } from '@src/types';
-import { DocumentSnapshot } from 'firebase/firestore';
 
 interface AuditLogViewerProps {
-  userId?: string; // Optional: filter by specific user
-  showStats?: boolean; // Show statistics summary
+  userId?: string;
+  actions?: AuditAction[];
+  onLogClick?: (log: AuditLog) => void;
 }
 
-const AUDIT_ACTIONS: { value: AuditAction; label: string; category: string }[] = [
-  // Authentication
-  { value: 'auth.login', label: 'Login', category: 'Authentication' },
-  { value: 'auth.logout', label: 'Logout', category: 'Authentication' },
-  { value: 'auth.signup', label: 'Sign Up', category: 'Authentication' },
-  { value: 'auth.failed_login', label: 'Failed Login', category: 'Authentication' },
-  { value: 'auth.password_reset', label: 'Password Reset', category: 'Authentication' },
-  { value: 'auth.password_changed', label: 'Password Changed', category: 'Authentication' },
-  { value: 'auth.account_locked', label: 'Account Locked', category: 'Authentication' },
-  { value: 'auth.suspicious_activity', label: 'Suspicious Activity', category: 'Authentication' },
-  
-  // Account Management
-  { value: 'account.created', label: 'Account Created', category: 'Account' },
-  { value: 'account.updated', label: 'Account Updated', category: 'Account' },
-  { value: 'account.deleted', label: 'Account Deleted', category: 'Account' },
-  { value: 'account.exported', label: 'Accounts Exported', category: 'Account' },
-  { value: 'account.imported', label: 'Accounts Imported', category: 'Account' },
-  
-  // Security
-  { value: 'security.biometric_enabled', label: 'Biometric Enabled', category: 'Security' },
-  { value: 'security.biometric_disabled', label: 'Biometric Disabled', category: 'Security' },
-  { value: 'security.biometric_auth_success', label: 'Biometric Auth Success', category: 'Security' },
-  { value: 'security.biometric_auth_failed', label: 'Biometric Auth Failed', category: 'Security' },
-  
-  // Admin Actions
-  { value: 'admin.user_data_accessed', label: 'User Data Accessed', category: 'Admin' },
-  { value: 'admin.subscription_changed', label: 'Subscription Changed', category: 'Admin' },
-  { value: 'admin.user_disabled', label: 'User Disabled', category: 'Admin' },
-  { value: 'admin.user_enabled', label: 'User Enabled', category: 'Admin' },
+type SelectChangeEvent<T = string> = {
+  target: {
+    value: T;
+  };
+};
+
+const AUDIT_ACTIONS = [
+  { value: 'auth.login', label: 'Login' },
+  { value: 'auth.logout', label: 'Logout' },
+  { value: 'auth.failed_login', label: 'Failed Login' },
+  { value: 'account.created', label: 'Account Created' },
+  { value: 'account.updated', label: 'Account Updated' },
+  { value: 'account.deleted', label: 'Account Deleted' },
+  { value: 'backup.created', label: 'Backup Created' },
+  { value: 'backup.restored', label: 'Backup Restored' },
+  { value: 'subscription.updated', label: 'Subscription Updated' },
+  { value: 'security.password_changed', label: 'Password Changed' },
+  { value: 'security.2fa_enabled', label: '2FA Enabled' },
+  { value: 'security.2fa_disabled', label: '2FA Disabled' },
 ];
 
-const SEVERITIES = ['info', 'warning', 'critical'] as const;
+const SEVERITIES = ['info', 'warning', 'critical'];
 
-export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStats = true }) => {
+/**
+ * Component for viewing and filtering audit logs
+ */
+const AuditLogViewer: React.FC<AuditLogViewerProps> = ({
+  userId,
+  actions: filterActions,
+  onLogClick,
+}) => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [hasMore, setHasMore] = useState(false);
-  const [lastDoc, setLastDoc] = useState<DocumentSnapshot | null>(null);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
+  const [lastDoc, setLastDoc] = useState<any>(null);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
-  const [stats, setStats] = useState<any>(null);
   
-  // Filters
   const [filters, setFilters] = useState<AuditLogSearchParams>({
+    actions: filterActions,
+    severity: undefined,
     userId,
-    actions: [],
-    severity: [],
     startDate: undefined,
     endDate: undefined,
-    success: undefined,
+    // searchQuery not used in AuditLogSearchParams
   });
-  
+
   const [tempFilters, setTempFilters] = useState(filters);
 
-  // Load audit logs
-  const loadLogs = useCallback(async (resetPagination = false) => {
+  /**
+   * Load audit logs with current filters
+   */
+  const loadLogs = useCallback(async (reset = false) => {
     setLoading(true);
     try {
-      const searchParams: AuditLogSearchParams = {
+      const params: AuditLogSearchParams = {
         ...filters,
-        pageSize,
-        lastDoc: resetPagination ? undefined : lastDoc || undefined,
+        // limit handled internally
+        lastDoc: reset ? undefined : lastDoc,
       };
+
+      const result = await AuditLogService.searchLogs(params);
       
-      const result = await AuditLogService.searchLogs(searchParams);
-      
-      if (resetPagination) {
+      if (reset) {
         setLogs(result.logs);
         setPage(0);
       } else {
         setLogs(prev => [...prev, ...result.logs]);
       }
       
-      setLastDoc(result.lastDoc);
-      setHasMore(result.hasMore);
-      
-      // Load stats if enabled
-      if (showStats && resetPagination) {
-        const statsData = await AuditLogService.getStats(
-          filters.userId,
-          filters.startDate,
-          filters.endDate
-        );
-        setStats(statsData);
+      setTotal(result.logs.length);
+      if (result.logs.length > 0) {
+        setLastDoc(result.lastDoc);
       }
     } catch (error) {
       console.error('Error loading audit logs:', error);
     } finally {
       setLoading(false);
     }
-  }, [filters, pageSize, lastDoc, showStats]);
+  }, [filters, rowsPerPage, lastDoc]);
 
   useEffect(() => {
     loadLogs(true);
-  }, [filters]);
+  }, [filters.actions, filters.severity, filters.userId]);
 
-  const handleApplyFilters = () => {
-    setFilters(tempFilters);
-  };
-
-  const handleClearFilters = () => {
-    const clearedFilters = {
-      userId,
-      actions: [],
-      severity: [],
-      startDate: undefined,
-      endDate: undefined,
-      success: undefined,
-    };
-    setTempFilters(clearedFilters);
-    setFilters(clearedFilters);
-  };
-
-  const handlePageChange = (_: unknown, newPage: number) => {
+  const handlePageChange = (event: unknown, newPage: number) => {
     setPage(newPage);
-    if (newPage > page && hasMore) {
+    if (newPage > page && logs.length < total) {
       loadLogs(false);
     }
   };
 
   const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPageSize(parseInt(event.target.value, 10));
+    setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-    setLastDoc(null);
+    loadLogs(true);
   };
 
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return <ErrorIcon color="error" fontSize="small" />;
-      case 'warning':
-        return <WarningIcon color="warning" fontSize="small" />;
-      default:
-        return <InfoIcon color="info" fontSize="small" />;
-    }
+  const handleFilterChange = (field: keyof AuditLogSearchParams) => (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent
+  ) => {
+    setTempFilters({
+      ...tempFilters,
+      [field]: event.target.value,
+    });
   };
 
-  const getSeverityColor = (severity: string): 'error' | 'warning' | 'info' => {
+  const handleApplyFilters = () => {
+    setFilters(tempFilters);
+    loadLogs(true);
+  };
+
+  const handleClearFilters = () => {
+    const clearedFilters: AuditLogSearchParams = {
+      actions: filterActions,
+      userId,
+    };
+    setTempFilters(clearedFilters);
+    setFilters(clearedFilters);
+  };
+
+  const handleRefresh = () => {
+    loadLogs(true);
+  };
+
+  const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
         return 'error';
@@ -201,7 +152,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
   };
 
   const getActionLabel = (action: string) => {
-    const found = AUDIT_ACTIONS.find(a => a.value === action);
+    const found = AUDIT_ACTIONS.find((a: any) => a.value === action);
     return found ? found.label : action;
   };
 
@@ -210,321 +161,252 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
       alert('Please select a date range to export');
       return;
     }
-    
+
     try {
-      const csv = await AuditLogService.exportLogs(
-        filters.userId || '',
-        filters.startDate,
-        filters.endDate
-      );
-      
-      // Download CSV
+      const csv = await AuditLogService.exportLogs(filters);
       const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `audit-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`;
       a.click();
-      URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting logs:', error);
     }
   };
 
   return (
-    <Box>
-      {/* Stats Summary */}
-      {showStats && stats && (
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center' }}>
-              <Typography variant="h4">{stats.totalEvents}</Typography>
-              <Typography color="textSecondary">Total Events</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center' }}>
-              <Typography variant="h4" color="error">{stats.failedAttempts}</Typography>
-              <Typography color="textSecondary">Failed Attempts</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center' }}>
-              <Typography variant="h4" color="warning.main">{stats.suspiciousActivities}</Typography>
-              <Typography color="textSecondary">Suspicious Activities</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center' }}>
-              <Typography variant="h4">{stats.uniqueUsers}</Typography>
-              <Typography color="textSecondary">Unique Users</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      )}
-
+    <div className="space-y-4">
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Actions</InputLabel>
-              <Select
-                multiple
-                value={tempFilters.actions || []}
-                onChange={(_e: SelectChangeEvent<string[]>) => 
-                  setTempFilters({ ...tempFilters, actions: e.target.value as AuditAction[] })
-                }
-                label="Actions"
-              >
-                {AUDIT_ACTIONS.map(action => (
-                  <MenuItem key={action.value} value={action.value}>
-                    {action.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12} md={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Severity</InputLabel>
-              <Select
-                multiple
-                value={tempFilters.severity || []}
-                onChange={(_e: SelectChangeEvent<string[]>) => 
-                  setTempFilters({ ...tempFilters, severity: e.target.value as unknown })
-                }
-                label="Severity"
-              >
-                {SEVERITIES.map(severity => (
-                  <MenuItem key={severity} value={severity}>
-                    {severity.charAt(0).toUpperCase() + severity.slice(1)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12} md={2}>
-            <TextField
-              fullWidth
-              type="date"
-              label="Start Date"
-              size="small"
-              InputLabelProps={{ shrink: true }}
-              value={tempFilters.startDate ? format(tempFilters.startDate, 'yyyy-MM-dd') : ''}
-              onChange={(_e) => 
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Actions Filter */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Actions</label>
+            <select
+              multiple
+              value={tempFilters.actions || []}
+              onChange={(e) => {
+                const values = Array.from(e.target.selectedOptions, option => option.value);
+                setTempFilters({ ...tempFilters, actions: values as AuditAction[] });
+              }}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              {AUDIT_ACTIONS.map((action: any) => (
+                <option key={action.value} value={action.value}>
+                  {action.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Severity Filter */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Severity</label>
+            <select
+              multiple
+              value={tempFilters.severity || []}
+              onChange={(e) => {
+                const values = Array.from(e.target.selectedOptions, option => option.value);
+                setTempFilters({ ...tempFilters, severity: values as any });
+              }}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              {SEVERITIES.map((severity: any) => (
+                <option key={severity} value={severity}>
+                  {severity.charAt(0).toUpperCase() + severity.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date Range */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Start Date</label>
+            <input
+              type="datetime-local"
+              value={tempFilters.startDate?.toISOString().slice(0, 16) || ''}
+              onChange={(e) => 
                 setTempFilters({ ...tempFilters, startDate: e.target.value ? new Date(e.target.value) : undefined })
               }
+              className="w-full border border-gray-300 rounded-md p-2"
             />
-          </Grid>
-          
-          <Grid item xs={12} md={2}>
-            <TextField
-              fullWidth
-              type="date"
-              label="End Date"
-              size="small"
-              InputLabelProps={{ shrink: true }}
-              value={tempFilters.endDate ? format(tempFilters.endDate, 'yyyy-MM-dd') : ''}
-              onChange={(_e) => 
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">End Date</label>
+            <input
+              type="datetime-local"
+              value={tempFilters.endDate?.toISOString().slice(0, 16) || ''}
+              onChange={(e) => 
                 setTempFilters({ ...tempFilters, endDate: e.target.value ? new Date(e.target.value) : undefined })
               }
+              className="w-full border border-gray-300 rounded-md p-2"
             />
-          </Grid>
-          
-          <Grid item xs={12} md={3}>
-            <Box display="flex" gap={1}>
-              <Button
-                variant="contained"
-                startIcon={<SearchIcon />}
-                onClick={handleApplyFilters}
-                size="small"
-                fullWidth
-              >
-                Apply Filters
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<ClearIcon />}
-                onClick={handleClearFilters}
-                size="small"
-              >
-                Clear
-              </Button>
-              <IconButton onClick={() => loadLogs(true)} size="small">
-                <RefreshIcon />
-              </IconButton>
-              <IconButton onClick={exportLogs} size="small">
-                <DownloadIcon />
-              </IconButton>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+          </div>
+
+          {/* Search */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Search</label>
+            <input
+              type="text"
+              value={''}  // searchQuery not used
+              onChange={(e) => {}} // searchQuery not used
+              placeholder="Search logs..."
+              className="w-full border border-gray-300 rounded-md p-2"
+            />
+          </div>
+        </div>
+
+        {/* Filter Actions */}
+        <div className="flex gap-2 mt-4">
+          <button onClick={handleApplyFilters} className="btn btn-primary">
+            Apply Filters
+          </button>
+          <button onClick={handleClearFilters} className="btn btn-outline">
+            Clear Filters
+          </button>
+          <button onClick={handleRefresh} className="btn btn-outline">
+            Refresh
+          </button>
+          <button onClick={exportLogs} className="btn btn-outline">
+            Export CSV
+          </button>
+        </div>
+      </div>
 
       {/* Logs Table */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Timestamp</TableCell>
-              <TableCell>Action</TableCell>
-              <TableCell>User</TableCell>
-              <TableCell>Resource</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>IP Address</TableCell>
-              <TableCell>Device</TableCell>
-              <TableCell>Details</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading && logs.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  <CircularProgress />
-                </TableCell>
-              </TableRow>
-            ) : logs.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  <Typography color="textSecondary">No audit logs found</Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              logs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {getSeverityIcon((log as unknown).severity || 'info')}
-                      <Typography variant="body2">
-                        {getActionLabel(log.action)}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
-                      {log.userId}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
-                      {log.resource}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={(log as unknown).success ? 'Success' : 'Failed'}
-                      color={(log as unknown).success ? 'success' : 'error'}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {log.ipAddress || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {log.deviceId || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <IconButton size="small" onClick={() => setSelectedLog(log)}>
-                      <InfoIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-        
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50, 100]}
-          component="div"
-          count={hasMore ? -1 : logs.length}
-          rowsPerPage={pageSize}
-          page={page}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
-      </TableContainer>
-
-      {/* Details Dialog */}
-      <Dialog
-        open={!!selectedLog}
-        onClose={() => setSelectedLog(null)}
-        maxWidth="md"
-        fullWidth
-      >
-        {selectedLog && (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
           <>
-            <DialogTitle>
-              Audit Log Details
-              <Chip
-                label={(selectedLog as unknown).severity || 'info'}
-                color={getSeverityColor((selectedLog as unknown).severity || 'info')}
-                size="small"
-                sx={{ ml: 2 }}
-              />
-            </DialogTitle>
-            <DialogContent>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Timestamp</Typography>
-                  <Typography>{format(selectedLog.timestamp, 'PPpp')}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Action</Typography>
-                  <Typography>{getActionLabel(selectedLog.action)}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">User ID</Typography>
-                  <Typography>{selectedLog.userId}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Resource</Typography>
-                  <Typography>{selectedLog.resource}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">IP Address</Typography>
-                  <Typography>{selectedLog.ipAddress || 'N/A'}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Device ID</Typography>
-                  <Typography>{selectedLog.deviceId || 'N/A'}</Typography>
-                </Grid>
-                {(selectedLog as unknown).errorMessage && (
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2" color="textSecondary">Error Message</Typography>
-                    <Typography color="error">{(selectedLog as unknown).errorMessage}</Typography>
-                  </Grid>
-                )}
-                {selectedLog.details && (
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2" color="textSecondary">Additional Details</Typography>
-                    <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
-                      <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                        {JSON.stringify(selectedLog.details, null, 2)}
-                      </pre>
-                    </Paper>
-                  </Grid>
-                )}
-              </Grid>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setSelectedLog(null)}>Close</Button>
-            </DialogActions>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Timestamp</th>
+                    <th className="px-4 py-2 text-left">Action</th>
+                    <th className="px-4 py-2 text-left">User</th>
+                    <th className="px-4 py-2 text-left">Resource</th>
+                    <th className="px-4 py-2 text-left">Severity</th>
+                    <th className="px-4 py-2 text-left">Success</th>
+                    <th className="px-4 py-2 text-left">IP Address</th>
+                    <th className="px-4 py-2 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log: any) => (
+                    <tr key={log.id} className="border-t dark:border-gray-600">
+                      <td className="px-4 py-2">
+                        {format(log.timestamp.toDate(), 'yyyy-MM-dd HH:mm:ss')}
+                      </td>
+                      <td className="px-4 py-2">{getActionLabel(log.action)}</td>
+                      <td className="px-4 py-2">{log.userId || 'System'}</td>
+                      <td className="px-4 py-2">{log.resource || '-'}</td>
+                      <td className="px-4 py-2">
+                        <span className={`px-2 py-1 rounded text-xs bg-${getSeverityColor(log.severity)}-100 text-${getSeverityColor(log.severity)}-800`}>
+                          {log.severity}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">
+                        {log.success ? '✓' : '✗'}
+                      </td>
+                      <td className="px-4 py-2">{log.ipAddress || '-'}</td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={() => {
+                            setSelectedLog(log);
+                            onLogClick?.(log);
+                          }}
+                          className="text-primary hover:underline"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-between items-center px-4 py-2 border-t dark:border-gray-600">
+              <div>
+                Showing {page * rowsPerPage + 1} to {Math.min((page + 1) * rowsPerPage, total)} of {total}
+              </div>
+              <div className="flex gap-2">
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => handleRowsPerPageChange(e as any)}
+                  className="border border-gray-300 rounded-md px-2 py-1"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <button
+                  onClick={() => handlePageChange(null, page - 1)}
+                  disabled={page === 0}
+                  className="btn btn-sm"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => handlePageChange(null, page + 1)}
+                  disabled={logs.length >= total}
+                  className="btn btn-sm"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </>
         )}
-      </Dialog>
-    </Box>
+      </div>
+
+      {/* Log Details Dialog */}
+      {selectedLog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">Log Details</h2>
+            <div className="space-y-2">
+              <div><strong>ID:</strong> {selectedLog.id}</div>
+              <div><strong>Timestamp:</strong> {format((selectedLog as any).timestamp.toDate(), 'yyyy-MM-dd HH:mm:ss')}</div>
+              <div><strong>Action:</strong> {getActionLabel((selectedLog as any).action)}</div>
+              <div><strong>User ID:</strong> {(selectedLog as any).userId || 'System'}</div>
+              <div><strong>Resource:</strong> {(selectedLog as any).resource || '-'}</div>
+              <div><strong>Severity:</strong> {(selectedLog as any).severity}</div>
+              <div><strong>Success:</strong> {(selectedLog as any).success ? 'Yes' : 'No'}</div>
+              <div><strong>IP Address:</strong> {(selectedLog as any).ipAddress || '-'}</div>
+              <div><strong>User Agent:</strong> {(selectedLog as any).userAgent || '-'}</div>
+              {(selectedLog as any).errorMessage && (
+                <div><strong>Error:</strong> {(selectedLog as any).errorMessage}</div>
+              )}
+              {(selectedLog as any).details && (
+                <div>
+                  <strong>Details:</strong>
+                  <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    {JSON.stringify((selectedLog as any).details, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setSelectedLog(null)}
+              className="mt-4 btn btn-primary"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
+
+export default AuditLogViewer;

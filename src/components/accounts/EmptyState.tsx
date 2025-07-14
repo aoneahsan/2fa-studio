@@ -15,7 +15,7 @@ const EmptyState: React.FC = () => {
   const dispatch = useDispatch();
 
   const handleAddAccount = () => {
-    dispatch(openModal({ type: 'addAccount' }));
+    dispatch(openModal({ type: 'addAccount' }) as any);
   };
 
   return (

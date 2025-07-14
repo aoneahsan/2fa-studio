@@ -65,7 +65,7 @@ export class BiometricAccountService {
         } else {
           return { 
             success: false, 
-            _error: 'Authentication cancelled' 
+            error: 'Authentication cancelled' 
           };
         }
       }
@@ -75,7 +75,7 @@ export class BiometricAccountService {
       if (!checkResult.isAvailable) {
         return { 
           success: false, 
-          _error: checkResult.biometryType || 'Biometric authentication not available' 
+          error: checkResult.biometryType || 'Biometric authentication not available' 
         };
       }
 
@@ -124,14 +124,14 @@ export class BiometricAccountService {
         
         return { 
           success: false, 
-          _error: 'Authentication failed' 
+          error: 'Authentication failed' 
         };
       }
     } catch (error) {
-      console.error('Biometric authentication _error:', error);
+      console.error('Biometric authentication error:', error);
       return { 
         success: false, 
-        _error: error instanceof Error ? error.message : 'Authentication error' 
+        error: error instanceof Error ? error.message : 'Authentication error' 
       };
     }
   }

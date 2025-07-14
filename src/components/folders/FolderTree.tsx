@@ -49,14 +49,14 @@ const FolderNode: React.FC<FolderNodeProps> = ({
   const hasChildren = folder.children && folder.children.length > 0;
 
   const handleToggle = (_e: React.MouseEvent) => {
-    _e.stopPropagation();
+    e.stopPropagation();
     if (hasChildren) {
-      dispatch(toggleFolderExpanded(folder.id));
+      dispatch(toggleFolderExpanded(folder.id) as any);
     }
   };
 
   const handleSelect = () => {
-    dispatch(selectFolder(folder.id));
+    dispatch(selectFolder(folder.id) as any);
     onFolderSelect?.(folder.id);
   };
 
@@ -159,7 +159,7 @@ const FolderTree: React.FC<FolderTreeProps> = ({
     : storeSelectedFolderId;
 
   const handleRootSelect = () => {
-    dispatch(selectFolder(null));
+    dispatch(selectFolder(null) as any);
     onFolderSelect?.(null);
   };
 
@@ -183,7 +183,7 @@ const FolderTree: React.FC<FolderTreeProps> = ({
       </div>
 
       {/* Folder Tree */}
-      {folders.map((folder) => (
+      {(folders || []).map((folder) => (
         <FolderNode
           key={folder.id}
           folder={folder}

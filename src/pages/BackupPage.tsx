@@ -111,19 +111,19 @@ const BackupPage: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: `Successfully backed up ${result.accountsCount} accounts`
-      }));
+      }) as any);
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Backup failed. Please try again.'
-      }));
+      }) as any);
     } finally {
       setIsBackingUp(false);
     }
   };
 
   const handleRestore = async (backupId: string) => {
-    const backup = backupHistory.find(b => b.id === backupId);
+    const backup = backupHistory.find((b: any) => b.id === backupId);
     if (!backup) return;
 
     const confirmed = window.confirm(
@@ -142,12 +142,12 @@ const BackupPage: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: `Successfully restored ${backup.accountCount} accounts`
-      }));
+      }) as any);
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Restore failed. Please try again.'
-      }));
+      }) as any);
     } finally {
       setIsRestoring(false);
       setSelectedBackup(null);
@@ -155,7 +155,7 @@ const BackupPage: React.FC = () => {
   };
 
   const handleExportBackup = (backupId: string) => {
-    const backup = backupHistory.find(b => b.id === backupId);
+    const backup = backupHistory.find((b: any) => b.id === backupId);
     if (!backup) return;
 
     dispatch(addToast({
@@ -175,7 +175,7 @@ const BackupPage: React.FC = () => {
         dispatch(addToast({
           type: 'info',
           message: `Importing ${file.name}...`
-        }));
+        }) as any);
       }
     };
     input.click();

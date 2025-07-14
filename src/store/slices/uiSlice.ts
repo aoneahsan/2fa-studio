@@ -53,7 +53,7 @@ const uiSlice = createSlice({
       state.toasts.push(toast);
     },
     removeToast: (state, action: PayloadAction<string>) => {
-      state.toasts = state.toasts.filter(toast => toast.id !== action.payload);
+      state.toasts = state.toasts.filter((toast: any) => toast.id !== action.payload);
     },
     clearToasts: (state) => {
       state.toasts = [];
@@ -68,7 +68,7 @@ const uiSlice = createSlice({
       state.isSidebarOpen = !state.isSidebarOpen;
     },
     setLoading: (state, action: PayloadAction<{ isLoading: boolean; message?: string }>) => {
-      state.isLoading = action.payload.isLoading;
+      state.isLoading = (action as any).payload.isLoading;
       state.loadingMessage = action.payload.message || null;
     },
   },

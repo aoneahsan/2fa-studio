@@ -35,7 +35,7 @@ const AccountUsageChart: React.FC<AccountUsageChartProps> = ({ stats, className 
   // Get recent daily usage (last 7 days)
   const recentDailyUsage = stats.dailyUsage.slice(-7);
   const maxDailyUsage = Math.max(
-    ...recentDailyUsage.map(d => d.views + d.copies + d.generations),
+    ...recentDailyUsage.map((d: any) => d.views + d.copies + d.generations),
     1
   );
 

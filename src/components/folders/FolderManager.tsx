@@ -65,11 +65,11 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
-        dispatch(clearFoldersError());
+        dispatch(clearFoldersError() as any);
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [_error, dispatch]);
+  }, [error, dispatch]);
 
   const handleCreate = async () => {
     if (!user || !formData.name.trim()) return;
@@ -133,7 +133,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
         userId: user.id,
         folderId: deleteConfirm.folderId,
         moveContentsTo: deleteConfirm.moveContentsTo,
-      })).unwrap();
+      }) as any).unwrap();
 
       setDeleteConfirm(null);
       setSelectedFolderId(null);
@@ -145,7 +145,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
   const handleFolderSelect = (folderId: string | null) => {
     setSelectedFolderId(folderId);
     if (folderId) {
-      const folder = folders.find(f => f.id === folderId);
+      const folder = folders.find((f: any) => f.id === folderId);
       if (folder) {
         setFormData({
           name: folder.name,
@@ -159,7 +159,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
 
   const handleStartEdit = () => {
     if (!selectedFolderId) return;
-    const folder = folders.find(f => f.id === selectedFolderId);
+    const folder = folders.find((f: any) => f.id === selectedFolderId);
     if (folder) {
       setEditingFolder(folder);
       setFormData({
@@ -171,7 +171,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const selectedFolder = selectedFolderId ? folders.find(f => f.id === selectedFolderId) : null;
+  const selectedFolder = selectedFolderId ? folders.find((f: any) => f.id === selectedFolderId) : null;
 
   if (!isOpen) return null;
 
@@ -256,7 +256,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                       className="select select-bordered w-full"
                     >
                       <option value="">Root Level</option>
-                      {folders.map((folder) => (
+                      {(folders || []).map((folder) => (
                         <option key={folder.id} value={folder.id}>
                           {folder.name}
                         </option>
@@ -358,7 +358,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                     <p>
                       <span className="text-muted-foreground">Parent:</span>{' '}
                       <span className="font-medium">
-                        {folders.find(f => f.id === selectedFolder.parentId)?.name || 'Unknown'}
+                        {folders.find((f: any) => f.id === selectedFolder.parentId)?.name || 'Unknown'}
                       </span>
                     </p>
                   )}
@@ -413,7 +413,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                 >
                   <option value="">Root Level</option>
                   {folders
-                    .filter(f => f.id !== deleteConfirm.folderId)
+                    .filter((f: any) => f.id !== deleteConfirm.folderId)
                     .map((folder) => (
                       <option key={folder.id} value={folder.id}>
                         {folder.name}

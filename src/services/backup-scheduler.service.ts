@@ -37,7 +37,7 @@ export class BackupSchedulerService {
     const unsubscribe = onSnapshot(schedulesRef, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         const schedule = { 
-          id: change.doc.id, 
+          id: (change as any).doc.id, 
           ...change.doc.data() 
         } as BackupSchedule;
 
@@ -149,7 +149,7 @@ export class BackupSchedulerService {
     const schedulesRef = collection(db, `users/${userId}/${this.SCHEDULES_COLLECTION}`);
     const snapshot = await getDocs(schedulesRef);
     
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       nextRun: doc.data().nextRun?.toDate(),
@@ -170,7 +170,7 @@ export class BackupSchedulerService {
     const snapshot = await getDocs(query(historyRef, where('userId', '==', userId)));
     
     return snapshot.docs
-      .map(doc => ({
+      .map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate(),
@@ -240,7 +240,7 @@ export class BackupSchedulerService {
   ): Promise<void> {
     const startTime = Date.now();
     let status: BackupHistory['status'] = 'success';
-    let _error: string | undefined;
+    let error: string | undefined;
     let accountsCount = 0;
 
     try {
@@ -286,7 +286,7 @@ export class BackupSchedulerService {
       status,
       destination: schedule.destination === 'both' ? 'googledrive' : schedule.destination,
       accountsCount,
-      _error,
+      error,
       duration,
     });
   }
@@ -348,7 +348,7 @@ export class BackupSchedulerService {
    */
   static async runBackupNow(userId: string, scheduleId: string): Promise<void> {
     const schedules = await this.getSchedules(userId);
-    const schedule = schedules.find(s => s.id === scheduleId);
+    const schedule = schedules.find((s: any) => s.id === scheduleId);
     
     if (!schedule) {
       throw new Error('Schedule not found');

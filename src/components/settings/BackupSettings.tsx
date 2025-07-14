@@ -68,12 +68,12 @@ const BackupSettings: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Backup completed successfully'
-      }));
+      }) as any);
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Backup failed. Please try again.'
-      }));
+      }) as any);
     } finally {
       setIsBackingUp(false);
     }
@@ -95,12 +95,12 @@ const BackupSettings: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Data restored successfully'
-      }));
+      }) as any);
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Restore failed. Please try again.'
-      }));
+      }) as any);
     } finally {
       setIsRestoring(false);
     }
@@ -110,23 +110,23 @@ const BackupSettings: React.FC = () => {
     dispatch(addToast({
       type: 'info',
       message: 'Downloading backup file...'
-    }));
+    }) as any);
   };
 
   const handleImportBackup = () => {
     dispatch(addToast({
       type: 'info',
       message: 'Import backup feature coming soon'
-    }));
+    }) as any);
   };
 
-  const handleFrequencyChange = (_e: React.ChangeEvent<HTMLSelectElement>) => {
-    const frequency = _e.target.value as BackupInfo['backupFrequency'];
+  const handleFrequencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const frequency = e.target.value as BackupInfo['backupFrequency'];
     setBackupInfo({ ...backupInfo, backupFrequency: frequency });
     dispatch(addToast({
       type: 'success',
       message: 'Backup frequency updated'
-    }));
+    }) as any);
   };
 
   const handleAutoBackupToggle = () => {
@@ -134,7 +134,7 @@ const BackupSettings: React.FC = () => {
     dispatch(addToast({
       type: 'success',
       message: backupInfo.isAutoBackupEnabled ? 'Auto-backup disabled' : 'Auto-backup enabled'
-    }));
+    }) as any);
   };
 
   return (

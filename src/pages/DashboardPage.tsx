@@ -34,7 +34,7 @@ const DashboardPage: React.FC = () => {
     
     return {
       totalAccounts: accounts.length,
-      recentlyUsed: accounts.filter(acc => acc.updatedAt > thirtyDaysAgo).length,
+      recentlyUsed: accounts.filter((acc: any) => acc.updatedAt > thirtyDaysAgo).length,
       backupStatus: lastBackup ? 'Backed up' : 'Not backed up',
       accountsRemaining: user?.subscription.accountLimit ? user.subscription.accountLimit - accounts.length : 0,
     };

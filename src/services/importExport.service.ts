@@ -50,7 +50,7 @@ export class ImportExportService {
     const userId = auth.currentUser?.uid || 'unknown';
     
     try {
-      let _result: string;
+      let result: string;
       
       switch (format) {
       case 'json':
@@ -116,7 +116,7 @@ export class ImportExportService {
     // For now, we don't support auto-detect
     // Later we can implement detectFormat method
 
-    let _result: ImportResult;
+    let result: ImportResult;
     
     switch (format) {
       case '2fas':
@@ -187,12 +187,12 @@ export class ImportExportService {
       version: this.EXPORT_VERSION,
       exported: new Date().toISOString(),
       encrypted: !!password,
-      accounts: accounts.map(account => ({
+      accounts: (accounts || []).map((account: any) => ({
         name: account.label,
         secret: account.secret,
         issuer: account.issuer,
         type: account.type.toUpperCase(),
-        algorithm: account.algorithm,
+        algorithm: (account as any).algorithm,
         digits: account.digits,
         period: account.period,
         counter: account.counter,
@@ -227,7 +227,7 @@ export class ImportExportService {
       },
       db: {
         version: 2,
-        entries: accounts.map(account => ({
+        entries: (accounts || []).map((account: any) => ({
           type: account.type.toLowerCase(),
           uuid: crypto.randomUUID(),
           name: account.label,
@@ -260,13 +260,13 @@ export class ImportExportService {
    * Export to andOTP format
    */
   private static async exportToAndOTP(accounts: OTPAccount[], password?: string): Promise<string> {
-    const andOTPData = accounts.map(account => ({
+    const andOTPData = (accounts || []).map((account: any) => ({
       secret: account.secret,
       issuer: account.issuer,
       label: account.label,
       digits: account.digits,
       type: account.type.toUpperCase(),
-      algorithm: account.algorithm,
+      algorithm: (account as any).algorithm,
       thumbnail: 'Default',
       last_used: 0,
       used_frequency: 0,
@@ -291,7 +291,7 @@ export class ImportExportService {
    */
   private static exportToGoogleAuth(accounts: OTPAccount[]): string {
     return accounts
-      .map(account => OTPService.generateURI(account))
+      .map((account: any) => OTPService.generateURI(account))
       .join('\n');
   }
 
@@ -299,7 +299,7 @@ export class ImportExportService {
    * Export to plain text format
    */
   private static exportToPlainText(accounts: OTPAccount[]): string {
-    return accounts.map(account => {
+    return (accounts || []).map((account: any) => {
       const parts = [
         `Issuer: ${account.issuer}`,
         `Account: ${account.label}`,
@@ -327,7 +327,7 @@ export class ImportExportService {
    * Import from 2FAS format
    */
   private static async importFrom2FAS(data: string, password?: string): Promise<ImportResult> {
-    const _result: ImportResult = {
+    const result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -369,7 +369,7 @@ export class ImportExportService {
             issuer: accountData.issuer || accountData.name || 'Unknown',
             label: accountData.name || accountData.account || '',
             secret: accountData.secret,
-            algorithm: accountData.algorithm || 'SHA1',
+            algorithm: (accountData as any).algorithm || 'SHA1',
             digits: accountData.digits || 6,
             period: accountData.period || 30,
             counter: accountData.counter || 0,
@@ -386,14 +386,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (_error: unknown) {
+        } catch (error: unknown) {
           result.failed++;
           result.errors.push(`Failed to import ${accountData.name}: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       result.errors.push(`Failed to parse 2FAS data: ${error.message}`);
     }
 
@@ -404,7 +404,7 @@ export class ImportExportService {
    * Import from Aegis format
    */
   private static async importFromAegis(data: string, password?: string): Promise<ImportResult> {
-    const _result: ImportResult = {
+    const result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -422,20 +422,20 @@ export class ImportExportService {
       }
 
       // Validate format
-      if (!parsedData.db?.entries || !Array.isArray(parsedData.db.entries)) {
+      if (!parsedData.db?.entries || !Array.isArray((parsedData as any).db.entries)) {
         throw new Error('Invalid Aegis format: missing entries');
       }
 
       // Import accounts
-      for (const entry of parsedData.db.entries) {
+      for (const entry of (parsedData as any).db.entries) {
         try {
           const account: OTPAccount = {
             id: crypto.randomUUID(),
             type: entry.type as 'totp' | 'hotp',
             issuer: entry.issuer || 'Unknown',
             label: entry.name,
-            secret: entry.info.secret,
-            algorithm: entry.info.algo || 'SHA1',
+            secret: (entry as any).info.secret,
+            algorithm: (entry as any).info.algo || 'SHA1',
             digits: entry.info.digits || 6,
             period: entry.info.period || 30,
             counter: entry.info.counter || 0,
@@ -446,14 +446,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (_error: unknown) {
+        } catch (error: unknown) {
           result.failed++;
           result.errors.push(`Failed to import ${entry.name}: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       result.errors.push(`Failed to parse Aegis data: ${error.message}`);
     }
 
@@ -464,7 +464,7 @@ export class ImportExportService {
    * Import from andOTP format
    */
   private static async importFromAndOTP(data: string, password?: string): Promise<ImportResult> {
-    const _result: ImportResult = {
+    const result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -487,7 +487,7 @@ export class ImportExportService {
             issuer: entry.issuer || entry.label || 'Unknown',
             label: entry.label || '',
             secret: entry.secret,
-            algorithm: entry.algorithm || 'SHA1',
+            algorithm: (entry as any).algorithm || 'SHA1',
             digits: entry.digits || 6,
             period: entry.period || 30,
             counter: entry.counter || 0,
@@ -498,14 +498,14 @@ export class ImportExportService {
 
           result.accounts.push(account);
           result.imported++;
-        } catch (_error: unknown) {
+        } catch (error: unknown) {
           result.failed++;
           result.errors.push(`Failed to import account: ${error.message}`);
         }
       }
 
       result.success = result.imported > 0;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       result.errors.push(`Failed to parse andOTP data: ${error.message}`);
     }
 
@@ -516,7 +516,7 @@ export class ImportExportService {
    * Import from Google Authenticator format (URI list)
    */
   private static importFromGoogleAuth(data: string): ImportResult {
-    const _result: ImportResult = {
+    const result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -524,7 +524,7 @@ export class ImportExportService {
       accounts: []
     };
 
-    const lines = data.split('\n').filter(line => line.trim());
+    const lines = data.split('\n').filter((line: any) => line.trim());
 
     for (const line of lines) {
       try {
@@ -543,7 +543,7 @@ export class ImportExportService {
           issuer: parsed.issuer || 'Unknown',
           label: parsed.label || (parsed as unknown).accountName || (parsed as unknown).name || '',
           secret: parsed.secret || '',
-          algorithm: parsed.algorithm || 'SHA1',
+          algorithm: (parsed as any).algorithm || 'SHA1',
           digits: parsed.digits || 6,
           period: parsed.period || 30,
           counter: parsed.counter || 0,
@@ -554,7 +554,7 @@ export class ImportExportService {
 
         result.accounts.push(account);
         result.imported++;
-      } catch (_error: unknown) {
+      } catch (error: unknown) {
         result.failed++;
         result.errors.push(`Failed to import URI: ${error.message}`);
       }
@@ -568,7 +568,7 @@ export class ImportExportService {
    * Import from plain text format
    */
   private static importFromPlainText(data: string): ImportResult {
-    const _result: ImportResult = {
+    const result: ImportResult = {
       success: false,
       imported: 0,
       failed: 0,
@@ -623,7 +623,7 @@ export class ImportExportService {
               account.counter = parseInt(value) || 0;
               break;
             case 'tags':
-              account.tags = value.split(',').map(t => t.trim());
+              account.tags = value.split(',').map((t: any) => t.trim());
               break;
           }
         }
@@ -645,7 +645,7 @@ export class ImportExportService {
 
         result.accounts.push(account as OTPAccount);
         result.imported++;
-      } catch (_error: unknown) {
+      } catch (error: unknown) {
         result.failed++;
         result.errors.push(`Failed to import entry: ${error.message}`);
       }

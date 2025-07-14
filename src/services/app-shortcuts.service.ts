@@ -107,7 +107,7 @@ export class AppShortcutsService {
   static async removeShortcut(accountId: string): Promise<void> {
     try {
       const shortcuts = await this.getShortcuts();
-      const filtered = shortcuts.filter(s => s.accountId !== accountId);
+      const filtered = shortcuts.filter((s: any) => s.accountId !== accountId);
       
       // Reorder positions
       filtered.forEach((shortcut, index) => {
@@ -151,7 +151,7 @@ export class AppShortcutsService {
   } | null> {
     try {
       const accounts = await MobileAccountService.loadAccounts();
-      const account = accounts.find(a => a.id === accountId);
+      const account = accounts.find((a: any) => a.id === accountId);
       
       if (!account) {
         return null;
@@ -220,7 +220,7 @@ export class AppShortcutsService {
       const widgetData: WidgetAccount[] = [];
 
       for (const accountId of accountIds) {
-        const account = accounts.find(a => a.id === accountId);
+        const account = accounts.find((a: any) => a.id === accountId);
         if (!account) continue;
 
         try {
@@ -235,7 +235,7 @@ export class AppShortcutsService {
             lastUpdated: new Date()
           });
         } catch (error) {
-          console.error(`Failed to generate code for widget account ${account.id}:`, _error);
+          console.error(`Failed to generate code for widget account ${account.id}:`, error);
         }
       }
 
@@ -266,7 +266,7 @@ export class AppShortcutsService {
       const shortcuts = await this.getShortcuts();
       
       // Create shortcuts data for native layer
-      const shortcutsData = shortcuts.map(shortcut => ({
+      const shortcutsData = shortcuts.map((shortcut: any) => ({
         id: shortcut.id,
         title: shortcut.label,
         subtitle: shortcut.issuer,
@@ -331,9 +331,9 @@ export class AppShortcutsService {
       if (data.action === 'generate_code' && data.accountId) {
         const result = await this.generateShortcutCode(data.accountId);
         
-        if (_result) {
+        if (result) {
           // Show code in native interface or copy to clipboard
-          await this.showShortcutResult(_result);
+          await this.showShortcutResult(result);
         }
       }
     } catch (error) {
@@ -344,7 +344,7 @@ export class AppShortcutsService {
   /**
    * Show shortcut result
    */
-  private static async showShortcutResult(_result: {
+  private static async showShortcutResult(result: {
     code: string;
     remainingTime: number;
     issuer: string;
@@ -360,7 +360,7 @@ export class AppShortcutsService {
         duration: 'short'
       });
     } catch (error) {
-      console.error('Failed to show shortcut _result:', error);
+      console.error('Failed to show shortcut result:', error);
     }
   }
 

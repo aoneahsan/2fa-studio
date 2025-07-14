@@ -109,7 +109,7 @@ export const handleGoogleDriveWebhook = onRequest(
 /**
  * Generic webhook handler
  */
-export async function handleWebhook(req: unknown, res: unknown) {
+export async function handleWebhook(req: any, res: any) {
 	const path = req.path.split('/').filter(Boolean);
 	const webhookType = path[1];
 
@@ -130,7 +130,7 @@ export async function handleWebhook(req: unknown, res: unknown) {
 			break;
 
 		default:
-			res.status(404).json({ _error: 'Unknown webhook type' });
+			res.status(404).json({ error: 'Unknown webhook type' });
 	}
 }
 
@@ -162,7 +162,7 @@ function verifyOneSignalSignature(
  */
 async function handleNotificationClicked(event: unknown) {
 	try {
-		const { userId, notificationId, heading, content } = event.data || {};
+		const { userId, notificationId, heading, content } = (event as any).data || {};
 
 		// Log the click
 		await db.collection('notification_events').add({
@@ -196,7 +196,7 @@ async function handleNotificationClicked(event: unknown) {
  */
 async function handleNotificationViewed(event: unknown) {
 	try {
-		const { userId, notificationId } = event.data || {};
+		const { userId, notificationId } = (event as any).data || {};
 
 		// Log the view
 		await db.collection('notification_events').add({
@@ -215,17 +215,17 @@ async function handleNotificationViewed(event: unknown) {
  */
 async function handleSubscriptionChanged(event: unknown) {
 	try {
-		const { userId, subscribed, subscriptionId } = event.data || {};
+		const { userId, subscribed, subscriptionId } = (event as any).data || {};
 
 		if (userId) {
-			const updates: unknown = {
+			const updates: any = {
 				'pushNotifications.subscribed': subscribed,
 				'pushNotifications.lastUpdated':
 					admin.firestore.FieldValue.serverTimestamp(),
 			};
 
 			if (subscriptionId) {
-				updates['pushNotifications.subscriptionId'] = subscriptionId;
+				(updates as any)['pushNotifications.subscriptionId'] = subscriptionId;
 			}
 
 			await db.collection('users').doc(userId).update(updates);
@@ -313,14 +313,14 @@ async function handleDriveFileRemoval(data: any) {
  */
 export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{service: string; url: string; events: string[]; secret?: string}>) => {
 	// Check admin privileges
-	if (!request._auth) {
+	if (!request.auth) {
 		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
 	}
 
-	const userDoc = await db.collection('users').doc(request.auth.uid).get();
+	const userDoc = await db.collection('users').doc(request.auth!.uid).get();
 	if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
 		throw new HttpsError(
 			'permission-denied',
@@ -347,7 +347,7 @@ export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{servi
 				? crypto.createHash('sha256').update(secret).digest('hex')
 				: null,
 			active: true,
-			createdBy: request.auth.uid,
+			createdBy: request.auth!.uid,
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 			lastTriggered: null,
 			failureCount: 0,
@@ -371,14 +371,14 @@ export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{servi
  */
 export const listWebhooks = onCall(async (request: FirebaseAuthRequest) => {
 	// Check admin privileges
-	if (!request._auth) {
+	if (!request.auth) {
 		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
 	}
 
-	const userDoc = await db.collection('users').doc(request.auth.uid).get();
+	const userDoc = await db.collection('users').doc(request.auth!.uid).get();
 	if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
 		throw new HttpsError(
 			'permission-denied',

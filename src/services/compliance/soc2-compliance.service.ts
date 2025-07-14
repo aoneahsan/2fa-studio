@@ -378,7 +378,7 @@ export class SOC2ComplianceService {
       }
       
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         lastReview: doc.data().lastReview?.toDate(),
@@ -527,11 +527,11 @@ export class SOC2ComplianceService {
       // Calculate summary metrics
       const summary = {
         totalControls: controls.length,
-        implementedControls: controls.filter(c => c.status === 'implemented').length,
-        partialControls: controls.filter(c => c.status === 'partial').length,
-        notImplementedControls: controls.filter(c => c.status === 'not_implemented').length,
-        criticalFindings: controlsAssessment.filter(a => a.findings.length > 0).length,
-        highFindings: incidents.filter(i => i.severity === 'high').length,
+        implementedControls: controls.filter((c: any) => c.status === 'implemented').length,
+        partialControls: controls.filter((c: any) => c.status === 'partial').length,
+        notImplementedControls: controls.filter((c: any) => c.status === 'not_implemented').length,
+        criticalFindings: controlsAssessment.filter((a: any) => a.findings.length > 0).length,
+        highFindings: incidents.filter((i: any) => i.severity === 'high').length,
         incidents: incidents.length,
         averageResolutionTime: this.calculateAverageResolutionTime(incidents)
       };
@@ -630,7 +630,7 @@ export class SOC2ComplianceService {
       }
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
@@ -675,7 +675,7 @@ export class SOC2ComplianceService {
       });
 
       // Assess incidents
-      const criticalIncidents = recentIncidents.filter(i => i.severity === 'critical');
+      const criticalIncidents = recentIncidents.filter((i: any) => i.severity === 'critical');
       if (criticalIncidents.length > 0) {
         score -= criticalIncidents.length * 5;
         findings.push(`${criticalIncidents.length} critical incidents in the last 90 days`);
@@ -683,7 +683,7 @@ export class SOC2ComplianceService {
       }
 
       // Assess metrics
-      const criticalMetrics = metrics.filter(m => m.status === 'critical');
+      const criticalMetrics = metrics.filter((m: any) => m.status === 'critical');
       if (criticalMetrics.length > 0) {
         score -= 10;
         findings.push('System metrics showing critical values');
@@ -727,7 +727,7 @@ export class SOC2ComplianceService {
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       detectedAt: doc.data().detectedAt?.toDate(),
@@ -737,7 +737,7 @@ export class SOC2ComplianceService {
   }
 
   private static async assessControls(controls: SecurityControl[]): Promise<ControlAssessment[]> {
-    return controls.map(control => {
+    return controls.map((control: any) => {
       const findings: string[] = [];
       const recommendations: string[] = [];
 
@@ -765,7 +765,7 @@ export class SOC2ComplianceService {
   }
 
   private static summarizeIncidents(incidents: SecurityIncident[]): IncidentSummary[] {
-    return incidents.map(incident => ({
+    return incidents.map((incident: any) => ({
       incidentId: incident.incidentId,
       title: incident.title,
       severity: incident.severity,
@@ -781,7 +781,7 @@ export class SOC2ComplianceService {
   }
 
   private static calculateAverageResolutionTime(incidents: SecurityIncident[]): number {
-    const resolvedIncidents = incidents.filter(i => i.resolvedAt);
+    const resolvedIncidents = incidents.filter((i: any) => i.resolvedAt);
     if (resolvedIncidents.length === 0) return 0;
 
     const totalHours = resolvedIncidents.reduce((sum, incident) => {
@@ -804,13 +804,13 @@ export class SOC2ComplianceService {
     const recommendations: string[] = [];
 
     // Control-based recommendations
-    const notImplemented = assessments.filter(a => a.status === 'not_implemented');
+    const notImplemented = assessments.filter((a: any) => a.status === 'not_implemented');
     if (notImplemented.length > 0) {
       recommendations.push(`Implement ${notImplemented.length} missing controls`);
     }
 
     // Incident-based recommendations
-    if (incidents.filter(i => i.severity === 'critical').length > 2) {
+    if (incidents.filter((i: any) => i.severity === 'critical').length > 2) {
       recommendations.push('Enhance security monitoring and incident prevention');
     }
 

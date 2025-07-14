@@ -27,14 +27,14 @@ const AccountsList: React.FC<AccountsListProps> = ({ accounts, isLoading }) => {
     dispatch(openModal({
       type: 'editAccount',
       data: { accountId: account.id }
-    }));
+    }) as any);
   };
 
   const handleDelete = (account: OTPAccount) => {
     dispatch(openModal({
       type: 'deleteAccount',
       data: account
-    }));
+    }) as any);
   };
   
   const handleToggleFavorite = async (account: OTPAccount) => {
@@ -78,7 +78,7 @@ const AccountsList: React.FC<AccountsListProps> = ({ accounts, isLoading }) => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {accounts.map((account) => (
+      {(accounts || []).map((account) => (
         <AccountCard
           key={account.id}
           account={account}

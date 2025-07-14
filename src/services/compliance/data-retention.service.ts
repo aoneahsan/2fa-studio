@@ -188,7 +188,7 @@ export class DataRetentionService {
   static async getPolicies(): Promise<RetentionPolicy[]> {
     try {
       const snapshot = await getDocs(collection(db, this.POLICIES_COLLECTION));
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         lastRun: doc.data().lastRun?.toDate(),
@@ -275,56 +275,56 @@ export class DataRetentionService {
       // Execute based on data type
       switch (policy.dataType) {
         case DataType.AUDIT_LOGS:
-          await this.processAuditLogs(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
+          await this.processAuditLogs(retentionDate, policy.action, (processed, succeeded, failed, error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(_error);
+            if (error) errors.push(error);
           });
           break;
           
         case DataType.SESSIONS:
-          await this.processSessions(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
+          await this.processSessions(retentionDate, policy.action, (processed, succeeded, failed, error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(_error);
+            if (error) errors.push(error);
           });
           break;
           
         case DataType.BACKUPS:
-          await this.processBackups(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
+          await this.processBackups(retentionDate, policy.action, (processed, succeeded, failed, error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(_error);
+            if (error) errors.push(error);
           });
           break;
           
         case DataType.ANALYTICS:
-          await this.processAnalytics(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
+          await this.processAnalytics(retentionDate, policy.action, (processed, succeeded, failed, error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(_error);
+            if (error) errors.push(error);
           });
           break;
           
         case DataType.DELETED_USERS:
-          await this.processDeletedUsers(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
+          await this.processDeletedUsers(retentionDate, policy.action, (processed, succeeded, failed, error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(_error);
+            if (error) errors.push(error);
           });
           break;
           
         case DataType.EXPORT_FILES:
-          await this.processExportFiles(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
+          await this.processExportFiles(retentionDate, policy.action, (processed, succeeded, failed, error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(_error);
+            if (error) errors.push(error);
           });
           break;
           
@@ -341,7 +341,7 @@ export class DataRetentionService {
       const endTime = new Date();
       const status = itemsFailed === 0 ? 'success' : itemsFailed < itemsProcessed ? 'partial' : 'failed';
       
-      const _result: RetentionExecutionResult = {
+      const result: RetentionExecutionResult = {
         policyId,
         policyName: policy.name,
         dataType: policy.dataType,
@@ -355,14 +355,14 @@ export class DataRetentionService {
       };
       
       // Log execution
-      await this.logExecution(_result);
+      await this.logExecution(result);
       
       return result;
     } catch (error) {
       console.error('Failed to execute retention policy:', error);
       
       const endTime = new Date();
-      const _result: RetentionExecutionResult = {
+      const result: RetentionExecutionResult = {
         policyId,
         policyName: 'Unknown',
         dataType: DataType.TEMP_DATA,
@@ -375,7 +375,7 @@ export class DataRetentionService {
         status: 'failed'
       };
       
-      await this.logExecution(_result);
+      await this.logExecution(result);
       throw error;
     }
   }
@@ -386,15 +386,15 @@ export class DataRetentionService {
   static async executeAllPolicies(): Promise<RetentionExecutionResult[]> {
     try {
       const policies = await this.getPolicies();
-      const enabledPolicies = policies.filter(p => p.enabled);
+      const enabledPolicies = policies.filter((p: any) => p.enabled);
       const results: RetentionExecutionResult[] = [];
       
       for (const policy of enabledPolicies) {
         try {
           const result = await this.executePolicy(policy.id);
-          results.push(_result);
+          results.push(result);
         } catch (error) {
-          console.error(`Failed to execute policy ${policy.name}:`, _error);
+          console.error(`Failed to execute policy ${policy.name}:`, error);
         }
       }
       
@@ -417,7 +417,7 @@ export class DataRetentionService {
       );
       
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         ...doc.data(),
         startTime: doc.data().startTime?.toDate(),
         endTime: doc.data().endTime?.toDate()
@@ -707,10 +707,10 @@ export class DataRetentionService {
     return now;
   }
   
-  private static async logExecution(_result: RetentionExecutionResult): Promise<void> {
+  private static async logExecution(result: RetentionExecutionResult): Promise<void> {
     try {
       await addDoc(collection(db, this.EXECUTION_HISTORY), {
-        ..._result,
+        ...result,
         startTime: Timestamp.fromDate(result.startTime),
         endTime: Timestamp.fromDate(result.endTime),
         createdAt: serverTimestamp()

@@ -232,7 +232,7 @@ export class AuditLoggingService {
       }
       
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
@@ -262,10 +262,10 @@ export class AuditLoggingService {
       // Calculate summary
       const summary = {
         totalEvents: logs.length,
-        successfulEvents: logs.filter(l => l.success).length,
-        failedEvents: logs.filter(l => !l.success).length,
-        criticalEvents: logs.filter(l => l.severity === 'critical').length,
-        uniqueUsers: new Set(logs.map(l => l.userId)).size,
+        successfulEvents: logs.filter((l: any) => l.success).length,
+        failedEvents: logs.filter((l: any) => !l.success).length,
+        criticalEvents: logs.filter((l: any) => l.severity === 'critical').length,
+        uniqueUsers: new Set(logs.map((l: any) => l.userId)).size,
         dateRange: { start: startDate, end: endDate }
       };
       
@@ -284,12 +284,12 @@ export class AuditLoggingService {
       const userActivity = this.calculateUserActivity(logs);
       
       // Security and compliance events
-      const securityEvents = logs.filter(l => 
+      const securityEvents = logs.filter((l: any) => 
         l.action.startsWith('security.') || 
         l.severity === 'critical'
       );
       
-      const complianceEvents = logs.filter(l => 
+      const complianceEvents = logs.filter((l: any) => 
         l.action.startsWith('compliance.') ||
         l.action.includes('data_') ||
         l.action.includes('consent')
@@ -407,7 +407,7 @@ export class AuditLoggingService {
       });
       
       const totalActions = logs.length;
-      const successfulActions = logs.filter(l => l.success).length;
+      const successfulActions = logs.filter((l: any) => l.success).length;
       const successRate = totalActions > 0 ? (successfulActions / totalActions) * 100 : 0;
       
       // Calculate top actions
@@ -447,15 +447,15 @@ export class AuditLoggingService {
       });
       
       // Check for suspicious patterns
-      const failedLogins = recentLogs.filter(l => 
+      const failedLogins = recentLogs.filter((l: any) => 
         l.action === AuditAction.LOGIN && !l.success
       ).length;
       
-      const criticalEvents = recentLogs.filter(l => 
+      const criticalEvents = recentLogs.filter((l: any) => 
         l.severity === 'critical'
       ).length;
       
-      const dataExports = recentLogs.filter(l => 
+      const dataExports = recentLogs.filter((l: any) => 
         l.action === AuditAction.DATA_EXPORT ||
         l.action === AuditAction.ACCOUNT_EXPORT
       ).length;
@@ -529,7 +529,7 @@ export class AuditLoggingService {
       'Success', 'Severity', 'Timestamp', 'IP Address', 'Details'
     ];
     
-    const rows = logs.map(log => [
+    const rows = logs.map((log: any) => [
       log.id || '',
       log.userId,
       log.userEmail,
@@ -545,7 +545,7 @@ export class AuditLoggingService {
     
     return [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map((row: any) => row.map((cell: any) => `"${cell}"`).join(','))
     ].join('\n');
   }
   

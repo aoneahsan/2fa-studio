@@ -185,7 +185,7 @@ export class EncryptionService {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
     const randomValues = crypto.getRandomValues(new Uint8Array(length));
     return Array.from(randomValues)
-      .map(value => charset[value % charset.length])
+      .map((value: any) => charset[value % charset.length])
       .join('');
   }
 

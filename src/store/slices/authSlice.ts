@@ -18,7 +18,7 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  _error: string | null;
+  error: string | null;
   encryptionKey: string | null;
 }
 
@@ -26,7 +26,7 @@ const initialState: AuthState = {
   user: null,
   isLoading: true,
   isAuthenticated: false,
-  _error: null,
+  error: null,
   encryptionKey: null,
 };
 
@@ -84,7 +84,7 @@ const authSlice = createSlice({
     updateUserSubscription: (state, action: PayloadAction<Partial<User['subscription']>>) => {
       if (state.user) {
         state.user.subscription = {
-          ...state.user.subscription,
+          ...(state as any).user.subscription,
           ...action.payload
         };
       }

@@ -20,14 +20,14 @@ import {
  */
 const ToastContainer: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const toasts = useSelector((state: RootState) => state.ui.toasts);
+  const toasts = useSelector((state: RootState) => (state as any).ui.toasts);
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
 
-    toasts.forEach((toast) => {
+    toasts.forEach((toast: any) => {
       const timer = setTimeout(() => {
-        dispatch(removeToast(toast.id));
+        dispatch(removeToast(toast.id) as any);
       }, toast.duration || 5000);
       
       timers.push(timer);
@@ -74,7 +74,7 @@ const ToastContainer: React.FC = () => {
 
   return (
     <div className="fixed bottom-0 right-0 p-6 space-y-4 z-50">
-      {toasts.map((toast) => (
+      {toasts.map((toast: any) => (
         <div
           key={toast.id}
           className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg animate-in slide-in-from-bottom-2 max-w-sm ${getStyles(toast.type)}`}
@@ -82,7 +82,7 @@ const ToastContainer: React.FC = () => {
           {getIcon(toast.type)}
           <p className="flex-1 text-sm text-foreground">{toast.message}</p>
           <button
-            onClick={() => dispatch(removeToast(toast.id))}
+            onClick={() => dispatch(removeToast(toast.id) as any)}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <XMarkIcon className="w-4 h-4" />

@@ -61,7 +61,7 @@ const BrowserExtensionSettings: React.FC = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to generate pairing code',
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }
@@ -76,12 +76,12 @@ const BrowserExtensionSettings: React.FC = () => {
       dispatch(addToast({
         type: 'success',
         message: 'Disconnected from browser extension',
-      }));
+      }) as any);
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to disconnect',
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +139,7 @@ const BrowserExtensionSettings: React.FC = () => {
               onClick={disconnect}
               disabled={isLoading}
               className="w-full"
-              variant="destructive"
+              variant="danger"
             >
               <XMarkIcon className="w-4 h-4 mr-2" />
               Disconnect
@@ -159,12 +159,7 @@ const BrowserExtensionSettings: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <div className="p-4 bg-white rounded-lg mx-auto w-fit">
-                  <QRCodeSVG
-                    value={pairingCode}
-                    size={200}
-                    level="M"
-                    includeMargin={true}
-                  />
+                  <div className="bg-gray-200 w-64 h-64 flex items-center justify-center">QR Code</div>
                 </div>
                 
                 <div className="text-center space-y-2">

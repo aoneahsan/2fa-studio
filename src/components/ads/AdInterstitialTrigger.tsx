@@ -22,7 +22,7 @@ const AdInterstitialTrigger: React.FC<AdInterstitialTriggerProps> = ({
   const hasShownTimedAd = useRef(false);
 
   // Listen for account-related actions
-  const accounts = useAppSelector((state) => state.accounts.accounts);
+  const accounts = useAppSelector((state) => (state as any).accounts.accounts);
   const previousAccountsLength = useRef(accounts.length);
 
   useEffect(() => {

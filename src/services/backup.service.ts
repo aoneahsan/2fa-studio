@@ -59,7 +59,7 @@ export class BackupService {
           issuer: accountData.issuer,
           label: accountData.label,
           secret: decryptedSecret,
-          algorithm: accountData.algorithm,
+          algorithm: (accountData as any).algorithm,
           digits: accountData.digits,
           period: accountData.period,
           type: accountData.type,
@@ -215,7 +215,7 @@ export class BackupService {
               issuer: account.issuer,
               label: account.label,
               encryptedSecret,
-              algorithm: account.algorithm || 'SHA1',
+              algorithm: (account as any).algorithm || 'SHA1',
               digits: account.digits || 6,
               period: account.period || 30,
               type: account.type || 'totp',
@@ -234,7 +234,7 @@ export class BackupService {
           
           importedCount++;
         } catch (error) {
-          console.error('Error importing account:', account.label, _error);
+          console.error('Error importing account:', account.label, error);
         }
       }
 
@@ -253,7 +253,7 @@ export class BackupService {
       return {
         success: false,
         accountsCount: 0,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -270,12 +270,12 @@ export class BackupService {
       const backupData = await this.createBackup(userId, includeSettings);
       
       // Convert to OTPAccount format for GoogleDriveBackupService
-      const accounts: OTPAccount[] = backupData.accounts.map(account => ({
+      const accounts: OTPAccount[] = ((backupData.accounts) || []).map((account: any) => ({
         id: account.id,
         issuer: account.issuer,
         label: account.label,
         secret: account.secret,
-        algorithm: account.algorithm,
+        algorithm: (account as any).algorithm,
         digits: account.digits,
         period: account.period,
         type: account.type,
@@ -303,14 +303,14 @@ export class BackupService {
         accountsCount: backupData.accountsCount,
         fileSize: result.fileId ? undefined : 0,
         fileId: result.fileId,
-        _error: result._error,
+        error: result.error,
       };
     } catch (error) {
       console.error('Error backing up to Google Drive:', error);
       return {
         success: false,
         accountsCount: 0,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -330,7 +330,7 @@ export class BackupService {
         return {
           success: false,
           accountsCount: 0,
-          _error: result.error || 'Failed to restore backup',
+          error: result.error || 'Failed to restore backup',
         };
       }
 
@@ -351,7 +351,7 @@ export class BackupService {
               issuer: account.issuer,
               label: account.label,
               encryptedSecret,
-              algorithm: account.algorithm || 'SHA1',
+              algorithm: (account as any).algorithm || 'SHA1',
               digits: account.digits || 6,
               period: account.period || 30,
               type: account.type || 'totp',
@@ -370,7 +370,7 @@ export class BackupService {
           
           importedCount++;
         } catch (error) {
-          console.error('Error importing account:', account.label, _error);
+          console.error('Error importing account:', account.label, error);
         }
       }
 
@@ -383,7 +383,7 @@ export class BackupService {
       return {
         success: false,
         accountsCount: 0,
-        _error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

@@ -33,7 +33,7 @@ const TIER_LIMITS = {
  */
 export const createCheckoutSession = onCall(
 	async (request: FirebaseAuthRequest<{tier: string; successUrl?: string; cancelUrl?: string}>) => {
-		if (!request._auth) {
+		if (!request.auth) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -56,7 +56,7 @@ export const createCheckoutSession = onCall(
 			// Get or create Stripe customer
 			const userDoc = await db
 				.collection('users')
-				.doc(request.auth.uid)
+				.doc(request.auth!.uid)
 				.get();
 			const userData = userDoc.data();
 
@@ -67,7 +67,7 @@ export const createCheckoutSession = onCall(
 				const customer = await stripe.customers.create({
 					email: userData?.email,
 					metadata: {
-						userId: request.auth.uid,
+						userId: request.auth!.uid,
 					},
 				});
 
@@ -98,7 +98,7 @@ export const createCheckoutSession = onCall(
 					cancelUrl ||
 					`${process.env.APP_URL}/settings?tab=subscription&status=cancelled`,
 				metadata: {
-					userId: request.auth.uid,
+					userId: request.auth!.uid,
 					tier,
 				},
 			});
@@ -119,7 +119,7 @@ export const createCheckoutSession = onCall(
  */
 export const createPortalSession = onCall(
 	async (request: FirebaseAuthRequest<{returnUrl?: string}>) => {
-		if (!request._auth) {
+		if (!request.auth) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -132,7 +132,7 @@ export const createPortalSession = onCall(
 			// Get user's Stripe customer ID
 			const userDoc = await db
 				.collection('users')
-				.doc(request.auth.uid)
+				.doc(request.auth!.uid)
 				.get();
 			const customerId = userDoc.data()?.stripeCustomerId;
 
@@ -183,8 +183,8 @@ export const handleStripeWebhook = onRequest(
 		let event: Stripe.Event;
 
 		try {
-			event = stripe.webhooks.constructEvent((req as unknown).rawBody || req.body, sig as string, endpointSecret);
-		} catch (err: unknown) {
+			event = stripe.webhooks.constructEvent((req as any).rawBody || req.body, sig as string, endpointSecret);
+		} catch (err: any) {
 			console.error('Webhook signature verification failed:', err.message);
 			res.status(400).send(`Webhook Error: ${err.message}`);
 			return;
@@ -238,7 +238,7 @@ export const handleStripeWebhook = onRequest(
  */
 export const checkAccountLimits = onCall(
 	async (request: FirebaseAuthRequest) => {
-		if (!request._auth) {
+		if (!request.auth) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -248,7 +248,7 @@ export const checkAccountLimits = onCall(
 		try {
 			const userDoc = await db
 				.collection('users')
-				.doc(request.auth.uid)
+				.doc(request.auth!.uid)
 				.get();
 			const userData = userDoc.data();
 
@@ -278,7 +278,7 @@ export const checkAccountLimits = onCall(
  */
 export const updateUsageStats = onCall(
 	async (request: FirebaseAuthRequest<{action: string; value?: number}>) => {
-		if (!request._auth) {
+		if (!request.auth) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -289,7 +289,7 @@ export const updateUsageStats = onCall(
 
 		try {
 			const increment = admin.firestore.FieldValue.increment(value);
-			const updates: unknown = {
+			const updates: any = {
 				lastActive: admin.firestore.FieldValue.serverTimestamp(),
 			};
 
@@ -308,7 +308,7 @@ export const updateUsageStats = onCall(
 					break;
 			}
 
-			await db.collection('users').doc(request.auth.uid).update(updates);
+			await db.collection('users').doc(request.auth!.uid).update(updates);
 
 			return { success: true };
 		} catch (error) {
@@ -408,9 +408,9 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 			stripeSubscriptionId: subscription.id,
 			stripePriceId: priceId,
 			status: subscription.status,
-			currentPeriodStart: new Date((subscription as unknown).current_period_start * 1000),
-			currentPeriodEnd: new Date((subscription as unknown).current_period_end * 1000),
-			cancelAtPeriodEnd: (subscription as unknown).cancel_at_period_end,
+			currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+			currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+			cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
 			accountLimit: TIER_LIMITS[tier as keyof typeof TIER_LIMITS].accounts,
 			updatedAt: admin.firestore.FieldValue.serverTimestamp(),
 		},

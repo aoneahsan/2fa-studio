@@ -55,7 +55,7 @@ describe('GoogleDriveService', () => {
       await GoogleDriveService.initialize()
 
       expect(mockGapi.load).toHaveBeenCalledWith('client:auth2', expect.any(Function))
-      expect(mockGapi.client.init).toHaveBeenCalledWith({
+      expect((mockGapi as any).client.init).toHaveBeenCalledWith({
         apiKey: expect.any(String),
         clientId: expect.any(String),
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
@@ -85,8 +85,8 @@ describe('GoogleDriveService', () => {
 
       const result = GoogleDriveService.isSignedIn()
 
-      expect(_result).toBe(true)
-      expect(mockAuthInstance.isSignedIn.get).toHaveBeenCalled()
+      expect(result).toBe(true)
+      expect((mockAuthInstance as any).isSignedIn.get).toHaveBeenCalled()
     })
 
     it('should sign in user', async () => {
@@ -129,7 +129,7 @@ describe('GoogleDriveService', () => {
 
     it('should create backup file', async () => {
       const mockFileResponse = {
-        _result: {
+        result: {
           id: 'mock-file-id',
           name: 'backup.json'
         }
@@ -139,8 +139,8 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.createBackup(mockBackupData)
 
-      expect(_result).toEqual(mockFileResponse._result)
-      expect(mockGapi.client.drive.files.create).toHaveBeenCalledWith({
+      expect(result).toEqual(mockFileResponse.result)
+      expect((mockGapi.client.drive as any).files.create).toHaveBeenCalledWith({
         resource: {
           name: expect.stringMatching(/2fa-backup-\d{4}-\d{2}-\d{2}\.json/),
           parents: ['appDataFolder']
@@ -154,7 +154,7 @@ describe('GoogleDriveService', () => {
 
     it('should list backup files', async () => {
       const mockFilesResponse = {
-        _result: {
+        result: {
           files: [
             {
               id: 'file1',
@@ -174,8 +174,8 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.listBackups()
 
-      expect(_result).toEqual(mockFilesResponse.result.files)
-      expect(mockGapi.client.drive.files.list).toHaveBeenCalledWith({
+      expect(result).toEqual((mockFilesResponse as any).result.files)
+      expect((mockGapi.client.drive as any).files.list).toHaveBeenCalledWith({
         q: "name contains '2fa-backup' and parents in 'appDataFolder'",
         orderBy: 'modifiedTime desc',
         fields: 'files(id,name,modifiedTime,size)'
@@ -192,8 +192,8 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.downloadBackup('mock-file-id')
 
-      expect(_result).toEqual(mockBackupData)
-      expect(mockGapi.client.drive.files.get).toHaveBeenCalledWith({
+      expect(result).toEqual(mockBackupData)
+      expect((mockGapi.client.drive as any).files.get).toHaveBeenCalledWith({
         fileId: 'mock-file-id',
         alt: 'media'
       })
@@ -212,18 +212,18 @@ describe('GoogleDriveService', () => {
     })
 
     it('should delete backup file', async () => {
-      mockGapi.client.drive.files.delete.mockResolvedValue({ _result: {} })
+      mockGapi.client.drive.files.delete.mockResolvedValue({ result: {} })
 
       await GoogleDriveService.deleteBackup('mock-file-id')
 
-      expect(mockGapi.client.drive.files.delete).toHaveBeenCalledWith({
+      expect((mockGapi.client.drive as any).files.delete).toHaveBeenCalledWith({
         fileId: 'mock-file-id'
       })
     })
 
     it('should update existing backup file', async () => {
       const mockFileResponse = {
-        _result: {
+        result: {
           id: 'mock-file-id',
           name: 'backup.json'
         }
@@ -233,8 +233,8 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.updateBackup('mock-file-id', mockBackupData)
 
-      expect(_result).toEqual(mockFileResponse._result)
-      expect(mockGapi.client.drive.files.update).toHaveBeenCalledWith({
+      expect(result).toEqual(mockFileResponse.result)
+      expect((mockGapi.client.drive as any).files.update).toHaveBeenCalledWith({
         fileId: 'mock-file-id',
         media: {
           mimeType: 'application/json',
@@ -247,7 +247,7 @@ describe('GoogleDriveService', () => {
   describe('error handling', () => {
     it('should handle API errors gracefully', async () => {
       const apiError = {
-        _error: {
+        error: {
           code: 403,
           message: 'Insufficient permissions'
         }
@@ -300,7 +300,7 @@ describe('GoogleDriveService', () => {
   describe('quota management', () => {
     it('should check available storage quota', async () => {
       const mockAboutResponse = {
-        _result: {
+        result: {
           storageQuota: {
             limit: '15000000000',
             usage: '5000000000'
@@ -310,7 +310,7 @@ describe('GoogleDriveService', () => {
 
       // Mock the about API
       mockGapi.client.drive = {
-        ...mockGapi.client.drive,
+        ...(mockGapi as any).client.drive,
         about: {
           get: vi.fn().mockResolvedValue(mockAboutResponse)
         }
@@ -318,7 +318,7 @@ describe('GoogleDriveService', () => {
 
       const result = await GoogleDriveService.getStorageQuota()
 
-      expect(_result).toEqual({
+      expect(result).toEqual({
         total: 15000000000,
         used: 5000000000,
         available: 10000000000
@@ -327,7 +327,7 @@ describe('GoogleDriveService', () => {
 
     it('should warn when storage quota is low', async () => {
       const mockAboutResponse = {
-        _result: {
+        result: {
           storageQuota: {
             limit: '15000000000',
             usage: '14500000000' // 96.67% used
@@ -336,7 +336,7 @@ describe('GoogleDriveService', () => {
       }
 
       mockGapi.client.drive = {
-        ...mockGapi.client.drive,
+        ...(mockGapi as any).client.drive,
         about: {
           get: vi.fn().mockResolvedValue(mockAboutResponse)
         }

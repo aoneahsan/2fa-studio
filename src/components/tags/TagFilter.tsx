@@ -27,18 +27,18 @@ const TagFilter: React.FC<TagFilterProps> = ({ className = '' }) => {
   const activeTags = useAppSelector(selectActiveTags);
   const filterMode = useAppSelector(selectFilterMode);
 
-  const activeTagObjects = tags.filter(tag => activeTags.includes(tag.id));
+  const activeTagObjects = tags.filter((tag: any) => activeTags.includes(tag.id));
 
   const handleTagClick = (tagId: string) => {
-    dispatch(toggleTag(tagId));
+    dispatch(toggleTag(tagId) as any);
   };
 
   const handleClearFilters = () => {
-    dispatch(clearActiveTags());
+    dispatch(clearActiveTags() as any);
   };
 
   const handleModeToggle = () => {
-    dispatch(setFilterMode(filterMode === 'OR' ? 'AND' : 'OR'));
+    dispatch(setFilterMode(filterMode === 'OR' ? 'AND' : 'OR') as any);
   };
 
   if (tags.length === 0) {
@@ -64,7 +64,7 @@ const TagFilter: React.FC<TagFilterProps> = ({ className = '' }) => {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-3">
-        {tags.map(tag => {
+        {(tags || []).map((tag: any) => {
           const isActive = activeTags.includes(tag.id);
           return (
             <button
@@ -104,7 +104,7 @@ const TagFilter: React.FC<TagFilterProps> = ({ className = '' }) => {
         <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
           Showing accounts tagged with:{' '}
           <span className="font-medium">
-            {activeTagObjects.map(tag => tag.name).join(filterMode === 'OR' ? ' or ' : ' and ')}
+            {activeTagObjects.map((tag: any) => tag.name).join(filterMode === 'OR' ? ' or ' : ' and ')}
           </span>
         </div>
       )}

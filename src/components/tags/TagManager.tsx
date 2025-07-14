@@ -38,7 +38,7 @@ interface TagFormData {
 const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
   const dispatch = useAppDispatch();
   const tags = useAppSelector(selectTags);
-  const user = useAppSelector(state => state._auth.user);
+  const user = useAppSelector(state => (state as any)._auth.user);
   
   const [isCreating, setIsCreating] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
@@ -81,7 +81,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    _e.preventDefault();
+    e.preventDefault();
     if (!user || !formData.name.trim()) return;
 
     setIsSubmitting(true);
@@ -91,12 +91,12 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
           userId: user.id,
           tagId: editingTag.id,
           updates: formData,
-        })).unwrap();
+        }) as any).unwrap();
       } else {
         await dispatch(createTag({
           userId: user.id,
           tag: formData,
-        })).unwrap();
+        }) as any).unwrap();
       }
       resetForm();
     } catch (error) {
@@ -113,7 +113,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
       await dispatch(deleteTag({
         userId: user.id,
         tagId,
-      })).unwrap();
+      }) as any).unwrap();
       setDeleteConfirm(null);
     } catch (error) {
       console.error('Failed to delete tag:', error);
@@ -160,7 +160,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: _e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
                       placeholder="e.g., Work, Personal, Finance"
                       required
@@ -172,7 +172,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
                       Color
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {TAG_COLORS.map(color => (
+                      {TAG_COLORS.map((color: any) => (
                         <button
                           key={color}
                           type="button"
@@ -251,7 +251,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {tags.map(tag => (
+                  {(tags || []).map((tag: any) => (
                     <div
                       key={tag.id}
                       className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"

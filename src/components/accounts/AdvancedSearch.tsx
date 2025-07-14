@@ -44,7 +44,7 @@ const defaultOptions: SearchOptions = {
  */
 const AdvancedSearch: React.FC = () => {
   const dispatch = useDispatch();
-  const searchQuery = useSelector((state: RootState) => state.accounts.searchQuery);
+  const searchQuery = useSelector((state: RootState) => (state as any).accounts.searchQuery);
   const [options, setOptions] = useState<SearchOptions>(() => {
     // Load saved options from localStorage
     const saved = localStorage.getItem('searchOptions');
@@ -66,14 +66,14 @@ const AdvancedSearch: React.FC = () => {
   const saveRecentSearch = useCallback((query: string) => {
     if (!query.trim()) return;
     
-    const updated = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
+    const updated = [query, ...recentSearches.filter((s: any) => s !== query)].slice(0, 5);
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
   }, [recentSearches]);
 
-  const handleSearchChange = useCallback((_e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = _e.target.value;
-    dispatch(setSearchQuery(value));
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    dispatch(setSearchQuery(value) as any);
     
     // Store enhanced search options in Redux if needed
     if (value) {
@@ -82,18 +82,18 @@ const AdvancedSearch: React.FC = () => {
         query: value,
         options: options
       };
-      dispatch(setSearchQuery(JSON.stringify(enhancedQuery)));
+      dispatch(setSearchQuery(JSON.stringify(enhancedQuery) as any));
     } else {
-      dispatch(setSearchQuery(''));
+      dispatch(setSearchQuery('') as any);
     }
   }, [dispatch, options]);
 
   const handleClearSearch = useCallback(() => {
-    dispatch(setSearchQuery(''));
+    dispatch(setSearchQuery('') as any);
     inputRef.current?.focus();
   }, [dispatch]);
 
-  const handleKeyDown = useCallback((_e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery) {
       saveRecentSearch(searchQuery);
       setShowSuggestions(false);
@@ -104,7 +104,7 @@ const AdvancedSearch: React.FC = () => {
   }, [searchQuery, saveRecentSearch]);
 
   const handleRecentSearchClick = useCallback((search: string) => {
-    dispatch(setSearchQuery(search));
+    dispatch(setSearchQuery(search) as any);
     setShowSuggestions(false);
     inputRef.current?.focus();
   }, [dispatch]);

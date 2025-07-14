@@ -179,14 +179,14 @@ const BackupScheduler: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Backup Schedules</h3>
-        <Button
+        <button className="btn btn-primary"
           onClick={() => setShowScheduleModal(true)}
-          variant="primary"
-          size="sm"
+          data-variant="primary"
+          data-size="sm"
         >
           <PlusIcon className="w-4 h-4 mr-2" />
           New Schedule
-        </Button>
+        </button>
       </div>
 
       {schedules.length === 0 ? (
@@ -261,11 +261,10 @@ const BackupScheduler: React.FC = () => {
       )}
 
       {/* Schedule Modal */}
-      <Modal
-        isOpen={showScheduleModal}
-        onClose={resetForm}
-        title={editingSchedule ? 'Edit Backup Schedule' : 'Create Backup Schedule'}
-      >
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">{editingSchedule ? 'Edit Backup Schedule' : 'Create Backup Schedule'}</h2>
         <div className="space-y-4">
           {/* Frequency */}
           <div>
@@ -376,15 +375,17 @@ const BackupScheduler: React.FC = () => {
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" onClick={resetForm}>
+            <button className="btn btn-primary" data-variant="secondary" onClick={resetForm}>
               Cancel
-            </Button>
-            <Button variant="primary" onClick={handleCreateSchedule}>
+            </button>
+            <button className="btn btn-primary" data-variant="primary" onClick={handleCreateSchedule}>
               {editingSchedule ? 'Update' : 'Create'} Schedule
-            </Button>
+            </button>
           </div>
         </div>
-      </Modal>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

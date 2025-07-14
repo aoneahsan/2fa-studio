@@ -76,13 +76,13 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
           dispatch(setUser({
             ...user,
             googleDriveConnected: true,
-          }));
+          }) as any);
         }
         
         dispatch(addToast({
           type: 'success',
           message: 'Connected to Google Drive',
-        }));
+        }) as any);
         
         // Load backups
         await refreshBackups();
@@ -92,15 +92,15 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
         dispatch(addToast({
           type: 'error',
           message: 'Failed to connect to Google Drive',
-        }));
+        }) as any);
         return false;
       }
     } catch (error) {
-      console.error('Google Drive connection _error:', error);
+      console.error('Google Drive connection error:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to connect to Google Drive',
-      }));
+      }) as any);
       return false;
     } finally {
       setIsLoading(false);
@@ -118,13 +118,13 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(setUser({
         ...user,
         googleDriveConnected: false,
-      }));
+      }) as any);
     }
     
     dispatch(addToast({
       type: 'info',
       message: 'Disconnected from Google Drive',
-    }));
+    }) as any);
   }, [dispatch, user]);
 
   // Create backup
@@ -149,7 +149,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(addToast({
         type: 'success',
         message: 'Backup created successfully',
-      }));
+      }) as any);
 
       // Refresh backup list
       await refreshBackups();
@@ -158,7 +158,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to create backup',
-      }));
+      }) as any);
       throw error;
     } finally {
       setIsLoading(false);
@@ -181,26 +181,26 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       if (backupData.data?.accounts) {
         // Dispatch action to restore accounts
         // This would need to be implemented in the accounts slice
-        console.log('Restoring accounts:', backupData.data.accounts);
+        console.log('Restoring accounts:', (backupData as any).data.accounts);
       }
 
       // Restore settings
       if (backupData.data?.settings) {
         // Dispatch action to restore settings
         // This would need to be implemented in the settings slice
-        console.log('Restoring settings:', backupData.data.settings);
+        console.log('Restoring settings:', (backupData as any).data.settings);
       }
 
       dispatch(addToast({
         type: 'success',
         message: 'Backup restored successfully',
-      }));
+      }) as any);
     } catch (error) {
       console.error('Failed to restore backup:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to restore backup. Check your encryption password.',
-      }));
+      }) as any);
       throw error;
     } finally {
       setIsLoading(false);
@@ -221,7 +221,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(addToast({
         type: 'success',
         message: 'Backup deleted',
-      }));
+      }) as any);
 
       // Refresh backup list
       await refreshBackups();
@@ -230,7 +230,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to delete backup',
-      }));
+      }) as any);
       throw error;
     } finally {
       setIsLoading(false);
@@ -248,7 +248,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
     try {
       const files = await GoogleDriveService.listBackups();
       
-      const formattedBackups: GoogleDriveBackup[] = files.map(file => ({
+      const formattedBackups: GoogleDriveBackup[] = files.map((file: any) => ({
         id: file.id,
         name: file.name,
         createdTime: file.createdTime,
@@ -266,7 +266,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to load backups',
-      }));
+      }) as any);
     } finally {
       setIsLoading(false);
     }
@@ -294,7 +294,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(addToast({
         type: 'success',
         message: 'Sync completed',
-      }));
+      }) as any);
 
       // Refresh backup list
       await refreshBackups();
@@ -303,7 +303,7 @@ export const useGoogleDrive = (): UseGoogleDriveReturn => {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to sync with Google Drive',
-      }));
+      }) as any);
       throw error;
     } finally {
       setIsLoading(false);

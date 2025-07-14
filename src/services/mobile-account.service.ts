@@ -115,7 +115,7 @@ export class MobileAccountService {
    */
   static async deleteAccount(accountId: string): Promise<void> {
     const accounts = await this.loadAccounts();
-    const filteredAccounts = accounts.filter(a => a.id !== accountId);
+    const filteredAccounts = accounts.filter((a: any) => a.id !== accountId);
     
     // Remove biometric protection if exists
     await BiometricAccountService.unprotectAccount(accountId);
@@ -132,7 +132,7 @@ export class MobileAccountService {
         version: '1.0',
         exportDate: new Date().toISOString(),
         device: await Device.getInfo(),
-        accounts: accounts.map(acc => ({
+        accounts: (accounts || []).map((acc: any) => ({
           ...acc,
           secret: undefined // Don't export secrets in plain text
         }))
@@ -161,7 +161,7 @@ export class MobileAccountService {
       const exportData = {
         version: '1.0',
         exportDate: new Date().toISOString(),
-        accounts: accounts.map(acc => ({
+        accounts: (accounts || []).map((acc: any) => ({
           issuer: acc.issuer,
           label: acc.label,
           // Don't include secrets in shared data
@@ -260,7 +260,7 @@ export class MobileAccountService {
 
       // Merge with existing accounts (avoid duplicates)
       const existingAccounts = await this.loadAccounts();
-      const existingIds = new Set(existingAccounts.map(a => a.id));
+      const existingIds = new Set(existingAccounts.map((a: any) => a.id));
       
       const newAccounts = backupData.accounts.filter(
         (acc: OTPAccount) => !existingIds.has(acc.id)
@@ -321,7 +321,7 @@ export class MobileAccountService {
     const accounts = await this.loadAccounts();
     const lowercaseQuery = query.toLowerCase();
     
-    return accounts.filter(account => 
+    return accounts.filter((account: any) => 
       account.issuer.toLowerCase().includes(lowercaseQuery) ||
       account.label.toLowerCase().includes(lowercaseQuery) ||
       account.tags?.some(tag => tag.toLowerCase().includes(lowercaseQuery))
@@ -333,7 +333,7 @@ export class MobileAccountService {
    */
   static async getAccountsByFolder(folderId: string | null): Promise<OTPAccount[]> {
     const accounts = await this.loadAccounts();
-    return accounts.filter(account => account.folderId === folderId);
+    return accounts.filter((account: any) => account.folderId === folderId);
   }
 
   /**
@@ -341,7 +341,7 @@ export class MobileAccountService {
    */
   static async getFavoriteAccounts(): Promise<OTPAccount[]> {
     const accounts = await this.loadAccounts();
-    return accounts.filter(account => account.isFavorite);
+    return accounts.filter((account: any) => account.isFavorite);
   }
 
   /**
@@ -349,11 +349,11 @@ export class MobileAccountService {
    */
   static async bulkDelete(accountIds: string[]): Promise<void> {
     const accounts = await this.loadAccounts();
-    const remainingAccounts = accounts.filter(a => !accountIds.includes(a.id));
+    const remainingAccounts = accounts.filter((a: any) => !accountIds.includes(a.id));
     
     // Remove biometric protection for deleted accounts
     await Promise.all(
-      accountIds.map(id => BiometricAccountService.unprotectAccount(id))
+      accountIds.map((id: any) => BiometricAccountService.unprotectAccount(id))
     );
     
     await this.saveAccounts(remainingAccounts);

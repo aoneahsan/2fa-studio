@@ -12,7 +12,7 @@ const db = admin.firestore();
 // Rate limiting configuration
 const RATE_LIMITS = {
 	api: { window: 60, max: 100 }, // 100 requests per minute
-	_auth: { window: 300, max: 5 }, // 5 auth attempts per 5 minutes
+	auth: { window: 300, max: 5 }, // 5 auth attempts per 5 minutes
 	backup: { window: 3600, max: 10 }, // 10 backups per hour
 };
 
@@ -69,7 +69,7 @@ export const enforceRateLimit = onCall(
 		const data = request.data;
 		const context = request.auth;
 		const { action = 'api', identifier } = data ?? {};
-		const id = identifier || context?.uid || (request.rawRequest as unknown).ip;
+		const id = identifier || context?.uid || (request.rawRequest as any)?.ip;
 
 		const limit =
 			RATE_LIMITS[action as keyof typeof RATE_LIMITS] || RATE_LIMITS.api;
@@ -97,7 +97,7 @@ export const enforceRateLimit = onCall(
 				await db.collection('audit_logs').add({
 					action: 'rate_limit_exceeded',
 					userId: context?.uid,
-					ip: (request.rawRequest as unknown).ip,
+					ip: (request.rawRequest as any)?.ip,
 					limit: action,
 					timestamp: admin.firestore.FieldValue.serverTimestamp(),
 				});
@@ -120,7 +120,7 @@ export const enforceRateLimit = onCall(
 				remaining: limit.max - count - 1,
 				resetAt: new Date(windowStart + limit.window * 1000).toISOString(),
 			};
-		} catch (_error: unknown) {
+		} catch (error: any) {
 			if (error.code === 'resource-exhausted') {
 				throw error;
 			}
@@ -173,7 +173,7 @@ export const validateRequest = onCall(
 			await db.collection('audit_logs').add({
 				action: 'invalid_signature',
 				userId: context?.uid,
-				ip: (request.rawRequest as unknown).ip,
+				ip: (request.rawRequest as any)?.ip,
 				timestamp: admin.firestore.FieldValue.serverTimestamp(),
 			});
 
@@ -211,8 +211,8 @@ export const createAuditLog = onCall(
 				details,
 				severity,
 				userId: context?.uid || null,
-				ip: (request.rawRequest as unknown).ip,
-				userAgent: (request.rawRequest as unknown).headers['user-agent'],
+				ip: (request.rawRequest as any)?.ip,
+				userAgent: (request.rawRequest as any)?.headers?.['user-agent'],
 				timestamp: admin.firestore.FieldValue.serverTimestamp(),
 			};
 
@@ -357,7 +357,7 @@ async function alertAdmins(alert: unknown) {
 
 			batch.set(notificationRef, {
 				title: 'Security Alert',
-				message: `${(alert.severity as string)?.toUpperCase() || 'HIGH'}: ${alert.action}`,
+				message: `${((alert as any).severity as string)?.toUpperCase() || 'HIGH'}: ${(alert as any).action}`,
 				type: 'security',
 				priority: 'high',
 				details: alert,
@@ -385,7 +385,7 @@ export const checkIPReputation = onCall(
 	},
 	async (request) => {
 		const data = request.data;
-		const ip = data?.ip || (request.rawRequest as unknown).ip;
+		const ip = data?.ip || (request.rawRequest as any)?.ip;
 
 		try {
 			// Check if IP is in blocklist

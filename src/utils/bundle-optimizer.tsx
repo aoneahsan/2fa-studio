@@ -19,11 +19,11 @@ export const createLazyComponent = <T extends React.ComponentType<any>>(
     while (attempts < retries) {
       try {
         return await importFunc();
-      } catch (error) {
+      } catch (error: any) {
         attempts++;
         
         if (attempts >= retries) {
-          console.error(`Failed to load component after ${retries} attempts:`, _error);
+          console.error(`Failed to load component after ${retries} attempts:`, error);
           
           // Return a fallback component if loading fails
           if (fallback) {
@@ -58,17 +58,17 @@ export const createLazyComponent = <T extends React.ComponentType<any>>(
  */
 export const preloadComponents = {
   // Auth components
-  LoginPage: () => import('@pages/auth/LoginPage'),
-  RegisterPage: () => import('@pages/auth/RegisterPage'),
+  LoginPage: () => import('@/pages/auth/LoginPage'),
+  RegisterPage: () => import('@/pages/auth/RegisterPage'),
   
   // Core components
   AccountsList: () => import('@components/accounts/AccountsList'),
   AddAccountModal: () => import('@components/accounts/AddAccountModal'),
-  SettingsPage: () => import('@pages/settings/SettingsPage'),
+  SettingsPage: () => import('@/pages/settings/SettingsPage'),
   
   // Admin components (only preload for admin users)
-  AdminDashboard: () => import('@pages/admin/AdminDashboard'),
-  UserManagement: () => import('@pages/admin/UserManagement')
+  AdminDashboard: () => import('@/pages/admin/AdminDashboard'),
+  UserManagement: () => import('@/pages/admin/UserManagement')
 };
 
 /**
@@ -154,8 +154,8 @@ export class PreloadManager {
         this.preloadedComponents.add(name);
         
         console.log(`Preloaded component: ${name}`);
-      } catch (error) {
-        console.warn(`Failed to preload component ${name}:`, _error);
+      } catch (error: any) {
+        console.warn(`Failed to preload component ${name}:`, error);
       }
     }
 
@@ -187,7 +187,7 @@ export class ImageOptimizer {
    */
   static preloadImages(urls: string[]): Promise<void[]> {
     return Promise.all(
-      urls.map(url => this.preloadImage(url))
+      urls.map((url: any) => this.preloadImage(url))
     );
   }
 
@@ -231,20 +231,20 @@ export const registerServiceWorker = (): void => {
     window.addEventListener('load', async () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', _registration);
+        console.log('Service Worker registered:', registration);
         
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              if (newWorker.state === 'installed' && ((navigator as any).serviceWorker).controller) {
                 // New content available, show update notification
                 console.log('New content available, reload to update');
               }
             });
           }
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Service Worker registration failed:', error);
       }
     });

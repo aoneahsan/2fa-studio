@@ -19,7 +19,7 @@ const DeleteAccountDialog: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   
-  const modalData = useSelector((state: RootState) => state.ui.modal.data);
+  const modalData = useSelector((state: RootState) => (state.ui as any).modal.data);
   const account = modalData;
 
   if (!account) {
@@ -31,27 +31,27 @@ const DeleteAccountDialog: React.FC = () => {
       dispatch(addToast({
         type: 'error',
         message: 'Please type DELETE to confirm'
-      }));
+      }) as any);
       return;
     }
 
     setIsDeleting(true);
 
     try {
-      await deleteAccount(account.id);
+      await deleteAccount((account as any).id);
       
       dispatch(addToast({
         type: 'success',
         message: 'Account deleted successfully'
-      }));
+      }) as any);
       
-      dispatch(closeModal());
+      dispatch(closeModal() as any);
     } catch (error) {
       console.error('Failed to delete account:', error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to delete account'
-      }));
+      }) as any);
     } finally {
       setIsDeleting(false);
     }
@@ -79,16 +79,16 @@ const DeleteAccountDialog: React.FC = () => {
           {/* Account Info */}
           <div className="bg-muted rounded-lg p-4 mb-6">
             <div className="flex items-center gap-3">
-              {account.iconUrl && (
+              {(account as any).iconUrl && (
                 <img 
-                  src={account.iconUrl} 
-                  alt={account.issuer}
+                  src={(account as any).iconUrl} 
+                  alt={(account as any).issuer}
                   className="w-8 h-8 rounded"
                 />
               )}
               <div>
-                <p className="font-medium text-foreground">{account.issuer}</p>
-                <p className="text-sm text-muted-foreground">{account.label}</p>
+                <p className="font-medium text-foreground">{(account as any).issuer}</p>
+                <p className="text-sm text-muted-foreground">{(account as any).label}</p>
               </div>
             </div>
           </div>
@@ -97,7 +97,7 @@ const DeleteAccountDialog: React.FC = () => {
           <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
             <p className="text-sm text-red-800 dark:text-red-200">
               <strong>Warning:</strong> Deleting this account will permanently remove it from your device. 
-              Make sure you have another way to access your {account.issuer} account before proceeding.
+              Make sure you have another way to access your {(account as any).issuer} account before proceeding.
             </p>
           </div>
 
@@ -120,7 +120,7 @@ const DeleteAccountDialog: React.FC = () => {
         {/* Footer */}
         <div className="flex gap-3 p-6 border-t border-border">
           <button
-            onClick={() => dispatch(closeModal())}
+            onClick={() => dispatch(closeModal() as any)}
             className="btn btn-outline flex-1"
             disabled={isDeleting}
           >

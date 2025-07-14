@@ -14,7 +14,7 @@ describe('Dependency Security Audit', () => {
       try {
         // Run yarn audit to check for vulnerabilities
         const auditResult = execSync('yarn audit --json', { encoding: 'utf8' });
-        const auditLines = auditResult.split('\n').filter(line => line.trim());
+        const auditLines = auditResult.split('\n').filter((line: any) => line.trim());
         
         let highVulns = 0;
         let criticalVulns = 0;

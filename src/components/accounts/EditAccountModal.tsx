@@ -37,15 +37,15 @@ import FingerPrintIcon from '@components/icons/FingerPrintIcon';
  */
 const EditAccountModal: React.FC = () => {
   const dispatch = useDispatch();
-  const modal = useSelector((state: RootState) => state.ui.modal);
+  const modal = useSelector((state: RootState) => (state as any).ui.modal);
   const { user } = useSelector((state: RootState) => state._auth);
-  const accounts = useSelector((state: RootState) => state.accounts.accounts);
+  const accounts = useSelector((state: RootState) => (state as any).accounts.accounts);
   const tags = useSelector(selectTags);
   const folders = useSelector(selectFolders);
   const { updateAccount: updateAccountHook } = useAccounts();
   
   const accountId = modal.data?.accountId;
-  const account = accounts.find(a => a.id === accountId);
+  const account = accounts.find((a: any) => a.id === accountId);
   
   const [formData, setFormData] = useState({
     issuer: '',
@@ -73,7 +73,7 @@ const EditAccountModal: React.FC = () => {
         isFavorite: account.isFavorite || false,
         period: account.period || 30,
         digits: account.digits || 6,
-        algorithm: account.algorithm || 'SHA1',
+        algorithm: (account as any).algorithm || 'SHA1',
         counter: account.counter || 0
       });
       
@@ -89,16 +89,16 @@ const EditAccountModal: React.FC = () => {
   // Load tags on mount
   useEffect(() => {
     if (user && tags.length === 0) {
-      dispatch(fetchTags(user.id));
+      dispatch(fetchTags(user.id) as any);
     }
   }, [user, tags.length, dispatch]);
 
   const handleClose = () => {
-    dispatch(closeModal());
+    dispatch(closeModal() as any);
   };
 
-  const handleChange = (_e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = _e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: name === 'period' || name === 'digits' || name === 'counter' 
@@ -108,8 +108,8 @@ const EditAccountModal: React.FC = () => {
   };
 
 
-  const handleSubmit = async (_e: React.FormEvent) => {
-    _e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
     if (!account) return;
     
@@ -125,7 +125,7 @@ const EditAccountModal: React.FC = () => {
         isFavorite: formData.isFavorite,
         period: formData.period,
         digits: formData.digits,
-        algorithm: formData.algorithm,
+        algorithm: (formData as any).algorithm,
         counter: account.type === 'hotp' ? formData.counter : undefined,
         updatedAt: new Date()
       };
@@ -253,7 +253,7 @@ const EditAccountModal: React.FC = () => {
               const suggestions = TagService.getTagSuggestions(formData.issuer);
               const availableSuggestions = suggestions.filter(
                 name => !formData.tags.some(tagId => {
-                  const tag = tags.find(t => t.id === tagId);
+                  const tag = tags.find((t: any) => t.id === tagId);
                   return tag?.name === name;
                 })
               );
@@ -263,7 +263,7 @@ const EditAccountModal: React.FC = () => {
                 <div className="mt-2 text-xs text-muted-foreground">
                   Suggestions: 
                   {availableSuggestions.map((name) => {
-                    const matchingTag = tags.find(t => t.name === name);
+                    const matchingTag = tags.find((t: any) => t.name === name);
                     if (!matchingTag) return null;
                     
                     return (

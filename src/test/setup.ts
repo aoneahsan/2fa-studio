@@ -188,5 +188,5 @@ Object.defineProperty(global, 'crypto', {
 global.console = {
   ...console,
   warn: vi.fn(),
-  _error: vi.fn()
+  error: vi.fn()
 };

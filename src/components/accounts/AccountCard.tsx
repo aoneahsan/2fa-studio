@@ -117,13 +117,13 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
         dispatch(addToast({
           type: 'error',
           message: result.error || 'Biometric authentication failed',
-        }));
+        }) as any);
       }
     } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to authenticate',
-      }));
+      }) as any);
     } finally {
       setIsAuthenticating(false);
     }
@@ -151,7 +151,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
         type: 'success',
         message: 'Code copied to clipboard',
         duration: 2000
-      }));
+      }) as any);
 
       setTimeout(() => setIsCopying(false), 1000);
     } catch (error) {
@@ -159,7 +159,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
       dispatch(addToast({
         type: 'error',
         message: 'Failed to copy code'
-      }));
+      }) as any);
     }
   };
 
@@ -167,7 +167,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
   const handleGenerateHOTP = () => {
     if (account.type !== 'hotp') return;
     
-    dispatch(incrementHOTPCounter(account.id));
+    dispatch(incrementHOTPCounter(account.id) as any);
     generateCode();
     
     // Track generation analytics
@@ -191,7 +191,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
           src={account.iconUrl} 
           alt={account.issuer}
           className="w-full h-full object-contain"
-          onError={(_e) => {
+          onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
           }}
         />
@@ -230,7 +230,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
             )}
             {account.tags && account.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {account.tags.map((tagId) => (
+                {(account.tags || []).map((tagId) => (
                   <AccountTagPill key={tagId} tagId={tagId} />
                 ))}
               </div>

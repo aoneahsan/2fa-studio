@@ -299,7 +299,7 @@ export class PolicyEnforcementService {
   ): Promise<PolicyEvaluation> {
     try {
       const policies = await this.getTeamPolicies(teamId);
-      const activePolicies = policies.filter(p => p.enabled);
+      const activePolicies = policies.filter((p: any) => p.enabled);
 
       const evaluation: PolicyEvaluation = {
         allowed: true,
@@ -397,7 +397,7 @@ export class PolicyEnforcementService {
       );
 
       const snapshot = await getDocs(q);
-      const policies = snapshot.docs.map(doc => ({
+      const policies = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate(),
@@ -429,7 +429,7 @@ export class PolicyEnforcementService {
 
       // Get team policies first
       const teamPolicies = await this.getTeamPolicies(teamId);
-      const policyIds = teamPolicies.map(p => p.id!);
+      const policyIds = teamPolicies.map((p: any) => p.id!);
 
       if (policyIds.length === 0) return [];
 
@@ -444,7 +444,7 @@ export class PolicyEnforcementService {
       }
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate(),
@@ -666,8 +666,8 @@ export class PolicyEnforcementService {
     const user = await AuthService.getCurrentUser();
     const hasMFA = user?.multiFactor?.enrolledFactors?.length > 0;
 
-    if (!hasMFA && policy.config.gracePeriodDays) {
-      const accountAge = Date.now() - (user?.metadata?.creationTime ? new Date(user.metadata.creationTime).getTime() : 0);
+    if (!hasMFA && (policy as any).config.gracePeriodDays) {
+      const accountAge = Date.now() - (user?.metadata?.creationTime ? new Date((user as any).metadata.creationTime).getTime() : 0);
       const gracePeriodMs = policy.config.gracePeriodDays * 24 * 60 * 60 * 1000;
       
       if (accountAge > gracePeriodMs) {
@@ -689,7 +689,7 @@ export class PolicyEnforcementService {
     userId: string,
     context?: Record<string, any>
   ): Promise<{ violated: boolean; details: Record<string, any> }> {
-    if (!policy.config.requireTrustedDevice) {
+    if (!(policy as any).config.requireTrustedDevice) {
       return { violated: false, details: {} };
     }
 
@@ -735,7 +735,7 @@ export class PolicyEnforcementService {
       };
     }
 
-    if (policy.config.maxExportItems && itemCount > policy.config.maxExportItems) {
+    if (policy.config.maxExportItems && itemCount > (policy as any).config.maxExportItems) {
       return {
         violated: true,
         details: {

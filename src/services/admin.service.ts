@@ -155,7 +155,7 @@ export class AdminService {
       if (params.searchTerm) {
         const term = params.searchTerm.toLowerCase();
         return {
-          users: users.filter(user => 
+          users: users.filter((user: any) => 
             user.email.toLowerCase().includes(term) ||
             user.displayName?.toLowerCase().includes(term)
           ),
@@ -219,27 +219,27 @@ export class AdminService {
 
         // Update subscription fields
         if (params.updates.subscriptionTier !== undefined) {
-          updates['subscription.tier'] = params.updates.subscriptionTier;
+          updates['subscription.tier'] = (params as any).updates.subscriptionTier;
           
           // Update features based on tier
-          const features = this.getFeaturesByTier(params.updates.subscriptionTier);
+          const features = this.getFeaturesByTier((params as any).updates.subscriptionTier);
           updates['subscription.features'] = features;
         }
 
         if (params.updates.subscriptionStatus !== undefined) {
-          updates['subscription.status'] = params.updates.subscriptionStatus;
+          updates['subscription.status'] = (params as any).updates.subscriptionStatus;
         }
 
         if (params.updates.accountLimit !== undefined) {
-          updates['subscription.accountLimit'] = params.updates.accountLimit;
+          updates['subscription.accountLimit'] = (params as any).updates.accountLimit;
         }
 
         if (params.updates.role !== undefined) {
-          updates['role'] = params.updates.role;
+          updates['role'] = (params as any).updates.role;
         }
 
         if (params.updates.disabled !== undefined) {
-          updates['disabled'] = params.updates.disabled;
+          updates['disabled'] = (params as any).updates.disabled;
         }
 
         // Update user document
@@ -459,7 +459,7 @@ export class AdminService {
         'exportUserData'
       );
       const result = await exportData({ userId });
-      return result.data.downloadUrl;
+      return (result as any).data.downloadUrl;
     } catch (error) {
       console.error('Error exporting user data:', error);
       throw error;

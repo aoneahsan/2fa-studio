@@ -98,7 +98,7 @@ export class MobileNotificationsService {
     });
 
     // Registration error
-    PushNotifications.addListener('registrationError', (_error: unknown) => {
+    PushNotifications.addListener('registrationError', (error: unknown) => {
       console.error('Error on _registration:', error);
     });
 
@@ -360,7 +360,7 @@ export class MobileNotificationsService {
     const pending = await LocalNotifications.getPending();
     if (pending.notifications.length > 0) {
       await LocalNotifications.cancel({ 
-        notifications: pending.notifications.map(n => ({ id: n.id }))
+        notifications: pending.notifications.map((n: any) => ({ id: n.id }))
       });
     }
   }
@@ -371,7 +371,7 @@ export class MobileNotificationsService {
   static async getPendingNotifications(): Promise<ScheduledNotification[]> {
     const pending = await LocalNotifications.getPending();
     
-    return pending.notifications.map(notification => ({
+    return pending.notifications.map((notification: any) => ({
       id: notification.id,
       type: notification.extra?.type || 'unknown',
       title: notification.title,
@@ -405,7 +405,7 @@ export class MobileNotificationsService {
    * Check if current time is in quiet hours
    */
   private static isQuietHours(settings: NotificationSettings): boolean {
-    if (!settings.quietHours.enabled) return false;
+    if (!(settings as any).quietHours.enabled) return false;
 
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();

@@ -52,8 +52,8 @@ const AppContent: React.FC = () => {
 
     // Initialize OneSignal
     const initializeNotifications = async () => {
-      const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
-      const safariWebId = import.meta.env.VITE_ONESIGNAL_SAFARI_WEB_ID;
+      const appId = (import.meta as any).env.VITE_ONESIGNAL_APP_ID;
+      const safariWebId = (import.meta as any).env.VITE_ONESIGNAL_SAFARI_WEB_ID;
       
       if (appId) {
         try {

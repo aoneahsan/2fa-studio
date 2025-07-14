@@ -257,11 +257,11 @@ export const getFeatures = (tier: string): SubscriptionFeatures => {
 };
 
 export const getPlan = (planId: string): SubscriptionPlan | undefined => {
-  return SUBSCRIPTION_PLANS.find(plan => plan.id === planId);
+  return SUBSCRIPTION_PLANS.find((plan: any) => plan.id === planId);
 };
 
 export const getPlanByTier = (tier: string): SubscriptionPlan | undefined => {
-  return SUBSCRIPTION_PLANS.find(plan => plan.tier === tier);
+  return SUBSCRIPTION_PLANS.find((plan: any) => plan.tier === tier);
 };
 
 export const canUseFeature = (userTier: string, feature: keyof SubscriptionFeatures): boolean => {

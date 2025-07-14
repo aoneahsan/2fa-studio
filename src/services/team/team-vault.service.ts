@@ -444,7 +444,7 @@ export class TeamVaultService {
 
       // Share all vault accounts with new member
       const vaultAccounts = await this.getVaultAccounts(vaultId);
-      const accountIds = vaultAccounts.map(va => va.accountId);
+      const accountIds = vaultAccounts.map((va: any) => va.accountId);
       await this.shareAccountWithMembers(accountIds, [memberId]);
 
       await this.logVaultAccess(vaultId, undefined, addedBy, VaultAction.MEMBER_ADDED, {
@@ -503,7 +503,7 @@ export class TeamVaultService {
 
       // Remove sharing of all vault accounts from member
       const vaultAccounts = await this.getVaultAccounts(vaultId);
-      const accountIds = vaultAccounts.map(va => va.accountId);
+      const accountIds = vaultAccounts.map((va: any) => va.accountId);
       await this.unshareAccountFromMembers(accountIds, [memberId]);
 
       await this.logVaultAccess(vaultId, undefined, removedBy, VaultAction.MEMBER_REMOVED, {
@@ -569,7 +569,7 @@ export class TeamVaultService {
       );
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate(),
@@ -592,7 +592,7 @@ export class TeamVaultService {
       );
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         addedAt: doc.data().addedAt?.toDate(),
@@ -658,7 +658,7 @@ export class TeamVaultService {
       }
 
       // Log access if enabled
-      if (vault.settings.accessLog) {
+      if ((vault as any).settings.accessLog) {
         await this.logVaultAccess(vaultId, accountId, userId, VaultAction.ACCOUNT_ACCESSED, {
           accountName: account.label
         });
@@ -704,7 +704,7 @@ export class TeamVaultService {
       });
 
       // Notify approvers (implement notification service)
-      // NotificationService.notifyApprovers(vault.settings.approvers, ...);
+      // NotificationService.notifyApprovers((vault as any).settings.approvers, ...);
 
       return docRef.id;
     } catch (error) {
@@ -795,7 +795,7 @@ export class TeamVaultService {
       );
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()

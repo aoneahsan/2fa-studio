@@ -45,7 +45,7 @@ export class OTPService {
     const totp = new OTPAuth.TOTP({
       issuer: account.issuer,
       label: account.label,
-      algorithm: account.algorithm,
+      algorithm: (account as any).algorithm,
       digits: account.digits,
       period: account.period,
       secret: account.secret
@@ -73,7 +73,7 @@ export class OTPService {
     const hotp = new OTPAuth.HOTP({
       issuer: account.issuer,
       label: account.label,
-      algorithm: account.algorithm,
+      algorithm: (account as any).algorithm,
       digits: account.digits,
       counter: account.counter,
       secret: account.secret
@@ -105,8 +105,8 @@ export class OTPService {
       return {
         issuer: parsed.issuer || '',
         label: parsed.label || '',
-        secret: parsed.secret.base32,
-        algorithm: parsed.algorithm as 'SHA1' | 'SHA256' | 'SHA512',
+        secret: (parsed as any).secret.base32,
+        algorithm: (parsed as any).algorithm as 'SHA1' | 'SHA256' | 'SHA512',
         digits: parsed.digits,
         type: parsed instanceof OTPAuth.TOTP ? 'totp' : 'hotp',
         period: parsed instanceof OTPAuth.TOTP ? parsed.period : undefined,
@@ -125,7 +125,7 @@ export class OTPService {
     const options = {
       issuer: account.issuer,
       label: account.label,
-      algorithm: account.algorithm,
+      algorithm: (account as any).algorithm,
       digits: account.digits,
       secret: account.secret
     };
@@ -152,7 +152,7 @@ export class OTPService {
     const totp = new OTPAuth.TOTP({
       issuer: account.issuer,
       label: account.label,
-      algorithm: account.algorithm,
+      algorithm: (account as any).algorithm,
       digits: account.digits,
       period: account.period,
       secret: account.secret
@@ -172,7 +172,7 @@ export class OTPService {
     const hotp = new OTPAuth.HOTP({
       issuer: account.issuer,
       label: account.label,
-      algorithm: account.algorithm,
+      algorithm: (account as any).algorithm,
       digits: account.digits,
       counter: account.counter,
       secret: account.secret

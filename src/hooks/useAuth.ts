@@ -19,11 +19,11 @@ export const useAuth = () => {
   const authState = useSelector((state: RootState) => state._auth);
 
   useEffect(() => {
-    dispatch(setLoading(true));
+    dispatch(setLoading(true) as any);
     
     // Initialize enhanced auth listener
     const unsubscribe = AuthService.initialize(async (user) => {
-      dispatch(setUser(user));
+      dispatch(setUser(user) as any);
       
       // Initialize sync service when user is authenticated
       if (user) {
@@ -37,7 +37,7 @@ export const useAuth = () => {
         RealtimeSyncService.cleanup();
       }
       
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     });
 
     return () => {
@@ -49,141 +49,141 @@ export const useAuth = () => {
   // Enhanced authentication methods
   const signInWithEmail = useCallback(async (email: string, password: string) => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       const user = await AuthService.signInWithEmail(email, password);
       return user;
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Sign in failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Sign in failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const signUpWithEmail = useCallback(async (email: string, password: string, displayName?: string) => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       const user = await AuthService.signUpWithEmail(email, password, displayName);
       return user;
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Sign up failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Sign up failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const signInWithGoogle = useCallback(async () => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       const user = await AuthService.signInWithGoogle();
       return user;
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Google sign in failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Google sign in failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const signInWithApple = useCallback(async () => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       const user = await AuthService.signInWithApple();
       return user;
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Apple sign in failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Apple sign in failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const signOut = useCallback(async () => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       await AuthService.signOut();
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Sign out failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Sign out failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const resetPassword = useCallback(async (email: string) => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       await AuthService.resetPassword(email);
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Password reset failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Password reset failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const updateProfile = useCallback(async (data: { displayName?: string; photoURL?: string }) => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       const updatedUser = await AuthService.updateProfile(data);
-      dispatch(setUser(updatedUser));
+      dispatch(setUser(updatedUser) as any);
       return updatedUser;
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Profile update failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Profile update failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const linkAccount = useCallback(async (provider: 'google' | 'apple') => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       const linkedUser = await AuthService.linkAccount(provider);
-      dispatch(setUser(linkedUser));
+      dispatch(setUser(linkedUser) as any);
       return linkedUser;
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Account linking failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Account linking failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const unlinkAccount = useCallback(async (providerId: string) => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       const updatedUser = await AuthService.unlinkAccount(providerId);
-      dispatch(setUser(updatedUser));
+      dispatch(setUser(updatedUser) as any);
       return updatedUser;
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Account unlinking failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Account unlinking failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
   const deleteAccount = useCallback(async () => {
     try {
-      dispatch(setLoading(true));
-      dispatch(clearError());
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
       await AuthService.deleteAccount();
-    } catch (_error: unknown) {
-      dispatch(setError(error.message || 'Account deletion failed'));
+    } catch (error: unknown) {
+      dispatch(setError(error.message || 'Account deletion failed') as any);
       throw error;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoading(false) as any);
     }
   }, [dispatch]);
 
@@ -192,7 +192,7 @@ export const useAuth = () => {
     user: authState.user,
     isLoading: authState.isLoading,
     isAuthenticated: authState.isAuthenticated,
-    _error: authState._error,
+    error: authState.error,
     
     // Enhanced authentication methods
     signInWithEmail,

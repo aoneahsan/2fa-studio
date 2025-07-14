@@ -80,7 +80,7 @@ export class AdminSupportService {
       await FirestoreService.updateDocument('support_tickets', ticketId, {
         responses,
         updatedAt: new Date(),
-        status: authorType === 'admin' ? 'in_progress' : ticket.data.status,
+        status: authorType === 'admin' ? 'in_progress' : (ticket as any).data.status,
       });
     }
   }

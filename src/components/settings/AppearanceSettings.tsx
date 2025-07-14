@@ -75,7 +75,7 @@ const AppearanceSettings: React.FC = () => {
   }, [theme]);
 
   const handleThemeChange = (newTheme: typeof theme) => {
-    dispatch(setTheme(newTheme));
+    dispatch(setTheme(newTheme) as any);
   };
 
   return (

@@ -141,7 +141,7 @@ export class PerformanceMonitor {
       .sort((a, b) => b.renderTime - a.renderTime)
       .slice(0, 5);
     
-    const memoryTrend = recentMetrics.map(m => m.memoryUsage);
+    const memoryTrend = recentMetrics.map((m: any) => m.memoryUsage);
     const errorRate = recentMetrics.reduce((sum, m) => sum + m.errors, 0) / recentMetrics.length || 0;
 
     return {
@@ -172,7 +172,7 @@ export class PerformanceMonitor {
         });
         longTaskObserver.observe({ entryTypes: ['longtask'] });
         this.observers.push(longTaskObserver);
-      } catch (_e) {
+      } catch (_e: any) {
         // Long task API not supported
       }
     }
@@ -193,7 +193,7 @@ export class PerformanceMonitor {
       });
       layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(layoutShiftObserver);
-    } catch (_e) {
+    } catch (_e: any) {
       // Layout shift API not supported
     }
 
@@ -208,7 +208,7 @@ export class PerformanceMonitor {
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(lcpObserver);
-    } catch (_e) {
+    } catch (_e: any) {
       // LCP API not supported
     }
   }
@@ -255,7 +255,7 @@ export class PerformanceMonitor {
   private static calculateBundleSize(): number {
     const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
     return resources
-      .filter(resource => resource.name.includes('.js') || resource.name.includes('.css'))
+      .filter((resource: any) => resource.name.includes('.js') || resource.name.includes('.css'))
       .reduce((total, resource) => total + (resource.transferSize || 0), 0);
   }
 

@@ -80,7 +80,7 @@ export class AnalyticsService {
       );
 
       const snapshot = await getDocs(q);
-      const usageData: AccountUsage[] = snapshot.docs.map(doc => ({
+      const usageData: AccountUsage[] = snapshot.docs.map((doc: any) => ({
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate(),
       })) as AccountUsage[];
@@ -112,7 +112,7 @@ export class AnalyticsService {
       );
 
       const snapshot = await getDocs(q);
-      const allUsage: AccountUsage[] = snapshot.docs.map(doc => ({
+      const allUsage: AccountUsage[] = snapshot.docs.map((doc: any) => ({
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate(),
       })) as AccountUsage[];
@@ -139,7 +139,7 @@ export class AnalyticsService {
       });
 
       // Find most and least used accounts
-      const accountsWithUsage = accounts.map(account => ({
+      const accountsWithUsage = (accounts || []).map((account: any) => ({
         accountId: account.id,
         issuer: account.issuer,
         label: account.label,
@@ -148,12 +148,12 @@ export class AnalyticsService {
       }));
 
       const mostUsed = accountsWithUsage
-        .filter(a => a.usageCount > 0)
+        .filter((a: any) => a.usageCount > 0)
         .sort((a, b) => b.usageCount - a.usageCount)
         .slice(0, 5);
 
       const leastUsed = accountsWithUsage
-        .filter(a => a.usageCount === 0 || a.usageCount < 5)
+        .filter((a: any) => a.usageCount === 0 || a.usageCount < 5)
         .sort((a, b) => a.usageCount - b.usageCount)
         .slice(0, 5);
 
@@ -162,7 +162,7 @@ export class AnalyticsService {
         .map((count, hour) => ({ hour, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 3)
-        .map(item => item.hour);
+        .map((item: any) => item.hour);
 
       // Calculate average actions per day
       const totalDays = Math.min(days, differenceInDays(new Date(), accounts[0]?.createdAt || new Date()) + 1);
@@ -170,8 +170,8 @@ export class AnalyticsService {
 
       // Find accounts not used recently
       const accountsNotUsedInDays = accountsWithUsage
-        .filter(a => !a.lastUsed || differenceInDays(new Date(), a.lastUsed) > 7)
-        .map(a => ({
+        .filter((a: any) => !a.lastUsed || differenceInDays(new Date(), a.lastUsed) > 7)
+        .map((a: any) => ({
           accountId: a.accountId,
           issuer: a.issuer,
           label: a.label,
@@ -216,13 +216,13 @@ export class AnalyticsService {
       return this.getEmptyStats(accountId);
     }
 
-    const totalViews = usageData.filter(u => u.action === 'view').length;
-    const totalCopies = usageData.filter(u => u.action === 'copy').length;
-    const totalGenerations = usageData.filter(u => u.action === 'generate').length;
+    const totalViews = usageData.filter((u: any) => u.action === 'view').length;
+    const totalCopies = usageData.filter((u: any) => u.action === 'copy').length;
+    const totalGenerations = usageData.filter((u: any) => u.action === 'generate').length;
 
-    const timestamps = usageData.map(u => u.timestamp);
-    const lastUsed = new Date(Math.max(...timestamps.map(t => t.getTime())));
-    const firstUsed = new Date(Math.min(...timestamps.map(t => t.getTime())));
+    const timestamps = usageData.map((u: any) => u.timestamp);
+    const lastUsed = new Date(Math.max(...timestamps.map((t: any) => t.getTime())));
+    const firstUsed = new Date(Math.min(...timestamps.map((t: any) => t.getTime())));
 
     // Calculate daily usage
     const dailyMap = new Map<string, DailyUsage>();
@@ -281,7 +281,7 @@ export class AnalyticsService {
         name: `Device ${deviceId.slice(0, 8)}`,
         platform: 'unknown',
         usageCount: usages.length,
-        lastUsed: new Date(Math.max(...usages.map(u => u.timestamp.getTime()))),
+        lastUsed: new Date(Math.max(...usages.map((u: any) => u.timestamp.getTime()))),
       };
     });
 
@@ -338,7 +338,7 @@ export class AnalyticsService {
       const snapshot = await getDocs(q);
       
       // Delete in batches
-      const deletePromises = snapshot.docs.map(doc => doc.ref.delete());
+      const deletePromises = snapshot.docs.map((doc: any) => doc.ref.delete());
       await Promise.all(deletePromises);
 
       // If we deleted a full batch, there might be more

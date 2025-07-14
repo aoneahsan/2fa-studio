@@ -190,7 +190,7 @@ export class NotificationService {
 
   async isPushNotificationEnabled(): Promise<boolean> {
     try {
-      const permission = await OneSignal.Notifications.permission;
+      const permission = await (OneSignal as any).Notifications.permission;
       return permission === true;
     } catch (error) {
       console.error('Failed to check push notification status:', error);

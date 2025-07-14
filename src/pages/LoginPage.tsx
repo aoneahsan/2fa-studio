@@ -26,13 +26,13 @@ const LoginPage: React.FC = () => {
   const [showEncryptionField, setShowEncryptionField] = useState(false);
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    _e.preventDefault();
+    e.preventDefault();
     
     if (!email || !password) {
       dispatch(addToast({
         type: 'error',
         message: 'Please fill in all fields',
-      }));
+      }) as any);
       return;
     }
 
@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
 
     try {
       // Sign in with Firebase
-      await dispatch(signIn({ email, password })).unwrap();
+      await dispatch(signIn({ email, password }) as any).unwrap();
       
       // Show encryption password field after successful auth
       if (!showEncryptionField) {
@@ -54,27 +54,27 @@ const LoginPage: React.FC = () => {
         dispatch(addToast({
           type: 'error',
           message: 'Please enter your encryption password',
-        }));
+        }) as any);
         setIsLoading(false);
         return;
       }
 
       // Hash the encryption password for use as key
       const encryptionKey = await EncryptionService.hashPassword(encryptionPassword);
-      dispatch(setEncryptionKey(encryptionKey));
+      dispatch(setEncryptionKey(encryptionKey) as any);
       
       dispatch(addToast({
         type: 'success',
         message: 'Welcome back!',
-      }));
+      }) as any);
       
       navigate('/dashboard');
-    } catch (_error: unknown) {
-      console.error('Login _error:', error);
+    } catch (error: unknown) {
+      console.error('Login error:', error);
       dispatch(addToast({
         type: 'error',
         message: error.message || 'Failed to sign in',
-      }));
+      }) as any);
       setShowEncryptionField(false);
     } finally {
       setIsLoading(false);
@@ -116,7 +116,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="email"
                       required
                       value={email}
-                      onChange={(e) => setEmail(_e.target.value)}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="input pl-10"
                       placeholder="you@example.com"
                     />

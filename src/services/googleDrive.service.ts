@@ -23,8 +23,8 @@ interface BackupMetadata {
 }
 
 export class GoogleDriveService {
-  private static CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  private static API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+  private static CLIENT_ID = (import.meta as any).env.VITE_GOOGLE_CLIENT_ID;
+  private static API_KEY = (import.meta as any).env.VITE_GOOGLE_API_KEY;
   private static DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
   private static SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
   
@@ -63,7 +63,7 @@ export class GoogleDriveService {
             this.gapiInited = true;
             resolve();
           } catch (error) {
-            reject(_error);
+            reject(error);
           }
         });
       };
@@ -215,7 +215,7 @@ export class GoogleDriveService {
         body: multipartRequestBody,
       });
 
-      return response.result.id;
+      return (response as any).result.id;
     } catch (error) {
       console.error('Failed to create backup:', error);
       throw error;
@@ -332,7 +332,7 @@ export class GoogleDriveService {
         fields: 'storageQuota',
       });
 
-      const quota = response.result.storageQuota;
+      const quota = (response as any).result.storageQuota;
       return {
         used: parseInt(quota?.usage || '0'),
         limit: parseInt(quota?.limit || '0'),

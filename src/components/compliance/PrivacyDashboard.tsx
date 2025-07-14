@@ -135,7 +135,7 @@ const PrivacyDashboard: React.FC = () => {
   };
 
   const getConsentValue = (type: ConsentType): boolean => {
-    const consent = consents.find(c => c.type === type);
+    const consent = consents.find((c: any) => c.type === type);
     return consent?.granted || false;
   };
 
