@@ -430,6 +430,7 @@ export class DataMigrationService {
 						name: category as string,
 						color: this.getCategoryColor(category as string),
 						icon: this.getCategoryIcon(category as string),
+						parentId: null,
 					});
 					categoryMap.set(category as string, folderId.id);
 				}
@@ -509,7 +510,7 @@ export class DataMigrationService {
 	): Promise<BackupValidationResult> {
 		const result: BackupValidationResult = {
 			isValid: true,
-			version: backupData.version || '1.0',
+			version: (backupData as any).version || '1.0',
 			accountCount: 0,
 			errors: [],
 			warnings: [],
@@ -523,15 +524,16 @@ export class DataMigrationService {
 			}
 
 			// Validate structure
-			if (!backupData.accounts || !Array.isArray(backupData.accounts)) {
+			const backupDataObj = backupData as any;
+			if (!backupDataObj.accounts || !Array.isArray(backupDataObj.accounts)) {
 				result.errors.push('Invalid backup structure: missing accounts array');
 				result.isValid = false;
 			} else {
-				result.accountCount = (backupData as any).accounts.length;
+				result.accountCount = backupDataObj.accounts.length;
 
 				// Validate each account
-				for (let i = 0; i < (backupData as any).accounts.length; i++) {
-					const account = backupData.accounts[i];
+				for (let i = 0; i < backupDataObj.accounts.length; i++) {
+					const account = backupDataObj.accounts[i];
 					const accountErrors = this.validateAccountData(
 						account,
 						result.version
@@ -544,14 +546,14 @@ export class DataMigrationService {
 			}
 
 			// Check for encryption
-			if (backupData.encrypted && !backupData.encryptionMetadata) {
+			if (backupDataObj.encrypted && !backupDataObj.encryptionMetadata) {
 				result.warnings.push(
 					'Backup is encrypted but missing encryption metadata'
 				);
 			}
 
 			// Check creation date
-			if (!backupData.createdAt) {
+			if (!backupDataObj.createdAt) {
 				result.warnings.push('Backup missing creation date');
 			}
 		} catch (error) {
@@ -570,17 +572,18 @@ export class DataMigrationService {
 		version: string
 	): string[] {
 		const errors: string[] = [];
+		const acc = account as any;
 
 		// Required fields
-		if (!account.label) errors.push('missing label');
-		if (!account.issuer) errors.push('missing issuer');
-		if (!account.encryptedSecret) errors.push('missing encrypted secret');
+		if (!acc.label) errors.push('missing label');
+		if (!acc.issuer) errors.push('missing issuer');
+		if (!acc.encryptedSecret) errors.push('missing encrypted secret');
 
 		// Version-specific validation
 		if (version >= '2.0.0') {
-			if (!account.algorithm) errors.push('missing algorithm');
-			if (!account.digits) errors.push('missing digits');
-			if (!account.period) errors.push('missing period');
+			if (!acc.algorithm) errors.push('missing algorithm');
+			if (!acc.digits) errors.push('missing digits');
+			if (!acc.period) errors.push('missing period');
 		}
 
 		return errors;

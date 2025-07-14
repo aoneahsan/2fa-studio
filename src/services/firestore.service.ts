@@ -83,7 +83,9 @@ export class FirestoreService {
 			const sanitized: unknown = {};
 			Object.keys(data).forEach((key) => {
 				const sanitizedKey = this.sanitizeInput(key);
-				sanitized[sanitizedKey] = this.sanitizeInput(data[key]);
+				(sanitized as any)[sanitizedKey] = this.sanitizeInput(
+					(data as any)[key]
+				);
 			});
 			return sanitized;
 		}
@@ -168,7 +170,7 @@ export class FirestoreService {
 
 			// Apply filters
 			filters.forEach((filter) => {
-				q = query(q, where(filter.field, filter.operator, filter.value));
+				q = query(q, where(filter.field, filter.operator as any, filter.value));
 			});
 
 			// Apply ordering
@@ -270,7 +272,7 @@ export class FirestoreService {
 					);
 
 					await updateDoc(docRef, {
-						...mergedData,
+						...(mergedData as any),
 						updatedAt: serverTimestamp(),
 					});
 				} else {
@@ -327,14 +329,14 @@ export class FirestoreService {
 				switch (operation.type) {
 					case 'create':
 						batch.set(docRef, {
-							...operation.data,
+							...(operation.data as any),
 							createdAt: serverTimestamp(),
 							updatedAt: serverTimestamp(),
 						});
 						break;
 					case 'update':
 						batch.update(docRef, {
-							...operation.data,
+							...(operation.data as any),
 							updatedAt: serverTimestamp(),
 						});
 						break;
@@ -425,7 +427,7 @@ export class FirestoreService {
 
 			// Apply filters
 			filters.forEach((filter) => {
-				q = query(q, where(filter.field, filter.operator, filter.value));
+				q = query(q, where(filter.field, filter.operator as any, filter.value));
 			});
 
 			// Apply ordering
@@ -529,13 +531,13 @@ export class FirestoreService {
 	): unknown {
 		if (!mergeFields) {
 			// Default merge strategy - newer values take precedence
-			return { ...currentData, ...newData };
+			return { ...(currentData as any), ...(newData as any) };
 		}
 
-		const merged = { ...currentData };
+		const merged = { ...(currentData as any) };
 		mergeFields.forEach((field) => {
 			if (Object.prototype.hasOwnProperty.call(newData, field)) {
-				merged[field] = newData[field];
+				(merged as any)[field] = (newData as any)[field];
 			}
 		});
 

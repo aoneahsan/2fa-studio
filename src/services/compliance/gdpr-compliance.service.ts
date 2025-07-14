@@ -155,7 +155,7 @@ export class GDPRComplianceService {
 				details,
 			};
 
-			await collection(db, this.CONSENT_COLLECTION).add(consentRecord);
+			await addDoc(collection(db, this.CONSENT_COLLECTION), consentRecord);
 
 			await AuditHelper.logComplianceAction(
 				'consent_update',
@@ -239,7 +239,8 @@ export class GDPRComplianceService {
 				},
 			};
 
-			const docRef = await collection(db, this.EXPORT_REQUESTS).add(
+			const docRef = await addDoc(
+				collection(db, this.EXPORT_REQUESTS),
 				exportRequest
 			);
 

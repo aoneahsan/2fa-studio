@@ -140,7 +140,7 @@ export class DeviceService {
 			model: info.model,
 			operatingSystem: info.operatingSystem,
 			osVersion: info.osVersion,
-			appVersion: info.appVersion || '1.0.0',
+			appVersion: (info as any).appVersion || '1.0.0',
 			isCurrentDevice: true,
 			lastActive: serverTimestamp(),
 			createdAt: serverTimestamp(),
