@@ -74,7 +74,7 @@ export class DataMigrationService {
         targetVersion: this.CURRENT_VERSION,
         plan
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to check migration:', error);
       throw error;
     }
@@ -201,7 +201,7 @@ export class DataMigrationService {
         try {
           await this.executeStep(userId, step, plan.fromVersion, plan.toVersion);
           result.migratedCount++;
-        } catch (_error) {
+        } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
           result.errors.push(`Step ${step.id}: ${errorMsg}`);
           result.errorCount++;
@@ -228,7 +228,7 @@ export class DataMigrationService {
       progressCallback?.('Migration complete', 100);
       result.success = true;
       
-    } catch (_error) {
+    } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Migration failed';
       result.errors.push(errorMsg);
       result.success = false;
@@ -310,7 +310,7 @@ export class DataMigrationService {
           encryptionVersion: toVersion
         });
         
-      } catch (_error) {
+      } catch (error) {
         console.error(`Failed to migrate encryption for account ${account.id}:`, _error);
         throw error;
       }
@@ -528,7 +528,7 @@ export class DataMigrationService {
         result.warnings.push('Backup missing creation date');
       }
 
-    } catch (_error) {
+    } catch (error) {
       result.errors.push(`Validation _error: ${error}`);
       result.isValid = false;
     }
@@ -653,7 +653,7 @@ export class DataMigrationService {
     ).join('\n');
   }
 
-  private static convertToXML(data: unknown): string {
+  private static convertToXML(data: any): string {
     // Basic XML conversion - would need proper XML library for production
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<export>\n';
     xml += `  <metadata>\n`;

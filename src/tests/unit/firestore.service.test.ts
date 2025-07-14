@@ -244,7 +244,7 @@ describe('FirestoreService', () => {
 
       try {
         await FirestoreService.getDocument('users/test', 'doc123');
-      } catch (_error) {
+      } catch (error) {
         expect(error.message).toContain('permission denied');
       }
     });
@@ -255,7 +255,7 @@ describe('FirestoreService', () => {
 
       try {
         await FirestoreService.getCollection('users');
-      } catch (_error) {
+      } catch (error) {
         expect(error.message).toContain('Network request failed');
       }
     });
@@ -263,7 +263,7 @@ describe('FirestoreService', () => {
     it('should handle invalid document references', async () => {
       try {
         await FirestoreService.getDocument('', '');
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeDefined();
       }
     });

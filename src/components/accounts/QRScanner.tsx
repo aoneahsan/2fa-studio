@@ -11,7 +11,7 @@ import { XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { OTPService } from '@services/otp.service';
 
 interface QRScannerProps {
-  onScanSuccess: (data: unknown) => void;
+  onScanSuccess: (data: any) => void;
   onClose: () => void;
 }
 

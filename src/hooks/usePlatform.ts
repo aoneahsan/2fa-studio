@@ -107,7 +107,7 @@ export const usePlatform = () => {
           hasKeyboard: Capacitor.isPluginAvailable('Keyboard'),
           hasSafeArea: isIOS || (isAndroid && parseInt(info.osVersion || '0') >= 9)
         });
-      } catch (_error) {
+      } catch (error) {
         console.error('Failed to detect platform:', error);
       }
     };
@@ -142,7 +142,7 @@ export const usePlatform = () => {
           style: style === 'dark' ? Style.Dark : Style.Light 
         });
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to set status bar style:', error);
     }
   };
@@ -155,7 +155,7 @@ export const usePlatform = () => {
 
     try {
       await StatusBar.setBackgroundColor({ color });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to set status bar color:', error);
     }
   };
@@ -172,7 +172,7 @@ export const usePlatform = () => {
       } else {
         await StatusBar.hide();
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to set status bar visibility:', error);
     }
   };

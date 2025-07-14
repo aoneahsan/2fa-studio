@@ -159,7 +159,7 @@ export class GDPRComplianceService {
           version: this.CONSENT_VERSION
         }
       );
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to record consent:', error);
       throw error;
     }
@@ -194,7 +194,7 @@ export class GDPRComplianceService {
       });
 
       return Array.from(consentMap.values());
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get user consents:', error);
       throw error;
     }
@@ -250,7 +250,7 @@ export class GDPRComplianceService {
       this.processDataExport(docRef.id, userId, exportRequest);
 
       return docRef.id;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to request data export:', error);
       throw error;
     }
@@ -369,7 +369,7 @@ export class GDPRComplianceService {
       // Send notification to user (implement notification service)
       // NotificationService.send(userId, 'Your data export is ready', { downloadUrl });
 
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to process data export:', error);
       
       await updateDoc(doc(db, this.EXPORT_REQUESTS, requestId), {
@@ -431,7 +431,7 @@ export class GDPRComplianceService {
       // EmailService.sendDeletionConfirmation(user.email!, docRef.id, deletionRequest.cancellationToken);
 
       return docRef.id;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to request deletion:', error);
       throw error;
     }
@@ -475,7 +475,7 @@ export class GDPRComplianceService {
           requestId
         }
       );
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to cancel deletion:', error);
       throw error;
     }
@@ -502,7 +502,7 @@ export class GDPRComplianceService {
 
         await this.executeDeleteion(request);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to process scheduled deletions:', error);
     }
   }
@@ -604,7 +604,7 @@ export class GDPRComplianceService {
           )
         }
       );
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to execute deletion:', error);
       
       await updateDoc(doc(db, this.DELETION_REQUESTS, request.id!), {
@@ -665,7 +665,7 @@ export class GDPRComplianceService {
           changes: settings
         }
       );
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update privacy settings:', error);
       throw error;
     }
@@ -687,7 +687,7 @@ export class GDPRComplianceService {
         ...docSnap.data(),
         updatedAt: docSnap.data().updatedAt?.toDate()
       } as PrivacySettings;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get privacy settings:', error);
       throw error;
     }
@@ -710,7 +710,7 @@ export class GDPRComplianceService {
       }
 
       return consent?.granted || false;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to check processing lawfulness:', error);
       return false;
     }
@@ -749,7 +749,7 @@ export class GDPRComplianceService {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 
-  private static convertToCSV(data: unknown): string {
+  private static convertToCSV(data: any): string {
     // Simple CSV conversion for flat data structures
     const flattenObject = (obj: unknown, prefix = ''): unknown => {
       return Object.keys(obj).reduce((acc, key) => {

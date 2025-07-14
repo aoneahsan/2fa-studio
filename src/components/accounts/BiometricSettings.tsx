@@ -30,7 +30,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
   onUpdate 
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [timeout, setTimeout] = useState(account.biometricTimeout || 5);
   
@@ -57,7 +57,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       }
       
       onUpdate?.();
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: error instanceof Error ? error.message : 'Failed to update biometric settings',
@@ -85,7 +85,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
       }));
       
       onUpdate?.();
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update timeout',
@@ -149,7 +149,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
             <div className="flex items-center gap-3">
               <select
                 value={timeout}
-                onChange={(_e) => setTimeout(Number(e.target.value))}
+                onChange={(e) => setTimeout(Number(e.target.value))}
                 className="flex-1 px-3 py-2 border border-border rounded-md bg-background"
                 disabled={isLoading}
               >

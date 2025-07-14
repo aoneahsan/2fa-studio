@@ -104,7 +104,7 @@ export class RealtimeSyncService {
       this.syncState.isSyncing = false;
       
       this.emitEvent({ type: 'sync_complete' });
-    } catch (_error) {
+    } catch (error) {
       this.syncState.isSyncing = false;
       this.emitEvent({ type: 'sync_error', _error: error as Error });
     }
@@ -423,7 +423,7 @@ export class RealtimeSyncService {
           data: resolvedData
         } 
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to resolve conflict:', error);
       throw error;
     }
@@ -489,7 +489,7 @@ export class RealtimeSyncService {
       this.pendingOperations.clear();
       this.syncState.pendingChanges = 0;
       
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to sync pending changes:', error);
       throw error;
     } finally {
@@ -552,7 +552,7 @@ export class RealtimeSyncService {
     this.eventListeners.forEach(listener => {
       try {
         listener(event);
-      } catch (_error) {
+      } catch (error) {
         console.error('Event listener _error:', error);
       }
     });

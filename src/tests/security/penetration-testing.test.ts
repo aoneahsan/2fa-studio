@@ -15,7 +15,7 @@ describe('Security Penetration Testing', () => {
       
       try {
         await AuthService.signInWithEmail(maliciousEmail, 'password');
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeDefined();
         expect(error.message).not.toContain('SQL');
       }
@@ -26,7 +26,7 @@ describe('Security Penetration Testing', () => {
       
       try {
         await AuthService.signUpWithEmail('test@test.com', 'password', xssPayload);
-      } catch (_error) {
+      } catch (error) {
         // Should not execute the script
         expect(error.message).not.toContain('<script>');
       }
@@ -40,7 +40,7 @@ describe('Security Penetration Testing', () => {
           await AuthService.signUpWithEmail('test@test.com', password);
           // Should not reach here
           expect(false).toBe(true);
-        } catch (_error) {
+        } catch (error) {
           expect(_error).toBeDefined();
         }
       }
@@ -53,7 +53,7 @@ describe('Security Penetration Testing', () => {
       for (let i = 0; i < 10; i++) {
         try {
           await AuthService.signInWithEmail(email, `wrongpassword${i}`);
-        } catch (_error) {
+        } catch (error) {
           attempts++;
         }
       }
@@ -109,7 +109,7 @@ describe('Security Penetration Testing', () => {
         await FirestoreService.getDocument(`users/${targetUserId}/accounts`, 'test-account');
         // Should not reach here without proper authorization
         expect(false).toBe(true);
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeDefined();
       }
     });
@@ -138,7 +138,7 @@ describe('Security Penetration Testing', () => {
         try {
           await FirestoreService.getCollection('users');
           requestCount++;
-        } catch (_error) {
+        } catch (error) {
           if (error.message.includes('rate limit')) {
             rateLimited = true;
             break;

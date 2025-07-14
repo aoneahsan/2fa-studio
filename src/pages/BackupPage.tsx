@@ -34,7 +34,7 @@ interface BackupStats {
  */
 const BackupPage: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const { accounts } = useSelector((state: RootState) => state.accounts);
   
   const [isBackingUp, setIsBackingUp] = useState(false);
@@ -112,7 +112,7 @@ const BackupPage: React.FC = () => {
         type: 'success',
         message: `Successfully backed up ${result.accountsCount} accounts`
       }));
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Backup failed. Please try again.'
@@ -143,7 +143,7 @@ const BackupPage: React.FC = () => {
         type: 'success',
         message: `Successfully restored ${backup.accountCount} accounts`
       }));
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Restore failed. Please try again.'

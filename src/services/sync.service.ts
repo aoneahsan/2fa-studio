@@ -16,7 +16,7 @@ export interface SyncEvent {
   userId: string;
   deviceId: string;
   timestamp: Date;
-  data: unknown;
+  data: any;
   synced: boolean;
 }
 
@@ -141,7 +141,7 @@ export class SyncService {
   static async publishSyncEvent(
     userId: string,
     type: SyncEvent['type'],
-    data: unknown
+    data: any
   ): Promise<void> {
     if (!this.syncStatus.isOnline) {
       // Queue for later if offline
@@ -156,7 +156,7 @@ export class SyncService {
         data,
         'pending'
       );
-    } catch (_error) {
+    } catch (error) {
       console.error('Error publishing sync event:', error);
       this.queuePendingChange({ type, data });
     }
@@ -188,7 +188,7 @@ export class SyncService {
   /**
    * Queue pending change for later sync
    */
-  private static queuePendingChange(change: { type: SyncEvent['type']; data: unknown }): void {
+  private static queuePendingChange(change: { type: SyncEvent['type']; data: any }): void {
     const pendingChanges = this.getPendingChanges();
     pendingChanges.push({
       ...change,
@@ -226,7 +226,7 @@ export class SyncService {
         // Use RealtimeSyncService to sync pending changes
         await RealtimeSyncService.syncPendingChanges();
         processedIds.push(change.id);
-      } catch (_error) {
+      } catch (error) {
         console.error('Error processing pending change:', error);
       }
     }
@@ -282,7 +282,7 @@ export class SyncService {
         
         // Remove from queue
         this.conflictQueue = this.conflictQueue.filter(c => c.id !== conflictId);
-      } catch (_error) {
+      } catch (error) {
         console.error('Error resolving conflict:', error);
       }
     }
@@ -316,7 +316,7 @@ export class SyncService {
           ...parsed,
           lastSyncTime: parsed.lastSyncTime ? new Date(parsed.lastSyncTime) : null,
         };
-      } catch (_error) {
+      } catch (error) {
         console.error('Error loading sync status:', error);
       }
     }

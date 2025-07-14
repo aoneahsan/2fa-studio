@@ -259,7 +259,7 @@ export class ProvisioningAPIService {
       );
 
       return docRef.id;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize provisioning:', error);
       throw error;
     }
@@ -306,7 +306,7 @@ export class ProvisioningAPIService {
           updates: Object.keys(updates)
         }
       );
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update provisioning _config:', error);
       throw error;
     }
@@ -407,7 +407,7 @@ export class ProvisioningAPIService {
         key: decryptedKey, // Return actual key only once
         keyId: apiKey.id
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to add API key:', error);
       throw error;
     }
@@ -455,7 +455,7 @@ export class ProvisioningAPIService {
         keyId,
         keyName: config.apiKeys[keyIndex].name
       }, 'success');
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to revoke API key:', error);
       throw error;
     }
@@ -516,7 +516,7 @@ export class ProvisioningAPIService {
       }, 'success', apiKeyId);
 
       return createdUser;
-    } catch (_error) {
+    } catch (error) {
       await this.logProvisioningActivity(teamId, 'user_created', 'user', undefined, {
         email: user.emails[0].value,
         _error: error instanceof Error ? error.message : 'Unknown error'
@@ -584,7 +584,7 @@ export class ProvisioningAPIService {
       }, 'success', apiKeyId);
 
       return updatedUser;
-    } catch (_error) {
+    } catch (error) {
       await this.logProvisioningActivity(teamId, 'user_updated', 'user', userId, {
         _error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
@@ -614,7 +614,7 @@ export class ProvisioningAPIService {
       }
 
       await this.logProvisioningActivity(teamId, 'user_deleted', 'user', userId, {}, 'success', apiKeyId);
-    } catch (_error) {
+    } catch (error) {
       await this.logProvisioningActivity(teamId, 'user_deleted', 'user', userId, {
         _error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
@@ -673,7 +673,7 @@ export class ProvisioningAPIService {
       }, 'success', apiKeyId);
 
       return createdGroup;
-    } catch (_error) {
+    } catch (error) {
       await this.logProvisioningActivity(teamId, 'group_created', 'group', undefined, {
         displayName: group.displayName,
         _error: error instanceof Error ? error.message : 'Unknown error'
@@ -711,7 +711,7 @@ export class ProvisioningAPIService {
       });
 
       return syncResult;
-    } catch (_error) {
+    } catch (error) {
       await this.updateSyncStatus(teamId, {
         status: 'failed',
         errors: [{
@@ -744,7 +744,7 @@ export class ProvisioningAPIService {
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate()
       } as ProvisioningConfig;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get provisioning _config:', error);
       throw error;
     }
@@ -771,7 +771,7 @@ export class ProvisioningAPIService {
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
       } as ProvisioningLog));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get provisioning logs:', error);
       throw error;
     }

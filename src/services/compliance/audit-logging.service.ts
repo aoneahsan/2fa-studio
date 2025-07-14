@@ -184,7 +184,7 @@ export class AuditLoggingService {
       if (params.severity === 'critical' && !params.success) {
         await this.alertSecurityTeam(auditLog);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to create audit log:', error);
       // Don't throw - audit logging should not break the app
     }
@@ -237,7 +237,7 @@ export class AuditLoggingService {
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
       } as AuditLog));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to query audit logs:', error);
       throw error;
     }
@@ -302,7 +302,7 @@ export class AuditLoggingService {
         securityEvents,
         complianceEvents
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to generate audit report:', error);
       throw error;
     }
@@ -324,7 +324,7 @@ export class AuditLoggingService {
       } else {
         return this.convertToCSV(logs);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to export audit logs:', error);
       throw error;
     }
@@ -378,7 +378,7 @@ export class AuditLoggingService {
       }
       
       return snapshot.size;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to apply retention policy:', error);
       throw error;
     }
@@ -429,7 +429,7 @@ export class AuditLoggingService {
         topActions,
         recentActivity
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get user activity summary:', error);
       throw error;
     }
@@ -481,7 +481,7 @@ export class AuditLoggingService {
       }
       
       return isSuspicious;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to detect suspicious activity:', error);
       return false;
     }

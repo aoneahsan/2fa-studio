@@ -137,7 +137,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
         );
         setStats(statsData);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error loading audit logs:', error);
     } finally {
       setLoading(false);
@@ -226,7 +226,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ userId, showStat
       a.download = `audit-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (_error) {
+    } catch (error) {
       console.error('Error exporting logs:', error);
     }
   };

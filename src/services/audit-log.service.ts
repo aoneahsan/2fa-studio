@@ -155,7 +155,7 @@ export class AuditLogService {
         // In production, this would be handled by Cloud Functions
         // to get the real IP from the request headers
         ipAddress = 'client-side-log';
-      } catch (_error) {
+      } catch (error) {
         console.error('Error getting IP address:', error);
       }
 
@@ -177,7 +177,7 @@ export class AuditLogService {
       if (entry.severity === 'critical' || !entry.success) {
         await this.triggerSecurityAlert(auditLog);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error logging audit event:', error);
       // Don't throw - audit logging should not break the app
     }
@@ -264,7 +264,7 @@ export class AuditLogService {
         lastDoc,
         hasMore: snapshot.docs.length > pageSize
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error searching audit logs:', error);
       throw error;
     }
@@ -350,7 +350,7 @@ export class AuditLogService {
         .map(([action, count]) => ({ action, count }));
 
       return stats;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting audit log stats:', error);
       throw error;
     }
@@ -413,7 +413,7 @@ export class AuditLogService {
       }
 
       return false;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error detecting suspicious activity:', error);
       return false;
     }
@@ -437,7 +437,7 @@ export class AuditLogService {
       // - FCM for push notifications
       // - Slack for admin alerts
       // - PagerDuty for critical incidents
-    } catch (_error) {
+    } catch (error) {
       console.error('Error triggering security alert:', error);
     }
   }
@@ -462,7 +462,7 @@ export class AuditLogService {
       console.log(`Found ${snapshot.size} old audit logs to clean up`);
       
       return snapshot.size;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error cleaning up old logs:', error);
       return 0;
     }
@@ -513,7 +513,7 @@ export class AuditLogService {
       });
 
       return csv;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error exporting audit logs:', error);
       throw error;
     }

@@ -32,7 +32,7 @@ interface BackupInfo {
  */
 const BackupSettings: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   
@@ -69,7 +69,7 @@ const BackupSettings: React.FC = () => {
         type: 'success',
         message: 'Backup completed successfully'
       }));
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Backup failed. Please try again.'
@@ -96,7 +96,7 @@ const BackupSettings: React.FC = () => {
         type: 'success',
         message: 'Data restored successfully'
       }));
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Restore failed. Please try again.'

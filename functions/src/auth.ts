@@ -54,7 +54,7 @@ export const onUserCreate = beforeUserCreated(async (event) => {
 		await sendWelcomeNotification(user);
 
 		console.log(`User created: ${user.uid}`);
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error creating user document:', error);
 	}
 });
@@ -102,7 +102,7 @@ export async function onUserDelete(userId: string) {
 		await batch.commit();
 
 		console.log(`User deleted: ${userId}`);
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error deleting user data:', error);
 	}
 }
@@ -131,7 +131,7 @@ export const validateAdmin = onCall(async (request: FirebaseAuthRequest) => {
 			isSuperAdmin,
 			role: userData?.role || 'user',
 		};
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error validating admin:', error);
 		throw new HttpsError(
 			'internal',
@@ -187,7 +187,7 @@ export async function cleanupExpiredSessions() {
 		}
 
 		return { cleaned: count };
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error cleaning up sessions:', error);
 		throw new HttpsError(
 			'internal',
@@ -213,7 +213,7 @@ async function sendWelcomeNotification(user: unknown) {
 
 		// TODO: Send welcome email via SendGrid or other email service
 		// TODO: Send push notification via OneSignal
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error sending welcome notification:', error);
 	}
 }
@@ -261,7 +261,7 @@ export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceI
 			sessionId: sessionRef.id,
 			expiresAt: expiresAt.toISOString(),
 		};
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error creating session:', error);
 		throw new HttpsError(
 			'internal',
@@ -310,7 +310,7 @@ export const revokeSession = onCall(async (request: FirebaseAuthRequest<{session
 		await sessionDoc.ref.delete();
 
 		return { success: true };
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error revoking session:', error);
 		throw new HttpsError(
 			'internal',
@@ -346,7 +346,7 @@ export const getUserSessions = onCall(async (request: FirebaseAuthRequest) => {
 		});
 
 		return { sessions };
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error getting sessions:', error);
 		throw new HttpsError('internal', 'Failed to get sessions');
 	}

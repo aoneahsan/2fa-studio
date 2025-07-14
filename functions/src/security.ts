@@ -52,7 +52,7 @@ export const monitorSuspiciousActivity = onDocumentCreated(
 				// Too many suspicious activities
 				await handleSuspiciousUser(userId, recentLogsSnapshot.docs);
 			}
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error monitoring activity:', error);
 		}
 	});
@@ -224,7 +224,7 @@ export const createAuditLog = onCall(
 			}
 
 			return { success: true };
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error creating audit log:', error);
 			throw new HttpsError(
 				'internal',
@@ -283,7 +283,7 @@ export async function cleanupOldAuditLogs() {
 			auditLogs: oldLogsSnapshot.size,
 			rateLimits: oldRateLimitsSnapshot.size,
 		};
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error cleaning up logs:', error);
 		throw error;
 	}
@@ -330,7 +330,7 @@ async function handleSuspiciousUser(
 			userId,
 			severity: 'high',
 		});
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error handling suspicious user:', error);
 	}
 }
@@ -370,7 +370,7 @@ async function alertAdmins(alert: unknown) {
 
 		// TODO: Send push notifications via OneSignal
 		// TODO: Send email alerts
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error alerting admins:', error);
 	}
 }
@@ -419,7 +419,7 @@ export const checkIPReputation = onCall(
 							: 'bad',
 				recentSuspiciousActivity: suspiciousCount,
 			};
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error checking IP reputation:', error);
 			throw new HttpsError(
 				'internal',

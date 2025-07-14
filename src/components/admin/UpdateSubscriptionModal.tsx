@@ -57,7 +57,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
       
       showToast('success', 'Subscription updated successfully');
       onSuccess();
-    } catch (_error) {
+    } catch (error) {
       console.error('Error updating subscription:', error);
       showToast('error', 'Failed to update subscription');
     } finally {
@@ -102,7 +102,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
               </label>
               <select
                 value={tier}
-                onChange={(_e) => setTier(e.target.value as SubscriptionTier)}
+                onChange={(e) => setTier(e.target.value as SubscriptionTier)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
               >
                 <option value="free">Free</option>
@@ -119,7 +119,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
               </label>
               <select
                 value={status}
-                onChange={(_e) => setStatus(e.target.value as SubscriptionStatus)}
+                onChange={(e) => setStatus(e.target.value as SubscriptionStatus)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
               >
                 <option value="active">Active</option>
@@ -138,7 +138,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
               <input
                 type="number"
                 value={accountLimit}
-                onChange={(_e) => setAccountLimit(e.target.value)}
+                onChange={(e) => setAccountLimit(e.target.value)}
                 placeholder="e.g., 10"
                 min="0"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
@@ -152,7 +152,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
               </label>
               <textarea
                 value={reason}
-                onChange={(_e) => setReason(e.target.value)}
+                onChange={(e) => setReason(e.target.value)}
                 placeholder="Provide a reason for this update..."
                 rows={3}
                 required

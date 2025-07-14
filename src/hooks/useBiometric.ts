@@ -51,7 +51,7 @@ export const useBiometric = () => {
           biometryType: result.biometryType as 'face' | 'fingerprint' | 'iris' | 'none',
           reason: result.reason,
         });
-      } catch (_error) {
+      } catch (error) {
         console.error('Error checking biometric:', error);
         setBiometricStatus({
           isAvailable: false,
@@ -148,7 +148,7 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to enable biometric:', error);
       return false;
     }
@@ -170,7 +170,7 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to disable biometric:', error);
       return false;
     }
@@ -196,7 +196,7 @@ export const useBiometric = () => {
         subtitle: 'Unlock app',
       });
       return true;
-    } catch (_error) {
+    } catch (error) {
       return false;
     }
   }, [biometricEnabled, authenticate, dispatch]);

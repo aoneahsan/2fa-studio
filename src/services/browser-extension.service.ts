@@ -30,7 +30,7 @@ interface ExtensionMessage {
   deviceId: string;
   timestamp: number;
   encrypted: boolean;
-  data: unknown;
+  data: any;
 }
 
 interface PairingData {
@@ -86,7 +86,7 @@ export class BrowserExtensionService {
           this.reconnect();
         }
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize browser extension service:', error);
     }
   }
@@ -124,7 +124,7 @@ export class BrowserExtensionService {
         deviceId: this.deviceId,
         timestamp: Date.now(),
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to generate pairing code:', error);
       throw error;
     }
@@ -168,7 +168,7 @@ export class BrowserExtensionService {
         type: 'success',
         message: 'Connected to browser extension',
       }));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to connect to extension:', error);
       throw error;
     }
@@ -229,7 +229,7 @@ export class BrowserExtensionService {
       // Delete processed message
       const messageRef = ref(this.db, `messages/${user.uid}/${this.deviceId}/${messageId}`);
       await remove(messageRef);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to handle message:', error);
     }
   }
@@ -244,7 +244,7 @@ export class BrowserExtensionService {
       
       // Send accounts to extension
       await this.sendMessage('sync_response', { accounts });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to handle sync request:', error);
     }
   }
@@ -275,7 +275,7 @@ export class BrowserExtensionService {
           }));
         }
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to handle autofill request:', error);
     }
   }
@@ -283,7 +283,7 @@ export class BrowserExtensionService {
   /**
    * Send message to browser extension
    */
-  async sendMessage(type: string, data: unknown): Promise<void> {
+  async sendMessage(type: string, data: any): Promise<void> {
     if (!this.db || !this.deviceId) {
       throw new Error('Service not initialized');
     }
@@ -313,7 +313,7 @@ export class BrowserExtensionService {
         encrypted: !!this.sessionKey,
         data: encryptedData,
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to send message:', error);
       throw error;
     }
@@ -356,7 +356,7 @@ export class BrowserExtensionService {
         type: 'success',
         message: `Sent code for ${account.issuer} to browser`,
       }));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to send account code:', error);
       store.dispatch(addToast({
         type: 'error',
@@ -391,7 +391,7 @@ export class BrowserExtensionService {
         type: 'info',
         message: 'Disconnected from browser extension',
       }));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to disconnect:', error);
     }
   }

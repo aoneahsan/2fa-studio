@@ -130,7 +130,7 @@ export type StripeEventTypes =
 
 export interface StripeWebhookEvent {
   type: StripeEventTypes;
-  data: unknown;
+  data: any;
   id: string;
 }
 

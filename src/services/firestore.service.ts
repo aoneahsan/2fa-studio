@@ -58,12 +58,12 @@ export interface ConflictResolution {
 
 export class FirestoreService {
   private static syncListeners: Map<string, Unsubscribe> = new Map();
-  private static offlineQueue: Array<{ operation: string; data: unknown }> = [];
+  private static offlineQueue: Array<{ operation: string; data: any }> = [];
 
   /**
    * Sanitize user input data
    */
-  static sanitizeInput(data: unknown): unknown {
+  static sanitizeInput(data: any): unknown {
     if (typeof data === 'string') {
       return data
         .replace(/[<>'"]/g, '') // Remove potential HTML/JS chars
@@ -121,7 +121,7 @@ export class FirestoreService {
       // Enable offline persistence
       // Note: This should be called before any other Firestore operations
       console.log('Firestore service initialized');
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize Firestore:', error);
     }
   }
@@ -147,7 +147,7 @@ export class FirestoreService {
       }
       
       return null;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting document:', error);
       throw error;
     }
@@ -158,7 +158,7 @@ export class FirestoreService {
    */
   static async getCollection<T = any>(
     collectionPath: string,
-    filters: Array<{ field: string; operator: unknown; value: unknown }> = [],
+    filters: Array<{ field: string; operator: unknown; value: any }> = [],
     pagination: PaginationOptions = {}
   ): Promise<SyncResult<T>> {
     try {
@@ -204,7 +204,7 @@ export class FirestoreService {
         lastDoc: resultDocs[resultDocs.length - 1],
         fromCache: querySnapshot.metadata.fromCache
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting collection:', error);
       throw error;
     }
@@ -235,7 +235,7 @@ export class FirestoreService {
         const docRef = await addDoc(collectionRef, documentData);
         return docRef.id;
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error creating document:', error);
       throw error;
     }
@@ -274,7 +274,7 @@ export class FirestoreService {
           updatedAt: serverTimestamp()
         });
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error updating document:', error);
       throw error;
     }
@@ -290,7 +290,7 @@ export class FirestoreService {
     try {
       const docRef = doc(db, collectionPath, documentId);
       await deleteDoc(docRef);
-    } catch (_error) {
+    } catch (error) {
       console.error('Error deleting document:', error);
       throw error;
     }
@@ -334,7 +334,7 @@ export class FirestoreService {
       });
 
       await batch.commit();
-    } catch (_error) {
+    } catch (error) {
       console.error('Error in batch operation:', error);
       throw error;
     }
@@ -348,7 +348,7 @@ export class FirestoreService {
   ): Promise<T> {
     try {
       return await runTransaction(db, callback);
-    } catch (_error) {
+    } catch (error) {
       console.error('Transaction failed:', error);
       throw error;
     }
@@ -391,7 +391,7 @@ export class FirestoreService {
       }
 
       return unsubscribe;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error setting up document subscription:', error);
       throw error;
     }
@@ -402,7 +402,7 @@ export class FirestoreService {
    */
   static subscribeToCollection<T = any>(
     collectionPath: string,
-    filters: Array<{ field: string; operator: unknown; value: unknown }> = [],
+    filters: Array<{ field: string; operator: unknown; value: any }> = [],
     callback: (data: T[], error?: FirestoreError) => void,
     subscriptionKey?: string,
     pagination?: PaginationOptions
@@ -447,7 +447,7 @@ export class FirestoreService {
       }
 
       return unsubscribe;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error setting up collection subscription:', error);
       throw error;
     }
@@ -481,7 +481,7 @@ export class FirestoreService {
     try {
       await disableNetwork(db);
       console.log('Firestore offline mode enabled');
-    } catch (_error) {
+    } catch (error) {
       console.error('Error enabling offline mode:', error);
     }
   }
@@ -490,7 +490,7 @@ export class FirestoreService {
     try {
       await enableNetwork(db);
       console.log('Firestore online mode enabled');
-    } catch (_error) {
+    } catch (error) {
       console.error('Error enabling online mode:', error);
     }
   }
@@ -498,7 +498,7 @@ export class FirestoreService {
   static async waitForPendingWrites(): Promise<void> {
     try {
       await waitForPendingWrites(db);
-    } catch (_error) {
+    } catch (error) {
       console.error('Error waiting for pending writes:', error);
     }
   }

@@ -360,7 +360,7 @@ export class SOC2ComplianceService {
           success: true
         });
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize SOC 2 controls:', error);
       throw error;
     }
@@ -388,7 +388,7 @@ export class SOC2ComplianceService {
           lastTested: doc.data().implementation?.lastTested?.toDate()
         }
       } as SecurityControl));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get controls:', error);
       throw error;
     }
@@ -427,7 +427,7 @@ export class SOC2ComplianceService {
         severity: 'info',
         success: true
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update control status:', error);
       throw error;
     }
@@ -466,7 +466,7 @@ export class SOC2ComplianceService {
       });
 
       return docRef.id;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to report incident:', error);
       throw error;
     }
@@ -501,7 +501,7 @@ export class SOC2ComplianceService {
         severity: 'info',
         success: true
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update incident:', error);
       throw error;
     }
@@ -563,7 +563,7 @@ export class SOC2ComplianceService {
       });
 
       return docRef.id;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to generate compliance report:', error);
       throw error;
     }
@@ -602,7 +602,7 @@ export class SOC2ComplianceService {
       if (status === 'critical') {
         await this.handleCriticalMetric(metric, value, details);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to record metric:', error);
     }
   }
@@ -635,7 +635,7 @@ export class SOC2ComplianceService {
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
       } as SystemMonitoring));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get monitoring metrics:', error);
       throw error;
     }
@@ -695,7 +695,7 @@ export class SOC2ComplianceService {
         findings,
         recommendations
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to perform security assessment:', error);
       throw error;
     }

@@ -50,7 +50,7 @@ export class NotificationService {
 
       this.initialized = true;
       console.log('NotificationService initialized successfully');
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize NotificationService:', error);
       throw error;
     }
@@ -91,7 +91,7 @@ export class NotificationService {
     try {
       await OneSignal.login(userId);
       console.log('External user ID set:', userId);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to set external user ID:', error);
     }
   }
@@ -100,7 +100,7 @@ export class NotificationService {
     try {
       await OneSignal.logout();
       console.log('User logged out from OneSignal');
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to logout from OneSignal:', error);
     }
   }
@@ -109,7 +109,7 @@ export class NotificationService {
     try {
       await OneSignal.User.addTag(key, value);
       console.log(`Tag added: ${key} = ${value}`);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to add tag:', error);
     }
   }
@@ -118,7 +118,7 @@ export class NotificationService {
     try {
       await OneSignal.User.addTags(tags);
       console.log('Tags added:', tags);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to add tags:', error);
     }
   }
@@ -127,7 +127,7 @@ export class NotificationService {
     try {
       await OneSignal.User.removeTag(key);
       console.log(`Tag removed: ${key}`);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to remove tag:', error);
     }
   }
@@ -136,7 +136,7 @@ export class NotificationService {
     try {
       await OneSignal.User.addEmail(email);
       console.log('Email set:', email);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to set email:', error);
     }
   }
@@ -145,7 +145,7 @@ export class NotificationService {
     try {
       await OneSignal.User.addSms(phoneNumber);
       console.log('SMS number set:', phoneNumber);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to set SMS number:', error);
     }
   }
@@ -183,7 +183,7 @@ export class NotificationService {
       
       await this.addTags(tags);
       console.log('Notification preferences updated:', preferences);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update notification preferences:', error);
     }
   }
@@ -192,7 +192,7 @@ export class NotificationService {
     try {
       const permission = await OneSignal.Notifications.permission;
       return permission === true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to check push notification status:', error);
       return false;
     }
@@ -202,7 +202,7 @@ export class NotificationService {
     try {
       const permission = await OneSignal.Notifications.requestPermission(true);
       return permission === true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to request permission:', error);
       return false;
     }

@@ -186,7 +186,7 @@ describe('AuthService', () => {
       try {
         await AuthService.signInWithEmail(invalidEmail, weakPassword);
         expect(false).toBe(true); // Should not reach here
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeDefined();
       }
     });
@@ -196,7 +196,7 @@ describe('AuthService', () => {
       
       try {
         await AuthService.signUpWithEmail('test@test.com', 'ValidPass123!', maliciousDisplayName);
-      } catch (_error) {
+      } catch (error) {
         // Should handle malicious input gracefully
         expect(error.message).not.toContain('<script>');
       }
@@ -207,7 +207,7 @@ describe('AuthService', () => {
     it('should not expose sensitive information in error messages', async () => {
       try {
         await AuthService.signInWithEmail('test@test.com', 'wrongpassword');
-      } catch (_error) {
+      } catch (error) {
         // Error should not contain sensitive information
         expect(error.message).not.toContain('password');
         expect(error.message).not.toContain('database');
@@ -233,7 +233,7 @@ describe('AuthService', () => {
 
       try {
         await AuthService.signInWithEmail('test@test.com', 'password123');
-      } catch (_error) {
+      } catch (error) {
         expect(error.message).toContain('Network error');
       }
     });
@@ -248,7 +248,7 @@ describe('AuthService', () => {
 
       try {
         await AuthService.signInWithEmail('test@test.com', 'password123');
-      } catch (_error) {
+      } catch (error) {
         expect(error.code).toBe('auth/user-not-found');
       }
     });
@@ -283,7 +283,7 @@ describe('AuthService', () => {
 
       try {
         await AuthService.linkAccount(invalidProvider);
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeDefined();
       }
     });
@@ -298,7 +298,7 @@ describe('AuthService', () => {
 
       try {
         await AuthService.linkAccount('google');
-      } catch (_error) {
+      } catch (error) {
         expect(error.code).toBe('auth/email-already-in-use');
       }
     });

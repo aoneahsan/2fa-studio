@@ -61,7 +61,7 @@ const AdminUsers: React.FC = () => {
       
       setLastDoc(result.lastDoc);
       setHasMore(result.hasMore);
-    } catch (_error) {
+    } catch (error) {
       console.error('Error loading users:', error);
     } finally {
       setLoading(false);
@@ -139,8 +139,8 @@ const AdminUsers: React.FC = () => {
                   type="text"
                   placeholder="Search by email or name..."
                   value={searchTerm}
-                  onChange={(_e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(_e) => e.key === 'Enter' && handleSearch()}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                 />
               </div>
@@ -156,7 +156,7 @@ const AdminUsers: React.FC = () => {
               
               <select
                 value={filterTier}
-                onChange={(_e) => setFilterTier(e.target.value as SubscriptionTier | '')}
+                onChange={(e) => setFilterTier(e.target.value as SubscriptionTier | '')}
                 className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm"
               >
                 <option value="">All Tiers</option>
@@ -168,7 +168,7 @@ const AdminUsers: React.FC = () => {
 
               <select
                 value={filterStatus}
-                onChange={(_e) => setFilterStatus(e.target.value as SubscriptionStatus | '')}
+                onChange={(e) => setFilterStatus(e.target.value as SubscriptionStatus | '')}
                 className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm"
               >
                 <option value="">All Status</option>
@@ -181,7 +181,7 @@ const AdminUsers: React.FC = () => {
 
               <select
                 value={sortBy}
-                onChange={(_e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as any)}
                 className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm"
               >
                 <option value="createdAt">Created Date</option>
@@ -282,7 +282,7 @@ const AdminUsers: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         <button
-                          onClick={(_e) => {
+                          onClick={(e) => {
                             e.stopPropagation();
                             handleUpdateSubscription(user);
                           }}

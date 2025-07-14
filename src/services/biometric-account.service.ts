@@ -127,7 +127,7 @@ export class BiometricAccountService {
           _error: 'Authentication failed' 
         };
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Biometric authentication _error:', error);
       return { 
         success: false, 
@@ -189,7 +189,7 @@ export class BiometricAccountService {
           platform: Capacitor.getPlatform()
         }
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error enabling biometric:', error);
       
       // Log failed attempt
@@ -254,7 +254,7 @@ export class BiometricAccountService {
           platform: Capacitor.getPlatform()
         }
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error disabling biometric:', error);
       
       // Log failed attempt
@@ -285,7 +285,7 @@ export class BiometricAccountService {
         biometricTimeout: timeout,
         updatedAt: new Date(),
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error updating biometric timeout:', error);
       throw error;
     }
@@ -303,7 +303,7 @@ export class BiometricAccountService {
       await updateDoc(accountRef, {
         lastBiometricAuth: new Date(),
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error updating last biometric _auth:', error);
     }
   }

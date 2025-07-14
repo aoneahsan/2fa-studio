@@ -37,7 +37,7 @@ describe('Dependency Security Audit', () => {
         
         expect(criticalVulns).toBe(0);
         expect(highVulns).toBe(0);
-      } catch (_error) {
+      } catch (error) {
         // If yarn audit fails, we still want to check package.json
         console.warn('Yarn audit failed, checking package.json manually');
       }

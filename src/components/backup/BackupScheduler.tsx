@@ -24,7 +24,7 @@ import { format } from 'date-fns';
  * Component for managing backup schedules
  */
 const BackupScheduler: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const [schedules, setSchedules] = useState<BackupSchedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -60,7 +60,7 @@ const BackupScheduler: React.FC = () => {
       setIsLoading(true);
       const userSchedules = await BackupSchedulerService.getSchedules(user.id);
       setSchedules(userSchedules);
-    } catch (_error) {
+    } catch (error) {
       console.error('Error loading schedules:', error);
     } finally {
       setIsLoading(false);
@@ -94,7 +94,7 @@ const BackupScheduler: React.FC = () => {
 
       await loadSchedules();
       resetForm();
-    } catch (_error) {
+    } catch (error) {
       console.error('Error saving schedule:', error);
     }
   };
@@ -105,7 +105,7 @@ const BackupScheduler: React.FC = () => {
     try {
       await BackupSchedulerService.deleteSchedule(user.id, scheduleId);
       await loadSchedules();
-    } catch (_error) {
+    } catch (error) {
       console.error('Error deleting schedule:', error);
     }
   };
@@ -115,7 +115,7 @@ const BackupScheduler: React.FC = () => {
 
     try {
       await BackupSchedulerService.runBackupNow(user.id, scheduleId);
-    } catch (_error) {
+    } catch (error) {
       console.error('Error running backup:', error);
     }
   };
@@ -272,7 +272,7 @@ const BackupScheduler: React.FC = () => {
             <label className="block text-sm font-medium mb-2">Frequency</label>
             <select
               value={frequency}
-              onChange={(_e) => setFrequency(e.target.value as BackupSchedule['frequency'])}
+              onChange={(e) => setFrequency(e.target.value as BackupSchedule['frequency'])}
               className="w-full px-3 py-2 border border-border rounded-md bg-background"
             >
               <option value="daily">Daily</option>
@@ -287,7 +287,7 @@ const BackupScheduler: React.FC = () => {
             <input
               type="time"
               value={time}
-              onChange={(_e) => setTime(e.target.value)}
+              onChange={(e) => setTime(e.target.value)}
               className="w-full px-3 py-2 border border-border rounded-md bg-background"
             />
           </div>
@@ -298,7 +298,7 @@ const BackupScheduler: React.FC = () => {
               <label className="block text-sm font-medium mb-2">Day of Week</label>
               <select
                 value={dayOfWeek}
-                onChange={(_e) => setDayOfWeek(Number(e.target.value))}
+                onChange={(e) => setDayOfWeek(Number(e.target.value))}
                 className="w-full px-3 py-2 border border-border rounded-md bg-background"
               >
                 <option value={0}>Sunday</option>
@@ -321,7 +321,7 @@ const BackupScheduler: React.FC = () => {
                 min="1"
                 max="31"
                 value={dayOfMonth}
-                onChange={(_e) => setDayOfMonth(Number(e.target.value))}
+                onChange={(e) => setDayOfMonth(Number(e.target.value))}
                 className="w-full px-3 py-2 border border-border rounded-md bg-background"
               />
             </div>
@@ -332,7 +332,7 @@ const BackupScheduler: React.FC = () => {
             <label className="block text-sm font-medium mb-2">Backup Destination</label>
             <select
               value={destination}
-              onChange={(_e) => setDestination(e.target.value as BackupSchedule['destination'])}
+              onChange={(e) => setDestination(e.target.value as BackupSchedule['destination'])}
               className="w-full px-3 py-2 border border-border rounded-md bg-background"
             >
               <option value="googledrive">Google Drive</option>
@@ -347,7 +347,7 @@ const BackupScheduler: React.FC = () => {
               <input
                 type="checkbox"
                 checked={encryptionEnabled}
-                onChange={(_e) => setEncryptionEnabled(e.target.checked)}
+                onChange={(e) => setEncryptionEnabled(e.target.checked)}
                 className="rounded border-border"
               />
               <span className="text-sm">Enable encryption</span>
@@ -357,7 +357,7 @@ const BackupScheduler: React.FC = () => {
               <input
                 type="checkbox"
                 checked={includeSettings}
-                onChange={(_e) => setIncludeSettings(e.target.checked)}
+                onChange={(e) => setIncludeSettings(e.target.checked)}
                 className="rounded border-border"
               />
               <span className="text-sm">Include app settings</span>
@@ -367,7 +367,7 @@ const BackupScheduler: React.FC = () => {
               <input
                 type="checkbox"
                 checked={enabled}
-                onChange={(_e) => setEnabled(e.target.checked)}
+                onChange={(e) => setEnabled(e.target.checked)}
                 className="rounded border-border"
               />
               <span className="text-sm">Enable schedule</span>

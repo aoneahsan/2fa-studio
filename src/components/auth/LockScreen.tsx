@@ -22,7 +22,7 @@ const LockScreen: React.FC = () => {
     setIsUnlocking(true);
     try {
       await unlockApp();
-    } catch (_error) {
+    } catch (error) {
       console.error('Unlock failed:', error);
     } finally {
       setIsUnlocking(false);

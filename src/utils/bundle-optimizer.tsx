@@ -19,7 +19,7 @@ export const createLazyComponent = <T extends React.ComponentType<any>>(
     while (attempts < retries) {
       try {
         return await importFunc();
-      } catch (_error) {
+      } catch (error) {
         attempts++;
         
         if (attempts >= retries) {
@@ -154,7 +154,7 @@ export class PreloadManager {
         this.preloadedComponents.add(name);
         
         console.log(`Preloaded component: ${name}`);
-      } catch (_error) {
+      } catch (error) {
         console.warn(`Failed to preload component ${name}:`, _error);
       }
     }
@@ -244,7 +244,7 @@ export const registerServiceWorker = (): void => {
             });
           }
         });
-      } catch (_error) {
+      } catch (error) {
         console.error('Service Worker registration failed:', error);
       }
     });

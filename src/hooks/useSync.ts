@@ -21,7 +21,7 @@ interface UseSyncOptions {
  * Hook for managing real-time sync
  */
 export const useSync = (options: UseSyncOptions = {}) => {
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (!user) return;
@@ -104,7 +104,7 @@ export const useSync = (options: UseSyncOptions = {}) => {
 
   // Publish sync events
   const publishAccountChange = useCallback(
-    async (type: 'added' | 'updated' | 'deleted', data: unknown) => {
+    async (type: 'added' | 'updated' | 'deleted', data: any) => {
       if (!user) return;
       await SyncService.publishSyncEvent(user.id, `account_${type}` as unknown, data);
     },
@@ -112,7 +112,7 @@ export const useSync = (options: UseSyncOptions = {}) => {
   );
 
   const publishTagChange = useCallback(
-    async (type: 'added' | 'updated' | 'deleted', data: unknown) => {
+    async (type: 'added' | 'updated' | 'deleted', data: any) => {
       if (!user) return;
       await SyncService.publishSyncEvent(user.id, `tag_${type}` as unknown, data);
     },
@@ -120,7 +120,7 @@ export const useSync = (options: UseSyncOptions = {}) => {
   );
 
   const publishFolderChange = useCallback(
-    async (type: 'added' | 'updated' | 'deleted', data: unknown) => {
+    async (type: 'added' | 'updated' | 'deleted', data: any) => {
       if (!user) return;
       await SyncService.publishSyncEvent(user.id, `folder_${type}` as unknown, data);
     },
@@ -128,7 +128,7 @@ export const useSync = (options: UseSyncOptions = {}) => {
   );
 
   const publishSettingsChange = useCallback(
-    async (data: unknown) => {
+    async (data: any) => {
       if (!user) return;
       await SyncService.publishSyncEvent(user.id, 'settings_updated', data);
     },

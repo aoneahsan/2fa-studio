@@ -28,7 +28,7 @@ import { AuditLogService } from '@services/audit-log.service';
  */
 export const useAccounts = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, encryptionKey } = useSelector((state: RootState) => state._auth);
+  const { user, encryptionKey } = useSelector((state: RootState) => state.auth);
   const accountsState = useSelector((state: RootState) => state.accounts);
   const activeTags = useSelector(selectActiveTags);
   const filterMode = useSelector(selectFilterMode);
@@ -88,7 +88,7 @@ export const useAccounts = () => {
             key: 'cached_accounts',
             value: JSON.stringify(decryptedAccounts),
           });
-        } catch (_error) {
+        } catch (error) {
           console.error('Error loading accounts:', error);
           dispatch(setError('Failed to load accounts'));
           
@@ -170,7 +170,7 @@ export const useAccounts = () => {
           requiresBiometric: account.requiresBiometric || false
         }
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error adding account:', error);
       dispatch(addToast({
         type: 'error',
@@ -239,7 +239,7 @@ export const useAccounts = () => {
           )
         }
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error updating account:', error);
       dispatch(addToast({
         type: 'error',
@@ -289,7 +289,7 @@ export const useAccounts = () => {
           permanentDeletion: true
         }
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error deleting account:', error);
       dispatch(addToast({
         type: 'error',

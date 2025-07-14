@@ -47,7 +47,7 @@ export const handleOneSignalWebhook = onRequest(
 			}
 
 			res.status(200).json({ received: true });
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error processing OneSignal webhook:', error);
 			res.status(500).send('Webhook processing failed');
 		}
@@ -99,7 +99,7 @@ export const handleGoogleDriveWebhook = onRequest(
 			}
 
 			res.status(200).send('OK');
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error processing Google Drive webhook:', error);
 			res.status(500).send('Webhook processing failed');
 		}
@@ -186,7 +186,7 @@ async function handleNotificationClicked(event: unknown) {
 						admin.firestore.FieldValue.increment(1),
 				});
 		}
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error handling notification click:', error);
 	}
 }
@@ -205,7 +205,7 @@ async function handleNotificationViewed(event: unknown) {
 			notificationId,
 			timestamp: admin.firestore.FieldValue.serverTimestamp(),
 		});
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error handling notification view:', error);
 	}
 }
@@ -230,7 +230,7 @@ async function handleSubscriptionChanged(event: unknown) {
 
 			await db.collection('users').doc(userId).update(updates);
 		}
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error handling subscription change:', error);
 	}
 }
@@ -238,7 +238,7 @@ async function handleSubscriptionChanged(event: unknown) {
 /**
  * Handle Google Drive file change
  */
-async function handleDriveFileChange(data: unknown) {
+async function handleDriveFileChange(data: any) {
 	try {
 		// Parse file change data
 		const { fileId, userId } = data ?? {};
@@ -264,7 +264,7 @@ async function handleDriveFileChange(data: unknown) {
 
 			// TODO: Trigger sync process
 		}
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error handling Drive file change:', error);
 	}
 }
@@ -272,7 +272,7 @@ async function handleDriveFileChange(data: unknown) {
 /**
  * Handle Google Drive file removal
  */
-async function handleDriveFileRemoval(data: unknown) {
+async function handleDriveFileRemoval(data: any) {
 	try {
 		const { fileId, userId } = data ?? {};
 
@@ -303,7 +303,7 @@ async function handleDriveFileRemoval(data: unknown) {
 				createdAt: admin.firestore.FieldValue.serverTimestamp(),
 			});
 		}
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error handling Drive file removal:', error);
 	}
 }
@@ -357,7 +357,7 @@ export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{servi
 			webhookId: webhookRef.id,
 			message: 'Webhook registered successfully',
 		};
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error registering webhook:', error);
 		throw new HttpsError(
 			'internal',
@@ -399,7 +399,7 @@ export const listWebhooks = onCall(async (request: FirebaseAuthRequest) => {
 		}));
 
 		return { webhooks };
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error listing webhooks:', error);
 		throw new HttpsError('internal', 'Failed to list webhooks');
 	}

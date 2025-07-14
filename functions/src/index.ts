@@ -115,7 +115,7 @@ export const api = onRequest(async (req, res) => {
 		} else {
 			res.status(404).json({ _error: 'Not found' });
 		}
-	} catch (_error) {
+	} catch (error) {
 		console.error('API Error:', error);
 		res.status(500).json({ _error: 'Internal server error' });
 	}

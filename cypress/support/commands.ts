@@ -6,6 +6,9 @@ import 'cypress'
 
 declare global {
   declare global {
+  }
+
+declare global {
   namespace Cypress {
     interface Chainable {
       /**

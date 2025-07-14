@@ -44,7 +44,7 @@ export class AppShortcutsService {
       await this.updateShortcuts();
       
       console.log('App shortcuts initialized');
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize app shortcuts:', error);
     }
   }
@@ -58,7 +58,7 @@ export class AppShortcutsService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get shortcuts:', error);
     }
     return [];
@@ -95,7 +95,7 @@ export class AppShortcutsService {
       await this.updateShortcuts();
 
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to add shortcut:', error);
       throw error;
     }
@@ -116,7 +116,7 @@ export class AppShortcutsService {
 
       await this.saveShortcuts(filtered);
       await this.updateShortcuts();
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to remove shortcut:', error);
       throw error;
     }
@@ -134,7 +134,7 @@ export class AppShortcutsService {
 
       await this.saveShortcuts(shortcuts);
       await this.updateShortcuts();
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to reorder shortcuts:', error);
       throw error;
     }
@@ -165,7 +165,7 @@ export class AppShortcutsService {
         issuer: account.issuer,
         label: account.label
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to generate shortcut code:', error);
       return null;
     }
@@ -180,7 +180,7 @@ export class AppShortcutsService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get widget accounts:', error);
     }
     return [];
@@ -201,7 +201,7 @@ export class AppShortcutsService {
 
       // Update widget data
       await this.updateWidgetData();
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to set widget accounts:', error);
       throw error;
     }
@@ -234,14 +234,14 @@ export class AppShortcutsService {
             remainingTime: result.remainingTime || 0,
             lastUpdated: new Date()
           });
-        } catch (_error) {
+        } catch (error) {
           console.error(`Failed to generate code for widget account ${account.id}:`, _error);
         }
       }
 
       // Send data to native layer for widget update
       await this.sendWidgetData(widgetData);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update widget data:', error);
     }
   }
@@ -279,7 +279,7 @@ export class AppShortcutsService {
 
       // Send to native layer
       await this.sendShortcutsData(shortcutsData);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update platform shortcuts:', error);
     }
   }
@@ -301,7 +301,7 @@ export class AppShortcutsService {
         // This would be implemented in the native iOS code
         await Capacitor.Plugins.TwoFAShortcuts?.updateSiriShortcuts({ shortcuts });
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to send shortcuts data to native layer:', error);
     }
   }
@@ -318,7 +318,7 @@ export class AppShortcutsService {
         // Send to iOS widget handler
         await Capacitor.Plugins.TwoFAWidget?.updateWidget({ accounts: data });
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to send widget data to native layer:', error);
     }
   }
@@ -326,7 +326,7 @@ export class AppShortcutsService {
   /**
    * Handle shortcut intent from native layer
    */
-  static async handleShortcutIntent(data: unknown): Promise<void> {
+  static async handleShortcutIntent(data: any): Promise<void> {
     try {
       if (data.action === 'generate_code' && data.accountId) {
         const result = await this.generateShortcutCode(data.accountId);
@@ -336,7 +336,7 @@ export class AppShortcutsService {
           await this.showShortcutResult(_result);
         }
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to handle shortcut intent:', error);
     }
   }
@@ -359,7 +359,7 @@ export class AppShortcutsService {
         text: `${result.issuer}: ${result.code} (copied)`,
         duration: 'short'
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to show shortcut _result:', error);
     }
   }

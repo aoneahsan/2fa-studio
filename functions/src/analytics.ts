@@ -119,7 +119,7 @@ export async function aggregateDailyStats() {
 
 		console.log(`Aggregated stats for ${today.toISOString().split('T')[0]}`);
 		return stats;
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error aggregating stats:', error);
 		throw error;
 	}
@@ -200,7 +200,7 @@ export const generateReports = onCall(
 			};
 
 			return report;
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error generating report:', error);
 			throw new HttpsError(
 				'internal',
@@ -240,7 +240,7 @@ export const trackEvent = onCall(
 			});
 
 			return { success: true };
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error tracking event:', error);
 			throw new HttpsError('internal', 'Failed to track event');
 		}
@@ -291,7 +291,7 @@ export async function cleanupOldAnalytics() {
 			analytics: oldAnalyticsSnapshot.size,
 			events: oldEventsSnapshot.size,
 		};
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error cleaning up analytics:', error);
 		throw error;
 	}

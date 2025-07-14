@@ -174,7 +174,7 @@ const RegisterPage: React.FC = () => {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(_e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="input pl-10"
                   placeholder="you@example.com"
                 />
@@ -197,7 +197,7 @@ const RegisterPage: React.FC = () => {
                   autoComplete="new-password"
                   required
                   value={password}
-                  onChange={(_e) => handlePasswordChange(e.target.value)}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
                   className="input pl-10"
                   placeholder="••••••••"
                 />
@@ -233,7 +233,7 @@ const RegisterPage: React.FC = () => {
                 autoComplete="new-password"
                 required
                 value={confirmPassword}
-                onChange={(_e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="input"
                 placeholder="••••••••"
               />
@@ -266,7 +266,7 @@ const RegisterPage: React.FC = () => {
                     autoComplete="off"
                     required
                     value={encryptionPassword}
-                    onChange={(_e) => handleEncryptionPasswordChange(e.target.value)}
+                    onChange={(e) => handleEncryptionPasswordChange(e.target.value)}
                     className="input pl-10"
                     placeholder="Strong encryption password"
                   />
@@ -293,7 +293,7 @@ const RegisterPage: React.FC = () => {
                 autoComplete="off"
                 required
                 value={confirmEncryptionPassword}
-                onChange={(_e) => setConfirmEncryptionPassword(e.target.value)}
+                onChange={(e) => setConfirmEncryptionPassword(e.target.value)}
                 className="input"
                 placeholder="••••••••"
               />
@@ -309,7 +309,7 @@ const RegisterPage: React.FC = () => {
                 name="encryptionHint"
                 type="text"
                 value={encryptionHint}
-                onChange={(_e) => setEncryptionHint(e.target.value)}
+                onChange={(e) => setEncryptionHint(e.target.value)}
                 className="input"
                 placeholder="A hint to help you remember"
               />

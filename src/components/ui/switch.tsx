@@ -26,7 +26,7 @@ export const Switch: React.FC<SwitchProps> = ({
     }
   };
 
-  const handleKeyDown = (_e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!disabled && (e.key === ' ' || e.key === 'Enter')) {
       e.preventDefault();
       onCheckedChange(!checked);

@@ -116,7 +116,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="email"
                       required
                       value={email}
-                      onChange={(_e) => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="input pl-10"
                       placeholder="you@example.com"
                     />
@@ -138,7 +138,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="current-password"
                       required
                       value={password}
-                      onChange={(_e) => setPassword(e.target.value)}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="input pl-10"
                       placeholder="••••••••"
                     />
@@ -171,7 +171,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="off"
                       required
                       value={encryptionPassword}
-                      onChange={(_e) => setEncryptionPassword(e.target.value)}
+                      onChange={(e) => setEncryptionPassword(e.target.value)}
                       className="input pl-10"
                       placeholder="Your encryption password"
                       autoFocus

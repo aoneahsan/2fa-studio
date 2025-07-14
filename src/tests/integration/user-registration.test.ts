@@ -137,7 +137,7 @@ describe('User Registration Integration Tests', () => {
       try {
         await AuthService.signUpWithEmail(invalidEmail, testUser.password);
         expect(false).toBe(true); // Should not reach here
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeDefined();
       }
     });
@@ -150,7 +150,7 @@ describe('User Registration Integration Tests', () => {
       try {
         await AuthService.signUpWithEmail(testUser.email, weakPassword);
         expect(false).toBe(true); // Should not reach here
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeDefined();
       }
     });
@@ -165,7 +165,7 @@ describe('User Registration Integration Tests', () => {
 
       try {
         await AuthService.signUpWithEmail(testUser.email, testUser.password);
-      } catch (_error) {
+      } catch (error) {
         expect(error.code).toBe('auth/email-already-in-use');
       }
     });
@@ -185,7 +185,7 @@ describe('User Registration Integration Tests', () => {
       try {
         await AuthService.signUpWithEmail(testUser.email, testUser.password);
         // Should still handle profile creation error gracefully
-      } catch (_error) {
+      } catch (error) {
         expect(error.message).toContain('permission denied');
       }
     });
@@ -274,7 +274,7 @@ describe('User Registration Integration Tests', () => {
         try {
           await AuthService.signUpWithEmail(input.email, input.password);
           expect(false).toBe(true); // Should not reach here
-        } catch (_error) {
+        } catch (error) {
           expect(_error).toBeDefined();
         }
       }

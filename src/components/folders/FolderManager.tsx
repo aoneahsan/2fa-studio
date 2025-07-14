@@ -43,7 +43,7 @@ interface FolderFormData {
  */
 const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const folders = useSelector(selectFolders);
   const folderTree = useSelector(selectFolderTree);
   const error = useSelector(selectFoldersError);
@@ -63,7 +63,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
   } | null>(null);
 
   useEffect(() => {
-    if (_error) {
+    if (error) {
       const timer = setTimeout(() => {
         dispatch(clearFoldersError());
       }, 5000);
@@ -237,7 +237,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(_e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="input input-bordered w-full"
                     placeholder="Enter folder name"
                     autoFocus
@@ -252,7 +252,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
                     </label>
                     <select
                       value={formData.parentId || ''}
-                      onChange={(_e) => setFormData({ ...formData, parentId: e.target.value || null })}
+                      onChange={(e) => setFormData({ ...formData, parentId: e.target.value || null })}
                       className="select select-bordered w-full"
                     >
                       <option value="">Root Level</option>
@@ -408,7 +408,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
               {deleteConfirm.moveContentsTo !== null && (
                 <select
                   value={deleteConfirm.moveContentsTo}
-                  onChange={(_e) => setDeleteConfirm({ ...deleteConfirm, moveContentsTo: e.target.value || null })}
+                  onChange={(e) => setDeleteConfirm({ ...deleteConfirm, moveContentsTo: e.target.value || null })}
                   className="select select-bordered w-full mb-4"
                 >
                   <option value="">Root Level</option>

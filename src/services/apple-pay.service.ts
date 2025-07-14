@@ -117,7 +117,7 @@ export class ApplePayService {
 
       console.log('Apple Pay and StoreKit initialized');
       return { success: true };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error initializing Apple Pay:', error);
       return {
         success: false,
@@ -138,7 +138,7 @@ export class ApplePayService {
       // Check if Apple Pay is available on this device
       // This would call the native Apple Pay API
       return true; // Simulated response
-    } catch (_error) {
+    } catch (error) {
       console.error('Error checking Apple Pay availability:', error);
       return false;
     }
@@ -185,7 +185,7 @@ export class ApplePayService {
         success: true,
         products: mockProducts,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error querying products:', error);
       return {
         success: false,
@@ -226,7 +226,7 @@ export class ApplePayService {
         success: true,
         purchase: mockPurchase,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error purchasing subscription:', error);
       return {
         success: false,
@@ -270,7 +270,7 @@ export class ApplePayService {
       };
 
       return mockResult;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error processing Apple Pay payment:', error);
       return {
         success: false,
@@ -317,7 +317,7 @@ export class ApplePayService {
         environment: result.environment,
         fraudRisk: result.fraudRisk || 'low',
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error validating receipt:', error);
       return {
         valid: false,
@@ -346,7 +346,7 @@ export class ApplePayService {
         success: true,
         purchases: [],
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error restoring purchases:', error);
       return {
         success: false,
@@ -414,7 +414,7 @@ export class ApplePayService {
         success: true,
         subscription,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error creating subscription from purchase:', error);
       return {
         success: false,
@@ -451,7 +451,7 @@ export class ApplePayService {
       }
 
       return { success: true };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
@@ -507,7 +507,7 @@ export class ApplePayService {
         default:
           console.log(`Unhandled App Store notification type: ${notificationType}`);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling App Store server notification:', error);
     }
   }
@@ -541,7 +541,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling cancellation:', error);
     }
   }
@@ -567,7 +567,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling renewal:', error);
     }
   }
@@ -608,7 +608,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling renewal status change:', error);
     }
   }
@@ -633,7 +633,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling renewal failure:', error);
     }
   }
@@ -658,7 +658,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling recovery:', error);
     }
   }
@@ -689,7 +689,7 @@ export class ApplePayService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling refund:', error);
     }
   }

@@ -46,7 +46,7 @@ export class MobileImportExportService extends ImportExportService {
         directory: Directory.Documents,
         recursive: true
       });
-    } catch (_error) {
+    } catch (error) {
       // Directories might already exist
     }
   }
@@ -95,7 +95,7 @@ export class MobileImportExportService extends ImportExportService {
 
       // Default: return data for further processing
       return { success: true, uri: `data:application/json;base64,${btoa(exportData)}` };
-    } catch (_error) {
+    } catch (error) {
       console.error('Export failed:', error);
       return { 
         success: false, 
@@ -158,7 +158,7 @@ export class MobileImportExportService extends ImportExportService {
       const accounts = await this.importAccounts(fileContent, format, options.password);
       
       return { success: true, accounts };
-    } catch (_error) {
+    } catch (error) {
       console.error('Import failed:', error);
       return { 
         success: false, 
@@ -201,7 +201,7 @@ export class MobileImportExportService extends ImportExportService {
       });
 
       return { success: true, uri: result.uri };
-    } catch (_error) {
+    } catch (error) {
       console.error('Backup failed:', error);
       return { 
         success: false, 
@@ -260,7 +260,7 @@ export class MobileImportExportService extends ImportExportService {
       }
 
       return { success: true, accounts: backupData.accounts };
-    } catch (_error) {
+    } catch (error) {
       console.error('Restore failed:', error);
       return { 
         success: false, 
@@ -307,7 +307,7 @@ export class MobileImportExportService extends ImportExportService {
       );
 
       return backups.sort((a, b) => b.created.getTime() - a.created.getTime());
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to list backups:', error);
       return [];
     }
@@ -330,7 +330,7 @@ export class MobileImportExportService extends ImportExportService {
           path: `${this.BACKUP_DIR}/${backup.filename}`,
           directory: Directory.Documents
         });
-      } catch (_error) {
+      } catch (error) {
         console.error(`Failed to delete backup ${backup.filename}:`, _error);
       }
     }
@@ -432,7 +432,7 @@ export class MobileImportExportService extends ImportExportService {
         try {
           const content = await this.readFileAsText(file);
           resolve(content);
-        } catch (_error) {
+        } catch (error) {
           reject(_error);
         }
       };

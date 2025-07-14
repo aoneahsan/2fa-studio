@@ -40,7 +40,7 @@ import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 const AccountsPage: React.FC = () => {
   const dispatch = useDispatch();
   const modal = useSelector((state: RootState) => state.ui.modal);
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const showFavoritesOnly = useSelector((state: RootState) => state.accounts.showFavoritesOnly);
   const { filteredAccounts, isLoading } = useAccounts();
   const [showFilters, setShowFilters] = useState(false);

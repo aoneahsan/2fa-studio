@@ -31,7 +31,7 @@ export interface ScheduledNotification {
   type: string;
   title: string;
   body: string;
-  data: unknown;
+  data: any;
   scheduledAt: Date;
 }
 
@@ -69,7 +69,7 @@ export class MobileNotificationsService {
 
       console.log('Push notifications initialized successfully');
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize push notifications:', error);
       return false;
     }
@@ -146,7 +146,7 @@ export class MobileNotificationsService {
       );
 
       console.log('Local notifications initialized');
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize local notifications:', error);
     }
   }
@@ -238,7 +238,7 @@ export class MobileNotificationsService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get notification settings:', error);
     }
 
@@ -396,7 +396,7 @@ export class MobileNotificationsService {
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({ token, platform, userId: getCurrentUserId() })
       // });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to send token to server:', error);
     }
   }

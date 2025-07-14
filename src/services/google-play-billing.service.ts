@@ -94,7 +94,7 @@ export class GooglePlayBillingService {
 
       console.log('Google Play Billing initialized');
       return { success: true };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error initializing Google Play Billing:', error);
       return {
         success: false,
@@ -136,7 +136,7 @@ export class GooglePlayBillingService {
         success: true,
         products: mockProducts,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error querying products:', error);
       return {
         success: false,
@@ -178,7 +178,7 @@ export class GooglePlayBillingService {
         success: true,
         purchase: mockPurchase,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error purchasing subscription:', error);
       return {
         success: false,
@@ -204,7 +204,7 @@ export class GooglePlayBillingService {
       console.log('Acknowledging purchase:', purchaseToken);
 
       return { success: true };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error acknowledging purchase:', error);
       return {
         success: false,
@@ -232,7 +232,7 @@ export class GooglePlayBillingService {
         success: true,
         purchases: [],
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error querying purchases:', error);
       return {
         success: false,
@@ -278,7 +278,7 @@ export class GooglePlayBillingService {
         subscription: result.subscription,
         fraudRisk: result.fraudRisk || 'low',
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error validating receipt:', error);
       return {
         valid: false,
@@ -348,7 +348,7 @@ export class GooglePlayBillingService {
         success: true,
         subscription,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error creating subscription from purchase:', error);
       return {
         success: false,
@@ -385,7 +385,7 @@ export class GooglePlayBillingService {
       }
 
       return { success: true };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
@@ -409,7 +409,7 @@ export class GooglePlayBillingService {
       if (subscriptionNotification) {
         await this.handleSubscriptionNotification(subscriptionNotification);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling Google Play webhook:', error);
     }
   }
@@ -480,7 +480,7 @@ export class GooglePlayBillingService {
           updateData
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling subscription notification:', error);
     }
   }

@@ -176,7 +176,7 @@ export class StripeService {
         subscription: result.subscription,
         clientSecret: result.clientSecret,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error creating subscription:', error);
       return {
         success: false,
@@ -234,7 +234,7 @@ export class StripeService {
         success: true,
         subscription: result.subscription,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error updating subscription:', error);
       return {
         success: false,
@@ -295,7 +295,7 @@ export class StripeService {
         success: true,
         subscription: result.subscription,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error canceling subscription:', error);
       return {
         success: false,
@@ -328,7 +328,7 @@ export class StripeService {
         success: true,
         paymentMethods: result.paymentMethods,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting payment methods:', error);
       return {
         success: false,
@@ -374,7 +374,7 @@ export class StripeService {
         success: true,
         paymentMethod: result.paymentMethod,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error attaching payment method:', error);
       return {
         success: false,
@@ -413,7 +413,7 @@ export class StripeService {
       return {
         success: true,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error detaching payment method:', error);
       return {
         success: false,
@@ -446,7 +446,7 @@ export class StripeService {
         success: true,
         invoices: result.invoices,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting invoices:', error);
       return {
         success: false,
@@ -489,7 +489,7 @@ export class StripeService {
         success: true,
         url: result.url,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error creating portal session:', error);
       return {
         success: false,
@@ -556,7 +556,7 @@ export class StripeService {
           subscriptionData
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling subscription update:', error);
     }
   }
@@ -582,7 +582,7 @@ export class StripeService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling subscription deletion:', error);
     }
   }
@@ -609,7 +609,7 @@ export class StripeService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling invoice payment succeeded:', error);
     }
   }
@@ -635,7 +635,7 @@ export class StripeService {
           }
         );
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling invoice payment failed:', error);
     }
   }
@@ -666,7 +666,7 @@ export class StripeService {
           updatedAt: new Date(),
         });
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error handling payment method attached:', error);
     }
   }

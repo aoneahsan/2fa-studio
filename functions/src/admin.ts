@@ -17,7 +17,7 @@ async function isAdmin(uid: string): Promise<boolean> {
 		const userDoc = await db.collection('users').doc(uid).get();
 		const userData = userDoc.data();
 		return userData?.role === 'admin' || userData?.role === 'super_admin';
-	} catch (_error) {
+	} catch (error) {
 		return false;
 	}
 }
@@ -100,7 +100,7 @@ export const getUserStats = onCall(
 				subscriptionStats,
 				lastUpdated: new Date().toISOString(),
 			};
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error getting user stats:', error);
 			throw new HttpsError(
 				'internal',
@@ -174,7 +174,7 @@ export const updateUserSubscription = onCall(
 			});
 
 			return { success: true };
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error updating subscription:', error);
 			throw new HttpsError(
 				'internal',
@@ -262,7 +262,7 @@ export const deleteUser = onCall(
 			});
 
 			return { success: true };
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error deleting user:', error);
 			throw new HttpsError('internal', 'Failed to delete user');
 		}
@@ -346,7 +346,7 @@ export const getSystemStats = onCall(
 				revenue: revenueStats,
 				lastUpdated: new Date().toISOString(),
 			};
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error getting system stats:', error);
 			throw new HttpsError(
 				'internal',
@@ -420,7 +420,7 @@ export const sendNotification = onCall(
 			// TODO: Send push notifications via OneSignal
 
 			return { success: true, notificationsSent: userIds.length };
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error sending notifications:', error);
 			throw new HttpsError(
 				'internal',
@@ -488,7 +488,7 @@ export const exportUsers = onCall(
 				exportedAt: new Date().toISOString(),
 				exportedBy: context.uid,
 			};
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error exporting users:', error);
 			throw new HttpsError('internal', 'Failed to export users');
 		}
@@ -540,7 +540,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
 		} else {
 			res.status(404).json({ _error: 'Not found' });
 		}
-	} catch (_error) {
+	} catch (error) {
 		console.error('Admin API _error:', error);
 		res.status(500).json({ _error: 'Internal server error' });
 	}

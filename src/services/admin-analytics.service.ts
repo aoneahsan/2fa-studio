@@ -116,7 +116,7 @@ export interface AnalyticsFilter {
 
 export class AdminAnalyticsService {
   private static readonly CACHE_TTL = 300000; // 5 minutes
-  private static cache: Map<string, { data: unknown; timestamp: number }> = new Map();
+  private static cache: Map<string, { data: any; timestamp: number }> = new Map();
 
   /**
    * Get comprehensive dashboard metrics
@@ -153,7 +153,7 @@ export class AdminAnalyticsService {
 
       this.setCache(cacheKey, metrics);
       return metrics;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting dashboard metrics:', error);
       throw error;
     }
@@ -206,7 +206,7 @@ export class AdminAnalyticsService {
         userRetention,
         topCountries,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting user metrics:', error);
       throw error;
     }
@@ -276,7 +276,7 @@ export class AdminAnalyticsService {
         churnRate,
         refundRate,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting revenue metrics:', error);
       throw error;
     }
@@ -318,7 +318,7 @@ export class AdminAnalyticsService {
         averageBackupsPerUser,
         topFeatures,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting usage metrics:', error);
       throw error;
     }
@@ -348,7 +348,7 @@ export class AdminAnalyticsService {
         default:
           return [];
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting time series data:', error);
       return [];
     }
@@ -372,7 +372,7 @@ export class AdminAnalyticsService {
         errorRate: Math.random() * 5, // 0-5%
         responseTime: Math.floor(Math.random() * 200) + 100, // 100-300ms
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error getting real-time metrics:', error);
       return {
         activeUsers: 0,
@@ -402,7 +402,7 @@ export class AdminAnalyticsService {
       // For now, return basic structure
       
       return { data, summary };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error generating custom report:', error);
       throw error;
     }
@@ -595,7 +595,7 @@ export class AdminAnalyticsService {
     return null;
   }
 
-  private static setCache(key: string, data: unknown): void {
+  private static setCache(key: string, data: any): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),

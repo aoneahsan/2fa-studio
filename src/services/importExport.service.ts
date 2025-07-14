@@ -86,7 +86,7 @@ export class ImportExportService {
       });
       
       return result;
-    } catch (_error) {
+    } catch (error) {
       // Log failed export
       await AuditLogService.log({
         userId,

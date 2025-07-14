@@ -62,7 +62,7 @@ export const scheduleAutoBackup = onCall(
 			}
 
 			return { success: true };
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error scheduling backup:', error);
 			throw new HttpsError(
 				'internal',
@@ -136,7 +136,7 @@ export async function cleanupOldBackups() {
 
 		console.log(`Cleaned up ${totalDeleted} old backups`);
 		return { deleted: totalDeleted };
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error cleaning up backups:', error);
 		throw error;
 	}
@@ -233,7 +233,7 @@ export const exportUserData = onCall(
 			});
 
 			return { downloadUrl: url, expiresIn: '7 days' };
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error exporting user data:', error);
 			throw new HttpsError(
 				'internal',
@@ -319,7 +319,7 @@ export const validateBackup = onCall(
 					md5Hash: metadata.md5Hash,
 				},
 			};
-		} catch (_error) {
+		} catch (error) {
 			console.error('Error validating backup:', error);
 			throw new HttpsError(
 				'internal',
@@ -360,7 +360,7 @@ export async function runScheduledBackups() {
 
 		console.log(`Processed ${processed} scheduled backups`);
 		return { processed };
-	} catch (_error) {
+	} catch (error) {
 		console.error('Error running scheduled backups:', error);
 		throw error;
 	}

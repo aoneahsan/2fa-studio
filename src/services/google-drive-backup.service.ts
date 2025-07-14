@@ -68,7 +68,7 @@ export class GoogleDriveBackupService {
 
       // Ensure app folder exists
       await this.ensureAppFolder();
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize Google Drive:', error);
       throw new Error('Google Drive initialization failed');
     }
@@ -167,7 +167,7 @@ export class GoogleDriveBackupService {
       await this.cleanupOldBackups();
 
       return { success: true, fileId: response.data.id };
-    } catch (_error) {
+    } catch (error) {
       console.error('Backup failed:', error);
       return {
         success: false,
@@ -216,7 +216,7 @@ export class GoogleDriveBackupService {
           metadata
         };
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to list backups:', error);
       throw error;
     }
@@ -292,7 +292,7 @@ export class GoogleDriveBackupService {
       }));
 
       return { success: true, accounts };
-    } catch (_error) {
+    } catch (error) {
       console.error('Restore failed:', error);
       return {
         success: false,
@@ -312,7 +312,7 @@ export class GoogleDriveBackupService {
     try {
       await this.drive.files.delete({ fileId });
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to delete backup:', error);
       return false;
     }
@@ -352,7 +352,7 @@ export class GoogleDriveBackupService {
         encrypted: appProperties.encrypted === 'true',
         checksum: appProperties.checksum || ''
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get backup info:', error);
       return null;
     }
@@ -384,7 +384,7 @@ export class GoogleDriveBackupService {
         usage,
         available: limit - usage
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get quota info:', error);
       throw error;
     }
@@ -396,7 +396,7 @@ export class GoogleDriveBackupService {
   private static async ensureAppFolder(): Promise<void> {
     try {
       await this.getAppFolderId();
-    } catch (_error) {
+    } catch (error) {
       // Folder doesn't exist, create it
       await this.drive.files.create({
         requestBody: {
@@ -437,7 +437,7 @@ export class GoogleDriveBackupService {
           await this.deleteBackup(backup.id);
         }
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to cleanup old backups:', error);
     }
   }
@@ -481,7 +481,7 @@ export class GoogleDriveBackupService {
     try {
       await this.drive.about.get({ fields: 'user' });
       return { success: true };
-    } catch (_error) {
+    } catch (error) {
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Connection test failed'
@@ -502,7 +502,7 @@ export class GoogleDriveBackupService {
         fields: 'user,storageQuota'
       });
       return response.data;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get user info:', error);
       throw error;
     }

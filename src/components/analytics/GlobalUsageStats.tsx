@@ -21,7 +21,7 @@ import {
  * Component for displaying global usage statistics
  */
 const GlobalUsageStats: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const { accounts } = useSelector((state: RootState) => state.accounts);
   const [stats, setStats] = useState<GlobalStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +44,7 @@ const GlobalUsageStats: React.FC = () => {
         timeRange
       );
       setStats(globalStats);
-    } catch (_error) {
+    } catch (error) {
       console.error('Error loading global stats:', error);
     } finally {
       setIsLoading(false);
@@ -77,7 +77,7 @@ const GlobalUsageStats: React.FC = () => {
         <h2 className="text-xl font-semibold">Usage Analytics</h2>
         <select
           value={timeRange}
-          onChange={(_e) => setTimeRange(Number(e.target.value))}
+          onChange={(e) => setTimeRange(Number(e.target.value))}
           className="px-3 py-1.5 border border-border rounded-md bg-background text-sm"
         >
           <option value={7}>Last 7 days</option>

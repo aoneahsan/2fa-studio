@@ -24,7 +24,7 @@ import AdInterstitialTrigger from '@components/ads/AdInterstitialTrigger';
  */
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const { accounts, isLoading } = useAccounts();
   const { lastBackup } = useSelector((state: RootState) => state.settings);
 

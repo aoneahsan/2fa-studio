@@ -125,7 +125,7 @@ export interface PolicyRule {
   condition: {
     field: string;
     operator: 'equals' | 'not_equals' | 'contains' | 'greater_than' | 'less_than' | 'regex';
-    value: unknown;
+    value: any;
   };
   action: 'allow' | 'deny' | 'require_approval' | 'notify';
   message?: string;
@@ -230,7 +230,7 @@ export class PolicyEnforcementService {
       this.clearTeamCache(policy.teamId);
 
       return docRef.id;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to create policy:', error);
       throw error;
     }
@@ -281,7 +281,7 @@ export class PolicyEnforcementService {
 
       // Clear cache for this team
       this.clearTeamCache(policy.teamId);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update policy:', error);
       throw error;
     }
@@ -351,7 +351,7 @@ export class PolicyEnforcementService {
       }
 
       return evaluation;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to evaluate policies:', error);
       throw error;
     }
@@ -374,7 +374,7 @@ export class PolicyEnforcementService {
         updatedAt: docSnap.data().updatedAt?.toDate(),
         lastEnforcedAt: docSnap.data().lastEnforcedAt?.toDate()
       } as TeamPolicy;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get policy:', error);
       throw error;
     }
@@ -409,7 +409,7 @@ export class PolicyEnforcementService {
       this.cacheTeamPolicies(teamId, policies);
 
       return policies;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get team policies:', error);
       throw error;
     }
@@ -450,7 +450,7 @@ export class PolicyEnforcementService {
         timestamp: doc.data().timestamp?.toDate(),
         resolvedAt: doc.data().resolvedAt?.toDate()
       } as PolicyViolation));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get policy violations:', error);
       throw error;
     }
@@ -487,7 +487,7 @@ export class PolicyEnforcementService {
           resolution
         }
       );
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to resolve violation:', error);
       throw error;
     }
@@ -536,7 +536,7 @@ export class PolicyEnforcementService {
         valid: errors.length === 0,
         errors
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to check password policy:', error);
       return { valid: true, errors: [] };
     }
@@ -568,7 +568,7 @@ export class PolicyEnforcementService {
       }
 
       return { allowed: true };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to check session policy:', error);
       return { allowed: true };
     }
@@ -627,7 +627,7 @@ export class PolicyEnforcementService {
       }
 
       return { allowed: true };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to check IP policy:', error);
       return { allowed: true };
     }

@@ -62,7 +62,7 @@ export class GoogleDriveService {
             });
             this.gapiInited = true;
             resolve();
-          } catch (_error) {
+          } catch (error) {
             reject(_error);
           }
         });
@@ -146,7 +146,7 @@ export class GoogleDriveService {
   /**
    * Create backup in Google Drive
    */
-  static async createBackup(data: unknown, encryptionPassword?: string): Promise<string> {
+  static async createBackup(data: any, encryptionPassword?: string): Promise<string> {
     if (!this.isAuthenticated()) {
       throw new Error('Not authenticated with Google Drive');
     }
@@ -216,7 +216,7 @@ export class GoogleDriveService {
       });
 
       return response.result.id;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to create backup:', error);
       throw error;
     }
@@ -251,7 +251,7 @@ export class GoogleDriveService {
           modifiedTime: file.modifiedTime || new Date().toISOString(),
           size: file.size || '0'
         }));
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to list backups:', error);
       throw error;
     }
@@ -272,7 +272,7 @@ export class GoogleDriveService {
         alt: 'media',
       });
 
-      let data: unknown = response.result;
+      let data: any = response.result;
       
       // Check if data is encrypted
       if (typeof data === 'string') {
@@ -293,7 +293,7 @@ export class GoogleDriveService {
       }
 
       return data;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get backup:', error);
       throw error;
     }
@@ -312,7 +312,7 @@ export class GoogleDriveService {
       await gapi.client.drive.files.delete({
         fileId: fileId,
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to delete backup:', error);
       throw error;
     }
@@ -337,7 +337,7 @@ export class GoogleDriveService {
         used: parseInt(quota?.usage || '0'),
         limit: parseInt(quota?.limit || '0'),
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get storage quota:', error);
       throw error;
     }
@@ -346,7 +346,7 @@ export class GoogleDriveService {
   /**
    * Sync backup with Google Drive
    */
-  static async syncBackup(data: unknown, encryptionPassword?: string): Promise<void> {
+  static async syncBackup(data: any, encryptionPassword?: string): Promise<void> {
     try {
       // Get latest backup
       const backups = await this.listBackups();
@@ -372,7 +372,7 @@ export class GoogleDriveService {
           await this.deleteBackup(backup.id);
         }
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to sync backup:', error);
       throw error;
     }

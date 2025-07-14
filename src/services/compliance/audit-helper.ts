@@ -29,7 +29,7 @@ export function Audited(
       try {
         result = await originalMethod.apply(this, args);
         return result;
-      } catch (_error) {
+      } catch (error) {
         success = false;
         errorMessage = error instanceof Error ? error.message : 'Unknown error';
         throw error;

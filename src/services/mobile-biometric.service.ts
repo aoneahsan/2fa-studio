@@ -48,7 +48,7 @@ export class MobileBiometricService {
         type: result.biometryType,
         reason: result.reason
       };
-    } catch (_error) {
+    } catch (error) {
       return { 
         available: false, 
         reason: 'Error checking biometry' 
@@ -65,7 +65,7 @@ export class MobileBiometricService {
       if (value) {
         return JSON.parse(value);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get biometric _config:', error);
     }
 
@@ -110,7 +110,7 @@ export class MobileBiometricService {
       await this.saveConfig(_config);
 
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to enable biometric:', error);
       return false;
     }
@@ -137,7 +137,7 @@ export class MobileBiometricService {
       this.authenticatedSessions.clear();
 
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to disable biometric:', error);
       return false;
     }
@@ -168,7 +168,7 @@ export class MobileBiometricService {
       }
 
       return result;
-    } catch (_error) {
+    } catch (error) {
       console.error('Biometric authentication failed:', error);
       return false;
     }

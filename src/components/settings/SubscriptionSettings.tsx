@@ -33,7 +33,7 @@ interface PricingPlan {
  */
 const SubscriptionSettings: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state._auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -120,7 +120,7 @@ const SubscriptionSettings: React.FC = () => {
         type: 'success',
         message: `Successfully upgraded to ${planId} plan!`
       }));
-    } catch (_error) {
+    } catch (error) {
       dispatch(addToast({
         type: 'error',
         message: 'Payment failed. Please try again.'

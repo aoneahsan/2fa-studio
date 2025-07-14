@@ -70,7 +70,7 @@ export class AdMobService {
 
       this.initialized = true;
       console.log('AdMob initialized successfully');
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize AdMob:', error);
     }
   }
@@ -139,7 +139,7 @@ export class AdMobService {
 
       await AdMob.showBanner(options);
       this.bannerShowing = true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to show banner:', error);
     }
   }
@@ -155,7 +155,7 @@ export class AdMobService {
     try {
       await AdMob.hideBanner();
       this.bannerShowing = false;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to hide banner:', error);
     }
   }
@@ -167,7 +167,7 @@ export class AdMobService {
     try {
       await AdMob.removeBanner();
       this.bannerShowing = false;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to remove banner:', error);
     }
   }
@@ -187,7 +187,7 @@ export class AdMobService {
       };
 
       await AdMob.prepareInterstitial(options);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to prepare interstitial:', error);
     }
   }
@@ -203,7 +203,7 @@ export class AdMobService {
     try {
       await AdMob.showInterstitial();
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to show interstitial:', error);
       // Try to prepare for next time
       this.prepareInterstitial();
@@ -226,7 +226,7 @@ export class AdMobService {
       };
 
       await AdMob.prepareRewardVideo(options);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to prepare rewarded video:', error);
     }
   }
@@ -305,7 +305,7 @@ export class AdMobService {
 
     try {
       await AdMob.resume();
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to resume ads:', error);
     }
   }
@@ -320,7 +320,7 @@ export class AdMobService {
 
     try {
       await AdMob.pause();
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to pause ads:', error);
     }
   }

@@ -14,7 +14,7 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ requireSuperAdmin = false }) => {
-  const { isAuthenticated, user } = useAppSelector((state) => state._auth);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean | null>(null);
 

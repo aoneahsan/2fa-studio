@@ -100,7 +100,7 @@ export class ReceiptValidationService {
       await this.storeValidationRecord(request, _result);
 
       return result;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error validating receipt:', error);
       return {
         valid: false,
@@ -147,7 +147,7 @@ export class ReceiptValidationService {
           stripeCustomerId: data.customerId,
         },
       };
-    } catch (_error) {
+    } catch (error) {
       return {
         valid: false,
         fraudRisk: 'high',
@@ -214,7 +214,7 @@ export class ReceiptValidationService {
           productId: request.productId,
         },
       };
-    } catch (_error) {
+    } catch (error) {
       return {
         valid: false,
         fraudRisk: 'high',
@@ -284,7 +284,7 @@ export class ReceiptValidationService {
           environment: validation.environment,
         },
       };
-    } catch (_error) {
+    } catch (error) {
       return {
         valid: false,
         fraudRisk: 'high',
@@ -392,7 +392,7 @@ export class ReceiptValidationService {
         recommendation,
         details,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error in fraud detection:', error);
       return {
         score: 50, // Medium risk if we can't analyze
@@ -456,7 +456,7 @@ export class ReceiptValidationService {
           ...result.metadata,
         },
       });
-    } catch (_error) {
+    } catch (error) {
       console.error('Error storing validation record:', error);
     }
   }

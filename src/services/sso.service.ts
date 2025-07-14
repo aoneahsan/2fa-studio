@@ -82,7 +82,7 @@ export class SSOService {
     try {
       // Load SSO configurations from Firestore
       await this.loadSSOConfigurations();
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initialize SSO service:', error);
       await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
@@ -122,7 +122,7 @@ export class SSOService {
       this.ssoConfigs.set(configId, ssoConfig);
 
       return configId;
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to create SSO _config:', error);
       await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
@@ -155,7 +155,7 @@ export class SSOService {
         success: true,
         redirectUrl: `${samlConfig.ssoUrl}?SAMLRequest=${encodeURIComponent(samlRequest)}&RelayState=${encodeURIComponent(relayState || '')}`
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initiate SAML login:', error);
       await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
@@ -207,7 +207,7 @@ export class SSOService {
         success: true,
         user
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to handle SAML response:', error);
       await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
@@ -244,7 +244,7 @@ export class SSOService {
         success: true,
         redirectUrl: authUrl
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to initiate OIDC login:', error);
       await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
@@ -291,7 +291,7 @@ export class SSOService {
         success: true,
         user
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to handle OIDC callback:', error);
       await ErrorMonitoringService.reportError(_error, {
         category: 'auth',
@@ -317,7 +317,7 @@ export class SSOService {
       
       // In a real implementation, this would be handled by a backend service
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('LDAP connection test failed:', error);
       return false;
     }
@@ -337,7 +337,7 @@ export class SSOService {
       );
 
       return result.success ? result.data : [];
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to get available SSO providers:', error);
       return [];
     }
@@ -363,7 +363,7 @@ export class SSOService {
       if (existing) {
         this.ssoConfigs.set(configId, { ...existing, ...updatedConfig });
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to update SSO _config:', error);
       throw error;
     }
@@ -376,7 +376,7 @@ export class SSOService {
     try {
       await FirestoreService.deleteDocument('sso_configurations', configId);
       this.ssoConfigs.delete(configId);
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to delete SSO _config:', error);
       throw error;
     }
@@ -570,7 +570,7 @@ export class SSOService {
         
         return { ...newUser, id: userId };
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Failed to create or update SSO user:', error);
       throw error;
     }
