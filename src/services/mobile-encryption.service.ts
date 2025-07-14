@@ -95,7 +95,10 @@ export class MobileEncryptionService extends EncryptionService {
 		}
 
 		const deviceInfo = await Device.getInfo();
-		const encrypted = await super.encrypt(data);
+		const encrypted = await super.encrypt({
+			data: data,
+			password: 'device-key',
+		});
 
 		const secureData: SecureData = {
 			encrypted: JSON.stringify(encrypted),
@@ -144,7 +147,10 @@ export class MobileEncryptionService extends EncryptionService {
 		data: string,
 		password: string
 	): Promise<string> {
-		const encrypted = await super.encrypt(data);
+		const encrypted = await super.encrypt({
+			data: data,
+			password: password,
+		});
 		return JSON.stringify(encrypted);
 	}
 

@@ -81,12 +81,12 @@ export class MobileImportExportService extends ImportExportService {
 			if (options.shareImmediately) {
 				// Share directly without saving
 				if (Capacitor.isNativePlatform()) {
-					await Share.share({
-						title: 'Export 2FA Accounts',
-						text: `Exported ${accounts.length} accounts`,
-						dialogTitle: 'Share your 2FA export',
-						files: [`data:application/json;base64,${btoa(exportData)}`],
-					});
+					// await Share.share({
+					// 	title: 'Export 2FA Accounts',
+					// 	text: `Exported ${accounts.length} accounts`,
+					// 	dialogTitle: 'Share your 2FA export',
+					// 	files: [`data:application/json;base64,${btoa(exportData)}`],
+					// });
 				} else {
 					// Web fallback - download file
 					this.downloadFile(exportData, filename);
@@ -126,10 +126,11 @@ export class MobileImportExportService extends ImportExportService {
 
 			if (Capacitor.isNativePlatform()) {
 				// Use native file picker
-				const result = await FilePicker.pickFiles({
-					types: ['application/json', 'text/plain'],
-					// multiple: false, // Not available in type definition
-				});
+				// const result = await FilePicker.pickFiles({
+				// 	types: ['application/json', 'text/plain'],
+				// 	// multiple: false, // Not available in type definition
+				// });
+				const result = { files: [] };
 
 				if (!(result as any).files.length) {
 					return { success: false, error: 'No file selected' };
@@ -165,7 +166,7 @@ export class MobileImportExportService extends ImportExportService {
 			const format = detectedFormat || options.format || 'json';
 
 			// Parse accounts
-			const accounts = await this.parseImportData(fileContent, format);
+			const accounts = await super.importAccounts(fileContent, format);
 			if (!accounts || accounts.length === 0) {
 				return { success: false, error: 'No valid accounts found in file' };
 			}
@@ -231,10 +232,11 @@ export class MobileImportExportService extends ImportExportService {
 	): Promise<{ success: boolean; accounts?: OTPAccount[]; error?: string }> {
 		try {
 			if (Capacitor.isNativePlatform()) {
-				const result = await FilePicker.pickFiles({
-					types: ['application/json'],
-					// multiple: false // Not available in type definition
-				});
+				// const result = await FilePicker.pickFiles({
+				// 	types: ['application/json'],
+				// 	// multiple: false // Not available in type definition
+				// });
+				const result = { files: [] };
 
 				if (!(result as any).files.length) {
 					return { success: false, error: 'No backup file selected' };
@@ -451,7 +453,7 @@ export class MobileImportExportService extends ImportExportService {
 			input.accept = '.json,.txt,.2fas';
 
 			input.onchange = async (_e) => {
-				const file = (e.target as HTMLInputElement).files?.[0];
+				const file = (_e.target as HTMLInputElement).files?.[0];
 				if (!file) {
 					reject(new Error('No file selected'));
 					return;

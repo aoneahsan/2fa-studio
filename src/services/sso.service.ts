@@ -322,7 +322,7 @@ export class SSOService {
 		try {
 			// This would use a server-side LDAP client
 			// For now, we'll simulate the test
-			console.log('Testing LDAP connection:', config.url);
+			console.log('Testing LDAP connection:', _config.url);
 
 			// In a real implementation, this would be handled by a backend service
 			return true;
