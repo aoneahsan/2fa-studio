@@ -129,7 +129,7 @@ class NotificationService {
 		}
 
 		try {
-			return OneSignal.Notifications.permission !== 'default';
+			return (OneSignal.Notifications.permission as any) !== 'default';
 		} catch (error) {
 			console.error('Error checking notification support:', error);
 			return false;
@@ -301,7 +301,7 @@ class NotificationService {
 
 			// Request permission without parameter and handle boolean return
 			const permission = await OneSignal.Notifications.requestPermission();
-			return permission === true;
+			return (permission as any) === true;
 		} catch (error) {
 			console.error('Error requesting notification permission:', error);
 			return false;

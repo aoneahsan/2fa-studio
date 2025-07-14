@@ -195,7 +195,7 @@ export class ErrorMonitoringService {
 
 			const result = await FirestoreService.getCollection<ErrorReport>(
 				'error_reports',
-				filters,
+				filters as any,
 				{ limit: 1000, orderBy: { field: 'timestamp', direction: 'desc' } }
 			);
 

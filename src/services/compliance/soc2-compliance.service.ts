@@ -532,7 +532,7 @@ export class SOC2ComplianceService {
 		updates: Partial<SecurityIncident>
 	): Promise<void> {
 		try {
-			const updateData: unknown = { ...updates };
+			const updateData: any = { ...updates };
 
 			if (updates.status === 'resolved' && !updates.resolvedAt) {
 				updateData.resolvedAt = serverTimestamp();
@@ -544,7 +544,7 @@ export class SOC2ComplianceService {
 
 			await updateDoc(
 				doc(db, this.INCIDENTS_COLLECTION, incidentId),
-				updateData
+				updateData as any
 			);
 
 			await AuditLoggingService.log({

@@ -463,7 +463,7 @@ export class DataRetentionService {
 	 * Get execution history
 	 */
 	static async getExecutionHistory(
-		limit: number = 100
+		limitCount: number = 100
 	): Promise<RetentionExecutionResult[]> {
 		try {
 			const q = query(
@@ -473,7 +473,7 @@ export class DataRetentionService {
 					'>',
 					new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
 				), // Last 90 days
-				limit(limit)
+				limit(limitCount)
 			);
 
 			const snapshot = await getDocs(q);
