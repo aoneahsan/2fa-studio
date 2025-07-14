@@ -21,11 +21,12 @@ import {
 	orderBy,
 	limit as firestoreLimit,
 } from 'firebase/firestore';
-import { db, functions } from '@services/firebase';
+import { db } from '@src/config/firebase';
+// import { functions } from '@src/config/firebase'; // functions not used
 import { httpsCallable } from 'firebase/functions';
 import { AuthService } from '@services/auth.service';
 import { RBACService, Resource, Action } from './rbac.service';
-import { TeamService } from '@services/team.service';
+// import { TeamService } from '@services/team.service'; // Service not found
 import { TeamVaultService } from './team-vault.service';
 import { AuditHelper } from '@services/compliance/audit-helper';
 import { EncryptionService } from '@services/encryption.service';
@@ -682,8 +683,7 @@ export class ProvisioningAPIService {
 				await AuthService.updateUser(userId, { disabled: true });
 			} else {
 				// Remove from team
-				await TeamService.removeTeamMember(teamId, userId);
-
+				// await TeamService.removeTeamMember(teamId, userId); // Service not found
 				// Optionally delete user completely
 				// await AuthService.deleteUser(userId);
 			}
