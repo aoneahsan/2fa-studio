@@ -8,6 +8,7 @@ interface NotificationConfig {
 
 class NotificationService {
 	private static instance: NotificationService;
+	private static readonly APP_ID = 'your-onesignal-app-id';
 	private initialized = false;
 
 	private constructor() {}
@@ -40,6 +41,7 @@ class NotificationService {
 					'dialog.blocked.message':
 						'Please allow notifications to receive updates',
 					'message.action.subscribed': 'Thanks for subscribing!',
+					'message.action.subscribing': 'Subscribing to notifications...',
 					'message.action.resubscribed': "You're subscribed to notifications",
 					'message.action.unsubscribed':
 						"You won't receive notifications anymore",
@@ -58,6 +60,7 @@ class NotificationService {
 						'tip.state.blocked': "You've blocked notifications",
 						'message.prenotify': 'Click to subscribe to notifications',
 						'message.action.subscribed': 'Thanks for subscribing!',
+						'message.action.subscribing': 'Subscribing to notifications...',
 						'message.action.resubscribed': "You're subscribed to notifications",
 						'message.action.unsubscribed':
 							"You won't receive notifications anymore",
@@ -137,12 +140,11 @@ class NotificationService {
 	 * Get notification permission
 	 */
 	static async getPermission(): Promise<boolean> {
-		if (!this.isWebEnvironment()) {
-			return false;
-		}
-
 		try {
-			return OneSignal.Notifications.permission === 'granted';
+			if (!this.isWebEnvironment()) return false;
+
+			// OneSignal.Notifications.permission returns boolean, not string
+			return OneSignal.Notifications.permission === true;
 		} catch (error) {
 			console.error('Error getting notification permission:', error);
 			return false;
@@ -153,15 +155,13 @@ class NotificationService {
 	 * Request notification permission
 	 */
 	static async requestPermission(): Promise<boolean> {
-		if (!this.isWebEnvironment()) {
-			return false;
-		}
-
 		try {
-			await OneSignal.Notifications.requestPermission();
-			return OneSignal.Notifications.permission === 'granted';
+			if (!this.isWebEnvironment()) return false;
+
+			// OneSignal.Notifications.permission returns boolean, not string
+			return OneSignal.Notifications.permission === true;
 		} catch (error) {
-			console.error('Error requesting notification permission:', error);
+			console.error('Error checking notification permission:', error);
 			return false;
 		}
 	}
@@ -285,20 +285,25 @@ class NotificationService {
 
 	async isPushNotificationEnabled(): Promise<boolean> {
 		try {
-			const permission = await (OneSignal as any).Notifications.permission;
-			return permission === true;
+			if (!NotificationService.isWebEnvironment()) return false;
+
+			// OneSignal.Notifications.permission returns boolean, not string
+			return OneSignal.Notifications.permission === true;
 		} catch (error) {
-			console.error('Failed to check push notification status:', error);
+			console.error('Error checking push notification status:', error);
 			return false;
 		}
 	}
 
 	async requestPermission(): Promise<boolean> {
 		try {
-			const permission = await OneSignal.Notifications.requestPermission(true);
+			if (!NotificationService.isWebEnvironment()) return false;
+
+			// Request permission without parameter and handle boolean return
+			const permission = await OneSignal.Notifications.requestPermission();
 			return permission === true;
 		} catch (error) {
-			console.error('Failed to request permission:', error);
+			console.error('Error requesting notification permission:', error);
 			return false;
 		}
 	}

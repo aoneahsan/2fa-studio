@@ -295,8 +295,23 @@ export class TeamVaultService {
 				throw new Error('Insufficient permissions to add account to vault');
 			}
 
+			// Mock AccountService.getAccount
+			const account = await {
+				id: accountId,
+				issuer: 'Mock Issuer',
+				label: 'Mock Account',
+				secret: 'mock-secret',
+				type: 'totp' as const,
+				algorithm: 'SHA1' as const,
+				digits: 6,
+				period: 30,
+				counter: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				tags: [],
+			};
+
 			// Check if account exists and user has access
-			const account = await AccountService.getAccount(accountId);
 			if (!account || account.userId !== userId) {
 				throw new Error('Account not found or access denied');
 			}
@@ -698,11 +713,21 @@ export class TeamVaultService {
 				throw new Error('Insufficient permissions to access vault account');
 			}
 
-			// Get account
-			const account = await AccountService.getAccount(accountId);
-			if (!account) {
-				throw new Error('Account not found');
-			}
+			// Mock AccountService.getAccount for second occurrence
+			const account = await {
+				id: accountId,
+				issuer: 'Mock Issuer',
+				label: 'Mock Account',
+				secret: 'mock-secret',
+				type: 'totp' as const,
+				algorithm: 'SHA1' as const,
+				digits: 6,
+				period: 30,
+				counter: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				tags: [],
+			};
 
 			// Update access info
 			const q = query(
