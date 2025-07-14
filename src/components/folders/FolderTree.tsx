@@ -49,7 +49,7 @@ const FolderNode: React.FC<FolderNodeProps> = ({
   const hasChildren = folder.children && folder.children.length > 0;
 
   const handleToggle = (_e: React.MouseEvent) => {
-    e.stopPropagation();
+    _e.stopPropagation();
     if (hasChildren) {
       dispatch(toggleFolderExpanded(folder.id));
     }

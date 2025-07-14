@@ -111,7 +111,7 @@ export async function onUserDelete(userId: string) {
  * Validate admin privileges
  */
 export const validateAdmin = onCall(async (request: FirebaseAuthRequest) => {
-	if (!request._auth) {
+	if (!request.auth) {
 		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
@@ -145,7 +145,7 @@ export const validateAdmin = onCall(async (request: FirebaseAuthRequest) => {
  */
 export const cleanupSessions = onCall(async (request: FirebaseAuthRequest) => {
 	// This can be called by scheduled function or admin
-	if (request._auth) {
+	if (request.auth) {
 		// Check if admin
 		const userDoc = await db.collection('users').doc(request.auth.uid).get();
 		if (
@@ -202,7 +202,7 @@ export async function cleanupExpiredSessions() {
 async function sendWelcomeNotification(user: unknown) {
 	try {
 		// Add welcome notification to user's notifications
-		await db.collection('users').doc(user.uid).collection('notifications').add({
+		await db.collection('users').doc((user as any).uid).collection('notifications').add({
 			title: 'Welcome to 2FA Studio!',
 			message:
 				'Your account has been created successfully. Start adding your 2FA accounts to keep them secure.',
@@ -222,7 +222,7 @@ async function sendWelcomeNotification(user: unknown) {
  * Create session for user
  */
 export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceInfo?: unknown; remember?: boolean}>) => {
-	if (!request._auth) {
+	if (!request.auth) {
 		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
@@ -241,10 +241,10 @@ export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceI
 		const sessionRef = await db.collection('sessions').add({
 			userId: request.auth.uid,
 			deviceInfo: {
-				userAgent: deviceInfo?.userAgent || 'Unknown',
-				platform: deviceInfo?.platform || 'Unknown',
-				browser: deviceInfo?.browser || 'Unknown',
-				ip: request.rawRequest?.ip || 'Unknown',
+				userAgent: (deviceInfo as any)?.userAgent || 'Unknown',
+				platform: (deviceInfo as any)?.platform || 'Unknown',
+				browser: (deviceInfo as any)?.browser || 'Unknown',
+				ip: (request.rawRequest as any)?.ip || 'Unknown',
 			},
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 			lastActiveAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -274,7 +274,7 @@ export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceI
  * Revoke session
  */
 export const revokeSession = onCall(async (request: FirebaseAuthRequest<{sessionId?: string}>) => {
-	if (!request._auth) {
+	if (!request.auth) {
 		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
@@ -323,7 +323,7 @@ export const revokeSession = onCall(async (request: FirebaseAuthRequest<{session
  * Get user sessions
  */
 export const getUserSessions = onCall(async (request: FirebaseAuthRequest) => {
-	if (!request._auth) {
+	if (!request.auth) {
 		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'

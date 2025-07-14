@@ -54,7 +54,7 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    e.preventDefault();
+    _e.preventDefault();
     
     // Validate form
     if (!email || !password || !confirmPassword || !encryptionPassword || !confirmEncryptionPassword) {
@@ -174,7 +174,7 @@ const RegisterPage: React.FC = () => {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(_e.target.value)}
                   className="input pl-10"
                   placeholder="you@example.com"
                 />

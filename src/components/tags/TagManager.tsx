@@ -38,7 +38,7 @@ interface TagFormData {
 const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
   const dispatch = useAppDispatch();
   const tags = useAppSelector(selectTags);
-  const user = useAppSelector(state => state.auth.user);
+  const user = useAppSelector(state => state._auth.user);
   
   const [isCreating, setIsCreating] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
@@ -81,7 +81,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    e.preventDefault();
+    _e.preventDefault();
     if (!user || !formData.name.trim()) return;
 
     setIsSubmitting(true);
@@ -160,7 +160,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, name: _e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
                       placeholder="e.g., Work, Personal, Finance"
                       required

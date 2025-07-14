@@ -33,7 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@comp
 import { Switch } from '@components/ui/switch';
 
 const PrivacyDashboard: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [loading, setLoading] = useState(true);
   const [consents, setConsents] = useState<ConsentRecord[]>([]);
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings | null>(null);

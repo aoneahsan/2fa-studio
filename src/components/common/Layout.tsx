@@ -35,7 +35,7 @@ interface NavItem {
 const Layout: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const { isLocked } = useSelector((state: RootState) => state.ui);
   const { lockApp } = useBiometric();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

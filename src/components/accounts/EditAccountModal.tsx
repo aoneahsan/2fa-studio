@@ -38,7 +38,7 @@ import FingerPrintIcon from '@components/icons/FingerPrintIcon';
 const EditAccountModal: React.FC = () => {
   const dispatch = useDispatch();
   const modal = useSelector((state: RootState) => state.ui.modal);
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const accounts = useSelector((state: RootState) => state.accounts.accounts);
   const tags = useSelector(selectTags);
   const folders = useSelector(selectFolders);
@@ -98,7 +98,7 @@ const EditAccountModal: React.FC = () => {
   };
 
   const handleChange = (_e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = _e.target;
     setFormData(prev => ({
       ...prev,
       [name]: name === 'period' || name === 'digits' || name === 'counter' 
@@ -109,7 +109,7 @@ const EditAccountModal: React.FC = () => {
 
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    e.preventDefault();
+    _e.preventDefault();
     
     if (!account) return;
     

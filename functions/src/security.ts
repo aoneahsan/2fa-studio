@@ -69,7 +69,7 @@ export const enforceRateLimit = onCall(
 		const data = request.data;
 		const context = request.auth;
 		const { action = 'api', identifier } = data ?? {};
-		const id = identifier || context?.uid || request.rawRequest.ip;
+		const id = identifier || context?.uid || (request.rawRequest as unknown).ip;
 
 		const limit =
 			RATE_LIMITS[action as keyof typeof RATE_LIMITS] || RATE_LIMITS.api;
@@ -97,7 +97,7 @@ export const enforceRateLimit = onCall(
 				await db.collection('audit_logs').add({
 					action: 'rate_limit_exceeded',
 					userId: context?.uid,
-					ip: request.rawRequest.ip,
+					ip: (request.rawRequest as unknown).ip,
 					limit: action,
 					timestamp: admin.firestore.FieldValue.serverTimestamp(),
 				});
@@ -121,7 +121,7 @@ export const enforceRateLimit = onCall(
 				resetAt: new Date(windowStart + limit.window * 1000).toISOString(),
 			};
 		} catch (_error: unknown) {
-			if ((error as unknown).code === 'resource-exhausted') {
+			if (error.code === 'resource-exhausted') {
 				throw error;
 			}
 			console.error('Error enforcing rate limit:', error);
@@ -173,7 +173,7 @@ export const validateRequest = onCall(
 			await db.collection('audit_logs').add({
 				action: 'invalid_signature',
 				userId: context?.uid,
-				ip: request.rawRequest.ip,
+				ip: (request.rawRequest as unknown).ip,
 				timestamp: admin.firestore.FieldValue.serverTimestamp(),
 			});
 
@@ -211,8 +211,8 @@ export const createAuditLog = onCall(
 				details,
 				severity,
 				userId: context?.uid || null,
-				ip: request.rawRequest.ip,
-				userAgent: request.rawRequest.headers['user-agent'],
+				ip: (request.rawRequest as unknown).ip,
+				userAgent: (request.rawRequest as unknown).headers['user-agent'],
 				timestamp: admin.firestore.FieldValue.serverTimestamp(),
 			};
 
@@ -357,7 +357,7 @@ async function alertAdmins(alert: unknown) {
 
 			batch.set(notificationRef, {
 				title: 'Security Alert',
-				message: `${alert.severity?.toUpperCase() || 'HIGH'}: ${alert.action}`,
+				message: `${(alert.severity as string)?.toUpperCase() || 'HIGH'}: ${alert.action}`,
 				type: 'security',
 				priority: 'high',
 				details: alert,
@@ -385,7 +385,7 @@ export const checkIPReputation = onCall(
 	},
 	async (request) => {
 		const data = request.data;
-		const ip = data?.ip || request.rawRequest.ip;
+		const ip = data?.ip || (request.rawRequest as unknown).ip;
 
 		try {
 			// Check if IP is in blocklist

@@ -18,7 +18,7 @@ interface UseAdsReturn {
 }
 
 export function useAds(): UseAdsReturn {
-	const user = useAppSelector((state) => state.auth.user);
+	const user = useAppSelector((state) => state._auth.user);
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [shouldShowAds, setShouldShowAds] = useState(false);
 

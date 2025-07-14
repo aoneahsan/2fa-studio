@@ -18,13 +18,13 @@ import { CameraIcon, UserCircleIcon } from '@heroicons/react/24/outline';
  */
 const ProfileSettings: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [isLoading, setIsLoading] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [photoURL, setPhotoURL] = useState(user?.photoURL || '');
 
   const handleUpdateProfile = async (_e: React.FormEvent) => {
-    e.preventDefault();
+    _e.preventDefault();
     
     if (!auth.currentUser || !user) return;
 
@@ -73,7 +73,7 @@ const ProfileSettings: React.FC = () => {
   };
 
   const handlePhotoUpload = async (_e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = _e.target.files?.[0];
     if (!file) return;
 
     // In a real app, you would upload to Firebase Storage

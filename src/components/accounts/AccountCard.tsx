@@ -39,7 +39,7 @@ interface AccountCardProps {
  */
 const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, onToggleFavorite }) => {
   const dispatch = useDispatch();
-  const { user } = useAppSelector((state: RootState) => state.auth);
+  const { user } = useAppSelector((state: RootState) => state._auth);
   const [otpCode, setOtpCode] = useState('');
   const [remainingTime, setRemainingTime] = useState(0);
   const [progress, setProgress] = useState(0);

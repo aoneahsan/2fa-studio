@@ -28,7 +28,7 @@ import { AuditLogService } from '@services/audit-log.service';
  */
 export const useAccounts = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, encryptionKey } = useSelector((state: RootState) => state.auth);
+  const { user, encryptionKey } = useSelector((state: RootState) => state._auth);
   const accountsState = useSelector((state: RootState) => state.accounts);
   const activeTags = useSelector(selectActiveTags);
   const filterMode = useSelector(selectFilterMode);

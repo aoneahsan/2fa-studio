@@ -6,6 +6,10 @@ import 'cypress'
 
 declare global {
   declare global {
+  }}
+
+declare global {
+  declare global {
   }
 
 declare global {
@@ -146,4 +150,5 @@ Cypress.Commands.add('setupEmulator', () => {
 });
 
 export {};
+}
 }

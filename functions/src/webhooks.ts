@@ -121,12 +121,12 @@ export async function handleWebhook(req: unknown, res: unknown) {
 
 		case 'onesignal':
 			// Type assertion needed for Firebase Functions
-			await handleOneSignalWebhook(req as unknown, res);
+			await handleOneSignalWebhook(req, res);
 			break;
 
 		case 'googledrive':
 			// Type assertion needed for Firebase Functions
-			await handleGoogleDriveWebhook(req as unknown, res);
+			await handleGoogleDriveWebhook(req, res);
 			break;
 
 		default:

@@ -138,7 +138,7 @@ export const generateReports = onCall(
 		const context = request.auth;
 		
 		// Check admin privileges
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'

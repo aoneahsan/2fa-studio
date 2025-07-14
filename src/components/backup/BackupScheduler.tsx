@@ -24,7 +24,7 @@ import { format } from 'date-fns';
  * Component for managing backup schedules
  */
 const BackupScheduler: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [schedules, setSchedules] = useState<BackupSchedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showScheduleModal, setShowScheduleModal] = useState(false);

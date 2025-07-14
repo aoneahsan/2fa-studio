@@ -24,7 +24,7 @@ export const scheduleAutoBackup = onCall(
 		const data = request.data;
 		const context = request.auth;
 		
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -153,7 +153,7 @@ export const exportUserData = onCall(
 	async (request) => {
 		const context = request.auth;
 		
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -170,7 +170,7 @@ export const exportUserData = onCall(
 			// Get user data
 			const userDoc = await db.collection('users').doc(userId).get();
 			if (userDoc.exists) {
-				exportData.user = userDoc.data();
+				(exportData as any).user = userDoc.data();
 			}
 
 			// Get accounts
@@ -179,9 +179,9 @@ export const exportUserData = onCall(
 				.where('userId', '==', userId)
 				.get();
 
-			exportData.accounts = [];
+			(exportData as any).accounts = [];
 			accountsSnapshot.forEach((doc) => {
-				exportData.accounts.push({
+				(exportData as any).accounts.push({
 					id: doc.id,
 					...doc.data(),
 				});
@@ -195,11 +195,11 @@ export const exportUserData = onCall(
 				.limit(10)
 				.get();
 
-			exportData.backups = [];
+			(exportData as any).backups = [];
 			backupsSnapshot.forEach((doc) => {
 				const backup = doc.data();
 				// Don't include actual backup data, just metadata
-				exportData.backups.push({
+				(exportData as any).backups.push({
 					id: doc.id,
 					createdAt: backup.createdAt,
 					size: backup.size,
@@ -255,7 +255,7 @@ export const validateBackup = onCall(
 		const data = request.data;
 		const context = request.auth;
 		
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'

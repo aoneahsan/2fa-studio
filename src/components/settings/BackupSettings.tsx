@@ -32,7 +32,7 @@ interface BackupInfo {
  */
 const BackupSettings: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   
@@ -121,7 +121,7 @@ const BackupSettings: React.FC = () => {
   };
 
   const handleFrequencyChange = (_e: React.ChangeEvent<HTMLSelectElement>) => {
-    const frequency = e.target.value as BackupInfo['backupFrequency'];
+    const frequency = _e.target.value as BackupInfo['backupFrequency'];
     setBackupInfo({ ...backupInfo, backupFrequency: frequency });
     dispatch(addToast({
       type: 'success',

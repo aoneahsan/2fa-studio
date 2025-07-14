@@ -30,7 +30,7 @@ const BiometricSettings: React.FC<BiometricSettingsProps> = ({
   onUpdate 
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [isLoading, setIsLoading] = useState(false);
   const [timeout, setTimeout] = useState(account.biometricTimeout || 5);
   

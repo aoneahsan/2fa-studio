@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   static getDerivedStateFromError(_error: Error): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
-      error
+      _error
     };
   }
 
@@ -55,8 +55,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   private reportError(_error: Error, errorInfo: React.ErrorInfo) {
     // In a real app, this would send to Sentry or similar service
     const errorReport = {
-      message: error.message,
-      stack: error.stack,
+      message: _error.message,
+      stack: _error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
@@ -131,7 +131,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <details className="error-boundary__details">
                 <summary>Error Details (Development Only)</summary>
                 <pre className="error-boundary__error">
-                  {this.state.error?.stack}
+                  {this.state._error?.stack}
                 </pre>
                 <pre className="error-boundary__component-stack">
                   {this.state.errorInfo?.componentStack}
@@ -150,16 +150,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 // Hook for functional components
 export const useErrorHandler = () => {
   const handleError = (_error: Error, errorInfo?: unknown) => {
-    console.error('Error handled by hook:', error);
+    console.error('Error handled by hook:', _error);
     
     // Report error
     const errorReport = {
-      message: error.message,
-      stack: error.stack,
+      message: _error.message,
+      stack: _error.stack,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href,
-      ...errorInfo
+      ...(errorInfo as any)
     };
 
     try {

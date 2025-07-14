@@ -3,6 +3,8 @@
  * @module utils/performance-monitor
  */
 
+import React from 'react';
+
 export interface PerformanceMetrics {
   loadTime: number;
   renderTime: number;

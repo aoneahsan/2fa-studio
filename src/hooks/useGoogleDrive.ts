@@ -35,7 +35,7 @@ interface UseGoogleDriveReturn {
 
 export const useGoogleDrive = (): UseGoogleDriveReturn => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const { accounts } = useSelector((state: RootState) => state.accounts);
   const settings = useSelector((state: RootState) => state.settings);
   

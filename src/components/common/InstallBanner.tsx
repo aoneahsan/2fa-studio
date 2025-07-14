@@ -48,7 +48,7 @@ const InstallBanner: React.FC = () => {
 
     // Handle install prompt for other platforms
     const handleBeforeInstallPrompt = (_e: BeforeInstallPromptEvent) => {
-      e.preventDefault();
+      _e.preventDefault();
       setDeferredPrompt(_e);
       
       const hasShownBanner = localStorage.getItem('2fa-install-banner-shown');

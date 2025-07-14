@@ -21,7 +21,7 @@ import {
  * Component for displaying global usage statistics
  */
 const GlobalUsageStats: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const { accounts } = useSelector((state: RootState) => state.accounts);
   const [stats, setStats] = useState<GlobalStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);

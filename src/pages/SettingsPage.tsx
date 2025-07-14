@@ -34,7 +34,7 @@ type SettingsTab = 'profile' | 'appearance' | 'security' | 'backup' | 'notificat
  */
 const SettingsPage: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
 
   const tabs = [

@@ -26,7 +26,7 @@ const LoginPage: React.FC = () => {
   const [showEncryptionField, setShowEncryptionField] = useState(false);
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    e.preventDefault();
+    _e.preventDefault();
     
     if (!email || !password) {
       dispatch(addToast({
@@ -116,7 +116,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="email"
                       required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(_e.target.value)}
                       className="input pl-10"
                       placeholder="you@example.com"
                     />

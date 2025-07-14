@@ -31,7 +31,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
   ];
 
   const handleFileChange = (_e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+    const selectedFile = _e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       const format = formats.find(f => f.value === selectedFormat);
@@ -105,13 +105,13 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
   };
 
   const handleDragOver = (_e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    _e.preventDefault();
+    _e.stopPropagation();
   };
 
   const handleDrop = (_e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    _e.preventDefault();
+    _e.stopPropagation();
     
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
@@ -147,7 +147,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
               </label>
               <select
                 value={selectedFormat}
-                onChange={(e) => handleFormatChange(e.target.value as ImportFormat)}
+                onChange={(e) => handleFormatChange(_e.target.value as ImportFormat)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent"

@@ -34,7 +34,7 @@ export const getUserStats = onCall(
 		const context = request.auth;
 		
 		// Check authentication
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -123,7 +123,7 @@ export const updateUserSubscription = onCall(
 		const context = request.auth;
 		
 		// Check authentication
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -197,7 +197,7 @@ export const deleteUser = onCall(
 		const context = request.auth;
 		
 		// Check authentication
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -281,7 +281,7 @@ export const getSystemStats = onCall(
 		const context = request.auth;
 		
 		// Check authentication
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -369,7 +369,7 @@ export const sendNotification = onCall(
 		const context = request.auth;
 		
 		// Check authentication
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -442,7 +442,7 @@ export const exportUsers = onCall(
 		const context = request.auth;
 		
 		// Check authentication
-		if (!_context) {
+		if (!context) {
 			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
@@ -504,7 +504,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
 	// Verify admin token
 	const token = req.headers.authorization?.split('Bearer ')[1];
 	if (!token) {
-		res.status(401).json({ _error: 'Unauthorized' });
+		res.status(401).json({ error: 'Unauthorized' });
 		return;
 	}
 
@@ -513,7 +513,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
 		const isUserAdmin = await isAdmin(decodedToken.uid);
 
 		if (!isUserAdmin) {
-			res.status(403).json({ _error: 'Forbidden' });
+			res.status(403).json({ error: 'Forbidden' });
 			return;
 		}
 
@@ -538,11 +538,11 @@ export async function handleAdminAPI(req: Request, res: Response) {
 
 			res.json({ users, page, limit });
 		} else {
-			res.status(404).json({ _error: 'Not found' });
+			res.status(404).json({ error: 'Not found' });
 		}
 	} catch (error) {
-		console.error('Admin API _error:', error);
-		res.status(500).json({ _error: 'Internal server error' });
+		console.error('Admin API error:', error);
+		res.status(500).json({ error: 'Internal server error' });
 	}
 }
 

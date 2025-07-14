@@ -33,7 +33,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (_e: React.FormEvent) => {
-    e.preventDefault();
+    _e.preventDefault();
     
     if (!reason.trim()) {
       showToast('error', 'Please provide a reason for the update');
@@ -102,7 +102,7 @@ const UpdateSubscriptionModal: React.FC<UpdateSubscriptionModalProps> = ({
               </label>
               <select
                 value={tier}
-                onChange={(e) => setTier(e.target.value as SubscriptionTier)}
+                onChange={(e) => setTier(_e.target.value as SubscriptionTier)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
               >
                 <option value="free">Free</option>

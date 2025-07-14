@@ -45,7 +45,7 @@ const AddAccountModal: React.FC = () => {
   const dispatch = useDispatch();
   const { addAccount } = useAccounts();
   const tags = useAppSelector(selectTags);
-  const user = useAppSelector(state => state.auth.user);
+  const user = useAppSelector(state => state._auth.user);
   const [mode, setMode] = useState<'choice' | 'scan' | 'manual'>('choice');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -129,7 +129,7 @@ const AddAccountModal: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = async (_e: React.FormEvent) => {
-    e.preventDefault();
+    _e.preventDefault();
 
     if (!validateForm()) {
       return;
@@ -251,7 +251,7 @@ const AddAccountModal: React.FC = () => {
                 <input
                   type="text"
                   value={formData.issuer}
-                  onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, issuer: _e.target.value })}
                   className="input"
                   placeholder="e.g., Google, GitHub, etc."
                 />

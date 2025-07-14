@@ -72,7 +72,7 @@ const AdvancedSearch: React.FC = () => {
   }, [recentSearches]);
 
   const handleSearchChange = useCallback((_e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const value = _e.target.value;
     dispatch(setSearchQuery(value));
     
     // Store enhanced search options in Redux if needed

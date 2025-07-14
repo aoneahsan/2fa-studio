@@ -28,7 +28,7 @@ interface DeviceManagerProps {
  * Modal for managing connected devices
  */
 const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [devices, setDevices] = useState<DeviceInfo[]>([]);
   const [sessions, setSessions] = useState<DeviceSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);

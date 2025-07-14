@@ -63,7 +63,7 @@ const SecuritySettings: React.FC = () => {
   };
 
   const handleAutoLockChange = (_e: React.ChangeEvent<HTMLSelectElement>) => {
-    const timeout = parseInt(e.target.value);
+    const timeout = parseInt(_e.target.value);
     dispatch(setAutoLockTimeout(timeout));
     dispatch(addToast({
       type: 'success',

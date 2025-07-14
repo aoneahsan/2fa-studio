@@ -64,7 +64,7 @@ export const webhookOneSignal = webhookFunctions.handleOneSignalWebhook;
 export const webhookGoogleDrive = webhookFunctions.handleGoogleDriveWebhook;
 
 // Scheduled Functions
-export const scheduledCleanup = onSchedule('every 24 hours', async (event) => {
+export const scheduledCleanup = onSchedule('every 24 hours', async () => {
 	console.log('Running daily cleanup tasks');
 
 	// Cleanup tasks
@@ -76,13 +76,13 @@ export const scheduledCleanup = onSchedule('every 24 hours', async (event) => {
 	]);
 });
 
-export const scheduledUsageCheck = onSchedule('every 1 hours', async (event) => {
+export const scheduledUsageCheck = onSchedule('every 1 hours', async () => {
 	console.log('Checking user usage limits');
 
 	await subscriptionFunctions.enforceUsageLimits();
 });
 
-export const scheduledBackup = onSchedule('every 12 hours', async (event) => {
+export const scheduledBackup = onSchedule('every 12 hours', async () => {
 	console.log('Running scheduled backups');
 
 	await backupFunctions.runScheduledBackups();

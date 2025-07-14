@@ -21,7 +21,7 @@ interface UseSyncOptions {
  * Hook for managing real-time sync
  */
 export const useSync = (options: UseSyncOptions = {}) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
 
   useEffect(() => {
     if (!user) return;

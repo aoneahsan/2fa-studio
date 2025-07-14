@@ -43,7 +43,7 @@ interface FolderFormData {
  */
 const FolderManager: React.FC<FolderManagerProps> = ({ isOpen, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const folders = useSelector(selectFolders);
   const folderTree = useSelector(selectFolderTree);
   const error = useSelector(selectFoldersError);

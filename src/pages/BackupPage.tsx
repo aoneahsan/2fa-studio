@@ -34,7 +34,7 @@ interface BackupStats {
  */
 const BackupPage: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const { accounts } = useSelector((state: RootState) => state.accounts);
   
   const [isBackingUp, setIsBackingUp] = useState(false);

@@ -22,7 +22,7 @@ import { format, formatDistanceToNow } from 'date-fns';
  * Component for displaying backup history
  */
 const BackupHistory: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [history, setHistory] = useState<BackupHistoryType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -17,7 +17,7 @@ const AccountSearch: React.FC = () => {
   const searchQuery = useSelector((state: RootState) => state.accounts.searchQuery);
 
   const handleSearchChange = useCallback((_e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setSearchQuery(e.target.value));
+    dispatch(setSearchQuery(_e.target.value));
   }, [dispatch]);
 
   const handleClearSearch = useCallback(() => {
