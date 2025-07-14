@@ -3,7 +3,6 @@
  * Provides offline functionality and caching
  */
 
-const CACHE_NAME = '2fa-studio-v1';
 const STATIC_CACHE = 'static-v1';
 const DYNAMIC_CACHE = 'dynamic-v1';
 
@@ -130,7 +129,7 @@ async function networkFirst(request) {
     }
     
     return networkResponse;
-  } catch (error) {
+  } catch (_error) {
     const cachedResponse = await caches.match(request);
     
     if (cachedResponse) {

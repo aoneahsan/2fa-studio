@@ -150,9 +150,10 @@ const BackupScheduler: React.FC = () => {
     switch (schedule.frequency) {
       case 'daily':
         return `Daily at ${schedule.time}`;
-      case 'weekly':
+      case 'weekly': {
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         return `Every ${days[schedule.dayOfWeek || 0]} at ${schedule.time}`;
+      }
       case 'monthly':
         return `Monthly on day ${schedule.dayOfMonth} at ${schedule.time}`;
       default:

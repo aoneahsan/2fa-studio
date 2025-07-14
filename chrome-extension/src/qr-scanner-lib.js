@@ -10,26 +10,22 @@ export class QRScanner {
   static async scanImage(imageData) {
     // This is a simplified QR scanner
     // In production, use a library like jsQR or qr-scanner
-    try {
-      // Create canvas
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      canvas.width = imageData.width;
-      canvas.height = imageData.height;
-      ctx.putImageData(imageData, 0, 0);
-      
-      // Try to detect QR code patterns
-      const qrData = this.detectQRPattern(ctx, imageData.width, imageData.height);
-      
-      if (qrData) {
-        return { data: qrData };
-      }
-      
-      throw new Error('No QR code found');
-    } catch (error) {
-      throw error;
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    ctx.putImageData(imageData, 0, 0);
+    
+    // Try to detect QR code patterns
+    const qrData = this.detectQRPattern(ctx, imageData.width, imageData.height);
+    
+    if (qrData) {
+      return { data: qrData };
     }
+    
+    throw new Error('No QR code found');
   }
 
   /**

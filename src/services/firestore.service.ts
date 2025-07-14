@@ -518,7 +518,7 @@ export class FirestoreService {
 
     const merged = { ...currentData };
     mergeFields.forEach(field => {
-      if (newData.hasOwnProperty(field)) {
+      if (Object.prototype.hasOwnProperty.call(newData, field)) {
         merged[field] = newData[field];
       }
     });

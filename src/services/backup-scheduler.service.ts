@@ -324,20 +324,22 @@ export class BackupSchedulerService {
         // Already set to next occurrence
         break;
 
-      case 'weekly':
+      case 'weekly': {
         const targetDay = schedule.dayOfWeek || 0;
         while (nextRun.getDay() !== targetDay) {
           nextRun = addDays(nextRun, 1);
         }
         break;
+      }
 
-      case 'monthly':
+      case 'monthly': {
         const targetDate = schedule.dayOfMonth || 1;
         nextRun.setDate(targetDate);
         if (nextRun <= now) {
           nextRun = addMonths(nextRun, 1);
         }
         break;
+      }
     }
 
     return nextRun;

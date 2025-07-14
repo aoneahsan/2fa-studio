@@ -218,47 +218,43 @@ class SecurityService {
   }
 
   async getChromeCertificateInfo(domain) {
-    try {
-      // Request certificate information from Chrome
-      const certInfo = await new Promise((resolve, reject) => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (tabs[0] && tabs[0].url.includes(domain)) {
-            // Get security state from the active tab
-            chrome.tabs.executeScript(tabs[0].id, {
-              code: `
-                (function() {
-                  const connection = navigator.connection;
-                  const securityState = document.visibilityState;
-                  return {
-                    protocol: location.protocol,
-                    hostname: location.hostname,
-                    securityState: securityState,
-                    timestamp: Date.now()
-                  };
-                })();
-              `
-            }, (result) => {
-              if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError);
-              } else {
-                resolve(result[0]);
-              }
-            });
-          } else {
-            reject(new Error('No matching tab found'));
-          }
-        });
+    // Request certificate information from Chrome
+    const certInfo = await new Promise((resolve, reject) => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0] && tabs[0].url.includes(domain)) {
+          // Get security state from the active tab
+          chrome.tabs.executeScript(tabs[0].id, {
+            code: `
+              (function() {
+                const connection = navigator.connection;
+                const securityState = document.visibilityState;
+                return {
+                  protocol: location.protocol,
+                  hostname: location.hostname,
+                  securityState: securityState,
+                  timestamp: Date.now()
+                };
+              })();
+            `
+          }, (result) => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError);
+            } else {
+              resolve(result[0]);
+            }
+          });
+        } else {
+          reject(new Error('No matching tab found'));
+        }
       });
+    });
 
-      return {
-        valid: certInfo.protocol === 'https:',
-        issuer: 'Valid CA',
-        expires: null,
-        details: certInfo
-      };
-    } catch (_error) {
-      throw _error;
-    }
+    return {
+      valid: certInfo.protocol === 'https:',
+      issuer: 'Valid CA',
+      expires: null,
+      details: certInfo
+    };
   }
 
   async validateCertificateChain(domain) {
@@ -586,36 +582,32 @@ class SecurityService {
   }
 
   async checkDomainWhois(domain) {
-    try {
-      // Simplified WHOIS check - in production, this would use actual WHOIS APIs
-      const knownOldDomains = this.getKnownEstablishedDomains();
-      const baseDomain = this.extractBaseDomain(domain);
-      
-      if (knownOldDomains.includes(baseDomain)) {
-        return {
-          daysOld: 365 * 10, // Assume 10+ years old
-          privateRegistration: false,
-          registrar: 'Trusted Registrar'
-        };
-      }
-
-      // Check against recently registered domains list
-      if (this.suspiciousDomains.has(domain)) {
-        return {
-          daysOld: Math.floor(Math.random() * 30), // Random recent date
-          privateRegistration: true,
-          registrar: 'Unknown'
-        };
-      }
-
+    // Simplified WHOIS check - in production, this would use actual WHOIS APIs
+    const knownOldDomains = this.getKnownEstablishedDomains();
+    const baseDomain = this.extractBaseDomain(domain);
+    
+    if (knownOldDomains.includes(baseDomain)) {
       return {
-        daysOld: 365, // Default to 1 year
+        daysOld: 365 * 10, // Assume 10+ years old
         privateRegistration: false,
-        registrar: 'Standard Registrar'
+        registrar: 'Trusted Registrar'
       };
-    } catch (_error) {
-      throw _error;
     }
+
+    // Check against recently registered domains list
+    if (this.suspiciousDomains.has(domain)) {
+      return {
+        daysOld: Math.floor(Math.random() * 30), // Random recent date
+        privateRegistration: true,
+        registrar: 'Unknown'
+      };
+    }
+
+    return {
+      daysOld: 365, // Default to 1 year
+      privateRegistration: false,
+      registrar: 'Standard Registrar'
+    };
   }
 
   async checkDNSRecords(domain) {

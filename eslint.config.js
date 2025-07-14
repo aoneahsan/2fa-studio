@@ -174,7 +174,7 @@ export default tseslint.config(
   
   // Fix scripts and CommonJS files
   {
-    files: ['*.cjs', 'fix-*.cjs', 'scripts/**/*.js'],
+    files: ['*.cjs', 'fix-*.cjs', 'scripts/**/*.js', 'setup.js', 'functions/.eslintrc.js'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -184,11 +184,32 @@ export default tseslint.config(
         __dirname: 'readonly',
         __filename: 'readonly',
         process: 'readonly',
+        console: 'readonly',
       }
     },
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-var-requires': 'off',
+      'no-undef': 'off',
+    }
+  },
+  
+  // Service Worker configuration
+  {
+    files: ['public/sw.js', '**/sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        clients: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
+        URL: 'readonly',
+        console: 'readonly',
+      }
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
       'no-undef': 'off',
     }
   }
