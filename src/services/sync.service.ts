@@ -16,7 +16,7 @@ export interface SyncEvent {
   userId: string;
   deviceId: string;
   timestamp: Date;
-  data: any;
+  data: unknown;
   synced: boolean;
 }
 
@@ -141,7 +141,7 @@ export class SyncService {
   static async publishSyncEvent(
     userId: string,
     type: SyncEvent['type'],
-    data: any
+    data: unknown
   ): Promise<void> {
     if (!this.syncStatus.isOnline) {
       // Queue for later if offline
@@ -157,7 +157,7 @@ export class SyncService {
         'pending'
       );
     } catch (_error) {
-      console.error('Error publishing sync event:', error);
+      console.error('Error publishing sync event:', _error);
       this.queuePendingChange({ type, data });
     }
   }
@@ -188,7 +188,7 @@ export class SyncService {
   /**
    * Queue pending change for later sync
    */
-  private static queuePendingChange(change: { type: SyncEvent['type']; data: any }): void {
+  private static queuePendingChange(change: { type: SyncEvent['type']; data: unknown }): void {
     const pendingChanges = this.getPendingChanges();
     pendingChanges.push({
       ...change,
@@ -227,7 +227,7 @@ export class SyncService {
         await RealtimeSyncService.syncPendingChanges();
         processedIds.push(change.id);
       } catch (_error) {
-        console.error('Error processing pending change:', error);
+        console.error('Error processing pending change:', _error);
       }
     }
 
@@ -283,7 +283,7 @@ export class SyncService {
         // Remove from queue
         this.conflictQueue = this.conflictQueue.filter(c => c.id !== conflictId);
       } catch (_error) {
-        console.error('Error resolving conflict:', error);
+        console.error('Error resolving conflict:', _error);
       }
     }
   }
@@ -317,7 +317,7 @@ export class SyncService {
           lastSyncTime: parsed.lastSyncTime ? new Date(parsed.lastSyncTime) : null,
         };
       } catch (_error) {
-        console.error('Error loading sync status:', error);
+        console.error('Error loading sync status:', _error);
       }
     }
   }

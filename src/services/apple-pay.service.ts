@@ -118,7 +118,7 @@ export class ApplePayService {
       console.log('Apple Pay and StoreKit initialized');
       return { success: true };
     } catch (_error) {
-      console.error('Error initializing Apple Pay:', error);
+      console.error('Error initializing Apple Pay:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -139,7 +139,7 @@ export class ApplePayService {
       // This would call the native Apple Pay API
       return true; // Simulated response
     } catch (_error) {
-      console.error('Error checking Apple Pay availability:', error);
+      console.error('Error checking Apple Pay availability:', _error);
       return false;
     }
   }
@@ -186,7 +186,7 @@ export class ApplePayService {
         products: mockProducts,
       };
     } catch (_error) {
-      console.error('Error querying products:', error);
+      console.error('Error querying products:', _error);
       return {
         success: false,
         products: [],
@@ -227,7 +227,7 @@ export class ApplePayService {
         purchase: mockPurchase,
       };
     } catch (_error) {
-      console.error('Error purchasing subscription:', error);
+      console.error('Error purchasing subscription:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -271,7 +271,7 @@ export class ApplePayService {
 
       return mockResult;
     } catch (_error) {
-      console.error('Error processing Apple Pay payment:', error);
+      console.error('Error processing Apple Pay payment:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -318,7 +318,7 @@ export class ApplePayService {
         fraudRisk: result.fraudRisk || 'low',
       };
     } catch (_error) {
-      console.error('Error validating receipt:', error);
+      console.error('Error validating receipt:', _error);
       return {
         valid: false,
         environment: 'sandbox',
@@ -347,7 +347,7 @@ export class ApplePayService {
         purchases: [],
       };
     } catch (_error) {
-      console.error('Error restoring purchases:', error);
+      console.error('Error restoring purchases:', _error);
       return {
         success: false,
         purchases: [],
@@ -415,7 +415,7 @@ export class ApplePayService {
         subscription,
       };
     } catch (_error) {
-      console.error('Error creating subscription from purchase:', error);
+      console.error('Error creating subscription from purchase:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -452,7 +452,7 @@ export class ApplePayService {
 
       return { success: true };
     } catch (_error) {
-      console.error('Error canceling subscription:', error);
+      console.error('Error canceling subscription:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -508,7 +508,7 @@ export class ApplePayService {
           console.log(`Unhandled App Store notification type: ${notificationType}`);
       }
     } catch (_error) {
-      console.error('Error handling App Store server notification:', error);
+      console.error('Error handling App Store server notification:', _error);
     }
   }
 
@@ -542,7 +542,7 @@ export class ApplePayService {
         );
       }
     } catch (_error) {
-      console.error('Error handling cancellation:', error);
+      console.error('Error handling cancellation:', _error);
     }
   }
 
@@ -568,7 +568,7 @@ export class ApplePayService {
         );
       }
     } catch (_error) {
-      console.error('Error handling renewal:', error);
+      console.error('Error handling renewal:', _error);
     }
   }
 
@@ -609,7 +609,7 @@ export class ApplePayService {
         );
       }
     } catch (_error) {
-      console.error('Error handling renewal status change:', error);
+      console.error('Error handling renewal status change:', _error);
     }
   }
 
@@ -634,7 +634,7 @@ export class ApplePayService {
         );
       }
     } catch (_error) {
-      console.error('Error handling renewal failure:', error);
+      console.error('Error handling renewal failure:', _error);
     }
   }
 
@@ -659,7 +659,7 @@ export class ApplePayService {
         );
       }
     } catch (_error) {
-      console.error('Error handling recovery:', error);
+      console.error('Error handling recovery:', _error);
     }
   }
 
@@ -690,7 +690,7 @@ export class ApplePayService {
         );
       }
     } catch (_error) {
-      console.error('Error handling refund:', error);
+      console.error('Error handling refund:', _error);
     }
   }
 

@@ -100,7 +100,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
       }
       resetForm();
     } catch (_error) {
-      console.error('Failed to save tag:', error);
+      console.error('Failed to save tag:', _error);
     } finally {
       setIsSubmitting(false);
     }
@@ -116,7 +116,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
       })).unwrap();
       setDeleteConfirm(null);
     } catch (_error) {
-      console.error('Failed to delete tag:', error);
+      console.error('Failed to delete tag:', _error);
     }
   };
 
@@ -160,7 +160,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(_e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
                       placeholder="e.g., Work, Personal, Finance"
                       required
@@ -194,7 +194,7 @@ const TagManager: React.FC<TagManagerProps> = ({ isOpen, onClose }) => {
                     </label>
                     <textarea
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(_e) => setFormData({ ...formData, description: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
                       rows={2}
                       placeholder="Add a description..."

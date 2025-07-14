@@ -45,7 +45,7 @@ export interface PermissionCondition {
   type: 'own' | 'team' | 'custom';
   field?: string;
   operator?: 'equals' | 'contains' | 'in';
-  value?: any;
+  value?: unknown;
 }
 
 export enum Resource {
@@ -284,8 +284,8 @@ export class RBACService {
           { rolesCount: this.SYSTEM_ROLES.length }
         );
       }
-    } catch (error) {
-      console.error('Failed to initialize roles:', error);
+    } catch (_error) {
+      console.error('Failed to initialize roles:', _error);
       throw error;
     }
   }
@@ -306,7 +306,7 @@ export class RBACService {
   ): Promise<PermissionCheck> {
     try {
       // Check cache first
-      const cacheKey = `${userId}:${resource}:${action}:${JSON.stringify(context)}`;
+      const cacheKey = `${userId}:${resource}:${action}:${JSON.stringify(_context)}`;
       const cached = this.getFromCache(cacheKey);
       if (cached) return cached;
 
@@ -344,7 +344,7 @@ export class RBACService {
             const conditionsMet = await this.checkConditions(
               permission.conditions,
               userId,
-              context
+              _context
             );
 
             if (conditionsMet) {
@@ -362,8 +362,8 @@ export class RBACService {
         allowed: false,
         reason: 'No matching permissions'
       });
-    } catch (error) {
-      console.error('Failed to check permission:', error);
+    } catch (_error) {
+      console.error('Failed to check permission:', _error);
       return {
         allowed: false,
         reason: 'Permission check failed'
@@ -429,8 +429,8 @@ export class RBACService {
       this.clearUserCache(userId);
 
       return docRef.id;
-    } catch (error) {
-      console.error('Failed to assign role:', error);
+    } catch (_error) {
+      console.error('Failed to assign role:', _error);
       throw error;
     }
   }
@@ -478,8 +478,8 @@ export class RBACService {
 
       // Clear cache for this user
       this.clearUserCache(userId);
-    } catch (error) {
-      console.error('Failed to revoke role:', error);
+    } catch (_error) {
+      console.error('Failed to revoke role:', _error);
       throw error;
     }
   }
@@ -527,8 +527,8 @@ export class RBACService {
       );
 
       return docRef.id;
-    } catch (error) {
-      console.error('Failed to create role:', error);
+    } catch (_error) {
+      console.error('Failed to create role:', _error);
       throw error;
     }
   }
@@ -576,8 +576,8 @@ export class RBACService {
 
       // Clear cache for all users with this role
       await this.clearRoleCache(roleId);
-    } catch (error) {
-      console.error('Failed to update role:', error);
+    } catch (_error) {
+      console.error('Failed to update role:', _error);
       throw error;
     }
   }
@@ -620,8 +620,8 @@ export class RBACService {
           roleName: role.name
         }
       );
-    } catch (error) {
-      console.error('Failed to delete role:', error);
+    } catch (_error) {
+      console.error('Failed to delete role:', _error);
       throw error;
     }
   }
@@ -638,8 +638,8 @@ export class RBACService {
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate()
       } as Role));
-    } catch (error) {
-      console.error('Failed to get roles:', error);
+    } catch (_error) {
+      console.error('Failed to get roles:', _error);
       throw error;
     }
   }
@@ -680,8 +680,8 @@ export class RBACService {
       }
 
       return { roles, permissions, isAdmin };
-    } catch (error) {
-      console.error('Failed to get user permissions:', error);
+    } catch (_error) {
+      console.error('Failed to get user permissions:', _error);
       throw error;
     }
   }
@@ -859,7 +859,7 @@ export class RBACService {
     const cached = this.PERMISSION_CACHE.get(key);
     if (!cached) return null;
 
-    const age = Date.now() - (cached as any).timestamp;
+    const age = Date.now() - (cached as unknown).timestamp;
     if (age > this.CACHE_TTL) {
       this.PERMISSION_CACHE.delete(key);
       return null;
@@ -868,9 +868,9 @@ export class RBACService {
     return cached;
   }
 
-  private static cacheResult(key: string, result: PermissionCheck): PermissionCheck {
-    (result as any).timestamp = Date.now();
-    this.PERMISSION_CACHE.set(key, result);
+  private static cacheResult(key: string, _result: PermissionCheck): PermissionCheck {
+    (result as unknown).timestamp = Date.now();
+    this.PERMISSION_CACHE.set(key, _result);
     return result;
   }
 

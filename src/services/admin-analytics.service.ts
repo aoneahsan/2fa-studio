@@ -116,7 +116,7 @@ export interface AnalyticsFilter {
 
 export class AdminAnalyticsService {
   private static readonly CACHE_TTL = 300000; // 5 minutes
-  private static cache: Map<string, { data: any; timestamp: number }> = new Map();
+  private static cache: Map<string, { data: unknown; timestamp: number }> = new Map();
 
   /**
    * Get comprehensive dashboard metrics
@@ -154,7 +154,7 @@ export class AdminAnalyticsService {
       this.setCache(cacheKey, metrics);
       return metrics;
     } catch (_error) {
-      console.error('Error getting dashboard metrics:', error);
+      console.error('Error getting dashboard metrics:', _error);
       throw error;
     }
   }
@@ -207,7 +207,7 @@ export class AdminAnalyticsService {
         topCountries,
       };
     } catch (_error) {
-      console.error('Error getting user metrics:', error);
+      console.error('Error getting user metrics:', _error);
       throw error;
     }
   }
@@ -277,7 +277,7 @@ export class AdminAnalyticsService {
         refundRate,
       };
     } catch (_error) {
-      console.error('Error getting revenue metrics:', error);
+      console.error('Error getting revenue metrics:', _error);
       throw error;
     }
   }
@@ -319,7 +319,7 @@ export class AdminAnalyticsService {
         topFeatures,
       };
     } catch (_error) {
-      console.error('Error getting usage metrics:', error);
+      console.error('Error getting usage metrics:', _error);
       throw error;
     }
   }
@@ -349,7 +349,7 @@ export class AdminAnalyticsService {
           return [];
       }
     } catch (_error) {
-      console.error('Error getting time series data:', error);
+      console.error('Error getting time series data:', _error);
       return [];
     }
   }
@@ -373,7 +373,7 @@ export class AdminAnalyticsService {
         responseTime: Math.floor(Math.random() * 200) + 100, // 100-300ms
       };
     } catch (_error) {
-      console.error('Error getting real-time metrics:', error);
+      console.error('Error getting real-time metrics:', _error);
       return {
         activeUsers: 0,
         requestsPerSecond: 0,
@@ -403,7 +403,7 @@ export class AdminAnalyticsService {
       
       return { data, summary };
     } catch (_error) {
-      console.error('Error generating custom report:', error);
+      console.error('Error generating custom report:', _error);
       throw error;
     }
   }
@@ -595,7 +595,7 @@ export class AdminAnalyticsService {
     return null;
   }
 
-  private static setCache(key: string, data: any): void {
+  private static setCache(key: string, data: unknown): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),

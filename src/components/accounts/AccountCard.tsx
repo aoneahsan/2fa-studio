@@ -39,7 +39,7 @@ interface AccountCardProps {
  */
 const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, onToggleFavorite }) => {
   const dispatch = useDispatch();
-  const { user } = useAppSelector((state: RootState) => state.auth);
+  const { user } = useAppSelector((state: RootState) => state._auth);
   const [otpCode, setOtpCode] = useState('');
   const [remainingTime, setRemainingTime] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -79,7 +79,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
         setProgress(result.progress || 0);
       }
     } catch (_error) {
-      console.error('Failed to generate code:', error);
+      console.error('Failed to generate code:', _error);
       setOtpCode('ERROR');
     }
   }, [account, isLocked]);
@@ -155,7 +155,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDelete, on
 
       setTimeout(() => setIsCopying(false), 1000);
     } catch (_error) {
-      console.error('Failed to copy:', error);
+      console.error('Failed to copy:', _error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to copy code'

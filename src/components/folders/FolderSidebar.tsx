@@ -37,7 +37,7 @@ const FolderSidebar: React.FC<FolderSidebarProps> = ({
   className = '' 
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const folderTree = useSelector(selectFolderTree);
   const selectedFolderId = useSelector(selectSelectedFolderId);
   const isLoading = useSelector((state: RootState) => state.folders.isLoading);

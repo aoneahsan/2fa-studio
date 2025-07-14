@@ -2,7 +2,8 @@
  * Security Cloud Functions
  */
 
-import * as functions from 'firebase-functions';
+import {onDocumentCreated} from 'firebase-functions/v2/firestore';
+import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import * as crypto from 'crypto';
 
@@ -18,9 +19,13 @@ const RATE_LIMITS = {
 /**
  * Monitor suspicious activity
  */
-export const monitorSuspiciousActivity = functions.firestore
-	.document('audit_logs/{logId}')
-	.onCreate(async (snap, context) => {
+export const monitorSuspiciousActivity = onDocumentCreated(
+	'audit_logs/{logId}',
+	async (event) => {
+		const snap = event.data;
+		if (!snap) {
+			return;
+		}
 		const log = snap.data();
 		const suspiciousActions = [
 			'failed_login',
@@ -47,18 +52,24 @@ export const monitorSuspiciousActivity = functions.firestore
 				// Too many suspicious activities
 				await handleSuspiciousUser(userId, recentLogsSnapshot.docs);
 			}
-		} catch (error) {
-			console.error('Error monitoring activity:', error);
+		} catch (_error) {
+			console.error('Error monitoring activity:', _error);
 		}
 	});
 
 /**
  * Enforce rate limiting
  */
-export const enforceRateLimit = functions.https.onCall(
-	async (data, context) => {
+export const enforceRateLimit = onCall(
+	{
+		cors: true,
+		maxInstances: 10,
+	},
+	async (request) => {
+		const data = request.data;
+		const context = request.auth;
 		const { action = 'api', identifier } = data ?? {};
-		const id = identifier || context?.auth?.uid || context.rawRequest.ip;
+		const id = identifier || context?.uid || request.rawRequest.ip;
 
 		const limit =
 			RATE_LIMITS[action as keyof typeof RATE_LIMITS] || RATE_LIMITS.api;
@@ -85,13 +96,13 @@ export const enforceRateLimit = functions.https.onCall(
 				// Rate limit exceeded
 				await db.collection('audit_logs').add({
 					action: 'rate_limit_exceeded',
-					userId: context?.auth?.uid,
-					ip: context.rawRequest.ip,
+					userId: context?.uid,
+					ip: request.rawRequest.ip,
 					limit: action,
 					timestamp: admin.firestore.FieldValue.serverTimestamp(),
 				});
 
-				throw new functions.https.HttpsError(
+				throw new HttpsError(
 					'resource-exhausted',
 					'Rate limit exceeded. Please try again later.'
 				);
@@ -110,11 +121,11 @@ export const enforceRateLimit = functions.https.onCall(
 				resetAt: new Date(windowStart + limit.window * 1000).toISOString(),
 			};
 		} catch (_error: unknown) {
-			if (error.code === 'resource-exhausted') {
+			if ((error as unknown).code === 'resource-exhausted') {
 				throw error;
 			}
-			console.error('Error enforcing rate limit:', error);
-			throw new functions.https.HttpsError(
+			console.error('Error enforcing rate limit:', _error);
+			throw new HttpsError(
 				'internal',
 				'Failed to check rate limit'
 			);
@@ -125,87 +136,103 @@ export const enforceRateLimit = functions.https.onCall(
 /**
  * Validate request signature
  */
-export const validateRequest = functions.https.onCall(async (data, context) => {
-	const { signature, payload, timestamp } = data ?? {};
+export const validateRequest = onCall(
+	{
+		cors: true,
+		maxInstances: 10,
+	},
+	async (request) => {
+		const data = request.data;
+		const context = request.auth;
+		const { signature, payload, timestamp } = data ?? {};
 
-	if (!signature || !payload || !timestamp) {
-		throw new functions.https.HttpsError(
-			'invalid-argument',
-			'Missing required fields'
-		);
+		if (!signature || !payload || !timestamp) {
+			throw new HttpsError(
+				'invalid-argument',
+				'Missing required fields'
+			);
+		}
+
+		// Check timestamp (prevent replay attacks)
+		const requestTime = new Date(timestamp).getTime();
+		const now = Date.now();
+		const maxAge = 5 * 60 * 1000; // 5 minutes
+
+		if (Math.abs(now - requestTime) > maxAge) {
+			throw new HttpsError('invalid-argument', 'Request expired');
+		}
+
+		// Verify signature
+		const secret = process.env.SECURITY_REQUEST_SECRET || 'default-secret';
+		const expectedSignature = crypto
+			.createHmac('sha256', secret)
+			.update(`${timestamp}:${JSON.stringify(payload)}`)
+			.digest('hex');
+
+		if (signature !== expectedSignature) {
+			await db.collection('audit_logs').add({
+				action: 'invalid_signature',
+				userId: context?.uid,
+				ip: request.rawRequest.ip,
+				timestamp: admin.firestore.FieldValue.serverTimestamp(),
+			});
+
+			throw new HttpsError(
+				'unauthenticated',
+				'Invalid signature'
+			);
+		}
+
+		return { valid: true };
 	}
-
-	// Check timestamp (prevent replay attacks)
-	const requestTime = new Date(timestamp).getTime();
-	const now = Date.now();
-	const maxAge = 5 * 60 * 1000; // 5 minutes
-
-	if (Math.abs(now - requestTime) > maxAge) {
-		throw new functions.https.HttpsError('invalid-argument', 'Request expired');
-	}
-
-	// Verify signature
-	const secret = functions.config().security.request_secret;
-	const expectedSignature = crypto
-		.createHmac('sha256', secret)
-		.update(`${timestamp}:${JSON.stringify(payload)}`)
-		.digest('hex');
-
-	if (signature !== expectedSignature) {
-		await db.collection('audit_logs').add({
-			action: 'invalid_signature',
-			userId: context?.auth?.uid,
-			ip: context.rawRequest.ip,
-			timestamp: admin.firestore.FieldValue.serverTimestamp(),
-		});
-
-		throw new functions.https.HttpsError(
-			'unauthenticated',
-			'Invalid signature'
-		);
-	}
-
-	return { valid: true };
-});
+);
 
 /**
  * Create audit log entry
  */
-export const createAuditLog = functions.https.onCall(async (data, context) => {
-	const { action, targetId, details, severity = 'info' } = data ?? {};
+export const createAuditLog = onCall(
+	{
+		cors: true,
+		maxInstances: 10,
+	},
+	async (request) => {
+		const data = request.data;
+		const context = request.auth;
+		const { action, targetId, details, severity = 'info' } = data ?? {};
 
-	if (!action) {
-		throw new functions.https.HttpsError('invalid-argument', 'Action required');
-	}
-
-	try {
-		const log = {
-			action,
-			targetId,
-			details,
-			severity,
-			userId: context?.auth?.uid,
-			ip: context.rawRequest.ip,
-			userAgent: context.rawRequest.headers['user-agent'],
-			timestamp: admin.firestore.FieldValue.serverTimestamp(),
-		};
-
-		await db.collection('audit_logs').add(log);
-
-		// Alert on critical actions
-		if (severity === 'critical') {
-			await alertAdmins(log);
+		if (!action) {
+			throw new HttpsError('invalid-argument', 'Action required');
 		}
 
-		return { success: true };
-	} catch (error) {
-		console.error('Error creating audit log:', error);
-		throw new functions.https.HttpsError(
-			'internal',
-			'Failed to create audit log'
-		);
+		try {
+			const log = {
+				action,
+				targetId,
+				details,
+				severity,
+				userId: context?.uid || null,
+				ip: request.rawRequest.ip,
+				userAgent: request.rawRequest.headers['user-agent'],
+				timestamp: admin.firestore.FieldValue.serverTimestamp(),
+			};
+
+			await db.collection('audit_logs').add(log);
+
+			// Alert on critical actions
+			if (severity === 'critical') {
+				await alertAdmins(log);
+			}
+
+			return { success: true };
+		} catch (_error) {
+			console.error('Error creating audit log:', _error);
+			throw new HttpsError(
+				'internal',
+				'Failed to create audit log'
+			);
+		}
 	}
-});
+);
 
 /**
  * Cleanup old audit logs
@@ -256,8 +283,8 @@ export async function cleanupOldAuditLogs() {
 			auditLogs: oldLogsSnapshot.size,
 			rateLimits: oldRateLimitsSnapshot.size,
 		};
-	} catch (error) {
-		console.error('Error cleaning up logs:', error);
+	} catch (_error) {
+		console.error('Error cleaning up logs:', _error);
 		throw error;
 	}
 }
@@ -303,8 +330,8 @@ async function handleSuspiciousUser(
 			userId,
 			severity: 'high',
 		});
-	} catch (error) {
-		console.error('Error handling suspicious user:', error);
+	} catch (_error) {
+		console.error('Error handling suspicious user:', _error);
 	}
 }
 
@@ -330,7 +357,7 @@ async function alertAdmins(alert: unknown) {
 
 			batch.set(notificationRef, {
 				title: 'Security Alert',
-				message: `${alert.severity.toUpperCase()}: ${alert.action}`,
+				message: `${alert.severity?.toUpperCase() || 'HIGH'}: ${alert.action}`,
 				type: 'security',
 				priority: 'high',
 				details: alert,
@@ -343,17 +370,22 @@ async function alertAdmins(alert: unknown) {
 
 		// TODO: Send push notifications via OneSignal
 		// TODO: Send email alerts
-	} catch (error) {
-		console.error('Error alerting admins:', error);
+	} catch (_error) {
+		console.error('Error alerting admins:', _error);
 	}
 }
 
 /**
  * Check IP reputation
  */
-export const checkIPReputation = functions.https.onCall(
-	async (data, context) => {
-		const ip = data.ip || context.rawRequest.ip;
+export const checkIPReputation = onCall(
+	{
+		cors: true,
+		maxInstances: 10,
+	},
+	async (request) => {
+		const data = request.data;
+		const ip = data?.ip || request.rawRequest.ip;
 
 		try {
 			// Check if IP is in blocklist
@@ -387,9 +419,9 @@ export const checkIPReputation = functions.https.onCall(
 							: 'bad',
 				recentSuspiciousActivity: suspiciousCount,
 			};
-		} catch (error) {
-			console.error('Error checking IP reputation:', error);
-			throw new functions.https.HttpsError(
+		} catch (_error) {
+			console.error('Error checking IP reputation:', _error);
+			throw new HttpsError(
 				'internal',
 				'Failed to check IP reputation'
 			);

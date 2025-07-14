@@ -231,7 +231,7 @@ export const registerServiceWorker = (): void => {
     window.addEventListener('load', async () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
+        console.log('Service Worker registered:', _registration);
         
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
@@ -309,8 +309,8 @@ export class MemoryManager {
    * Force garbage collection (for debugging)
    */
   static forceGC(): void {
-    if ('gc' in window && typeof (window as any).gc === 'function') {
-      (window as any).gc();
+    if ('gc' in window && typeof (window as unknown).gc === 'function') {
+      (window as unknown).gc();
     }
   }
 }

@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
       
       navigate('/dashboard');
     } catch (_error: unknown) {
-      console.error('Login _error:', error);
+      console.error('Login _error:', _error);
       dispatch(addToast({
         type: 'error',
         message: error.message || 'Failed to sign in',
@@ -116,7 +116,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="email"
                       required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(_e) => setEmail(e.target.value)}
                       className="input pl-10"
                       placeholder="you@example.com"
                     />
@@ -138,7 +138,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="current-password"
                       required
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(_e) => setPassword(e.target.value)}
                       className="input pl-10"
                       placeholder="••••••••"
                     />
@@ -171,7 +171,7 @@ const LoginPage: React.FC = () => {
                       autoComplete="off"
                       required
                       value={encryptionPassword}
-                      onChange={(e) => setEncryptionPassword(e.target.value)}
+                      onChange={(_e) => setEncryptionPassword(e.target.value)}
                       className="input pl-10"
                       placeholder="Your encryption password"
                       autoFocus

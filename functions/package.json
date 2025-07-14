@@ -10,7 +10,7 @@
 		"logs": "firebase functions:log"
 	},
 	"engines": {
-		"node": "24"
+		"node": "22"
 	},
 	"main": "lib/index.js",
 	"dependencies": {
@@ -23,9 +23,7 @@
 		"jsonwebtoken": "^9.0.2",
 		"@google-cloud/storage": "^7.16.0",
 		"googleapis": "^152.0.0",
-		"crypto": "^1.0.1",
 		"node-cron": "^4.2.1",
-		"node-fetch": "^3.3.2",
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {
@@ -35,7 +33,6 @@
 		"@types/jsonwebtoken": "^9.0.10",
 		"@types/node": "^24.0.13",
 		"@types/node-cron": "^3.0.11",
-		"@types/node-fetch": "^3.0.3",
 		"@types/uuid": "^10.0.0",
 		"@typescript-eslint/eslint-plugin": "^8.36.0",
 		"@typescript-eslint/parser": "^8.36.0",

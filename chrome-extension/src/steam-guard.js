@@ -15,7 +15,7 @@ class SteamGuard {
    * @param {number} [time] - Unix timestamp (optional)
    * @returns {string} 5-character Steam code
    */
-  generateCode(secret, time = null) {
+  async generateCode(secret, time = null) {
     try {
       // Get current time or use provided time
       const currentTime = time || Math.floor(Date.now() / 1000);
@@ -32,39 +32,39 @@ class SteamGuard {
       const secretBytes = this.base32Decode(secret);
       
       // Generate HMAC-SHA1
-      return crypto.subtle.importKey(
+      const key = await crypto.subtle.importKey(
         'raw',
         secretBytes,
         { name: 'HMAC', hash: 'SHA-1' },
         false,
         ['sign']
-      ).then(key => {
-        return crypto.subtle.sign('HMAC', key, counterBuffer);
-      }).then(signature => {
-        // Convert to Steam code
-        const signatureArray = new Uint8Array(signature);
-        
-        // Get offset from last nibble
-        const offset = signatureArray[19] & 0x0f;
-        
-        // Get 4 bytes from signature at offset
-        let fullCode = 0;
-        for (let i = 0; i < 4; i++) {
-          fullCode = (fullCode << 8) | signatureArray[offset + i];
-        }
-        
-        // Remove sign bit
-        fullCode = fullCode & 0x7fffffff;
-        
-        // Generate 5-character Steam code
-        let steamCode = '';
-        for (let i = 0; i < 5; i++) {
-          steamCode += this.steamAlphabet[fullCode % this.steamAlphabet.length];
-          fullCode = Math.floor(fullCode / this.steamAlphabet.length);
-        }
-        
-        return steamCode;
-      });
+      );
+      
+      const signature = await crypto.subtle.sign('HMAC', key, counterBuffer);
+      
+      // Convert to Steam code
+      const signatureArray = new Uint8Array(signature);
+      
+      // Get offset from last nibble
+      const offset = signatureArray[19] & 0x0f;
+      
+      // Get 4 bytes from signature at offset
+      let fullCode = 0;
+      for (let i = 0; i < 4; i++) {
+        fullCode = (fullCode << 8) | signatureArray[offset + i];
+      }
+      
+      // Remove sign bit
+      fullCode = fullCode & 0x7fffffff;
+      
+      // Generate 5-character Steam code
+      let steamCode = '';
+      for (let i = 0; i < 5; i++) {
+        steamCode += this.steamAlphabet[fullCode % this.steamAlphabet.length];
+        fullCode = Math.floor(fullCode / this.steamAlphabet.length);
+      }
+      
+      return steamCode;
     } catch (error) {
       console.error('Steam Guard generation error:', error);
       throw new Error('Failed to generate Steam Guard code');
@@ -90,10 +90,10 @@ class SteamGuard {
     // Convert bits to bytes
     const bytes = [];
     for (let i = 0; i + 8 <= bits.length; i += 8) {
-      bytes.push(parseInt(bits.substr(i, 8), 2));
+      bytes.push(parseInt(bits.substring(i, i + 8), 2));
     }
     
-    return new Uint8Array(bytes);
+    return new Uint8Array(bytes).buffer;
   }
 
   /**

@@ -146,7 +146,7 @@ export class GoogleDriveService {
   /**
    * Create backup in Google Drive
    */
-  static async createBackup(data: any, encryptionPassword?: string): Promise<string> {
+  static async createBackup(data: unknown, encryptionPassword?: string): Promise<string> {
     if (!this.isAuthenticated()) {
       throw new Error('Not authenticated with Google Drive');
     }
@@ -217,7 +217,7 @@ export class GoogleDriveService {
 
       return response.result.id;
     } catch (_error) {
-      console.error('Failed to create backup:', error);
+      console.error('Failed to create backup:', _error);
       throw error;
     }
   }
@@ -252,7 +252,7 @@ export class GoogleDriveService {
           size: file.size || '0'
         }));
     } catch (_error) {
-      console.error('Failed to list backups:', error);
+      console.error('Failed to list backups:', _error);
       throw error;
     }
   }
@@ -272,7 +272,7 @@ export class GoogleDriveService {
         alt: 'media',
       });
 
-      let data: any = response.result;
+      let data: unknown = response.result;
       
       // Check if data is encrypted
       if (typeof data === 'string') {
@@ -294,7 +294,7 @@ export class GoogleDriveService {
 
       return data;
     } catch (_error) {
-      console.error('Failed to get backup:', error);
+      console.error('Failed to get backup:', _error);
       throw error;
     }
   }
@@ -313,7 +313,7 @@ export class GoogleDriveService {
         fileId: fileId,
       });
     } catch (_error) {
-      console.error('Failed to delete backup:', error);
+      console.error('Failed to delete backup:', _error);
       throw error;
     }
   }
@@ -338,7 +338,7 @@ export class GoogleDriveService {
         limit: parseInt(quota?.limit || '0'),
       };
     } catch (_error) {
-      console.error('Failed to get storage quota:', error);
+      console.error('Failed to get storage quota:', _error);
       throw error;
     }
   }
@@ -346,7 +346,7 @@ export class GoogleDriveService {
   /**
    * Sync backup with Google Drive
    */
-  static async syncBackup(data: any, encryptionPassword?: string): Promise<void> {
+  static async syncBackup(data: unknown, encryptionPassword?: string): Promise<void> {
     try {
       // Get latest backup
       const backups = await this.listBackups();
@@ -373,7 +373,7 @@ export class GoogleDriveService {
         }
       }
     } catch (_error) {
-      console.error('Failed to sync backup:', error);
+      console.error('Failed to sync backup:', _error);
       throw error;
     }
   }

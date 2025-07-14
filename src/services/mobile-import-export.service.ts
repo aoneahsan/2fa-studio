@@ -96,7 +96,7 @@ export class MobileImportExportService extends ImportExportService {
       // Default: return data for further processing
       return { success: true, uri: `data:application/json;base64,${btoa(exportData)}` };
     } catch (_error) {
-      console.error('Export failed:', error);
+      console.error('Export failed:', _error);
       return { 
         success: false, 
         _error: error instanceof Error ? error.message : 'Export failed' 
@@ -159,7 +159,7 @@ export class MobileImportExportService extends ImportExportService {
       
       return { success: true, accounts };
     } catch (_error) {
-      console.error('Import failed:', error);
+      console.error('Import failed:', _error);
       return { 
         success: false, 
         _error: error instanceof Error ? error.message : 'Import failed' 
@@ -202,7 +202,7 @@ export class MobileImportExportService extends ImportExportService {
 
       return { success: true, uri: result.uri };
     } catch (_error) {
-      console.error('Backup failed:', error);
+      console.error('Backup failed:', _error);
       return { 
         success: false, 
         _error: error instanceof Error ? error.message : 'Backup failed' 
@@ -261,7 +261,7 @@ export class MobileImportExportService extends ImportExportService {
 
       return { success: true, accounts: backupData.accounts };
     } catch (_error) {
-      console.error('Restore failed:', error);
+      console.error('Restore failed:', _error);
       return { 
         success: false, 
         _error: error instanceof Error ? error.message : 'Restore failed' 
@@ -308,7 +308,7 @@ export class MobileImportExportService extends ImportExportService {
 
       return backups.sort((a, b) => b.created.getTime() - a.created.getTime());
     } catch (_error) {
-      console.error('Failed to list backups:', error);
+      console.error('Failed to list backups:', _error);
       return [];
     }
   }

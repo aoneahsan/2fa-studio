@@ -47,7 +47,7 @@ export class MobileAccountService {
         value: encrypted
       });
     } catch (_error) {
-      console.error('Failed to save accounts:', error);
+      console.error('Failed to save accounts:', _error);
       throw new Error('Failed to save accounts securely');
     }
   }
@@ -66,7 +66,7 @@ export class MobileAccountService {
       const decrypted = await EncryptionService.decryptData(value);
       return JSON.parse(decrypted);
     } catch (_error) {
-      console.error('Failed to load accounts:', error);
+      console.error('Failed to load accounts:', _error);
       throw new Error('Failed to load accounts');
     }
   }
@@ -148,7 +148,7 @@ export class MobileAccountService {
 
       return result.uri;
     } catch (_error) {
-      console.error('Failed to export accounts:', error);
+      console.error('Failed to export accounts:', _error);
       throw new Error('Failed to export accounts');
     }
   }
@@ -175,7 +175,7 @@ export class MobileAccountService {
         files: [`data:application/json;base64,${btoa(JSON.stringify(exportData))}`]
       });
     } catch (_error) {
-      console.error('Failed to share accounts:', error);
+      console.error('Failed to share accounts:', _error);
     }
   }
 
@@ -198,7 +198,7 @@ export class MobileAccountService {
 
       return importData.accounts;
     } catch (_error) {
-      console.error('Failed to import accounts:', error);
+      console.error('Failed to import accounts:', _error);
       throw new Error('Failed to import accounts from file');
     }
   }
@@ -232,7 +232,7 @@ export class MobileAccountService {
 
       return result.uri;
     } catch (_error) {
-      console.error('Failed to create backup:', error);
+      console.error('Failed to create backup:', _error);
       throw new Error('Failed to create encrypted backup');
     }
   }
@@ -272,7 +272,7 @@ export class MobileAccountService {
 
       return newAccounts.length;
     } catch (_error) {
-      console.error('Failed to restore backup:', error);
+      console.error('Failed to restore backup:', _error);
       throw new Error('Failed to restore from backup');
     }
   }

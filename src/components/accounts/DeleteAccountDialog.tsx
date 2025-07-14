@@ -47,7 +47,7 @@ const DeleteAccountDialog: React.FC = () => {
       
       dispatch(closeModal());
     } catch (_error) {
-      console.error('Failed to delete account:', error);
+      console.error('Failed to delete account:', _error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to delete account'
@@ -109,7 +109,7 @@ const DeleteAccountDialog: React.FC = () => {
             <input
               type="text"
               value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
+              onChange={(_e) => setConfirmText(e.target.value)}
               className="input"
               placeholder="Type DELETE"
               autoComplete="off"

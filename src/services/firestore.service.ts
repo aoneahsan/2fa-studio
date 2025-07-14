@@ -58,12 +58,12 @@ export interface ConflictResolution {
 
 export class FirestoreService {
   private static syncListeners: Map<string, Unsubscribe> = new Map();
-  private static offlineQueue: Array<{ operation: string; data: any }> = [];
+  private static offlineQueue: Array<{ operation: string; data: unknown }> = [];
 
   /**
    * Sanitize user input data
    */
-  static sanitizeInput(data: any): unknown {
+  static sanitizeInput(data: unknown): unknown {
     if (typeof data === 'string') {
       return data
         .replace(/[<>'"]/g, '') // Remove potential HTML/JS chars
@@ -122,7 +122,7 @@ export class FirestoreService {
       // Note: This should be called before any other Firestore operations
       console.log('Firestore service initialized');
     } catch (_error) {
-      console.error('Failed to initialize Firestore:', error);
+      console.error('Failed to initialize Firestore:', _error);
     }
   }
 
@@ -148,7 +148,7 @@ export class FirestoreService {
       
       return null;
     } catch (_error) {
-      console.error('Error getting document:', error);
+      console.error('Error getting document:', _error);
       throw error;
     }
   }
@@ -158,7 +158,7 @@ export class FirestoreService {
    */
   static async getCollection<T = any>(
     collectionPath: string,
-    filters: Array<{ field: string; operator: unknown; value: any }> = [],
+    filters: Array<{ field: string; operator: unknown; value: unknown }> = [],
     pagination: PaginationOptions = {}
   ): Promise<SyncResult<T>> {
     try {
@@ -205,7 +205,7 @@ export class FirestoreService {
         fromCache: querySnapshot.metadata.fromCache
       };
     } catch (_error) {
-      console.error('Error getting collection:', error);
+      console.error('Error getting collection:', _error);
       throw error;
     }
   }
@@ -236,7 +236,7 @@ export class FirestoreService {
         return docRef.id;
       }
     } catch (_error) {
-      console.error('Error creating document:', error);
+      console.error('Error creating document:', _error);
       throw error;
     }
   }
@@ -275,7 +275,7 @@ export class FirestoreService {
         });
       }
     } catch (_error) {
-      console.error('Error updating document:', error);
+      console.error('Error updating document:', _error);
       throw error;
     }
   }
@@ -291,7 +291,7 @@ export class FirestoreService {
       const docRef = doc(db, collectionPath, documentId);
       await deleteDoc(docRef);
     } catch (_error) {
-      console.error('Error deleting document:', error);
+      console.error('Error deleting document:', _error);
       throw error;
     }
   }
@@ -335,7 +335,7 @@ export class FirestoreService {
 
       await batch.commit();
     } catch (_error) {
-      console.error('Error in batch operation:', error);
+      console.error('Error in batch operation:', _error);
       throw error;
     }
   }
@@ -349,7 +349,7 @@ export class FirestoreService {
     try {
       return await runTransaction(db, callback);
     } catch (_error) {
-      console.error('Transaction failed:', error);
+      console.error('Transaction failed:', _error);
       throw error;
     }
   }
@@ -381,7 +381,7 @@ export class FirestoreService {
           }
         },
         (_error) => {
-          console.error('Document subscription _error:', error);
+          console.error('Document subscription _error:', _error);
           callback(null, _error);
         }
       );
@@ -392,7 +392,7 @@ export class FirestoreService {
 
       return unsubscribe;
     } catch (_error) {
-      console.error('Error setting up document subscription:', error);
+      console.error('Error setting up document subscription:', _error);
       throw error;
     }
   }
@@ -402,7 +402,7 @@ export class FirestoreService {
    */
   static subscribeToCollection<T = any>(
     collectionPath: string,
-    filters: Array<{ field: string; operator: unknown; value: any }> = [],
+    filters: Array<{ field: string; operator: unknown; value: unknown }> = [],
     callback: (data: T[], error?: FirestoreError) => void,
     subscriptionKey?: string,
     pagination?: PaginationOptions
@@ -437,7 +437,7 @@ export class FirestoreService {
           callback(data);
         },
         (_error) => {
-          console.error('Collection subscription _error:', error);
+          console.error('Collection subscription _error:', _error);
           callback([], _error);
         }
       );
@@ -448,7 +448,7 @@ export class FirestoreService {
 
       return unsubscribe;
     } catch (_error) {
-      console.error('Error setting up collection subscription:', error);
+      console.error('Error setting up collection subscription:', _error);
       throw error;
     }
   }
@@ -482,7 +482,7 @@ export class FirestoreService {
       await disableNetwork(db);
       console.log('Firestore offline mode enabled');
     } catch (_error) {
-      console.error('Error enabling offline mode:', error);
+      console.error('Error enabling offline mode:', _error);
     }
   }
 
@@ -491,7 +491,7 @@ export class FirestoreService {
       await enableNetwork(db);
       console.log('Firestore online mode enabled');
     } catch (_error) {
-      console.error('Error enabling online mode:', error);
+      console.error('Error enabling online mode:', _error);
     }
   }
 
@@ -499,7 +499,7 @@ export class FirestoreService {
     try {
       await waitForPendingWrites(db);
     } catch (_error) {
-      console.error('Error waiting for pending writes:', error);
+      console.error('Error waiting for pending writes:', _error);
     }
   }
 

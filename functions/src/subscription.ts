@@ -2,21 +2,23 @@
  * Subscription Cloud Functions
  */
 
-import * as functions from 'firebase-functions';
+import {onCall, HttpsError, onRequest} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import Stripe from 'stripe';
+import {FirebaseAuthRequest} from './types';
 
 const db = admin.firestore();
-const stripe = new Stripe(functions.config().stripe.secret_key, {
-	apiVersion: '2023-10-16',
+
+// Initialize Stripe with environment variable
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+	apiVersion: '2025-06-30.basil',
 });
 
 // Subscription tiers and prices
 const SUBSCRIPTION_PRICES = {
-	pro: functions.config().stripe.price_pro || 'price_pro_monthly',
-	premium: functions.config().stripe.price_premium || 'price_premium_monthly',
-	business:
-		functions.config().stripe.price_business || 'price_business_monthly',
+	pro: process.env.STRIPE_PRICE_PRO || 'price_pro_monthly',
+	premium: process.env.STRIPE_PRICE_PREMIUM || 'price_premium_monthly',
+	business: process.env.STRIPE_PRICE_BUSINESS || 'price_business_monthly',
 };
 
 const TIER_LIMITS = {
@@ -29,22 +31,22 @@ const TIER_LIMITS = {
 /**
  * Create Stripe checkout session
  */
-export const createCheckoutSession = functions.https.onCall(
-	async (data, context) => {
-		if (!context?.auth) {
-			throw new functions.https.HttpsError(
+export const createCheckoutSession = onCall(
+	async (request: FirebaseAuthRequest<{tier: string; successUrl?: string; cancelUrl?: string}>) => {
+		if (!request._auth) {
+			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
 			);
 		}
 
-		const { tier, successUrl, cancelUrl } = data ?? {};
+		const { tier, successUrl, cancelUrl } = request.data ?? {};
 
 		if (
 			!tier ||
 			!SUBSCRIPTION_PRICES[tier as keyof typeof SUBSCRIPTION_PRICES]
 		) {
-			throw new functions.https.HttpsError(
+			throw new HttpsError(
 				'invalid-argument',
 				'Invalid subscription tier'
 			);
@@ -54,7 +56,7 @@ export const createCheckoutSession = functions.https.onCall(
 			// Get or create Stripe customer
 			const userDoc = await db
 				.collection('users')
-				.doc(context?.auth?.uid)
+				.doc(request.auth.uid)
 				.get();
 			const userData = userDoc.data();
 
@@ -65,7 +67,7 @@ export const createCheckoutSession = functions.https.onCall(
 				const customer = await stripe.customers.create({
 					email: userData?.email,
 					metadata: {
-						userId: context?.auth?.uid,
+						userId: request.auth.uid,
 					},
 				});
 
@@ -91,20 +93,20 @@ export const createCheckoutSession = functions.https.onCall(
 				mode: 'subscription',
 				success_url:
 					successUrl ||
-					`${functions.config().app.url}/settings?tab=subscription&status=success`,
+					`${process.env.APP_URL}/settings?tab=subscription&status=success`,
 				cancel_url:
 					cancelUrl ||
-					`${functions.config().app.url}/settings?tab=subscription&status=cancelled`,
+					`${process.env.APP_URL}/settings?tab=subscription&status=cancelled`,
 				metadata: {
-					userId: context?.auth?.uid,
+					userId: request.auth.uid,
 					tier,
 				},
 			});
 
 			return { sessionId: session.id, url: session.url };
-		} catch (error) {
-			console.error('Error creating checkout session:', error);
-			throw new functions.https.HttpsError(
+		} catch (_error) {
+			console.error('Error creating checkout session:', _error);
+			throw new HttpsError(
 				'internal',
 				'Failed to create checkout session'
 			);
@@ -115,27 +117,27 @@ export const createCheckoutSession = functions.https.onCall(
 /**
  * Create customer portal session
  */
-export const createPortalSession = functions.https.onCall(
-	async (data, context) => {
-		if (!context?.auth) {
-			throw new functions.https.HttpsError(
+export const createPortalSession = onCall(
+	async (request: FirebaseAuthRequest<{returnUrl?: string}>) => {
+		if (!request._auth) {
+			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
 			);
 		}
 
-		const { returnUrl } = data ?? {};
+		const { returnUrl } = request.data ?? {};
 
 		try {
 			// Get user's Stripe customer ID
 			const userDoc = await db
 				.collection('users')
-				.doc(context?.auth?.uid)
+				.doc(request.auth.uid)
 				.get();
 			const customerId = userDoc.data()?.stripeCustomerId;
 
 			if (!customerId) {
-				throw new functions.https.HttpsError(
+				throw new HttpsError(
 					'not-found',
 					'No subscription found'
 				);
@@ -146,13 +148,13 @@ export const createPortalSession = functions.https.onCall(
 				customer: customerId,
 				return_url:
 					returnUrl ||
-					`${functions.config().app.url}/settings?tab=subscription`,
+					`${process.env.APP_URL}/settings?tab=subscription`,
 			});
 
 			return { url: session.url };
-		} catch (error) {
-			console.error('Error creating portal session:', error);
-			throw new functions.https.HttpsError(
+		} catch (_error) {
+			console.error('Error creating portal session:', _error);
+			throw new HttpsError(
 				'internal',
 				'Failed to create portal session'
 			);
@@ -163,7 +165,7 @@ export const createPortalSession = functions.https.onCall(
 /**
  * Handle Stripe webhook
  */
-export const handleStripeWebhook = functions.https.onRequest(
+export const handleStripeWebhook = onRequest(
 	async (req, res) => {
 		if (req.method !== 'POST') {
 			res.status(405).send('Method Not Allowed');
@@ -171,7 +173,7 @@ export const handleStripeWebhook = functions.https.onRequest(
 		}
 
 		const sig = req.headers['stripe-signature'];
-		const endpointSecret = functions.config().stripe.webhook_secret;
+		const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 		if (!sig || !endpointSecret) {
 			res.status(400).send('Missing signature or secret');
@@ -181,7 +183,7 @@ export const handleStripeWebhook = functions.https.onRequest(
 		let event: Stripe.Event;
 
 		try {
-			event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
+			event = stripe.webhooks.constructEvent((req as unknown).rawBody || req.body, sig as string, endpointSecret);
 		} catch (err: unknown) {
 			console.error('Webhook signature verification failed:', err.message);
 			res.status(400).send(`Webhook Error: ${err.message}`);
@@ -224,8 +226,8 @@ export const handleStripeWebhook = functions.https.onRequest(
 			}
 
 			res.json({ received: true });
-		} catch (error) {
-			console.error('Error processing webhook:', error);
+		} catch (_error) {
+			console.error('Error processing webhook:', _error);
 			res.status(500).send('Webhook processing failed');
 		}
 	}
@@ -234,10 +236,10 @@ export const handleStripeWebhook = functions.https.onRequest(
 /**
  * Check account limits for user
  */
-export const checkAccountLimits = functions.https.onCall(
-	async (data, context) => {
-		if (!context?.auth) {
-			throw new functions.https.HttpsError(
+export const checkAccountLimits = onCall(
+	async (request: FirebaseAuthRequest) => {
+		if (!request._auth) {
+			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
 			);
@@ -246,7 +248,7 @@ export const checkAccountLimits = functions.https.onCall(
 		try {
 			const userDoc = await db
 				.collection('users')
-				.doc(context?.auth?.uid)
+				.doc(request.auth.uid)
 				.get();
 			const userData = userDoc.data();
 
@@ -261,9 +263,9 @@ export const checkAccountLimits = functions.https.onCall(
 				remaining: limits.accounts === -1 ? -1 : limits.accounts - currentCount,
 				canAdd: limits.accounts === -1 || currentCount < limits.accounts,
 			};
-		} catch (error) {
-			console.error('Error checking limits:', error);
-			throw new functions.https.HttpsError(
+		} catch (_error) {
+			console.error('Error checking limits:', _error);
+			throw new HttpsError(
 				'internal',
 				'Failed to check limits'
 			);
@@ -274,16 +276,16 @@ export const checkAccountLimits = functions.https.onCall(
 /**
  * Update usage statistics
  */
-export const updateUsageStats = functions.https.onCall(
-	async (data, context) => {
-		if (!context?.auth) {
-			throw new functions.https.HttpsError(
+export const updateUsageStats = onCall(
+	async (request: FirebaseAuthRequest<{action: string; value?: number}>) => {
+		if (!request._auth) {
+			throw new HttpsError(
 				'unauthenticated',
 				'User must be authenticated'
 			);
 		}
 
-		const { action, value = 1 } = data ?? {};
+		const { action, value = 1 } = request.data ?? {};
 
 		try {
 			const increment = admin.firestore.FieldValue.increment(value);
@@ -306,12 +308,12 @@ export const updateUsageStats = functions.https.onCall(
 					break;
 			}
 
-			await db.collection('users').doc(context?.auth?.uid).update(updates);
+			await db.collection('users').doc(request.auth.uid).update(updates);
 
 			return { success: true };
-		} catch (error) {
-			console.error('Error updating usage stats:', error);
-			throw new functions.https.HttpsError(
+		} catch (_error) {
+			console.error('Error updating usage stats:', _error);
+			throw new HttpsError(
 				'internal',
 				'Failed to update usage stats'
 			);
@@ -351,8 +353,8 @@ export async function enforceUsageLimits() {
 		}
 
 		return { violations };
-	} catch (error) {
-		console.error('Error enforcing limits:', error);
+	} catch (_error) {
+		console.error('Error enforcing limits:', _error);
 		throw error;
 	}
 }
@@ -406,9 +408,9 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 			stripeSubscriptionId: subscription.id,
 			stripePriceId: priceId,
 			status: subscription.status,
-			currentPeriodStart: new Date(subscription.current_period_start * 1000),
-			currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-			cancelAtPeriodEnd: subscription.cancel_at_period_end,
+			currentPeriodStart: new Date((subscription as unknown).current_period_start * 1000),
+			currentPeriodEnd: new Date((subscription as unknown).current_period_end * 1000),
+			cancelAtPeriodEnd: (subscription as unknown).cancel_at_period_end,
 			accountLimit: TIER_LIMITS[tier as keyof typeof TIER_LIMITS].accounts,
 			updatedAt: admin.firestore.FieldValue.serverTimestamp(),
 		},

@@ -2,7 +2,7 @@
  * Analytics Cloud Functions
  */
 
-import * as functions from 'firebase-functions';
+import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
@@ -119,8 +119,8 @@ export async function aggregateDailyStats() {
 
 		console.log(`Aggregated stats for ${today.toISOString().split('T')[0]}`);
 		return stats;
-	} catch (error) {
-		console.error('Error aggregating stats:', error);
+	} catch (_error) {
+		console.error('Error aggregating stats:', _error);
 		throw error;
 	}
 }
@@ -128,107 +128,124 @@ export async function aggregateDailyStats() {
 /**
  * Generate analytics reports
  */
-export const generateReports = functions.https.onCall(async (data, context) => {
-	// Check admin privileges
-	if (!context?.auth) {
-		throw new functions.https.HttpsError(
-			'unauthenticated',
-			'User must be authenticated'
-		);
-	}
-
-	const userDoc = await db.collection('users').doc(context?.auth?.uid).get();
-	if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
-		throw new functions.https.HttpsError(
-			'permission-denied',
-			'Admin access required'
-		);
-	}
-
-	const { period = 'week', startDate, endDate } = data ?? {};
-
-	try {
-		let start: Date;
-		let end: Date;
-
-		if (startDate && endDate) {
-			start = new Date(startDate);
-			end = new Date(endDate);
-		} else {
-			end = new Date();
-			start = new Date();
-
-			switch (period) {
-				case 'day':
-					start.setDate(start.getDate() - 1);
-					break;
-				case 'week':
-					start.setDate(start.getDate() - 7);
-					break;
-				case 'month':
-					start.setMonth(start.getMonth() - 1);
-					break;
-				case 'year':
-					start.setFullYear(start.getFullYear() - 1);
-					break;
-			}
+export const generateReports = onCall(
+	{
+		cors: true,
+		maxInstances: 10,
+	},
+	async (request) => {
+		const data = request.data;
+		const context = request.auth;
+		
+		// Check admin privileges
+		if (!_context) {
+			throw new HttpsError(
+				'unauthenticated',
+				'User must be authenticated'
+			);
 		}
 
-		// Get analytics data for period
-		const analyticsSnapshot = await db
-			.collection('analytics')
-			.where('date', '>=', start)
-			.where('date', '<=', end)
-			.orderBy('date', 'asc')
-			.get();
+		const userDoc = await db.collection('users').doc(context.uid).get();
+		if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
+			throw new HttpsError(
+				'permission-denied',
+				'Admin access required'
+			);
+		}
 
-		const report = {
-			period: { start: start.toISOString(), end: end.toISOString() },
-			data: analyticsSnapshot.docs.map((doc) => ({
-				date: doc.id,
-				...doc.data(),
-			})),
-			summary: calculateSummary(analyticsSnapshot.docs),
-		};
+		const { period = 'week', startDate, endDate } = data ?? {};
 
-		return report;
-	} catch (error) {
-		console.error('Error generating report:', error);
-		throw new functions.https.HttpsError(
-			'internal',
-			'Failed to generate report'
-		);
+		try {
+			let start: Date;
+			let end: Date;
+
+			if (startDate && endDate) {
+				start = new Date(startDate);
+				end = new Date(endDate);
+			} else {
+				end = new Date();
+				start = new Date();
+
+				switch (period) {
+					case 'day':
+						start.setDate(start.getDate() - 1);
+						break;
+					case 'week':
+						start.setDate(start.getDate() - 7);
+						break;
+					case 'month':
+						start.setMonth(start.getMonth() - 1);
+						break;
+					case 'year':
+						start.setFullYear(start.getFullYear() - 1);
+						break;
+				}
+			}
+
+			// Get analytics data for period
+			const analyticsSnapshot = await db
+				.collection('analytics')
+				.where('date', '>=', start)
+				.where('date', '<=', end)
+				.orderBy('date', 'asc')
+				.get();
+
+			const report = {
+				period: { start: start.toISOString(), end: end.toISOString() },
+				data: analyticsSnapshot.docs.map((doc) => ({
+					date: doc.id,
+					...doc.data(),
+				})),
+				summary: calculateSummary(analyticsSnapshot.docs),
+			};
+
+			return report;
+		} catch (_error) {
+			console.error('Error generating report:', _error);
+			throw new HttpsError(
+				'internal',
+				'Failed to generate report'
+			);
+		}
 	}
-});
+);
 
 /**
  * Track custom events
  */
-export const trackEvent = functions.https.onCall(async (data, context) => {
-	const { event, properties = {} } = data ?? {};
+export const trackEvent = onCall(
+	{
+		cors: true,
+		maxInstances: 10,
+	},
+	async (request) => {
+		const data = request.data;
+		const context = request.auth;
+		const { event, properties = {} } = data ?? {};
 
-	if (!event) {
-		throw new functions.https.HttpsError(
-			'invalid-argument',
-			'Event name required'
-		);
+		if (!event) {
+			throw new HttpsError(
+				'invalid-argument',
+				'Event name required'
+			);
+		}
+
+		try {
+			await db.collection('events').add({
+				event,
+				properties,
+				userId: context?.uid || null,
+				timestamp: admin.firestore.FieldValue.serverTimestamp(),
+				date: new Date().toISOString().split('T')[0],
+			});
+
+			return { success: true };
+		} catch (_error) {
+			console.error('Error tracking event:', _error);
+			throw new HttpsError('internal', 'Failed to track event');
+		}
 	}
-
-	try {
-		await db.collection('events').add({
-			event,
-			properties,
-			userId: context?.auth?.uid || null,
-			timestamp: admin.firestore.FieldValue.serverTimestamp(),
-			date: new Date().toISOString().split('T')[0],
-		});
-
-		return { success: true };
-	} catch (error) {
-		console.error('Error tracking event:', error);
-		throw new functions.https.HttpsError('internal', 'Failed to track event');
-	}
-});
+);
 
 /**
  * Cleanup old analytics data
@@ -274,8 +291,8 @@ export async function cleanupOldAnalytics() {
 			analytics: oldAnalyticsSnapshot.size,
 			events: oldEventsSnapshot.size,
 		};
-	} catch (error) {
-		console.error('Error cleaning up analytics:', error);
+	} catch (_error) {
+		console.error('Error cleaning up analytics:', _error);
 		throw error;
 	}
 }

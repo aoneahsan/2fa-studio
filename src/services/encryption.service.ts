@@ -125,7 +125,7 @@ export class EncryptionService {
         iterations
       };
     } catch (_error) {
-      console.error('Encryption failed:', error);
+      console.error('Encryption failed:', _error);
       throw new Error('Failed to encrypt data');
     }
   }
@@ -173,7 +173,7 @@ export class EncryptionService {
       const decoder = new TextDecoder();
       return decoder.decode(decryptedBuffer);
     } catch (_error) {
-      console.error('Decryption failed:', error);
+      console.error('Decryption failed:', _error);
       throw new Error('Failed to decrypt data - invalid password or corrupted data');
     }
   }

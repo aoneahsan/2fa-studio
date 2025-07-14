@@ -48,7 +48,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
       await createBackup(encryptionPassword || backupPassword);
       setBackupPassword('');
     } catch (_error) {
-      console.error('Backup failed:', error);
+      console.error('Backup failed:', _error);
     }
   };
 
@@ -63,7 +63,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
       await restoreBackup(backupId, encryptionPassword || backupPassword);
       setBackupPassword('');
     } catch (_error) {
-      console.error('Restore failed:', error);
+      console.error('Restore failed:', _error);
     }
   };
 
@@ -77,7 +77,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
     try {
       await deleteBackup(backupId);
     } catch (_error) {
-      console.error('Delete failed:', error);
+      console.error('Delete failed:', _error);
     }
   };
 
@@ -178,7 +178,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
           <input
             type={showPassword ? 'text' : 'password'}
             value={backupPassword}
-            onChange={(e) => setBackupPassword(e.target.value)}
+            onChange={(_e) => setBackupPassword(e.target.value)}
             placeholder="Enter password for encrypted backups"
             className="input mb-2"
           />
@@ -186,7 +186,7 @@ const GoogleDriveBackup: React.FC<GoogleDriveBackupProps> = ({ encryptionPasswor
             <input
               type="checkbox"
               checked={showPassword}
-              onChange={(e) => setShowPassword(e.target.checked)}
+              onChange={(_e) => setShowPassword(e.target.checked)}
               className="checkbox"
             />
             Show password

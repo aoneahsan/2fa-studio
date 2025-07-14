@@ -111,7 +111,11 @@
       "Bash(firebase deploy:*)",
       "Bash(yarn lint:*)",
       "Bash(yarn eslint:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(yarn info:*)",
+      "Bash(firebase functions:config:get:*)",
+      "Bash(./node_modules/.bin/tsc:*)",
+      "Bash(yarn fix-lint-errors:*)"
     ],
     "deny": []
   }

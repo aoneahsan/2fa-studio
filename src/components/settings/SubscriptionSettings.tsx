@@ -33,7 +33,7 @@ interface PricingPlan {
  */
 const SubscriptionSettings: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [isProcessing, setIsProcessing] = useState(false);
 

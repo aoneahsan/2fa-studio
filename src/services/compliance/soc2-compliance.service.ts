@@ -353,15 +353,15 @@ export class SOC2ComplianceService {
         await AuditLoggingService.log({
           userId: 'system',
           userEmail: 'system',
-          action: 'compliance.soc2_controls_initialized' as any,
-          resource: 'system' as any,
+          action: 'compliance.soc2_controls_initialized' as unknown,
+          resource: 'system' as unknown,
           details: { controlsCount: this.DEFAULT_CONTROLS.length },
           severity: 'info',
           success: true
         });
       }
-    } catch (error) {
-      console.error('Failed to initialize SOC 2 controls:', error);
+    } catch (_error) {
+      console.error('Failed to initialize SOC 2 controls:', _error);
       throw error;
     }
   }
@@ -388,8 +388,8 @@ export class SOC2ComplianceService {
           lastTested: doc.data().implementation?.lastTested?.toDate()
         }
       } as SecurityControl));
-    } catch (error) {
-      console.error('Failed to get controls:', error);
+    } catch (_error) {
+      console.error('Failed to get controls:', _error);
       throw error;
     }
   }
@@ -421,14 +421,14 @@ export class SOC2ComplianceService {
       await AuditLoggingService.log({
         userId: AuthService.getCurrentUser()?.uid || 'system',
         userEmail: AuthService.getCurrentUser()?.email || 'system',
-        action: 'compliance.control_updated' as any,
-        resource: 'system' as any,
+        action: 'compliance.control_updated' as unknown,
+        resource: 'system' as unknown,
         details: { controlId, status, implementation },
         severity: 'info',
         success: true
       });
-    } catch (error) {
-      console.error('Failed to update control status:', error);
+    } catch (_error) {
+      console.error('Failed to update control status:', _error);
       throw error;
     }
   }
@@ -458,16 +458,16 @@ export class SOC2ComplianceService {
       await AuditLoggingService.log({
         userId: incident.reportedBy,
         userEmail: AuthService.getCurrentUser()?.email || 'system',
-        action: 'security.incident_reported' as any,
-        resource: 'system' as any,
+        action: 'security.incident_reported' as unknown,
+        resource: 'system' as unknown,
         details: { incidentId, severity: incident.severity, title: incident.title },
         severity: incident.severity === 'critical' ? 'critical' : 'warning',
         success: true
       });
 
       return docRef.id;
-    } catch (error) {
-      console.error('Failed to report incident:', error);
+    } catch (_error) {
+      console.error('Failed to report incident:', _error);
       throw error;
     }
   }
@@ -480,7 +480,7 @@ export class SOC2ComplianceService {
     updates: Partial<SecurityIncident>
   ): Promise<void> {
     try {
-      const updateData: any = { ...updates };
+      const updateData: unknown = { ...updates };
       
       if (updates.status === 'resolved' && !updates.resolvedAt) {
         updateData.resolvedAt = serverTimestamp();
@@ -495,14 +495,14 @@ export class SOC2ComplianceService {
       await AuditLoggingService.log({
         userId: AuthService.getCurrentUser()?.uid || 'system',
         userEmail: AuthService.getCurrentUser()?.email || 'system',
-        action: 'security.incident_updated' as any,
-        resource: 'system' as any,
+        action: 'security.incident_updated' as unknown,
+        resource: 'system' as unknown,
         details: { incidentId, updates },
         severity: 'info',
         success: true
       });
-    } catch (error) {
-      console.error('Failed to update incident:', error);
+    } catch (_error) {
+      console.error('Failed to update incident:', _error);
       throw error;
     }
   }
@@ -555,16 +555,16 @@ export class SOC2ComplianceService {
       await AuditLoggingService.log({
         userId: AuthService.getCurrentUser()?.uid || 'system',
         userEmail: AuthService.getCurrentUser()?.email || 'system',
-        action: 'compliance.report_generated' as any,
-        resource: 'system' as any,
+        action: 'compliance.report_generated' as unknown,
+        resource: 'system' as unknown,
         details: { reportId: docRef.id, reportType, period: { startDate, endDate } },
         severity: 'info',
         success: true
       });
 
       return docRef.id;
-    } catch (error) {
-      console.error('Failed to generate compliance report:', error);
+    } catch (_error) {
+      console.error('Failed to generate compliance report:', _error);
       throw error;
     }
   }
@@ -602,8 +602,8 @@ export class SOC2ComplianceService {
       if (status === 'critical') {
         await this.handleCriticalMetric(metric, value, details);
       }
-    } catch (error) {
-      console.error('Failed to record metric:', error);
+    } catch (_error) {
+      console.error('Failed to record metric:', _error);
     }
   }
 
@@ -635,8 +635,8 @@ export class SOC2ComplianceService {
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
       } as SystemMonitoring));
-    } catch (error) {
-      console.error('Failed to get monitoring metrics:', error);
+    } catch (_error) {
+      console.error('Failed to get monitoring metrics:', _error);
       throw error;
     }
   }
@@ -695,8 +695,8 @@ export class SOC2ComplianceService {
         findings,
         recommendations
       };
-    } catch (error) {
-      console.error('Failed to perform security assessment:', error);
+    } catch (_error) {
+      console.error('Failed to perform security assessment:', _error);
       throw error;
     }
   }
@@ -872,8 +872,8 @@ export class SOC2ComplianceService {
     await AuditLoggingService.log({
       userId: 'system',
       userEmail: 'system',
-      action: 'security.alert_sent' as any,
-      resource: 'system' as any,
+      action: 'security.alert_sent' as unknown,
+      resource: 'system' as unknown,
       details: {
         incidentId: incident.incidentId,
         severity: incident.severity,

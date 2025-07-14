@@ -28,7 +28,7 @@ interface DeviceManagerProps {
  * Modal for managing connected devices
  */
 const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [devices, setDevices] = useState<DeviceInfo[]>([]);
   const [sessions, setSessions] = useState<DeviceSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +54,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
       setDevices(userDevices);
       setSessions(activeSessions);
     } catch (_error) {
-      console.error('Error loading devices:', error);
+      console.error('Error loading devices:', _error);
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +67,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
       await DeviceService.trustDevice(user.id, deviceId);
       await loadDevices();
     } catch (_error) {
-      console.error('Error trusting device:', error);
+      console.error('Error trusting device:', _error);
     }
   };
 
@@ -79,7 +79,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
       setShowConfirmDelete(null);
       await loadDevices();
     } catch (_error) {
-      console.error('Error removing device:', error);
+      console.error('Error removing device:', _error);
     }
   };
 
@@ -90,7 +90,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
       await DeviceService.endSession(user.id, sessionId);
       await loadDevices();
     } catch (_error) {
-      console.error('Error ending session:', error);
+      console.error('Error ending session:', _error);
     }
   };
 
@@ -190,7 +190,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
                       <div className="flex items-center gap-2">
                         {!device.isTrusted && !device.isCurrentDevice && (
                           <button
-                            onClick={(e) => {
+                            onClick={(_e) => {
                               e.stopPropagation();
                               handleTrustDevice(device.id);
                             }}
@@ -201,7 +201,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
                         )}
                         {!device.isCurrentDevice && (
                           <button
-                            onClick={(e) => {
+                            onClick={(_e) => {
                               e.stopPropagation();
                               setShowConfirmDelete(device.id);
                             }}

@@ -7,15 +7,15 @@ import { defineConfig } from 'cypress'
  */
 export default defineConfig({
   e2e: {
-    setupNodeEvents(on, config) {
+    setupNodeEvents(_on, _config) {
       // Firebase emulator tasks
       on('task', {
         setupFirebaseEmulator() {
           // Start Firebase emulators if not already running
-          const { spawn } = require('child_process')
+          const { spawn } = import('child_process')
           
           return new Promise((resolve) => {
-            const emulator = spawn('firebase', ['emulators:start', '--only', 'auth,firestore,functions,storage'], {
+            const emulator = spawn('firebase', ['emulators:start', '--only', '_auth,firestore,functions,storage'], {
               detached: true,
               stdio: 'ignore'
             })
@@ -31,7 +31,7 @@ export default defineConfig({
         
         clearFirebaseEmulator() {
           // Clear emulator data
-          const fetch = require('node-fetch')
+          import fetch from 'node-fetch'
           
           return Promise.all([
             // Clear Auth emulator
@@ -53,7 +53,7 @@ export default defineConfig({
         
         cleanupTestUser(email: string) {
           // Remove test user and associated data
-          const admin = require('firebase-admin')
+          import admin from 'firebase-admin'
           
           if (!admin.apps.length) {
             admin.initializeApp({
@@ -89,7 +89,7 @@ export default defineConfig({
         
         // Database seeding for tests
         seedTestData() {
-          const admin = require('firebase-admin')
+          import admin from 'firebase-admin'
           
           if (!admin.apps.length) {
             admin.initializeApp({
@@ -147,8 +147,8 @@ export default defineConfig({
         
         // Performance testing helpers
         measurePageLoadTime(url: string) {
-          const { performance } = require('perf_hooks')
-          const puppeteer = require('puppeteer')
+          const { performance } = import('perf_hooks')
+          import puppeteer from 'puppeteer'
           
           return puppeteer.launch({ headless: true })
             .then((browser) => {
@@ -169,9 +169,9 @@ export default defineConfig({
         
         // Screenshot comparison for visual regression testing
         compareScreenshots(baseline: string, current: string) {
-          const pixelmatch = require('pixelmatch');
-          const fs = require('fs');
-          const { PNG } = require('pngjs');
+          import pixelmatch from 'pixelmatch';
+          import fs from 'fs';
+          const { PNG } = import('pngjs');
           
           const baselineImg = PNG.sync.read(fs.readFileSync(baseline))
           const currentImg = PNG.sync.read(fs.readFileSync(current))
@@ -199,7 +199,7 @@ export default defineConfig({
       })
       
       // Code coverage
-      require('@cypress/code-coverage/task')(on, config)
+      import('@cypress/code-coverage/task')(_on, _config)
       
       return config
     }

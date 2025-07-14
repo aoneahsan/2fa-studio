@@ -359,7 +359,7 @@ class BackgroundService {
 
   handleOpenApp() {
     chrome.tabs.create({ 
-      url: chrome.runtime.getURL('../index.html') 
+      url: chrome.runtime.getURL('popup/popup.html') 
     });
   }
 
@@ -764,7 +764,7 @@ class BackgroundService {
       
       reader.onloadend = async () => {
         const base64 = reader.result.split(',')[1];
-        const result = await this.qrScanner.scanFromBase64(base64);
+        const result = await QRScanner.scanFromBase64(base64);
         
         if (result) {
           const parsed = this.parseOTPUrl(result);
@@ -856,7 +856,7 @@ class BackgroundService {
 
   async updateAccountsContextMenu(accounts, _tab) {
     // Remove old account items
-    const _existingItems = await chrome.contextMenus.removeAll();
+    await chrome.contextMenus.removeAll();
     
     // Recreate base menu
     this.setupContextMenu();

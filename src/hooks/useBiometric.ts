@@ -51,8 +51,8 @@ export const useBiometric = () => {
           biometryType: result.biometryType as 'face' | 'fingerprint' | 'iris' | 'none',
           reason: result.reason,
         });
-      } catch (error) {
-        console.error('Error checking biometric:', error);
+      } catch (_error) {
+        console.error('Error checking biometric:', _error);
         setBiometricStatus({
           isAvailable: false,
           reason: 'Failed to check biometric availability',
@@ -99,8 +99,8 @@ export const useBiometric = () => {
       } else {
         throw new Error('Authentication failed');
       }
-    } catch (error: any) {
-      console.error('Biometric authentication error:', error);
+    } catch (_error: unknown) {
+      console.error('Biometric authentication _error:', _error);
       
       if (error.code === 'UserCancel') {
         dispatch(addToast({
@@ -148,8 +148,8 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (error) {
-      console.error('Failed to enable biometric:', error);
+    } catch (_error) {
+      console.error('Failed to enable biometric:', _error);
       return false;
     }
   }, [biometricStatus, authenticate, dispatch]);
@@ -170,8 +170,8 @@ export const useBiometric = () => {
       }));
       
       return true;
-    } catch (error) {
-      console.error('Failed to disable biometric:', error);
+    } catch (_error) {
+      console.error('Failed to disable biometric:', _error);
       return false;
     }
   }, [authenticate, dispatch]);
@@ -196,7 +196,7 @@ export const useBiometric = () => {
         subtitle: 'Unlock app',
       });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }, [biometricEnabled, authenticate, dispatch]);

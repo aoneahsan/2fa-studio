@@ -69,7 +69,7 @@ export class AdminService {
       return idTokenResult.claims.role === 'admin' || 
              idTokenResult.claims.role === 'super_admin';
     } catch (_error) {
-      console.error('Error checking admin status:', error);
+      console.error('Error checking admin status:', _error);
       return false;
     }
   }
@@ -85,7 +85,7 @@ export class AdminService {
       const idTokenResult = await currentUser.getIdTokenResult();
       return idTokenResult.claims.role === 'super_admin';
     } catch (_error) {
-      console.error('Error checking super admin status:', error);
+      console.error('Error checking super admin status:', _error);
       return false;
     }
   }
@@ -99,7 +99,7 @@ export class AdminService {
       const result = await getStats();
       return result.data;
     } catch (_error) {
-      console.error('Error getting dashboard stats:', error);
+      console.error('Error getting dashboard stats:', _error);
       throw error;
     }
   }
@@ -166,7 +166,7 @@ export class AdminService {
 
       return { users, lastDoc: lastDocSnapshot, hasMore };
     } catch (_error) {
-      console.error('Error searching users:', error);
+      console.error('Error searching users:', _error);
       throw error;
     }
   }
@@ -195,7 +195,7 @@ export class AdminService {
       
       return { id: userDoc.id, ...userDoc.data() } as User;
     } catch (_error) {
-      console.error('Error getting user details:', error);
+      console.error('Error getting user details:', _error);
       throw error;
     }
   }
@@ -295,7 +295,7 @@ export class AdminService {
         });
       }
     } catch (_error) {
-      console.error('Error updating user subscription:', error);
+      console.error('Error updating user subscription:', _error);
       throw error;
     }
   }
@@ -413,7 +413,7 @@ export class AdminService {
 
       return { actions, lastDoc: lastDocSnapshot, hasMore };
     } catch (_error) {
-      console.error('Error getting admin actions:', error);
+      console.error('Error getting admin actions:', _error);
       throw error;
     }
   }
@@ -444,7 +444,7 @@ export class AdminService {
         timestamp: serverTimestamp()
       });
     } catch (_error) {
-      console.error('Error sending notification:', error);
+      console.error('Error sending notification:', _error);
       throw error;
     }
   }
@@ -461,7 +461,7 @@ export class AdminService {
       const result = await exportData({ userId });
       return result.data.downloadUrl;
     } catch (_error) {
-      console.error('Error exporting user data:', error);
+      console.error('Error exporting user data:', _error);
       throw error;
     }
   }
@@ -483,7 +483,7 @@ export class AdminService {
         timestamp: serverTimestamp()
       });
     } catch (_error) {
-      console.error('Error deleting user account:', error);
+      console.error('Error deleting user account:', _error);
       throw error;
     }
   }

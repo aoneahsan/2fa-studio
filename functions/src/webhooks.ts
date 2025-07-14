@@ -2,17 +2,17 @@
  * Webhook Cloud Functions
  */
 
-import * as functions from 'firebase-functions';
+import {onCall, HttpsError, onRequest} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
-import { Request, Response } from 'express';
 import * as crypto from 'crypto';
+import {FirebaseAuthRequest} from './types';
 
 const db = admin.firestore();
 
 /**
  * Handle OneSignal webhook
  */
-export const handleOneSignalWebhook = functions.https.onRequest(
+export const handleOneSignalWebhook = onRequest(
 	async (req, res) => {
 		if (req.method !== 'POST') {
 			res.status(405).send('Method Not Allowed');
@@ -47,8 +47,8 @@ export const handleOneSignalWebhook = functions.https.onRequest(
 			}
 
 			res.status(200).json({ received: true });
-		} catch (error) {
-			console.error('Error processing OneSignal webhook:', error);
+		} catch (_error) {
+			console.error('Error processing OneSignal webhook:', _error);
 			res.status(500).send('Webhook processing failed');
 		}
 	}
@@ -57,7 +57,7 @@ export const handleOneSignalWebhook = functions.https.onRequest(
 /**
  * Handle Google Drive webhook
  */
-export const handleGoogleDriveWebhook = functions.https.onRequest(
+export const handleGoogleDriveWebhook = onRequest(
 	async (req, res) => {
 		if (req.method !== 'POST') {
 			res.status(405).send('Method Not Allowed');
@@ -99,8 +99,8 @@ export const handleGoogleDriveWebhook = functions.https.onRequest(
 			}
 
 			res.status(200).send('OK');
-		} catch (error) {
-			console.error('Error processing Google Drive webhook:', error);
+		} catch (_error) {
+			console.error('Error processing Google Drive webhook:', _error);
 			res.status(500).send('Webhook processing failed');
 		}
 	}
@@ -109,7 +109,7 @@ export const handleGoogleDriveWebhook = functions.https.onRequest(
 /**
  * Generic webhook handler
  */
-export async function handleWebhook(req: Request, res: Response) {
+export async function handleWebhook(req: unknown, res: unknown) {
 	const path = req.path.split('/').filter(Boolean);
 	const webhookType = path[1];
 
@@ -120,11 +120,13 @@ export async function handleWebhook(req: Request, res: Response) {
 			break;
 
 		case 'onesignal':
-			await handleOneSignalWebhook(req, res);
+			// Type assertion needed for Firebase Functions
+			await handleOneSignalWebhook(req as unknown, res);
 			break;
 
 		case 'googledrive':
-			await handleGoogleDriveWebhook(req, res);
+			// Type assertion needed for Firebase Functions
+			await handleGoogleDriveWebhook(req as unknown, res);
 			break;
 
 		default:
@@ -141,7 +143,7 @@ function verifyOneSignalSignature(
 ): boolean {
 	if (!signature) return false;
 
-	const secret = functions.config().onesignal.webhook_secret;
+	const secret = process.env.ONESIGNAL_WEBHOOK_SECRET;
 	if (!secret) {
 		console.warn('OneSignal webhook secret not configured');
 		return true; // Allow in development
@@ -160,7 +162,7 @@ function verifyOneSignalSignature(
  */
 async function handleNotificationClicked(event: unknown) {
 	try {
-		const { userId, notificationId, heading, content } = event.data;
+		const { userId, notificationId, heading, content } = event.data || {};
 
 		// Log the click
 		await db.collection('notification_events').add({
@@ -184,8 +186,8 @@ async function handleNotificationClicked(event: unknown) {
 						admin.firestore.FieldValue.increment(1),
 				});
 		}
-	} catch (error) {
-		console.error('Error handling notification click:', error);
+	} catch (_error) {
+		console.error('Error handling notification click:', _error);
 	}
 }
 
@@ -194,7 +196,7 @@ async function handleNotificationClicked(event: unknown) {
  */
 async function handleNotificationViewed(event: unknown) {
 	try {
-		const { userId, notificationId } = event.data;
+		const { userId, notificationId } = event.data || {};
 
 		// Log the view
 		await db.collection('notification_events').add({
@@ -203,8 +205,8 @@ async function handleNotificationViewed(event: unknown) {
 			notificationId,
 			timestamp: admin.firestore.FieldValue.serverTimestamp(),
 		});
-	} catch (error) {
-		console.error('Error handling notification view:', error);
+	} catch (_error) {
+		console.error('Error handling notification view:', _error);
 	}
 }
 
@@ -213,7 +215,7 @@ async function handleNotificationViewed(event: unknown) {
  */
 async function handleSubscriptionChanged(event: unknown) {
 	try {
-		const { userId, subscribed, subscriptionId } = event.data;
+		const { userId, subscribed, subscriptionId } = event.data || {};
 
 		if (userId) {
 			const updates: unknown = {
@@ -228,15 +230,15 @@ async function handleSubscriptionChanged(event: unknown) {
 
 			await db.collection('users').doc(userId).update(updates);
 		}
-	} catch (error) {
-		console.error('Error handling subscription change:', error);
+	} catch (_error) {
+		console.error('Error handling subscription change:', _error);
 	}
 }
 
 /**
  * Handle Google Drive file change
  */
-async function handleDriveFileChange(data: any) {
+async function handleDriveFileChange(data: unknown) {
 	try {
 		// Parse file change data
 		const { fileId, userId } = data ?? {};
@@ -262,15 +264,15 @@ async function handleDriveFileChange(data: any) {
 
 			// TODO: Trigger sync process
 		}
-	} catch (error) {
-		console.error('Error handling Drive file change:', error);
+	} catch (_error) {
+		console.error('Error handling Drive file change:', _error);
 	}
 }
 
 /**
  * Handle Google Drive file removal
  */
-async function handleDriveFileRemoval(data: any) {
+async function handleDriveFileRemoval(data: unknown) {
 	try {
 		const { fileId, userId } = data ?? {};
 
@@ -301,35 +303,35 @@ async function handleDriveFileRemoval(data: any) {
 				createdAt: admin.firestore.FieldValue.serverTimestamp(),
 			});
 		}
-	} catch (error) {
-		console.error('Error handling Drive file removal:', error);
+	} catch (_error) {
+		console.error('Error handling Drive file removal:', _error);
 	}
 }
 
 /**
  * Register webhook endpoint
  */
-export const registerWebhook = functions.https.onCall(async (data, context) => {
+export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{service: string; url: string; events: string[]; secret?: string}>) => {
 	// Check admin privileges
-	if (!context?.auth) {
-		throw new functions.https.HttpsError(
+	if (!request._auth) {
+		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
 	}
 
-	const userDoc = await db.collection('users').doc(context?.auth?.uid).get();
+	const userDoc = await db.collection('users').doc(request.auth.uid).get();
 	if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'permission-denied',
 			'Admin access required'
 		);
 	}
 
-	const { service, url, events, secret } = data ?? {};
+	const { service, url, events, secret } = request.data ?? {};
 
 	if (!service || !url || !events) {
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'invalid-argument',
 			'Missing required fields'
 		);
@@ -345,7 +347,7 @@ export const registerWebhook = functions.https.onCall(async (data, context) => {
 				? crypto.createHash('sha256').update(secret).digest('hex')
 				: null,
 			active: true,
-			createdBy: context?.auth?.uid,
+			createdBy: request.auth.uid,
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 			lastTriggered: null,
 			failureCount: 0,
@@ -355,9 +357,9 @@ export const registerWebhook = functions.https.onCall(async (data, context) => {
 			webhookId: webhookRef.id,
 			message: 'Webhook registered successfully',
 		};
-	} catch (error) {
-		console.error('Error registering webhook:', error);
-		throw new functions.https.HttpsError(
+	} catch (_error) {
+		console.error('Error registering webhook:', _error);
+		throw new HttpsError(
 			'internal',
 			'Failed to register webhook'
 		);
@@ -367,18 +369,18 @@ export const registerWebhook = functions.https.onCall(async (data, context) => {
 /**
  * List registered webhooks
  */
-export const listWebhooks = functions.https.onCall(async (data, context) => {
+export const listWebhooks = onCall(async (request: FirebaseAuthRequest) => {
 	// Check admin privileges
-	if (!context?.auth) {
-		throw new functions.https.HttpsError(
+	if (!request._auth) {
+		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
 	}
 
-	const userDoc = await db.collection('users').doc(context?.auth?.uid).get();
+	const userDoc = await db.collection('users').doc(request.auth.uid).get();
 	if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'permission-denied',
 			'Admin access required'
 		);
@@ -397,8 +399,8 @@ export const listWebhooks = functions.https.onCall(async (data, context) => {
 		}));
 
 		return { webhooks };
-	} catch (error) {
-		console.error('Error listing webhooks:', error);
-		throw new functions.https.HttpsError('internal', 'Failed to list webhooks');
+	} catch (_error) {
+		console.error('Error listing webhooks:', _error);
+		throw new HttpsError('internal', 'Failed to list webhooks');
 	}
 });

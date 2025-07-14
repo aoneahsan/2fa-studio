@@ -83,7 +83,7 @@ class PopupManager {
 
     // Open app button
     this.elements.openAppBtn.addEventListener('click', () => {
-      chrome.tabs.create({ url: chrome.runtime.getURL('../index.html') });
+      chrome.tabs.create({ url: 'https://2fa-studio.web.app' });
     });
 
     // Add account buttons

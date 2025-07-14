@@ -66,7 +66,7 @@ export class MobileBiometricService {
         return JSON.parse(value);
       }
     } catch (_error) {
-      console.error('Failed to get biometric _config:', error);
+      console.error('Failed to get biometric _config:', _error);
     }
 
     return {
@@ -111,7 +111,7 @@ export class MobileBiometricService {
 
       return true;
     } catch (_error) {
-      console.error('Failed to enable biometric:', error);
+      console.error('Failed to enable biometric:', _error);
       return false;
     }
   }
@@ -138,7 +138,7 @@ export class MobileBiometricService {
 
       return true;
     } catch (_error) {
-      console.error('Failed to disable biometric:', error);
+      console.error('Failed to disable biometric:', _error);
       return false;
     }
   }
@@ -169,7 +169,7 @@ export class MobileBiometricService {
 
       return result;
     } catch (_error) {
-      console.error('Biometric authentication failed:', error);
+      console.error('Biometric authentication failed:', _error);
       return false;
     }
   }

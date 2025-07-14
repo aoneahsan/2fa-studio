@@ -30,7 +30,7 @@ interface ExtensionMessage {
   deviceId: string;
   timestamp: number;
   encrypted: boolean;
-  data: any;
+  data: unknown;
 }
 
 interface PairingData {
@@ -86,8 +86,8 @@ export class BrowserExtensionService {
           this.reconnect();
         }
       });
-    } catch (error) {
-      console.error('Failed to initialize browser extension service:', error);
+    } catch (_error) {
+      console.error('Failed to initialize browser extension service:', _error);
     }
   }
 
@@ -124,8 +124,8 @@ export class BrowserExtensionService {
         deviceId: this.deviceId,
         timestamp: Date.now(),
       });
-    } catch (error) {
-      console.error('Failed to generate pairing code:', error);
+    } catch (_error) {
+      console.error('Failed to generate pairing code:', _error);
       throw error;
     }
   }
@@ -168,8 +168,8 @@ export class BrowserExtensionService {
         type: 'success',
         message: 'Connected to browser extension',
       }));
-    } catch (error) {
-      console.error('Failed to connect to extension:', error);
+    } catch (_error) {
+      console.error('Failed to connect to extension:', _error);
       throw error;
     }
   }
@@ -229,8 +229,8 @@ export class BrowserExtensionService {
       // Delete processed message
       const messageRef = ref(this.db, `messages/${user.uid}/${this.deviceId}/${messageId}`);
       await remove(messageRef);
-    } catch (error) {
-      console.error('Failed to handle message:', error);
+    } catch (_error) {
+      console.error('Failed to handle message:', _error);
     }
   }
 
@@ -244,8 +244,8 @@ export class BrowserExtensionService {
       
       // Send accounts to extension
       await this.sendMessage('sync_response', { accounts });
-    } catch (error) {
-      console.error('Failed to handle sync request:', error);
+    } catch (_error) {
+      console.error('Failed to handle sync request:', _error);
     }
   }
 
@@ -275,15 +275,15 @@ export class BrowserExtensionService {
           }));
         }
       }
-    } catch (error) {
-      console.error('Failed to handle autofill request:', error);
+    } catch (_error) {
+      console.error('Failed to handle autofill request:', _error);
     }
   }
 
   /**
    * Send message to browser extension
    */
-  async sendMessage(type: string, data: any): Promise<void> {
+  async sendMessage(type: string, data: unknown): Promise<void> {
     if (!this.db || !this.deviceId) {
       throw new Error('Service not initialized');
     }
@@ -313,8 +313,8 @@ export class BrowserExtensionService {
         encrypted: !!this.sessionKey,
         data: encryptedData,
       });
-    } catch (error) {
-      console.error('Failed to send message:', error);
+    } catch (_error) {
+      console.error('Failed to send message:', _error);
       throw error;
     }
   }
@@ -356,8 +356,8 @@ export class BrowserExtensionService {
         type: 'success',
         message: `Sent code for ${account.issuer} to browser`,
       }));
-    } catch (error) {
-      console.error('Failed to send account code:', error);
+    } catch (_error) {
+      console.error('Failed to send account code:', _error);
       store.dispatch(addToast({
         type: 'error',
         message: 'Failed to send code to browser',
@@ -391,8 +391,8 @@ export class BrowserExtensionService {
         type: 'info',
         message: 'Disconnected from browser extension',
       }));
-    } catch (error) {
-      console.error('Failed to disconnect:', error);
+    } catch (_error) {
+      console.error('Failed to disconnect:', _error);
     }
   }
 

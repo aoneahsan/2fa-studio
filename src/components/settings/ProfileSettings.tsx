@@ -18,7 +18,7 @@ import { CameraIcon, UserCircleIcon } from '@heroicons/react/24/outline';
  */
 const ProfileSettings: React.FC = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [isLoading, setIsLoading] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [photoURL, setPhotoURL] = useState(user?.photoURL || '');
@@ -62,7 +62,7 @@ const ProfileSettings: React.FC = () => {
         message: 'Profile updated successfully'
       }));
     } catch (_error) {
-      console.error('Profile update _error:', error);
+      console.error('Profile update _error:', _error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update profile'
@@ -160,7 +160,7 @@ const ProfileSettings: React.FC = () => {
           <input
             type="text"
             value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            onChange={(_e) => setDisplayName(e.target.value)}
             className="input"
             placeholder="Enter your name"
           />

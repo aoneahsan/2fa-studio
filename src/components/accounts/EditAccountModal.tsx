@@ -38,7 +38,7 @@ import FingerPrintIcon from '@components/icons/FingerPrintIcon';
 const EditAccountModal: React.FC = () => {
   const dispatch = useDispatch();
   const modal = useSelector((state: RootState) => state.ui.modal);
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const accounts = useSelector((state: RootState) => state.accounts.accounts);
   const tags = useSelector(selectTags);
   const folders = useSelector(selectFolders);
@@ -81,7 +81,7 @@ const EditAccountModal: React.FC = () => {
       if (user) {
         AnalyticsService.getAccountUsageStats(user.id, account.id)
           .then(setUsageStats)
-          .catch(console.error);
+          .catch(console._error);
       }
     }
   }, [account, user]);
@@ -134,7 +134,7 @@ const EditAccountModal: React.FC = () => {
       
       handleClose();
     } catch (_error) {
-      console.error('Error updating account:', error);
+      console.error('Error updating account:', _error);
     } finally {
       setIsSubmitting(false);
     }

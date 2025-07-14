@@ -50,7 +50,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["assets/*", "src/injected.js", "src/qr-detector.js"],
+      "resources": ["assets/*", "src/qr-detector.js"],
       "matches": ["https://*/*", "http://localhost/*"]
     }
   ],

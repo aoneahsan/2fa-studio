@@ -147,7 +147,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
               </label>
               <select
                 value={selectedFormat}
-                onChange={(e) => handleFormatChange(e.target.value as ImportFormat)}
+                onChange={(_e) => handleFormatChange(e.target.value as ImportFormat)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -217,7 +217,7 @@ export function ImportAccountsModal({ isOpen, onClose }: ImportAccountsModalProp
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(_e) => setPassword(e.target.value)}
                   placeholder="Enter password to decrypt file"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white

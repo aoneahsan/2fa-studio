@@ -95,7 +95,7 @@ export class GooglePlayBillingService {
       console.log('Google Play Billing initialized');
       return { success: true };
     } catch (_error) {
-      console.error('Error initializing Google Play Billing:', error);
+      console.error('Error initializing Google Play Billing:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -137,7 +137,7 @@ export class GooglePlayBillingService {
         products: mockProducts,
       };
     } catch (_error) {
-      console.error('Error querying products:', error);
+      console.error('Error querying products:', _error);
       return {
         success: false,
         products: [],
@@ -179,7 +179,7 @@ export class GooglePlayBillingService {
         purchase: mockPurchase,
       };
     } catch (_error) {
-      console.error('Error purchasing subscription:', error);
+      console.error('Error purchasing subscription:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -205,7 +205,7 @@ export class GooglePlayBillingService {
 
       return { success: true };
     } catch (_error) {
-      console.error('Error acknowledging purchase:', error);
+      console.error('Error acknowledging purchase:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -233,7 +233,7 @@ export class GooglePlayBillingService {
         purchases: [],
       };
     } catch (_error) {
-      console.error('Error querying purchases:', error);
+      console.error('Error querying purchases:', _error);
       return {
         success: false,
         purchases: [],
@@ -279,7 +279,7 @@ export class GooglePlayBillingService {
         fraudRisk: result.fraudRisk || 'low',
       };
     } catch (_error) {
-      console.error('Error validating receipt:', error);
+      console.error('Error validating receipt:', _error);
       return {
         valid: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -349,7 +349,7 @@ export class GooglePlayBillingService {
         subscription,
       };
     } catch (_error) {
-      console.error('Error creating subscription from purchase:', error);
+      console.error('Error creating subscription from purchase:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -386,7 +386,7 @@ export class GooglePlayBillingService {
 
       return { success: true };
     } catch (_error) {
-      console.error('Error canceling subscription:', error);
+      console.error('Error canceling subscription:', _error);
       return {
         success: false,
         _error: error instanceof Error ? error.message : 'Unknown error',
@@ -410,7 +410,7 @@ export class GooglePlayBillingService {
         await this.handleSubscriptionNotification(subscriptionNotification);
       }
     } catch (_error) {
-      console.error('Error handling Google Play webhook:', error);
+      console.error('Error handling Google Play webhook:', _error);
     }
   }
 
@@ -481,7 +481,7 @@ export class GooglePlayBillingService {
         );
       }
     } catch (_error) {
-      console.error('Error handling subscription notification:', error);
+      console.error('Error handling subscription notification:', _error);
     }
   }
 

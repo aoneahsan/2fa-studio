@@ -16,7 +16,7 @@ import { User } from 'firebase/auth';
  */
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const authState = useSelector((state: RootState) => state.auth);
+  const authState = useSelector((state: RootState) => state._auth);
 
   useEffect(() => {
     dispatch(setLoading(true));
@@ -30,7 +30,7 @@ export const useAuth = () => {
         try {
           await RealtimeSyncService.initialize(user.uid);
         } catch (_error) {
-          console.error('Failed to initialize sync service:', error);
+          console.error('Failed to initialize sync service:', _error);
         }
       } else {
         // Cleanup sync service when user logs out

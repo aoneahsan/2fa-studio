@@ -165,7 +165,7 @@ export class SubscriptionService {
       const { sessionId } = await response.json();
       return sessionId;
     } catch (_error) {
-      console.error('Error creating checkout session:', error);
+      console.error('Error creating checkout session:', _error);
       throw error;
     }
   }
@@ -206,7 +206,7 @@ export class SubscriptionService {
       const { url } = await response.json();
       return url;
     } catch (_error) {
-      console.error('Error creating billing portal session:', error);
+      console.error('Error creating billing portal session:', _error);
       throw error;
     }
   }
@@ -248,7 +248,7 @@ export class SubscriptionService {
         status: update.status
       });
     } catch (_error) {
-      console.error('Error updating user subscription:', error);
+      console.error('Error updating user subscription:', _error);
       throw error;
     }
   }
@@ -305,7 +305,7 @@ export class SubscriptionService {
       return user.subscription?.status === 'active' && 
              user.subscription?.tier !== 'free';
     } catch (_error) {
-      console.error('Error checking subscription:', error);
+      console.error('Error checking subscription:', _error);
       return false;
     }
   }
@@ -343,7 +343,7 @@ export class SubscriptionService {
         lastBackup: user.lastBackup ? user.lastBackup.toDate() : null
       };
     } catch (_error) {
-      console.error('Error getting usage stats:', error);
+      console.error('Error getting usage stats:', _error);
       throw error;
     }
   }
@@ -364,7 +364,7 @@ export class SubscriptionService {
         timestamp: serverTimestamp()
       });
     } catch (_error) {
-      console.error('Error logging subscription event:', error);
+      console.error('Error logging subscription event:', _error);
     }
   }
 
@@ -386,7 +386,7 @@ export class SubscriptionService {
         throw new Error('Failed to cancel subscription');
       }
     } catch (_error) {
-      console.error('Error canceling subscription:', error);
+      console.error('Error canceling subscription:', _error);
       throw error;
     }
   }
@@ -409,7 +409,7 @@ export class SubscriptionService {
         throw new Error('Failed to resume subscription');
       }
     } catch (_error) {
-      console.error('Error resuming subscription:', error);
+      console.error('Error resuming subscription:', _error);
       throw error;
     }
   }

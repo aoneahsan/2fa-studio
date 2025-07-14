@@ -184,7 +184,7 @@ export class ErrorMonitoringService {
         topErrors: this.getTopErrors(errors)
       };
     } catch (_error) {
-      console.error('Failed to get error stats:', error);
+      console.error('Failed to get error stats:', _error);
       return {
         totalErrors: 0,
         errorsByCategory: {},
@@ -205,7 +205,7 @@ export class ErrorMonitoringService {
         resolvedAt: new Date()
       });
     } catch (_error) {
-      console.error('Failed to resolve _error:', error);
+      console.error('Failed to resolve _error:', _error);
     }
   }
 

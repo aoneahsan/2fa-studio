@@ -73,7 +73,7 @@ const AddAccountModal: React.FC = () => {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   // Handle QR scan success
-  const handleScanSuccess = (data: any) => {
+  const handleScanSuccess = (data: unknown) => {
     setFormData({
       ...formData,
       issuer: data.issuer || '',
@@ -158,7 +158,7 @@ const AddAccountModal: React.FC = () => {
 
       dispatch(closeModal());
     } catch (_error) {
-      console.error('Failed to add account:', error);
+      console.error('Failed to add account:', _error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to add account'
@@ -251,7 +251,7 @@ const AddAccountModal: React.FC = () => {
                 <input
                   type="text"
                   value={formData.issuer}
-                  onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
+                  onChange={(_e) => setFormData({ ...formData, issuer: e.target.value })}
                   className="input"
                   placeholder="e.g., Google, GitHub, etc."
                 />
@@ -268,7 +268,7 @@ const AddAccountModal: React.FC = () => {
                 <input
                   type="text"
                   value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  onChange={(_e) => setFormData({ ...formData, label: e.target.value })}
                   className="input"
                   placeholder="e.g., user@example.com"
                 />
@@ -285,7 +285,7 @@ const AddAccountModal: React.FC = () => {
                 <input
                   type="text"
                   value={formData.secret}
-                  onChange={(e) => setFormData({ ...formData, secret: e.target.value })}
+                  onChange={(_e) => setFormData({ ...formData, secret: e.target.value })}
                   className="input font-mono"
                   placeholder="Enter secret key"
                   autoComplete="off"
@@ -302,7 +302,7 @@ const AddAccountModal: React.FC = () => {
                 </label>
                 <select
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'totp' | 'hotp' })}
+                  onChange={(_e) => setFormData({ ...formData, type: e.target.value as 'totp' | 'hotp' })}
                   className="input"
                 >
                   <option value="totp">Time-based (TOTP)</option>
@@ -324,7 +324,7 @@ const AddAccountModal: React.FC = () => {
                     </label>
                     <select
                       value={formData.algorithm}
-                      onChange={(e) => setFormData({ ...formData, algorithm: e.target.value as unknown })}
+                      onChange={(_e) => setFormData({ ...formData, algorithm: e.target.value as unknown })}
                       className="input"
                     >
                       <option value="SHA1">SHA1</option>
@@ -341,7 +341,7 @@ const AddAccountModal: React.FC = () => {
                     <input
                       type="number"
                       value={formData.digits}
-                      onChange={(e) => setFormData({ ...formData, digits: parseInt(e.target.value) })}
+                      onChange={(_e) => setFormData({ ...formData, digits: parseInt(e.target.value) })}
                       className="input"
                       min="6"
                       max="8"
@@ -357,7 +357,7 @@ const AddAccountModal: React.FC = () => {
                       <input
                         type="number"
                         value={formData.period}
-                        onChange={(e) => setFormData({ ...formData, period: parseInt(e.target.value) })}
+                        onChange={(_e) => setFormData({ ...formData, period: parseInt(e.target.value) })}
                         className="input"
                         min="15"
                         max="60"
@@ -371,7 +371,7 @@ const AddAccountModal: React.FC = () => {
                       <input
                         type="number"
                         value={formData.counter}
-                        onChange={(e) => setFormData({ ...formData, counter: parseInt(e.target.value) })}
+                        onChange={(_e) => setFormData({ ...formData, counter: parseInt(e.target.value) })}
                         className="input"
                         min="0"
                       />

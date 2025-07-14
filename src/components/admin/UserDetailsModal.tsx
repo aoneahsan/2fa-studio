@@ -29,7 +29,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   onClose,
   onUpdateSubscription
 }) => {
-  const formatDate = (date: any) => {
+  const formatDate = (date: unknown) => {
     if (!date) return 'N/A';
     const d = date.toDate ? date.toDate() : new Date(date);
     return d.toLocaleString();

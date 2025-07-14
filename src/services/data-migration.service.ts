@@ -75,7 +75,7 @@ export class DataMigrationService {
         plan
       };
     } catch (_error) {
-      console.error('Failed to check migration:', error);
+      console.error('Failed to check migration:', _error);
       throw error;
     }
   }
@@ -653,7 +653,7 @@ export class DataMigrationService {
     ).join('\n');
   }
 
-  private static convertToXML(data: any): string {
+  private static convertToXML(data: unknown): string {
     // Basic XML conversion - would need proper XML library for production
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<export>\n';
     xml += `  <metadata>\n`;

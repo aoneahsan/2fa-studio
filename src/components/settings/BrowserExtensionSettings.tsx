@@ -57,7 +57,7 @@ const BrowserExtensionSettings: React.FC = () => {
         setShowQRCode(false);
         setPairingCode('');
       }, 5 * 60 * 1000);
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to generate pairing code',
@@ -77,7 +77,7 @@ const BrowserExtensionSettings: React.FC = () => {
         type: 'success',
         message: 'Disconnected from browser extension',
       }));
-    } catch (error) {
+    } catch (_error) {
       dispatch(addToast({
         type: 'error',
         message: 'Failed to disconnect',

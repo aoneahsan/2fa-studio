@@ -192,7 +192,7 @@ export interface SyncStatus {
   errors?: Array<{
     timestamp: Date;
     operation: string;
-    error: string;
+    _error: string;
     resourceId?: string;
   }>;
 }
@@ -208,7 +208,7 @@ export class ProvisioningAPIService {
    */
   static async initializeProvisioning(
     teamId: string,
-    config: Omit<ProvisioningConfig, 'id' | 'createdAt' | 'updatedAt' | 'apiKeys'>,
+    _config: Omit<ProvisioningConfig, 'id' | 'createdAt' | 'updatedAt' | 'apiKeys'>,
     createdBy: string
   ): Promise<string> {
     try {
@@ -234,7 +234,7 @@ export class ProvisioningAPIService {
       const apiKey = await this.generateApiKey('Initial API Key', createdBy, ['*']);
 
       const provisioningConfig: Omit<ProvisioningConfig, 'id'> = {
-        ...config,
+        ..._config,
         teamId,
         apiKeys: [apiKey],
         createdAt: serverTimestamp() as Timestamp,
@@ -259,8 +259,8 @@ export class ProvisioningAPIService {
       );
 
       return docRef.id;
-    } catch (error) {
-      console.error('Failed to initialize provisioning:', error);
+    } catch (_error) {
+      console.error('Failed to initialize provisioning:', _error);
       throw error;
     }
   }
@@ -287,7 +287,7 @@ export class ProvisioningAPIService {
       }
 
       const config = await this.getTeamProvisioningConfig(teamId);
-      if (!config) {
+      if (!_config) {
         throw new Error('Provisioning not configured for this team');
       }
 
@@ -306,8 +306,8 @@ export class ProvisioningAPIService {
           updates: Object.keys(updates)
         }
       );
-    } catch (error) {
-      console.error('Failed to update provisioning config:', error);
+    } catch (_error) {
+      console.error('Failed to update provisioning _config:', _error);
       throw error;
     }
   }
@@ -378,7 +378,7 @@ export class ProvisioningAPIService {
       }
 
       const config = await this.getTeamProvisioningConfig(teamId);
-      if (!config) {
+      if (!_config) {
         throw new Error('Provisioning not configured for this team');
       }
 
@@ -407,8 +407,8 @@ export class ProvisioningAPIService {
         key: decryptedKey, // Return actual key only once
         keyId: apiKey.id
       };
-    } catch (error) {
-      console.error('Failed to add API key:', error);
+    } catch (_error) {
+      console.error('Failed to add API key:', _error);
       throw error;
     }
   }
@@ -435,7 +435,7 @@ export class ProvisioningAPIService {
       }
 
       const config = await this.getTeamProvisioningConfig(teamId);
-      if (!config) {
+      if (!_config) {
         throw new Error('Provisioning not configured for this team');
       }
 
@@ -455,8 +455,8 @@ export class ProvisioningAPIService {
         keyId,
         keyName: config.apiKeys[keyIndex].name
       }, 'success');
-    } catch (error) {
-      console.error('Failed to revoke API key:', error);
+    } catch (_error) {
+      console.error('Failed to revoke API key:', _error);
       throw error;
     }
   }
@@ -516,10 +516,10 @@ export class ProvisioningAPIService {
       }, 'success', apiKeyId);
 
       return createdUser;
-    } catch (error) {
+    } catch (_error) {
       await this.logProvisioningActivity(teamId, 'user_created', 'user', undefined, {
         email: user.emails[0].value,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        _error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -536,7 +536,7 @@ export class ProvisioningAPIService {
       await this.validateApiKey(teamId, apiKeyId, 'users:update');
 
       // Update auth user
-      const authUpdates: any = {};
+      const authUpdates: unknown = {};
       if (updates.displayName) authUpdates.displayName = updates.displayName;
       if (updates.active !== undefined) authUpdates.disabled = !updates.active;
       if (updates.emails?.[0]?.value) authUpdates.email = updates.emails[0].value;
@@ -584,9 +584,9 @@ export class ProvisioningAPIService {
       }, 'success', apiKeyId);
 
       return updatedUser;
-    } catch (error) {
+    } catch (_error) {
       await this.logProvisioningActivity(teamId, 'user_updated', 'user', userId, {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        _error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -614,9 +614,9 @@ export class ProvisioningAPIService {
       }
 
       await this.logProvisioningActivity(teamId, 'user_deleted', 'user', userId, {}, 'success', apiKeyId);
-    } catch (error) {
+    } catch (_error) {
       await this.logProvisioningActivity(teamId, 'user_deleted', 'user', userId, {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        _error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -673,10 +673,10 @@ export class ProvisioningAPIService {
       }, 'success', apiKeyId);
 
       return createdGroup;
-    } catch (error) {
+    } catch (_error) {
       await this.logProvisioningActivity(teamId, 'group_created', 'group', undefined, {
         displayName: group.displayName,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        _error: error instanceof Error ? error.message : 'Unknown error'
       }, 'failed', apiKeyId);
       throw error;
     }
@@ -711,13 +711,13 @@ export class ProvisioningAPIService {
       });
 
       return syncResult;
-    } catch (error) {
+    } catch (_error) {
       await this.updateSyncStatus(teamId, {
         status: 'failed',
         errors: [{
           timestamp: new Date(),
           operation: 'sync',
-          error: error instanceof Error ? error.message : 'Unknown error'
+          _error: error instanceof Error ? error.message : 'Unknown error'
         }]
       });
       throw error;
@@ -744,8 +744,8 @@ export class ProvisioningAPIService {
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate()
       } as ProvisioningConfig;
-    } catch (error) {
-      console.error('Failed to get provisioning config:', error);
+    } catch (_error) {
+      console.error('Failed to get provisioning _config:', _error);
       throw error;
     }
   }
@@ -771,8 +771,8 @@ export class ProvisioningAPIService {
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
       } as ProvisioningLog));
-    } catch (error) {
-      console.error('Failed to get provisioning logs:', error);
+    } catch (_error) {
+      console.error('Failed to get provisioning logs:', _error);
       throw error;
     }
   }
@@ -785,7 +785,7 @@ export class ProvisioningAPIService {
     requiredPermission: string
   ): Promise<void> {
     const config = await this.getTeamProvisioningConfig(teamId);
-    if (!config) {
+    if (!_config) {
       throw new Error('Provisioning not configured');
     }
 
@@ -870,7 +870,7 @@ export class ProvisioningAPIService {
       ipAddress: await this.getClientIP()
     };
 
-    if (status === 'failed' && details.error) {
+    if (status === 'failed' && details._error) {
       log.error = details.error;
     }
 

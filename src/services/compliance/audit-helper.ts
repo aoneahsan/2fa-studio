@@ -14,22 +14,22 @@ export function Audited(
   severity: 'info' | 'warning' | 'critical' = 'info'
 ) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now();
       let success = true;
       let errorMessage: string | undefined;
-      let result: any;
+      let _result: unknown;
 
       try {
         result = await originalMethod.apply(this, args);
         return result;
-      } catch (error) {
+      } catch (_error) {
         success = false;
         errorMessage = error instanceof Error ? error.message : 'Unknown error';
         throw error;
@@ -43,11 +43,11 @@ export function Audited(
             resourceId: args[0]?.resourceId || args[0]?.id,
             details: {
               method: propertyKey,
-              args: args.map((arg: any) => 
+              args: args.map((arg: unknown) => 
                 typeof arg === 'object' ? { ...arg, password: '[REDACTED]' } : arg
               ),
               duration: Date.now() - startTime,
-              result: success ? 'success' : 'failure'
+              _result: success ? 'success' : 'failure'
             },
             severity,
             success,
@@ -244,7 +244,7 @@ export class AuditHelper {
     action: AuditAction,
     userId: string,
     userEmail: string,
-    error: Error,
+    _error: Error,
     details?: Record<string, any>
   ) {
     await AuditLoggingService.log({
@@ -253,7 +253,7 @@ export class AuditHelper {
       action,
       resource: AuditResource.SYSTEM,
       details: {
-        error: error.message,
+        _error: error.message,
         stack: error.stack,
         ...details
       },

@@ -27,7 +27,7 @@ import { Button } from '@components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 
 const AuditLogViewer: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<AuditQuery>({
@@ -51,8 +51,8 @@ const AuditLogViewer: React.FC = () => {
         userId: user.role === 'admin' || user.role === 'super_admin' ? undefined : user.uid
       });
       setLogs(auditLogs);
-    } catch (error) {
-      console.error('Failed to load audit logs:', error);
+    } catch (_error) {
+      console.error('Failed to load audit logs:', _error);
     } finally {
       setLoading(false);
     }
@@ -74,8 +74,8 @@ const AuditLogViewer: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Failed to export audit logs:', error);
+    } catch (_error) {
+      console.error('Failed to export audit logs:', _error);
     }
   };
 
@@ -132,7 +132,7 @@ const AuditLogViewer: React.FC = () => {
               <input
                 type="date"
                 value={filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : ''}
-                onChange={(e) => setFilters({
+                onChange={(_e) => setFilters({
                   ...filters,
                   startDate: e.target.value ? new Date(e.target.value) : undefined
                 })}
@@ -144,7 +144,7 @@ const AuditLogViewer: React.FC = () => {
               <input
                 type="date"
                 value={filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : ''}
-                onChange={(e) => setFilters({
+                onChange={(_e) => setFilters({
                   ...filters,
                   endDate: e.target.value ? new Date(e.target.value) : undefined
                 })}
@@ -157,7 +157,7 @@ const AuditLogViewer: React.FC = () => {
               <label className="block text-sm font-medium mb-1">Action</label>
               <select
                 value={filters.action || ''}
-                onChange={(e) => setFilters({
+                onChange={(_e) => setFilters({
                   ...filters,
                   action: e.target.value as AuditAction || undefined
                 })}
@@ -179,7 +179,7 @@ const AuditLogViewer: React.FC = () => {
               <label className="block text-sm font-medium mb-1">Severity</label>
               <select
                 value={filters.severity || ''}
-                onChange={(e) => setFilters({
+                onChange={(_e) => setFilters({
                   ...filters,
                   severity: e.target.value as 'info' | 'warning' | 'critical' || undefined
                 })}

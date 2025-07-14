@@ -5,6 +5,7 @@ import 'cypress'
 // ***********************************************
 
 declare global {
+  declare global {
   namespace Cypress {
     interface Chainable {
       /**
@@ -121,7 +122,7 @@ Cypress.Commands.add('cleanup', () => {
 // Mock biometric authentication
 Cypress.Commands.add('mockBiometric', (success = true) => {
   cy.window().then((win) => {
-    (win as any).BiometricAuth = {
+    (win as unknown).BiometricAuth = {
       isAvailable: () => Promise.resolve({ isAvailable: true }),
       verify: () => Promise.resolve({ isVerified: success })
     };
@@ -132,11 +133,11 @@ Cypress.Commands.add('mockBiometric', (success = true) => {
 Cypress.Commands.add('setupEmulator', () => {
   cy.window().then((win) => {
     // Initialize Firebase with emulator settings
-    if ((win as any).firebase) {
-      (win as any).firebase.auth().useEmulator('http://localhost:9099');
-      (win as any).firebase.firestore().useEmulator('localhost', 8080);
-      (win as any).firebase.storage().useEmulator('localhost', 9199);
-      (win as any).firebase.functions().useEmulator('localhost', 5001);
+    if ((win as unknown).firebase) {
+      (win as unknown).firebase.auth().useEmulator('http://localhost:9099');
+      (win as unknown).firebase.firestore().useEmulator('localhost', 8080);
+      (win as unknown).firebase.storage().useEmulator('localhost', 9199);
+      (win as unknown).firebase.functions().useEmulator('localhost', 5001);
     }
   });
 });

@@ -2,7 +2,8 @@
  * Firebase Cloud Functions for 2FA Studio
  */
 
-import * as functions from 'firebase-functions';
+import {onSchedule} from 'firebase-functions/v2/scheduler';
+import {onRequest} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import * as adminFunctions from './admin';
 import * as authFunctions from './auth';
@@ -63,44 +64,32 @@ export const webhookOneSignal = webhookFunctions.handleOneSignalWebhook;
 export const webhookGoogleDrive = webhookFunctions.handleGoogleDriveWebhook;
 
 // Scheduled Functions
-export const scheduledCleanup = functions.pubsub
-	.schedule('every 24 hours')
-	.onRun(async (context) => {
-		console.log('Running daily cleanup tasks');
+export const scheduledCleanup = onSchedule('every 24 hours', async (event) => {
+	console.log('Running daily cleanup tasks');
 
-		// Cleanup tasks
-		await Promise.all([
-			authFunctions.cleanupExpiredSessions(),
-			backupFunctions.cleanupOldBackups(),
-			analyticsFunctions.cleanupOldAnalytics(),
-			securityFunctions.cleanupOldAuditLogs(),
-		]);
+	// Cleanup tasks
+	await Promise.all([
+		authFunctions.cleanupExpiredSessions(),
+		backupFunctions.cleanupOldBackups(),
+		analyticsFunctions.cleanupOldAnalytics(),
+		securityFunctions.cleanupOldAuditLogs(),
+	]);
+});
 
-		return null;
-	});
+export const scheduledUsageCheck = onSchedule('every 1 hours', async (event) => {
+	console.log('Checking user usage limits');
 
-export const scheduledUsageCheck = functions.pubsub
-	.schedule('every 1 hours')
-	.onRun(async (context) => {
-		console.log('Checking user usage limits');
+	await subscriptionFunctions.enforceUsageLimits();
+});
 
-		await subscriptionFunctions.enforceUsageLimits();
+export const scheduledBackup = onSchedule('every 12 hours', async (event) => {
+	console.log('Running scheduled backups');
 
-		return null;
-	});
-
-export const scheduledBackup = functions.pubsub
-	.schedule('every 12 hours')
-	.onRun(async (context) => {
-		console.log('Running scheduled backups');
-
-		await backupFunctions.runScheduledBackups();
-
-		return null;
-	});
+	await backupFunctions.runScheduledBackups();
+});
 
 // HTTP Functions for API
-export const api = functions.https.onRequest(async (req, res) => {
+export const api = onRequest(async (req, res) => {
 	// Enable CORS
 	res.set('Access-Control-Allow-Origin', '*');
 	res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -118,16 +107,16 @@ export const api = functions.https.onRequest(async (req, res) => {
 		if (path[0] === 'health') {
 			res.json({ status: 'ok', timestamp: new Date().toISOString() });
 		} else if (path[0] === 'admin' && path[1]) {
-			// Admin API routes
-			await adminFunctions.handleAdminAPI(req, res);
+			// Admin API routes - cast to proper types
+			await adminFunctions.handleAdminAPI(req as unknown, res as unknown);
 		} else if (path[0] === 'webhook' && path[1]) {
-			// Webhook routes
-			await webhookFunctions.handleWebhook(req, res);
+			// Webhook routes - cast to proper types
+			await webhookFunctions.handleWebhook(req as unknown, res as unknown);
 		} else {
 			res.status(404).json({ _error: 'Not found' });
 		}
-	} catch (error) {
-		console.error('API Error:', error);
+	} catch (_error) {
+		console.error('API Error:', _error);
 		res.status(500).json({ _error: 'Internal server error' });
 	}
 });

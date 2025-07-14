@@ -67,7 +67,7 @@ export enum RetentionAction {
 export interface RetentionCondition {
   field: string;
   operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
-  value: any;
+  value: unknown;
 }
 
 export interface RetentionExecutionResult {
@@ -176,8 +176,8 @@ export class DataRetentionService {
           { action: 'initialized_retention_policies' }
         );
       }
-    } catch (error) {
-      console.error('Failed to initialize retention policies:', error);
+    } catch (_error) {
+      console.error('Failed to initialize retention policies:', _error);
       throw error;
     }
   }
@@ -196,8 +196,8 @@ export class DataRetentionService {
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate()
       } as RetentionPolicy));
-    } catch (error) {
-      console.error('Failed to get retention policies:', error);
+    } catch (_error) {
+      console.error('Failed to get retention policies:', _error);
       throw error;
     }
   }
@@ -237,8 +237,8 @@ export class DataRetentionService {
       );
       
       return policyId!;
-    } catch (error) {
-      console.error('Failed to upsert retention policy:', error);
+    } catch (_error) {
+      console.error('Failed to upsert retention policy:', _error);
       throw error;
     }
   }
@@ -275,56 +275,56 @@ export class DataRetentionService {
       // Execute based on data type
       switch (policy.dataType) {
         case DataType.AUDIT_LOGS:
-          await this.processAuditLogs(retentionDate, policy.action, (processed, succeeded, failed, error) => {
+          await this.processAuditLogs(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(error);
+            if (_error) errors.push(_error);
           });
           break;
           
         case DataType.SESSIONS:
-          await this.processSessions(retentionDate, policy.action, (processed, succeeded, failed, error) => {
+          await this.processSessions(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(error);
+            if (_error) errors.push(_error);
           });
           break;
           
         case DataType.BACKUPS:
-          await this.processBackups(retentionDate, policy.action, (processed, succeeded, failed, error) => {
+          await this.processBackups(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(error);
+            if (_error) errors.push(_error);
           });
           break;
           
         case DataType.ANALYTICS:
-          await this.processAnalytics(retentionDate, policy.action, (processed, succeeded, failed, error) => {
+          await this.processAnalytics(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(error);
+            if (_error) errors.push(_error);
           });
           break;
           
         case DataType.DELETED_USERS:
-          await this.processDeletedUsers(retentionDate, policy.action, (processed, succeeded, failed, error) => {
+          await this.processDeletedUsers(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(error);
+            if (_error) errors.push(_error);
           });
           break;
           
         case DataType.EXPORT_FILES:
-          await this.processExportFiles(retentionDate, policy.action, (processed, succeeded, failed, error) => {
+          await this.processExportFiles(retentionDate, policy.action, (processed, succeeded, failed, _error) => {
             itemsProcessed += processed;
             itemsSucceeded += succeeded;
             itemsFailed += failed;
-            if (error) errors.push(error);
+            if (_error) errors.push(_error);
           });
           break;
           
@@ -341,7 +341,7 @@ export class DataRetentionService {
       const endTime = new Date();
       const status = itemsFailed === 0 ? 'success' : itemsFailed < itemsProcessed ? 'partial' : 'failed';
       
-      const result: RetentionExecutionResult = {
+      const _result: RetentionExecutionResult = {
         policyId,
         policyName: policy.name,
         dataType: policy.dataType,
@@ -355,14 +355,14 @@ export class DataRetentionService {
       };
       
       // Log execution
-      await this.logExecution(result);
+      await this.logExecution(_result);
       
       return result;
-    } catch (error) {
-      console.error('Failed to execute retention policy:', error);
+    } catch (_error) {
+      console.error('Failed to execute retention policy:', _error);
       
       const endTime = new Date();
-      const result: RetentionExecutionResult = {
+      const _result: RetentionExecutionResult = {
         policyId,
         policyName: 'Unknown',
         dataType: DataType.TEMP_DATA,
@@ -375,7 +375,7 @@ export class DataRetentionService {
         status: 'failed'
       };
       
-      await this.logExecution(result);
+      await this.logExecution(_result);
       throw error;
     }
   }
@@ -392,15 +392,15 @@ export class DataRetentionService {
       for (const policy of enabledPolicies) {
         try {
           const result = await this.executePolicy(policy.id);
-          results.push(result);
-        } catch (error) {
-          console.error(`Failed to execute policy ${policy.name}:`, error);
+          results.push(_result);
+        } catch (_error) {
+          console.error(`Failed to execute policy ${policy.name}:`, _error);
         }
       }
       
       return results;
-    } catch (error) {
-      console.error('Failed to execute all policies:', error);
+    } catch (_error) {
+      console.error('Failed to execute all policies:', _error);
       throw error;
     }
   }
@@ -422,8 +422,8 @@ export class DataRetentionService {
         startTime: doc.data().startTime?.toDate(),
         endTime: doc.data().endTime?.toDate()
       } as RetentionExecutionResult));
-    } catch (error) {
-      console.error('Failed to get execution history:', error);
+    } catch (_error) {
+      console.error('Failed to get execution history:', _error);
       throw error;
     }
   }
@@ -450,7 +450,7 @@ export class DataRetentionService {
       try {
         await batch.commit();
         callback(snapshot.size, snapshot.size, 0);
-      } catch (error) {
+      } catch (_error) {
         callback(snapshot.size, 0, snapshot.size, error instanceof Error ? error.message : 'Unknown error');
       }
       
@@ -481,7 +481,7 @@ export class DataRetentionService {
       try {
         await batch.commit();
         callback(snapshot.size, snapshot.size, 0);
-      } catch (error) {
+      } catch (_error) {
         callback(snapshot.size, 0, snapshot.size, error instanceof Error ? error.message : 'Unknown error');
       }
       
@@ -520,7 +520,7 @@ export class DataRetentionService {
           // Delete document
           await deleteDoc(doc.ref);
           succeeded++;
-        } catch (error) {
+        } catch (_error) {
           failed++;
           callback(1, 0, 1, error instanceof Error ? error.message : 'Unknown error');
         }
@@ -565,7 +565,7 @@ export class DataRetentionService {
         try {
           await batch.commit();
           callback(snapshot.size, snapshot.size, 0);
-        } catch (error) {
+        } catch (_error) {
           callback(snapshot.size, 0, snapshot.size, error instanceof Error ? error.message : 'Unknown error');
         }
       } else if (action === RetentionAction.DELETE) {
@@ -575,7 +575,7 @@ export class DataRetentionService {
         try {
           await batch.commit();
           callback(snapshot.size, snapshot.size, 0);
-        } catch (error) {
+        } catch (_error) {
           callback(snapshot.size, 0, snapshot.size, error instanceof Error ? error.message : 'Unknown error');
         }
       }
@@ -622,7 +622,7 @@ export class DataRetentionService {
           // Delete user document
           await deleteDoc(doc.ref);
           succeeded++;
-        } catch (error) {
+        } catch (_error) {
           failed++;
           callback(1, 0, 1, error instanceof Error ? error.message : 'Unknown error');
         }
@@ -660,14 +660,14 @@ export class DataRetentionService {
             succeeded++;
           }
           processed++;
-        } catch (error) {
+        } catch (_error) {
           failed++;
           callback(1, 0, 1, error instanceof Error ? error.message : 'Unknown error');
         }
       }
       
       callback(processed, succeeded, failed);
-    } catch (error) {
+    } catch (_error) {
       callback(0, 0, 0, error instanceof Error ? error.message : 'Unknown error');
     }
   }
@@ -707,10 +707,10 @@ export class DataRetentionService {
     return now;
   }
   
-  private static async logExecution(result: RetentionExecutionResult): Promise<void> {
+  private static async logExecution(_result: RetentionExecutionResult): Promise<void> {
     try {
       await addDoc(collection(db, this.EXECUTION_HISTORY), {
-        ...result,
+        ..._result,
         startTime: Timestamp.fromDate(result.startTime),
         endTime: Timestamp.fromDate(result.endTime),
         createdAt: serverTimestamp()
@@ -729,8 +729,8 @@ export class DataRetentionService {
           status: result.status
         }
       );
-    } catch (error) {
-      console.error('Failed to log retention execution:', error);
+    } catch (_error) {
+      console.error('Failed to log retention execution:', _error);
     }
   }
 }

@@ -71,7 +71,7 @@ export class AdMobService {
       this.initialized = true;
       console.log('AdMob initialized successfully');
     } catch (_error) {
-      console.error('Failed to initialize AdMob:', error);
+      console.error('Failed to initialize AdMob:', _error);
     }
   }
 
@@ -85,7 +85,7 @@ export class AdMobService {
     });
 
     AdMob.addListener('bannerAdFailedToLoad', (_error: AdMobError) => {
-      console.error('Banner ad failed to load:', error);
+      console.error('Banner ad failed to load:', _error);
       this.bannerShowing = false;
     });
 
@@ -95,7 +95,7 @@ export class AdMobService {
     });
 
     AdMob.addListener('interstitialAdFailedToLoad', (_error: AdMobError) => {
-      console.error('Interstitial ad failed to load:', error);
+      console.error('Interstitial ad failed to load:', _error);
     });
 
     AdMob.addListener('interstitialAdDismissed', () => {
@@ -110,7 +110,7 @@ export class AdMobService {
     });
 
     AdMob.addListener('rewardedAdFailedToLoad', (_error: AdMobError) => {
-      console.error('Rewarded ad failed to load:', error);
+      console.error('Rewarded ad failed to load:', _error);
     });
 
     AdMob.addListener('rewardedAdDismissed', () => {
@@ -140,7 +140,7 @@ export class AdMobService {
       await AdMob.showBanner(options);
       this.bannerShowing = true;
     } catch (_error) {
-      console.error('Failed to show banner:', error);
+      console.error('Failed to show banner:', _error);
     }
   }
 
@@ -156,7 +156,7 @@ export class AdMobService {
       await AdMob.hideBanner();
       this.bannerShowing = false;
     } catch (_error) {
-      console.error('Failed to hide banner:', error);
+      console.error('Failed to hide banner:', _error);
     }
   }
 
@@ -168,7 +168,7 @@ export class AdMobService {
       await AdMob.removeBanner();
       this.bannerShowing = false;
     } catch (_error) {
-      console.error('Failed to remove banner:', error);
+      console.error('Failed to remove banner:', _error);
     }
   }
 
@@ -188,7 +188,7 @@ export class AdMobService {
 
       await AdMob.prepareInterstitial(options);
     } catch (_error) {
-      console.error('Failed to prepare interstitial:', error);
+      console.error('Failed to prepare interstitial:', _error);
     }
   }
 
@@ -204,7 +204,7 @@ export class AdMobService {
       await AdMob.showInterstitial();
       return true;
     } catch (_error) {
-      console.error('Failed to show interstitial:', error);
+      console.error('Failed to show interstitial:', _error);
       // Try to prepare for next time
       this.prepareInterstitial();
       return false;
@@ -227,7 +227,7 @@ export class AdMobService {
 
       await AdMob.prepareRewardVideo(options);
     } catch (_error) {
-      console.error('Failed to prepare rewarded video:', error);
+      console.error('Failed to prepare rewarded video:', _error);
     }
   }
 
@@ -262,7 +262,7 @@ export class AdMobService {
 
       // Show the ad
       AdMob.showRewardVideo().catch((_error) => {
-        console.error('Failed to show rewarded video:', error);
+        console.error('Failed to show rewarded video:', _error);
         rewardListener.remove();
         dismissListener.remove();
         resolve({ completed: false });
@@ -306,7 +306,7 @@ export class AdMobService {
     try {
       await AdMob.resume();
     } catch (_error) {
-      console.error('Failed to resume ads:', error);
+      console.error('Failed to resume ads:', _error);
     }
   }
 
@@ -321,7 +321,7 @@ export class AdMobService {
     try {
       await AdMob.pause();
     } catch (_error) {
-      console.error('Failed to pause ads:', error);
+      console.error('Failed to pause ads:', _error);
     }
   }
 }

@@ -120,7 +120,5 @@ async function runIntegrationTests() {
   }
 }
 
-// Run tests if this is the main module
-if (import.meta.url === `file://${process.argv[1]}`) {
-  runIntegrationTests();
-}
+// Auto-run tests in browser
+runIntegrationTests();

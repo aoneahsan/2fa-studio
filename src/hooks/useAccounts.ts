@@ -28,7 +28,7 @@ import { AuditLogService } from '@services/audit-log.service';
  */
 export const useAccounts = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, encryptionKey } = useSelector((state: RootState) => state.auth);
+  const { user, encryptionKey } = useSelector((state: RootState) => state._auth);
   const accountsState = useSelector((state: RootState) => state.accounts);
   const activeTags = useSelector(selectActiveTags);
   const filterMode = useSelector(selectFilterMode);
@@ -89,7 +89,7 @@ export const useAccounts = () => {
             value: JSON.stringify(decryptedAccounts),
           });
         } catch (_error) {
-          console.error('Error loading accounts:', error);
+          console.error('Error loading accounts:', _error);
           dispatch(setError('Failed to load accounts'));
           
           // Try to load from cache
@@ -102,7 +102,7 @@ export const useAccounts = () => {
         }
       },
       (_error) => {
-        console.error('Firestore subscription _error:', error);
+        console.error('Firestore subscription _error:', _error);
         dispatch(setError('Failed to sync accounts'));
         dispatch(setLoading(false));
       }
@@ -171,7 +171,7 @@ export const useAccounts = () => {
         }
       });
     } catch (_error) {
-      console.error('Error adding account:', error);
+      console.error('Error adding account:', _error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to add account',
@@ -240,7 +240,7 @@ export const useAccounts = () => {
         }
       });
     } catch (_error) {
-      console.error('Error updating account:', error);
+      console.error('Error updating account:', _error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to update account',
@@ -290,7 +290,7 @@ export const useAccounts = () => {
         }
       });
     } catch (_error) {
-      console.error('Error deleting account:', error);
+      console.error('Error deleting account:', _error);
       dispatch(addToast({
         type: 'error',
         message: 'Failed to delete account',

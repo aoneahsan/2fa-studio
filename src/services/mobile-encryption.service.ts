@@ -30,7 +30,7 @@ export class MobileEncryptionService extends EncryptionService {
       // Get or generate device-specific key
       this.deviceKey = await this.getOrCreateDeviceKey();
     } catch (_error) {
-      console.error('Failed to initialize encryption:', error);
+      console.error('Failed to initialize encryption:', _error);
       throw new Error('Encryption initialization failed');
     }
   }
@@ -69,7 +69,7 @@ export class MobileEncryptionService extends EncryptionService {
         return newKey;
       }
     } catch (_error) {
-      console.error('Failed to get device key:', error);
+      console.error('Failed to get device key:', _error);
       throw error;
     }
   }

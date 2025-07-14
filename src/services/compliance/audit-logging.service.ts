@@ -37,8 +37,8 @@ export interface AuditLog {
   success: boolean;
   errorMessage?: string;
   metadata?: {
-    previousValue?: any;
-    newValue?: any;
+    previousValue?: unknown;
+    newValue?: unknown;
     changeType?: 'create' | 'update' | 'delete' | 'access';
   };
 }
@@ -184,8 +184,8 @@ export class AuditLoggingService {
       if (params.severity === 'critical' && !params.success) {
         await this.alertSecurityTeam(auditLog);
       }
-    } catch (error) {
-      console.error('Failed to create audit log:', error);
+    } catch (_error) {
+      console.error('Failed to create audit log:', _error);
       // Don't throw - audit logging should not break the app
     }
   }
@@ -237,8 +237,8 @@ export class AuditLoggingService {
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate()
       } as AuditLog));
-    } catch (error) {
-      console.error('Failed to query audit logs:', error);
+    } catch (_error) {
+      console.error('Failed to query audit logs:', _error);
       throw error;
     }
   }
@@ -302,8 +302,8 @@ export class AuditLoggingService {
         securityEvents,
         complianceEvents
       };
-    } catch (error) {
-      console.error('Failed to generate audit report:', error);
+    } catch (_error) {
+      console.error('Failed to generate audit report:', _error);
       throw error;
     }
   }
@@ -324,8 +324,8 @@ export class AuditLoggingService {
       } else {
         return this.convertToCSV(logs);
       }
-    } catch (error) {
-      console.error('Failed to export audit logs:', error);
+    } catch (_error) {
+      console.error('Failed to export audit logs:', _error);
       throw error;
     }
   }
@@ -378,8 +378,8 @@ export class AuditLoggingService {
       }
       
       return snapshot.size;
-    } catch (error) {
-      console.error('Failed to apply retention policy:', error);
+    } catch (_error) {
+      console.error('Failed to apply retention policy:', _error);
       throw error;
     }
   }
@@ -429,8 +429,8 @@ export class AuditLoggingService {
         topActions,
         recentActivity
       };
-    } catch (error) {
-      console.error('Failed to get user activity summary:', error);
+    } catch (_error) {
+      console.error('Failed to get user activity summary:', _error);
       throw error;
     }
   }
@@ -481,8 +481,8 @@ export class AuditLoggingService {
       }
       
       return isSuspicious;
-    } catch (error) {
-      console.error('Failed to detect suspicious activity:', error);
+    } catch (_error) {
+      console.error('Failed to detect suspicious activity:', _error);
       return false;
     }
   }

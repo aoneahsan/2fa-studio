@@ -101,7 +101,7 @@ export class ReceiptValidationService {
 
       return result;
     } catch (_error) {
-      console.error('Error validating receipt:', error);
+      console.error('Error validating receipt:', _error);
       return {
         valid: false,
         fraudRisk: 'high',
@@ -393,7 +393,7 @@ export class ReceiptValidationService {
         details,
       };
     } catch (_error) {
-      console.error('Error in fraud detection:', error);
+      console.error('Error in fraud detection:', _error);
       return {
         score: 50, // Medium risk if we can't analyze
         factors: ['fraud_detection_error'],
@@ -457,7 +457,7 @@ export class ReceiptValidationService {
         },
       });
     } catch (_error) {
-      console.error('Error storing validation record:', error);
+      console.error('Error storing validation record:', _error);
     }
   }
 

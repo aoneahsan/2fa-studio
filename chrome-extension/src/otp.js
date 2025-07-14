@@ -97,7 +97,7 @@ export class OTPService {
   /**
    * Generate HMAC-based code
    */
-  static generateHMAC(secret, counter, digits, algorithm) {
+  static async generateHMAC(secret, counter, digits, algorithm) {
     try {
       // Decode base32 secret
       const key = this.base32Decode(secret);
@@ -107,9 +107,17 @@ export class OTPService {
       const view = new DataView(counterBytes);
       view.setUint32(4, counter, false);
       
-      // Generate HMAC
-      const hmacKey = this.importKey(key);
-      const hmac = this.computeHMAC(hmacKey, counterBytes, algorithm);
+      // Generate HMAC using Web Crypto API
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        key,
+        { name: 'HMAC', hash: algorithm === 'SHA256' ? 'SHA-256' : 'SHA-1' },
+        false,
+        ['sign']
+      );
+      
+      const signature = await crypto.subtle.sign('HMAC', cryptoKey, counterBytes);
+      const hmac = new Uint8Array(signature);
       
       // Dynamic truncation
       const offset = hmac[hmac.length - 1] & 0xf;
@@ -152,7 +160,7 @@ export class OTPService {
       }
     }
     
-    return new Uint8Array(bytes);
+    return new Uint8Array(bytes).buffer;
   }
 
   /**
@@ -234,7 +242,7 @@ export class OTPService {
       }
       
       const type = url.hostname;
-      const [issuer, accountName] = decodeURIComponent(url.pathname.substr(1)).split(':');
+      const [issuer, accountName] = decodeURIComponent(url.pathname.substring(1)).split(':');
       
       const params = {};
       url.searchParams.forEach((value, key) => {

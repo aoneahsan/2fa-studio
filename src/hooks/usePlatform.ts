@@ -108,7 +108,7 @@ export const usePlatform = () => {
           hasSafeArea: isIOS || (isAndroid && parseInt(info.osVersion || '0') >= 9)
         });
       } catch (_error) {
-        console.error('Failed to detect platform:', error);
+        console.error('Failed to detect platform:', _error);
       }
     };
 
@@ -143,7 +143,7 @@ export const usePlatform = () => {
         });
       }
     } catch (_error) {
-      console.error('Failed to set status bar style:', error);
+      console.error('Failed to set status bar style:', _error);
     }
   };
 
@@ -156,7 +156,7 @@ export const usePlatform = () => {
     try {
       await StatusBar.setBackgroundColor({ color });
     } catch (_error) {
-      console.error('Failed to set status bar color:', error);
+      console.error('Failed to set status bar color:', _error);
     }
   };
 
@@ -173,7 +173,7 @@ export const usePlatform = () => {
         await StatusBar.hide();
       }
     } catch (_error) {
-      console.error('Failed to set status bar visibility:', error);
+      console.error('Failed to set status bar visibility:', _error);
     }
   };
 

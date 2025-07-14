@@ -33,7 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@comp
 import { Switch } from '@components/ui/switch';
 
 const PrivacyDashboard: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state._auth);
   const [loading, setLoading] = useState(true);
   const [consents, setConsents] = useState<ConsentRecord[]>([]);
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings | null>(null);
@@ -61,8 +61,8 @@ const PrivacyDashboard: React.FC = () => {
 
       setConsents(userConsents);
       setPrivacySettings(settings);
-    } catch (error) {
-      console.error('Failed to load privacy data:', error);
+    } catch (_error) {
+      console.error('Failed to load privacy data:', _error);
     } finally {
       setLoading(false);
     }
@@ -74,8 +74,8 @@ const PrivacyDashboard: React.FC = () => {
     try {
       await GDPRComplianceService.recordConsent(user.uid, type, granted);
       await loadPrivacyData();
-    } catch (error) {
-      console.error('Failed to update consent:', error);
+    } catch (_error) {
+      console.error('Failed to update consent:', _error);
     }
   };
 
@@ -88,8 +88,8 @@ const PrivacyDashboard: React.FC = () => {
       
       // Show success message
       alert(`Data export requested. Request ID: ${requestId}. You will receive an email when it's ready.`);
-    } catch (error) {
-      console.error('Failed to request data export:', error);
+    } catch (_error) {
+      console.error('Failed to request data export:', _error);
       alert('Failed to request data export. Please try again.');
     } finally {
       setExportInProgress(false);
@@ -105,8 +105,8 @@ const PrivacyDashboard: React.FC = () => {
       
       alert(`Account deletion scheduled for ${format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'PPP')}. You will receive an email with instructions to cancel if needed.`);
       setShowDeletionConfirm(false);
-    } catch (error) {
-      console.error('Failed to request deletion:', error);
+    } catch (_error) {
+      console.error('Failed to request deletion:', _error);
       alert('Failed to request account deletion. Please try again.');
     }
   };
@@ -129,8 +129,8 @@ const PrivacyDashboard: React.FC = () => {
 
       await GDPRComplianceService.updatePrivacySettings(user.uid, updatedSettings);
       setPrivacySettings(updatedSettings);
-    } catch (error) {
-      console.error('Failed to update privacy settings:', error);
+    } catch (_error) {
+      console.error('Failed to update privacy settings:', _error);
     }
   };
 
@@ -410,7 +410,7 @@ const PrivacyDashboard: React.FC = () => {
                         type="text"
                         placeholder="Type DELETE"
                         className="px-3 py-2 border rounded-md"
-                        onChange={(e) => {
+                        onChange={(_e) => {
                           if (e.target.value === 'DELETE') {
                             handleDeletionRequest();
                           }

@@ -2,16 +2,24 @@
  * Authentication Cloud Functions
  */
 
-import * as functions from 'firebase-functions';
+import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
+import {FirebaseAuthRequest} from './types';
+import {beforeUserCreated} from 'firebase-functions/v2/identity';
 
 const db = admin.firestore();
-const auth = admin.auth();
 
 /**
  * Trigger when a new user is created
  */
-export const onUserCreate = functions.auth.user().onCreate(async (user) => {
+export const onUserCreate = beforeUserCreated(async (event) => {
+	const user = event.data;
+	
+	if (!user) {
+		console.error('No user data provided');
+		return;
+	}
+	
 	try {
 		// Create user document in Firestore
 		await db
@@ -42,26 +50,26 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
 				lastActive: admin.firestore.FieldValue.serverTimestamp(),
 			});
 
-		// Send welcome email/notification
+		// Send welcome notification to new user
 		await sendWelcomeNotification(user);
 
 		console.log(`User created: ${user.uid}`);
-	} catch (error) {
-		console.error('Error creating user document:', error);
+	} catch (_error) {
+		console.error('Error creating user document:', _error);
 	}
 });
 
 /**
  * Trigger when a user is deleted
  */
-export const onUserDelete = functions.auth.user().onDelete(async (user) => {
+export async function onUserDelete(userId: string) {
 	try {
 		const batch = db.batch();
 
 		// Delete user's accounts
 		const accountsSnapshot = await db
 			.collection('accounts')
-			.where('userId', '==', user.uid)
+			.where('userId', '==', userId)
 			.get();
 
 		accountsSnapshot.forEach((doc) => {
@@ -71,7 +79,7 @@ export const onUserDelete = functions.auth.user().onDelete(async (user) => {
 		// Delete user's sessions
 		const sessionsSnapshot = await db
 			.collection('sessions')
-			.where('userId', '==', user.uid)
+			.where('userId', '==', userId)
 			.get();
 
 		sessionsSnapshot.forEach((doc) => {
@@ -81,7 +89,7 @@ export const onUserDelete = functions.auth.user().onDelete(async (user) => {
 		// Delete user's backups
 		const backupsSnapshot = await db
 			.collection('backups')
-			.where('userId', '==', user.uid)
+			.where('userId', '==', userId)
 			.get();
 
 		backupsSnapshot.forEach((doc) => {
@@ -89,29 +97,29 @@ export const onUserDelete = functions.auth.user().onDelete(async (user) => {
 		});
 
 		// Delete user document
-		batch.delete(db.collection('users').doc(user.uid));
+		batch.delete(db.collection('users').doc(userId));
 
 		await batch.commit();
 
-		console.log(`User deleted: ${user.uid}`);
-	} catch (error) {
-		console.error('Error deleting user data:', error);
+		console.log(`User deleted: ${userId}`);
+	} catch (_error) {
+		console.error('Error deleting user data:', _error);
 	}
-});
+}
 
 /**
  * Validate admin privileges
  */
-export const validateAdmin = functions.https.onCall(async (data, context) => {
-	if (!context?.auth) {
-		throw new functions.https.HttpsError(
+export const validateAdmin = onCall(async (request: FirebaseAuthRequest) => {
+	if (!request._auth) {
+		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
 	}
 
 	try {
-		const userDoc = await db.collection('users').doc(context?.auth?.uid).get();
+		const userDoc = await db.collection('users').doc(request.auth.uid).get();
 		const userData = userDoc.data();
 
 		const isAdmin =
@@ -123,9 +131,9 @@ export const validateAdmin = functions.https.onCall(async (data, context) => {
 			isSuperAdmin,
 			role: userData?.role || 'user',
 		};
-	} catch (error) {
-		console.error('Error validating admin:', error);
-		throw new functions.https.HttpsError(
+	} catch (_error) {
+		console.error('Error validating admin:', _error);
+		throw new HttpsError(
 			'internal',
 			'Failed to validate admin status'
 		);
@@ -135,16 +143,16 @@ export const validateAdmin = functions.https.onCall(async (data, context) => {
 /**
  * Cleanup expired sessions
  */
-export const cleanupSessions = functions.https.onCall(async (data, context) => {
+export const cleanupSessions = onCall(async (request: FirebaseAuthRequest) => {
 	// This can be called by scheduled function or admin
-	if (context?.auth) {
+	if (request._auth) {
 		// Check if admin
-		const userDoc = await db.collection('users').doc(context?.auth?.uid).get();
+		const userDoc = await db.collection('users').doc(request.auth.uid).get();
 		if (
 			userDoc.data()?.role !== 'admin' &&
 			userDoc.data()?.role !== 'super_admin'
 		) {
-			throw new functions.https.HttpsError(
+			throw new HttpsError(
 				'permission-denied',
 				'Admin access required'
 			);
@@ -179,9 +187,9 @@ export async function cleanupExpiredSessions() {
 		}
 
 		return { cleaned: count };
-	} catch (error) {
-		console.error('Error cleaning up sessions:', error);
-		throw new functions.https.HttpsError(
+	} catch (_error) {
+		console.error('Error cleaning up sessions:', _error);
+		throw new HttpsError(
 			'internal',
 			'Failed to cleanup sessions'
 		);
@@ -191,7 +199,7 @@ export async function cleanupExpiredSessions() {
 /**
  * Send welcome notification to new user
  */
-async function sendWelcomeNotification(user: admin.auth.UserRecord) {
+async function sendWelcomeNotification(user: unknown) {
 	try {
 		// Add welcome notification to user's notifications
 		await db.collection('users').doc(user.uid).collection('notifications').add({
@@ -205,23 +213,23 @@ async function sendWelcomeNotification(user: admin.auth.UserRecord) {
 
 		// TODO: Send welcome email via SendGrid or other email service
 		// TODO: Send push notification via OneSignal
-	} catch (error) {
-		console.error('Error sending welcome notification:', error);
+	} catch (_error) {
+		console.error('Error sending welcome notification:', _error);
 	}
 }
 
 /**
  * Create session for user
  */
-export const createSession = functions.https.onCall(async (data, context) => {
-	if (!context?.auth) {
-		throw new functions.https.HttpsError(
+export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceInfo?: unknown; remember?: boolean}>) => {
+	if (!request._auth) {
+		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
 	}
 
-	const { deviceInfo, remember = false } = data ?? {};
+	const { deviceInfo, remember = false } = request.data ?? {};
 
 	try {
 		// Calculate expiration (30 days if remember, 24 hours otherwise)
@@ -231,12 +239,12 @@ export const createSession = functions.https.onCall(async (data, context) => {
 
 		// Create session
 		const sessionRef = await db.collection('sessions').add({
-			userId: context?.auth?.uid,
+			userId: request.auth.uid,
 			deviceInfo: {
 				userAgent: deviceInfo?.userAgent || 'Unknown',
 				platform: deviceInfo?.platform || 'Unknown',
 				browser: deviceInfo?.browser || 'Unknown',
-				ip: context.rawRequest.ip || 'Unknown',
+				ip: request.rawRequest?.ip || 'Unknown',
 			},
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 			lastActiveAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -245,7 +253,7 @@ export const createSession = functions.https.onCall(async (data, context) => {
 		});
 
 		// Update user's last active
-		await db.collection('users').doc(context?.auth?.uid).update({
+		await db.collection('users').doc(request.auth.uid).update({
 			lastActive: admin.firestore.FieldValue.serverTimestamp(),
 		});
 
@@ -253,9 +261,9 @@ export const createSession = functions.https.onCall(async (data, context) => {
 			sessionId: sessionRef.id,
 			expiresAt: expiresAt.toISOString(),
 		};
-	} catch (error) {
-		console.error('Error creating session:', error);
-		throw new functions.https.HttpsError(
+	} catch (_error) {
+		console.error('Error creating session:', _error);
+		throw new HttpsError(
 			'internal',
 			'Failed to create session'
 		);
@@ -265,18 +273,18 @@ export const createSession = functions.https.onCall(async (data, context) => {
 /**
  * Revoke session
  */
-export const revokeSession = functions.https.onCall(async (data, context) => {
-	if (!context?.auth) {
-		throw new functions.https.HttpsError(
+export const revokeSession = onCall(async (request: FirebaseAuthRequest<{sessionId?: string}>) => {
+	if (!request._auth) {
+		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
 	}
 
-	const { sessionId } = data ?? {};
+	const { sessionId } = request.data ?? {};
 
 	if (!sessionId) {
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'invalid-argument',
 			'Session ID required'
 		);
@@ -287,12 +295,12 @@ export const revokeSession = functions.https.onCall(async (data, context) => {
 		const sessionDoc = await db.collection('sessions').doc(sessionId).get();
 
 		if (!sessionDoc.exists) {
-			throw new functions.https.HttpsError('not-found', 'Session not found');
+			throw new HttpsError('not-found', 'Session not found');
 		}
 
 		// Check if session belongs to user
-		if (sessionDoc.data()?.userId !== context?.auth?.uid) {
-			throw new functions.https.HttpsError(
+		if (sessionDoc.data()?.userId !== request.auth.uid) {
+			throw new HttpsError(
 				'permission-denied',
 				'Cannot revoke this session'
 			);
@@ -302,9 +310,9 @@ export const revokeSession = functions.https.onCall(async (data, context) => {
 		await sessionDoc.ref.delete();
 
 		return { success: true };
-	} catch (error) {
-		console.error('Error revoking session:', error);
-		throw new functions.https.HttpsError(
+	} catch (_error) {
+		console.error('Error revoking session:', _error);
+		throw new HttpsError(
 			'internal',
 			'Failed to revoke session'
 		);
@@ -314,9 +322,9 @@ export const revokeSession = functions.https.onCall(async (data, context) => {
 /**
  * Get user sessions
  */
-export const getUserSessions = functions.https.onCall(async (data, context) => {
-	if (!context?.auth) {
-		throw new functions.https.HttpsError(
+export const getUserSessions = onCall(async (request: FirebaseAuthRequest) => {
+	if (!request._auth) {
+		throw new HttpsError(
 			'unauthenticated',
 			'User must be authenticated'
 		);
@@ -325,7 +333,7 @@ export const getUserSessions = functions.https.onCall(async (data, context) => {
 	try {
 		const sessionsSnapshot = await db
 			.collection('sessions')
-			.where('userId', '==', context?.auth?.uid)
+			.where('userId', '==', request.auth.uid)
 			.orderBy('lastActiveAt', 'desc')
 			.get();
 
@@ -338,8 +346,8 @@ export const getUserSessions = functions.https.onCall(async (data, context) => {
 		});
 
 		return { sessions };
-	} catch (error) {
-		console.error('Error getting sessions:', error);
-		throw new functions.https.HttpsError('internal', 'Failed to get sessions');
+	} catch (_error) {
+		console.error('Error getting sessions:', _error);
+		throw new HttpsError('internal', 'Failed to get sessions');
 	}
 });

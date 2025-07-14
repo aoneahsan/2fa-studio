@@ -12,7 +12,7 @@ import { RootState } from '@src/store';
  * Component that protects routes requiring authentication
  */
 const PrivateRoute: React.FC = () => {
-  const { isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, isLoading } = useSelector((state: RootState) => state._auth);
 
   if (isLoading) {
     return null; // LoadingScreen is shown at App level
