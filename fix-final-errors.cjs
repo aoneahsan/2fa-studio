@@ -219,4 +219,4 @@ fixes.forEach(({ file, replacements }) => {
   fixFile(path.join(__dirname, file), replacements);
 });
 
-console.log('\nAll done\!');
+console.log('\nAll done!');

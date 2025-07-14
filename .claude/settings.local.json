@@ -115,7 +115,8 @@
       "Bash(yarn info:*)",
       "Bash(firebase functions:config:get:*)",
       "Bash(./node_modules/.bin/tsc:*)",
-      "Bash(yarn fix-lint-errors:*)"
+      "Bash(yarn fix-lint-errors:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

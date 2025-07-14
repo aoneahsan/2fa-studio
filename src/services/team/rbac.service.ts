@@ -831,7 +831,7 @@ export class RBACService {
           // Additional team membership check would go here
           break;
 
-        case 'custom':
+        case 'custom': {
           if (!condition.field || !context?.customConditions) {
             return false;
           }
@@ -849,6 +849,7 @@ export class RBACService {
               break;
           }
           break;
+        }
       }
     }
 

@@ -8,6 +8,8 @@
 		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"lint:quiet": "eslint . --quiet",
 		"preview": "vite preview",
 		"cap:sync": "npx cap sync",
 		"cap:android": "npx cap open android",

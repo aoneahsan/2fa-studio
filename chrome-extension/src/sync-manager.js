@@ -69,8 +69,8 @@ class SyncManager {
         enabled: result.syncEnabled !== false, // Default to true
         lastSyncTime: result.lastSyncTime || null
       };
-    } catch (error) {
-      console.error('Failed to get sync status:', error);
+    } catch (_error) {
+      console.error('Failed to get sync status:', _error);
       return { enabled: false, lastSyncTime: null };
     }
   }
@@ -90,9 +90,9 @@ class SyncManager {
       await this.performInitialSync();
       
       return { success: true };
-    } catch (error) {
-      console.error('Failed to enable sync:', error);
-      return { success: false, error: error.message };
+    } catch (_error) {
+      console.error('Failed to enable sync:', _error);
+      return { success: false, error: _error.message };
     }
   }
 
@@ -105,9 +105,9 @@ class SyncManager {
       // await this.clearSyncData();
       
       return { success: true };
-    } catch (error) {
-      console.error('Failed to disable sync:', error);
-      return { success: false, error: error.message };
+    } catch (_error) {
+      console.error('Failed to disable sync:', _error);
+      return { success: false, error: _error.message };
     }
   }
 
@@ -144,8 +144,8 @@ class SyncManager {
       
       this.lastSyncTime = Date.now();
       await chrome.storage.sync.set({ lastSyncTime: this.lastSyncTime });
-    } catch (error) {
-      console.error('Initial sync failed:', error);
+    } catch (_error) {
+      console.error('Initial sync failed:', _error);
     } finally {
       this.syncInProgress = false;
     }
@@ -174,9 +174,9 @@ class SyncManager {
       await chrome.storage.sync.set(filteredData);
       
       console.log('Settings pushed to sync storage');
-    } catch (error) {
-      console.error('Failed to push to sync:', error);
-      throw error;
+    } catch (_error) {
+      console.error('Failed to push to sync:', _error);
+      throw _error;
     }
   }
 
@@ -197,9 +197,9 @@ class SyncManager {
       await chrome.storage.local.set(filteredData);
       
       console.log('Settings pulled from sync storage');
-    } catch (error) {
-      console.error('Failed to pull from sync:', error);
-      throw error;
+    } catch (_error) {
+      console.error('Failed to pull from sync:', _error);
+      throw _error;
     }
   }
 
@@ -257,16 +257,16 @@ class SyncManager {
   }
 
   async resolveConflicts(localData, syncData) {
-    let dataToUse;
+    let _dataToUse;
     
     switch (this.conflictResolutionStrategy) {
       case 'local':
-        dataToUse = localData;
+        _dataToUse = localData;
         await this.pushToSync(localData);
         break;
         
       case 'remote':
-        dataToUse = syncData;
+        _dataToUse = syncData;
         await this.pullFromSync(syncData);
         break;
         
@@ -294,8 +294,8 @@ class SyncManager {
         toStore: dataSize,
         limit: quota
       };
-    } catch (error) {
-      console.error('Failed to check sync quota:', error);
+    } catch (_error) {
+      console.error('Failed to check sync quota:', _error);
       return { canStore: true, used: 0, limit: 102400 };
     }
   }
@@ -304,7 +304,7 @@ class SyncManager {
     try {
       const allData = await chrome.storage.sync.get(null);
       return new Blob([JSON.stringify(allData)]).size;
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -313,8 +313,8 @@ class SyncManager {
     try {
       await chrome.storage.sync.clear();
       console.log('Sync storage cleared');
-    } catch (error) {
-      console.error('Failed to clear sync storage:', error);
+    } catch (_error) {
+      console.error('Failed to clear sync storage:', _error);
     }
   }
 
@@ -326,9 +326,9 @@ class SyncManager {
         data: syncData,
         exportTime: Date.now()
       };
-    } catch (error) {
-      console.error('Failed to export sync data:', error);
-      return { success: false, error: error.message };
+    } catch (_error) {
+      console.error('Failed to export sync data:', _error);
+      return { success: false, error: _error.message };
     }
   }
 
@@ -352,9 +352,9 @@ class SyncManager {
       await chrome.storage.sync.set(filteredData);
       
       return { success: true };
-    } catch (error) {
-      console.error('Failed to import sync data:', error);
-      return { success: false, error: error.message };
+    } catch (_error) {
+      console.error('Failed to import sync data:', _error);
+      return { success: false, error: _error.message };
     }
   }
 

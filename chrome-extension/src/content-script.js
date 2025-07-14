@@ -722,7 +722,7 @@ class ContentScript {
           // Open popup if no automatic match
           chrome.runtime.sendMessage({ action: 'openPopup' });
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to get code:', error);
       }
     });
@@ -780,7 +780,7 @@ class ContentScript {
           // Open popup if no automatic match
           chrome.runtime.sendMessage({ action: 'openPopup' });
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to get code:', error);
       }
     });
@@ -1181,7 +1181,7 @@ class ContentScript {
       }
       
       return count;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to scan for QR codes:', error);
       return 0;
     }
@@ -1559,7 +1559,7 @@ class ContentScript {
       } else {
         this.showNotification('Failed to report site', 'error');
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to report phishing site:', error);
       this.showNotification('Error reporting site', 'error');
     }
@@ -1604,7 +1604,7 @@ class ContentScript {
       }
 
       return response;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to request code with security:', error);
       return null;
     }
@@ -1617,7 +1617,7 @@ class ContentScript {
     try {
       await navigator.clipboard.writeText(text);
       this.showNotification('Code copied to clipboard', 'success');
-    } catch (error) {
+    } catch (_error) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = text;

@@ -41,8 +41,8 @@ class QRDetector {
             confidence: this.calculateConfidence(element, qrData)
           });
         }
-      } catch (error) {
-        console.debug('Failed to scan element:', error);
+      } catch (_error) {
+        console.debug('Failed to scan element:', _error);
       }
     }
 
@@ -297,7 +297,7 @@ class QRDetector {
       });
 
       return response?.data;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -384,7 +384,7 @@ class QRDetector {
           this.showNotification('Failed to add account', 'error');
           this.resetButton(button);
         }
-      } catch (error) {
+      } catch (_error) {
         this.showNotification('Error adding account', 'error');
         this.resetButton(button);
       }
@@ -628,8 +628,8 @@ class QRDetector {
       });
       
       return qrCodes.length;
-    } catch (error) {
-      console.error('QR detection failed:', error);
+    } catch (_error) {
+      console.error('QR detection failed:', _error);
       return 0;
     }
   }

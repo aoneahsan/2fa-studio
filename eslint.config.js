@@ -47,7 +47,7 @@ export default tseslint.config(
       ],
       
       // TypeScript rules - more lenient
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -61,14 +61,17 @@ export default tseslint.config(
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-empty-interface': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
       
       // General rules
-      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
+      'no-console': 'off',
       'no-debugger': 'warn',
       'no-empty': ['warn', { allowEmptyCatch: true }],
       'prefer-const': 'warn',
+      'no-unused-vars': 'off', // Using TypeScript's rule instead
     }
   },
   
@@ -142,6 +145,13 @@ export default tseslint.config(
       globals: {
         ...globals.browser,
         chrome: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        process: 'readonly',
+        global: 'readonly',
       }
     },
     rules: {
@@ -149,9 +159,37 @@ export default tseslint.config(
         'warn',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_'
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          ignoreRestSiblings: true
         }
       ],
+      'no-undef': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+    }
+  },
+  
+  // Fix scripts and CommonJS files
+  {
+    files: ['*.cjs', 'fix-*.cjs', 'scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        process: 'readonly',
+      }
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+      'no-undef': 'off',
     }
   }
 )

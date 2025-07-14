@@ -13,29 +13,29 @@ export class QRScanner {
     try {
       // Create canvas
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const _ctx = canvas.getContext('2d');
       
       canvas.width = imageData.width;
       canvas.height = imageData.height;
-      ctx.putImageData(imageData, 0, 0);
+      _ctx.putImageData(imageData, 0, 0);
       
       // Try to detect QR code patterns
-      const qrData = this.detectQRPattern(ctx, imageData.width, imageData.height);
+      const qrData = this.detectQRPattern(_ctx, imageData.width, imageData.height);
       
       if (qrData) {
         return { data: qrData };
       }
       
       throw new Error('No QR code found');
-    } catch (error) {
-      throw error;
+    } catch (_error) {
+      throw _error;
     }
   }
 
   /**
    * Simple QR pattern detection
    */
-  static detectQRPattern(ctx, width, height) {
+  static detectQRPattern(_ctx, _width, _height) {
     // This is a placeholder for actual QR detection
     // In a real implementation, use jsQR or similar library
     
@@ -77,8 +77,8 @@ export class QRScanner {
         period: parseInt(params.get('period') || '30'),
         counter: parseInt(params.get('counter') || '0')
       };
-    } catch (error) {
-      console.error('Failed to parse OTP URL:', error);
+    } catch (_error) {
+      console.error('Failed to parse OTP URL:', _error);
       return null;
     }
   }

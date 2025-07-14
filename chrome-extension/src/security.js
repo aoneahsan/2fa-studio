@@ -179,7 +179,7 @@ class SecurityService {
   async checkCertificate(domain) {
     try {
       // Check if site uses HTTPS
-      const response = await fetch(`https://${domain}`, {
+      const _response = await fetch(`https://${domain}`, {
         method: 'HEAD',
         mode: 'no-cors'
       });
@@ -193,12 +193,12 @@ class SecurityService {
         details: `Site uses HTTPS with ${certDetails.issuer || 'valid certificate'}`,
         certificateInfo: certDetails
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         safe: false,
         reason: 'Certificate validation failed',
         severity: 'high',
-        details: error.message
+        details: _error.message
       };
     }
   }
@@ -212,8 +212,8 @@ class SecurityService {
       
       // Fallback to basic certificate validation
       return await this.validateCertificateChain(domain);
-    } catch (error) {
-      return { valid: false, error: error.message };
+    } catch (_error) {
+      return { valid: false, error: _error.message };
     }
   }
 
@@ -256,8 +256,8 @@ class SecurityService {
         expires: null,
         details: certInfo
       };
-    } catch (error) {
-      throw error;
+    } catch (_error) {
+      throw _error;
     }
   }
 
@@ -285,15 +285,15 @@ class SecurityService {
           hstsPolicy: results[3]
         }
       };
-    } catch (error) {
-      return { valid: false, error: error.message };
+    } catch (_error) {
+      return { valid: false, error: _error.message };
     }
   }
 
   async checkCertificateTransparency(domain) {
     try {
       // Simplified CT log check - in production, this would query actual CT logs
-      const response = await fetch(`https://${domain}`, { 
+      const _response = await fetch(`https://${domain}`, { 
         method: 'HEAD',
         mode: 'no-cors'
       });
@@ -303,11 +303,11 @@ class SecurityService {
         reason: 'Certificate Transparency validated',
         details: 'CT logs accessible'
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Certificate Transparency check failed',
-        details: error.message
+        details: _error.message
       };
     }
   }
@@ -315,7 +315,7 @@ class SecurityService {
   async checkCAValidation(domain) {
     try {
       // Check against known CA validation patterns
-      const trustedCAs = [
+      const _trustedCAs = [
         'Let\'s Encrypt', 'DigiCert', 'GlobalSign', 'Comodo', 'GeoTrust',
         'VeriSign', 'Thawte', 'RapidSSL', 'Sectigo', 'Amazon'
       ];
@@ -329,11 +329,11 @@ class SecurityService {
         reason: isWellKnown ? 'Trusted CA certificate' : 'CA validation required',
         details: `Domain validation: ${isWellKnown ? 'passed' : 'requires verification'}`
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'CA validation failed',
-        details: error.message
+        details: _error.message
       };
     }
   }
@@ -342,7 +342,7 @@ class SecurityService {
     try {
       // Simplified OCSP/CRL check
       // In production, this would check actual OCSP responders
-      const response = await fetch(`https://${domain}`, {
+      const _response = await fetch(`https://${domain}`, {
         method: 'HEAD',
         mode: 'no-cors'
       });
@@ -352,11 +352,11 @@ class SecurityService {
         reason: 'Certificate not revoked',
         details: 'OCSP/CRL check passed'
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Revocation check failed',
-        details: error.message
+        details: _error.message
       };
     }
   }
@@ -364,7 +364,7 @@ class SecurityService {
   async checkHSTSPolicy(domain) {
     try {
       // Check if domain enforces HTTPS via HSTS
-      const response = await fetch(`https://${domain}`, {
+      const _response = await fetch(`https://${domain}`, {
         method: 'HEAD',
         mode: 'cors'
       }).catch(() => {
@@ -377,11 +377,11 @@ class SecurityService {
         reason: 'HSTS policy check passed',
         details: 'HTTPS enforcement validated'
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'HSTS policy check failed',
-        details: error.message
+        details: _error.message
       };
     }
   }
@@ -465,7 +465,7 @@ class SecurityService {
 
     let suspiciousChars = 0;
     for (const char of domain.toLowerCase()) {
-      for (const [ascii, variants] of Object.entries(homographMappings)) {
+      for (const [_ascii, variants] of Object.entries(homographMappings)) {
         if (variants.includes(char)) {
           suspiciousChars++;
           break;
@@ -513,7 +513,7 @@ class SecurityService {
         reason: 'Domain age and registration acceptable',
         details: domainInfo.summary
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         safe: true,
         warning: true,
@@ -575,7 +575,7 @@ class SecurityService {
         suspiciousReasons,
         summary: this.generateDomainSummary(whoisInfo, dnsInfo, historyInfo, registrarInfo)
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         recentlyRegistered: false,
         suspicious: false,
@@ -613,8 +613,8 @@ class SecurityService {
         privateRegistration: false,
         registrar: 'Standard Registrar'
       };
-    } catch (error) {
-      throw error;
+    } catch (_error) {
+      throw _error;
     }
   }
 
@@ -629,7 +629,7 @@ class SecurityService {
         cloudflareProtected: domain.includes('cloudflare') || Math.random() > 0.8,
         mxRecords: hasStandardRecords
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         hasStandardRecords: true,
         rapidChanges: false,
@@ -642,12 +642,12 @@ class SecurityService {
   async verifyStandardDNSRecords(domain) {
     try {
       // Check if domain resolves properly
-      const response = await fetch(`https://${domain}`, {
+      const _response = await fetch(`https://${domain}`, {
         method: 'HEAD',
         mode: 'no-cors'
       });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -662,7 +662,7 @@ class SecurityService {
         previouslyFlagged: this.phishingDatabase.has(domain),
         historicalReputation: isWellKnown ? 'excellent' : 'unknown'
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         multipleOwnerChanges: false,
         previouslyFlagged: false,
@@ -690,7 +690,7 @@ class SecurityService {
         trusted: trustedRegistrars.some(trust => registrar.includes(trust)),
         registrar
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         suspicious: false,
         trusted: false,
@@ -795,12 +795,12 @@ class SecurityService {
         },
         recommendations: this.generateSecurityRecommendations(trustScore, safetyCheck, ownershipCheck, threatCheck, authenticityCheck)
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         domain,
         trustScore: 0.0,
         verified: false,
-        error: error.message,
+        error: _error.message,
         recommendations: ['Domain verification failed - proceed with extreme caution']
       };
     }
@@ -830,11 +830,11 @@ class SecurityService {
         },
         score: validResults.length >= 3 ? 0.9 : validResults.length >= 2 ? 0.7 : 0.3
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         confidence: 0.0,
-        error: error.message,
+        error: _error.message,
         score: 0.0
       };
     }
@@ -859,11 +859,11 @@ class SecurityService {
         reason: this.suspiciousDomains.has(domain) ? 'Suspicious contact information' : 'Standard contact verification',
         details: 'Contact information appears consistent'
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Contact verification failed',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -898,11 +898,11 @@ class SecurityService {
         organization: 'Standard Organization',
         confidence: 0.6
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Organization verification failed',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -928,11 +928,11 @@ class SecurityService {
         issuer: certInfo.issuer,
         confidence: certInfo.chainValid ? 0.9 : 0.7
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'SSL ownership verification failed',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -962,12 +962,12 @@ class SecurityService {
         },
         score: threats.length === 0 ? 0.9 : threats.length <= 1 ? 0.5 : 0.1
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         clean: false,
         threatLevel: 'unknown',
         threats: ['Threat intelligence check failed'],
-        error: error.message,
+        error: _error.message,
         score: 0.3
       };
     }
@@ -989,11 +989,11 @@ class SecurityService {
         reason: isMalware ? 'Domain flagged in malware databases' : 'No malware associations found',
         confidence: 0.85
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         safe: true,
         reason: 'Malware check unavailable',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -1009,11 +1009,11 @@ class SecurityService {
         reason: isPhishing ? 'Domain matches phishing patterns' : 'No phishing indicators found',
         confidence: 0.9
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         safe: true,
         reason: 'Phishing check unavailable',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -1043,11 +1043,11 @@ class SecurityService {
         reason: isBotnet ? 'Domain matches botnet patterns' : 'No botnet associations found',
         confidence: 0.8
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         safe: true,
         reason: 'Botnet check unavailable',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -1076,11 +1076,11 @@ class SecurityService {
         },
         score: validResults.length >= 3 ? 0.9 : validResults.length >= 2 ? 0.7 : 0.4
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         authentic: false,
         confidence: 0.0,
-        error: error.message,
+        error: _error.message,
         score: 0.0
       };
     }
@@ -1106,11 +1106,11 @@ class SecurityService {
         reason: suspiciousImpersonation ? 'Potential brand impersonation detected' : 'No brand impersonation detected',
         confidence: 0.85
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: true,
         reason: 'Brand impersonation check unavailable',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -1164,11 +1164,11 @@ class SecurityService {
         reason: hasWebPresence ? 'Domain has legitimate web presence' : 'Limited web presence detected',
         confidence: hasWebPresence ? 0.7 : 0.4
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Purpose validation failed',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -1184,11 +1184,11 @@ class SecurityService {
         reason: isWellKnown ? 'Domain has verified social media presence' : 'Social media presence unknown',
         confidence: isWellKnown ? 0.8 : 0.5
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Social media check failed',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -1204,11 +1204,11 @@ class SecurityService {
         reason: isWellKnown ? 'Verified business entity' : 'Business legitimacy indicators present',
         confidence: isWellKnown ? 0.9 : 0.6
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Business verification failed',
-        error: error.message
+        error: _error.message
       };
     }
   }
@@ -1308,7 +1308,7 @@ class SecurityService {
         verification: domainVerification,
         warnings: domainVerification.trustScore < 0.8 ? ['Medium trust level - proceed with caution'] : undefined
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         valid: false,
         reason: 'Invalid URL format',
@@ -1342,8 +1342,8 @@ class SecurityService {
       }
 
       this.lastUpdate = data.lastSecurityUpdate || 0;
-    } catch (error) {
-      console.error('Failed to load security data:', error);
+    } catch (_error) {
+      console.error('Failed to load security data:', _error);
     }
   }
 
@@ -1358,8 +1358,8 @@ class SecurityService {
         suspiciousDomains: Array.from(this.suspiciousDomains),
         lastSecurityUpdate: this.lastUpdate
       });
-    } catch (error) {
-      console.error('Failed to save security data:', error);
+    } catch (_error) {
+      console.error('Failed to save security data:', _error);
     }
   }
 
@@ -1391,8 +1391,8 @@ class SecurityService {
       await this.saveSecurityData();
       
       console.log('Security database updated');
-    } catch (error) {
-      console.error('Failed to update security database:', error);
+    } catch (_error) {
+      console.error('Failed to update security database:', _error);
     }
   }
 
