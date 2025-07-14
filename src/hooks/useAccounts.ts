@@ -61,7 +61,14 @@ export const useAccounts = () => {
 		const unsubscribe = FirestoreService.subscribeToCollection<any>(
 			`users/${user.uid}/accounts`,
 			[],
-			async (documents) => {
+			async (documents, error) => {
+				if (error) {
+					console.error('Firestore subscription error:', error);
+					dispatch(setError('Failed to sync accounts') as any);
+					dispatch(setLoading(false) as any);
+					return;
+				}
+
 				try {
 					const decryptedAccounts: OTPAccount[] = [];
 
@@ -116,11 +123,6 @@ export const useAccounts = () => {
 				} finally {
 					dispatch(setLoading(false) as any);
 				}
-			},
-			(error: Error) => {
-				console.error('Firestore subscription error:', error);
-				dispatch(setError('Failed to sync accounts') as any);
-				dispatch(setLoading(false) as any);
 			}
 		);
 
@@ -139,7 +141,7 @@ export const useAccounts = () => {
 
 				// Encrypt the secret using MobileEncryptionService
 				const encryptedSecret = await MobileEncryptionService.encryptData(
-					account.secret
+					account.secret as string
 				);
 
 				const accountData = {
@@ -176,14 +178,14 @@ export const useAccounts = () => {
 				await AuditLogService.log({
 					userId: user.uid,
 					action: 'account.created',
-					resource: `account/${documentId}`,
+					resource: `account/${documentId || 'unknown'}`,
 					severity: 'info',
 					success: true,
 					details: {
 						issuer: account.issuer,
 						label: account.label,
 						type: account.type,
-						hasTags: (account.tags?.length || 0) > 0,
+						hasTags: Array.isArray(account.tags) && account.tags.length > 0,
 						hasFolderId: !!account.folderId,
 						requiresBiometric: account.requiresBiometric || false,
 					},
@@ -252,7 +254,7 @@ export const useAccounts = () => {
 				await AuditLogService.log({
 					userId: user.uid,
 					action: 'account.updated',
-					resource: `account/${account.id}`,
+					resource: `account/${account.id || 'unknown'}`,
 					severity: 'info',
 					success: true,
 					details: {
@@ -316,7 +318,7 @@ export const useAccounts = () => {
 				await AuditLogService.log({
 					userId: user.uid,
 					action: 'account.deleted',
-					resource: `account/${accountId}`,
+					resource: `account/${accountId || 'unknown'}`,
 					severity: 'warning',
 					success: true,
 					details: {
