@@ -949,6 +949,105 @@ export class AuthService {
 	}
 
 	/**
+	 * Create user (Admin only - for provisioning API)
+	 */
+	static async createUser(userData: {
+		email: string;
+		displayName: string;
+		disabled?: boolean;
+	}): Promise<{ uid: string; email: string; displayName: string }> {
+		try {
+			// Note: This would require Firebase Admin SDK in a real implementation
+			// For now, creating a regular user and updating the profile
+			const userCredential = await createUserWithEmailAndPassword(
+				auth,
+				userData.email,
+				Math.random().toString(36) // Temporary password - user would need to reset
+			);
+
+			// Update profile
+			await updateProfile(userCredential.user, {
+				displayName: userData.displayName,
+			});
+
+			// Create user document in Firestore
+			const userDoc: User = {
+				id: userCredential.user.uid,
+				email: userData.email,
+				displayName: userData.displayName,
+				photoURL: '',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				subscription: {
+					tier: 'free',
+					status: 'active',
+					startDate: new Date(),
+					endDate: null,
+					accountLimit: 10,
+					features: {
+						cloudBackup: false,
+						browserExtension: false,
+						prioritySupport: false,
+						advancedSecurity: false,
+						noAds: false,
+					},
+				},
+				settings: {
+					theme: 'system',
+					language: 'en',
+					autoLock: true,
+					autoLockTimeout: 60,
+					biometricAuth: false,
+					showAccountIcons: true,
+					copyOnTap: true,
+					sortOrder: 'manual',
+					groupByIssuer: false,
+					hideTokens: false,
+					fontSize: 'medium',
+				},
+				lastBackup: null,
+				backupEnabled: false,
+				deviceCount: 0,
+				disabled: userData.disabled || false,
+			};
+
+			await setDoc(doc(db, 'users', userDoc.id), {
+				...userDoc,
+				createdAt: serverTimestamp(),
+				updatedAt: serverTimestamp(),
+			});
+
+			return {
+				uid: userCredential.user.uid,
+				email: userData.email,
+				displayName: userData.displayName,
+			};
+		} catch (error: unknown) {
+			const authError = error as any;
+			throw new Error(this.getErrorMessage(authError.code));
+		}
+	}
+
+	/**
+	 * Update user (Admin only)
+	 */
+	static async updateUser(
+		userId: string,
+		updates: { disabled?: boolean; [key: string]: any }
+	): Promise<void> {
+		try {
+			// Update in Firestore
+			await updateDoc(doc(db, 'users', userId), {
+				...updates,
+				updatedAt: serverTimestamp(),
+			});
+		} catch (error: unknown) {
+			const authError = error as any;
+			throw new Error(this.getErrorMessage(authError.code));
+		}
+	}
+
+	/**
 	 * Get current user
 	 */
 	static getCurrentUser(): User | null {

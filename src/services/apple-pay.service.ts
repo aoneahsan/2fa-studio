@@ -562,13 +562,14 @@ export class ApplePayService {
 		receiptInfo: ReceiptInfo
 	): Promise<void> {
 		try {
+			const receipt = receiptInfo as ReceiptInfo;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: receiptInfo.transaction_id,
+						value: receipt.transaction_id,
 					},
 				]
 			);
@@ -579,7 +580,9 @@ export class ApplePayService {
 					firestoreResult.data[0].id,
 					{
 						status: 'canceled',
-						canceledAt: new Date(parseInt(receiptInfo.cancellation_date_ms)),
+						canceledAt: receipt.cancellation_date_ms
+							? new Date(parseInt(receipt.cancellation_date_ms))
+							: new Date(),
 						updatedAt: new Date(),
 					}
 				);

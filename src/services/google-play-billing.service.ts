@@ -420,9 +420,12 @@ export class GooglePlayBillingService {
 	/**
 	 * Handle Google Play webhook (Real-time Developer Notifications)
 	 */
-	static async handleWebhook(notification: unknown): Promise<void> {
+	static async handleWebhook(
+		notification: GooglePlayNotification
+	): Promise<void> {
 		try {
-			const { subscriptionNotification, testNotification } = notification;
+			const { subscriptionNotification, testNotification } =
+				notification as GooglePlayNotification;
 
 			if (testNotification) {
 				console.log('Received Google Play test notification');

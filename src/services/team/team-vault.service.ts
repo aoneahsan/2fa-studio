@@ -27,6 +27,7 @@ import { RBACService, Resource, Action } from './rbac.service';
 import { AuditLogService } from '../audit-log.service';
 import { ErrorMonitoringService } from '../error-monitoring.service';
 import { MobileEncryptionService } from '../mobile-encryption.service';
+import { AuthService } from '../auth.service';
 import { auth } from '../../config/firebase';
 
 const db = getFirestore();
@@ -144,31 +145,27 @@ export class TeamVaultService {
 		creatorId: string
 	): Promise<string> {
 		try {
-			const vaultData: Omit<TeamVault, 'id'> = {
+			const vaultData = {
 				...vault,
 				createdBy: creatorId,
-				createdAt: serverTimestamp(),
-				updatedAt: serverTimestamp(),
+				createdAt: new Date(),
+				updatedAt: new Date(),
 				memberIds: [creatorId], // Creator is automatically a member
 				accountIds: [],
 			};
 
-			const docRef = await addDoc(
-				collection(db, this.VAULTS_COLLECTION),
-				vaultData
-			);
+			const docRef = await addDoc(collection(db, 'team_vaults'), vaultData);
 
 			// Log vault creation
 			await AuditLogService.log({
 				userId: creatorId,
 				action: 'vault.created',
 				resource: 'vault',
-				resourceId: docRef.id,
-				success: true,
 				severity: 'info',
+				success: true,
 				details: {
+					vaultId: docRef.id,
 					vaultName: vault.name,
-					teamId: vault.teamId,
 				},
 			});
 
@@ -187,7 +184,7 @@ export class TeamVaultService {
 		updates: Partial<
 			Omit<TeamVault, 'id' | 'createdAt' | 'createdBy' | 'teamId'>
 		>,
-		userId: string
+		updaterId: string
 	): Promise<void> {
 		try {
 			const vaultRef = doc(db, this.VAULTS_COLLECTION, vaultId);
@@ -201,7 +198,7 @@ export class TeamVaultService {
 
 			// Check if user has permission to update vault
 			const hasPermission = await RBACService.checkPermission(
-				userId,
+				updaterId,
 				Resource.VAULTS,
 				Action.UPDATE,
 				{ teamId: vault.teamId, resourceId: vaultId }
@@ -219,15 +216,14 @@ export class TeamVaultService {
 
 			// Log vault update
 			await AuditLogService.log({
-				userId: userId,
+				userId: updaterId,
 				action: 'vault.updated',
 				resource: 'vault',
-				resourceId: vaultId,
-				success: true,
 				severity: 'info',
+				success: true,
 				details: {
-					vaultName: vault.name,
-					updates,
+					vaultId,
+					changes: updates,
 				},
 			});
 		} catch (error) {
@@ -242,7 +238,7 @@ export class TeamVaultService {
 	static async addAccountToVault(
 		vaultId: string,
 		accountId: string,
-		userId: string,
+		adderId: string,
 		notes?: string
 	): Promise<void> {
 		try {
@@ -253,7 +249,7 @@ export class TeamVaultService {
 
 			// Check if user has permission to add accounts
 			const hasPermission = await RBACService.checkPermission(
-				userId,
+				adderId,
 				Resource.VAULTS,
 				Action.UPDATE,
 				{ teamId: vault.teamId, resourceId: vaultId }
@@ -263,7 +259,7 @@ export class TeamVaultService {
 				throw new Error('Insufficient permissions to add accounts to vault');
 			}
 
-			// Get account from database
+			// Fix Firestore collection method call
 			const accountDoc = await getDoc(doc(db, 'accounts', accountId));
 			if (!accountDoc.exists()) {
 				throw new Error('Account not found');
@@ -272,7 +268,7 @@ export class TeamVaultService {
 			const accountData = accountDoc.data();
 			const account: Account = {
 				id: accountDoc.id,
-				userId: accountData.userId || userId,
+				userId: accountData.userId || adderId,
 				issuer: accountData.issuer || '',
 				label: accountData.label || '',
 				secret: accountData.secret || '',
@@ -294,18 +290,18 @@ export class TeamVaultService {
 			};
 
 			// Check if account exists and user has access
-			if (!account || account.userId !== userId) {
+			if (!account || account.userId !== adderId) {
 				throw new Error('Account not found or access denied');
 			}
 
 			// Check if approval is required
 			if (
 				vault.settings.requireApproval &&
-				!vault.settings.approvers?.includes(userId)
+				!vault.settings.approvers?.includes(adderId)
 			) {
 				await this.requestApproval(
 					vaultId,
-					userId,
+					adderId,
 					VaultAction.ACCOUNT_ADDED,
 					accountId,
 					{ accountName: account.label, notes }
@@ -324,23 +320,22 @@ export class TeamVaultService {
 			await addDoc(collection(db, this.VAULT_ACCOUNTS_COLLECTION), {
 				vaultId,
 				accountId,
-				addedBy: userId,
+				addedBy: adderId,
 				addedAt: serverTimestamp(),
 				accessCount: 0,
 				notes,
 			});
 
-			// Log account addition
+			// Log account added to vault
 			await AuditLogService.log({
-				userId: userId,
+				userId: adderId,
 				action: 'vault.account_added',
 				resource: 'vault',
-				resourceId: vaultId,
-				success: true,
 				severity: 'info',
+				success: true,
 				details: {
+					vaultId,
 					accountId,
-					accountName: account.label,
 				},
 			});
 		} catch (error) {
@@ -355,7 +350,7 @@ export class TeamVaultService {
 	static async removeAccountFromVault(
 		vaultId: string,
 		accountId: string,
-		userId: string
+		removerId: string
 	): Promise<void> {
 		try {
 			const vault = await this.getVault(vaultId);
@@ -365,7 +360,7 @@ export class TeamVaultService {
 
 			// Check permissions
 			const hasPermission = await RBACService.checkPermission(
-				userId,
+				removerId,
 				Resource.VAULTS_UPDATE,
 				Action.UPDATE,
 				{ teamId: vault.teamId, resourceId: vaultId }
@@ -380,11 +375,11 @@ export class TeamVaultService {
 			// Check if approval is required
 			if (
 				vault.settings.requireApproval &&
-				!vault.settings.approvers?.includes(userId)
+				!vault.settings.approvers?.includes(removerId)
 			) {
 				await this.requestApproval(
 					vaultId,
-					userId,
+					removerId,
 					VaultAction.ACCOUNT_REMOVED,
 					accountId,
 					{}
@@ -416,16 +411,15 @@ export class TeamVaultService {
 			await this.logVaultAccess(
 				vaultId,
 				accountId,
-				userId,
+				removerId,
 				VaultAction.ACCOUNT_REMOVED,
 				{}
 			);
 
 			await AuditLogService.logAccountAction(
-				'update',
-				userId,
-				AuthService.getCurrentUser()?.email || 'unknown',
+				'vault.account_removed',
 				accountId,
+				AuthService.getCurrentUser()?.email || 'unknown',
 				{ action: 'removed_from_vault', vaultId, vaultName: vault.name }
 			);
 		} catch (error) {
@@ -440,7 +434,7 @@ export class TeamVaultService {
 	static async addMemberToVault(
 		vaultId: string,
 		memberId: string,
-		addedBy: string
+		adderId: string
 	): Promise<void> {
 		try {
 			const vault = await this.getVault(vaultId);
@@ -450,7 +444,7 @@ export class TeamVaultService {
 
 			// Check permissions
 			const hasPermission = await RBACService.checkPermission(
-				addedBy,
+				adderId,
 				Resource.VAULTS_SHARE,
 				Action.SHARE,
 				{ teamId: vault.teamId, resourceId: vaultId }
@@ -478,7 +472,7 @@ export class TeamVaultService {
 			await this.logVaultAccess(
 				vaultId,
 				undefined,
-				addedBy,
+				adderId,
 				VaultAction.MEMBER_ADDED,
 				{
 					memberId,
@@ -486,11 +480,14 @@ export class TeamVaultService {
 			);
 
 			await AuditLogService.logAccountAction(
-				'update',
-				addedBy,
-				AuthService.getCurrentUser()?.email || 'unknown',
+				'vault.member_added',
 				vaultId,
-				{ action: 'member_added', memberId }
+				AuthService.getCurrentUser()?.email || 'unknown',
+				{
+					memberId,
+					memberEmail: 'member-email', // Would get from user service
+					vaultName: vault.name,
+				}
 			);
 		} catch (error) {
 			console.error('Failed to add member to vault:', error);
@@ -504,7 +501,7 @@ export class TeamVaultService {
 	static async removeMemberFromVault(
 		vaultId: string,
 		memberId: string,
-		removedBy: string
+		removerId: string
 	): Promise<void> {
 		try {
 			const vault = await this.getVault(vaultId);
@@ -514,7 +511,7 @@ export class TeamVaultService {
 
 			// Check permissions
 			const hasPermission = await RBACService.checkPermission(
-				removedBy,
+				removerId,
 				Resource.VAULTS_SHARE,
 				Action.SHARE,
 				{ teamId: vault.teamId, resourceId: vaultId }
@@ -543,7 +540,7 @@ export class TeamVaultService {
 			await this.logVaultAccess(
 				vaultId,
 				undefined,
-				removedBy,
+				removerId,
 				VaultAction.MEMBER_REMOVED,
 				{
 					memberId,
@@ -551,11 +548,14 @@ export class TeamVaultService {
 			);
 
 			await AuditLogService.logAccountAction(
-				'update',
-				removedBy,
-				AuthService.getCurrentUser()?.email || 'unknown',
+				'vault.member_removed',
 				vaultId,
-				{ action: 'member_removed', memberId }
+				AuthService.getCurrentUser()?.email || 'unknown',
+				{
+					memberId,
+					memberEmail: 'member-email', // Would get from user service
+					vaultName: vault.name,
+				}
 			);
 		} catch (error) {
 			console.error('Failed to remove member from vault:', error);
@@ -678,7 +678,7 @@ export class TeamVaultService {
 			}
 
 			// Get account from database
-			const accountDoc = await db.collection('accounts').doc(accountId).get();
+			const accountDoc = await getDoc(doc(db, 'accounts', accountId));
 
 			if (!accountDoc.exists) {
 				throw new Error('Account not found');

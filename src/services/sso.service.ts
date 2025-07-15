@@ -161,18 +161,16 @@ export class SSOService {
 				success: true,
 				redirectUrl: `${samlConfig.ssoUrl}?SAMLRequest=${encodeURIComponent(samlRequest)}&RelayState=${encodeURIComponent(relayState || '')}`,
 			};
-		} catch (error) {
-			console.error('Failed to initiate SAML login:', error);
-			await ErrorMonitoringService.reportError(error, {
-				category: 'auth',
-				severity: 'high',
-				_context: { operation: 'saml_login_initiation', organizationId },
+		} catch (error: unknown) {
+			await ErrorMonitoringService.reportError(error as Error, {
+				context: 'sso_saml_authentication',
+				userId: 'unknown',
+				samlRequest: 'sanitized',
 			});
 
-			return {
-				success: false,
-				error: error.message,
-			};
+			throw new Error(
+				error instanceof Error ? error.message : 'SAML authentication failed'
+			);
 		}
 	}
 

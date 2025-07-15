@@ -95,7 +95,17 @@ export type AuditAction =
 	| 'data.sync_completed'
 	| 'data.sync_failed'
 	| 'data.gdpr_export'
-	| 'data.gdpr_deletion';
+	| 'data.gdpr_deletion'
+
+	// Vault actions
+	| 'vault.created'
+	| 'vault.updated'
+	| 'vault.deleted'
+	| 'vault.account_added'
+	| 'vault.account_removed'
+	| 'vault.member_added'
+	| 'vault.member_removed'
+	| 'vault.permissions_changed';
 
 export interface AuditLogEntry extends Omit<AuditLog, 'id' | 'timestamp'> {
 	action: AuditAction;
@@ -561,5 +571,38 @@ export class AuditLogService {
 		].join('\n');
 
 		return csv;
+	}
+
+	/**
+	 * Log account-related action
+	 */
+	static async logAccountAction(
+		action: AuditAction,
+		accountId: string,
+		userEmail: string,
+		details?: Record<string, any>
+	): Promise<void> {
+		try {
+			await this.log({
+				userId: userEmail,
+				action,
+				resource: 'account',
+				severity: 'info',
+				success: true,
+				details: {
+					...details,
+					accountId,
+				},
+			});
+		} catch (error) {
+			console.error('Failed to log account action:', error);
+		}
+	}
+
+	/**
+	 * Get current user
+	 */
+	private static getCurrentUser(): any {
+		return auth.currentUser;
 	}
 }
