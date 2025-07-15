@@ -380,7 +380,7 @@ export class RBACService {
 								userId,
 								resource,
 								action,
-								context,
+								context: context || {},
 							}
 						);
 
@@ -915,26 +915,32 @@ export class RBACService {
 				case 'own':
 					if (
 						!condition.field ||
-						!originalContext?.resourceOwnerId ||
-						originalContext.resourceOwnerId !== originalContext.userId
+						!(originalContext?.context as any)?.resourceOwnerId ||
+						(originalContext?.context as any).resourceOwnerId !==
+							originalContext?.userId
 					) {
 						return false;
 					}
 					break;
 
 				case 'team':
-					if (!condition.field || !originalContext?.teamId) {
+					if (!condition.field || !(originalContext?.context as any)?.teamId) {
 						return false;
 					}
 					// Additional team membership check would go here
 					break;
 
 				case 'custom': {
-					if (!condition.field || !originalContext?.customConditions) {
+					if (
+						!condition.field ||
+						!(originalContext?.context as any)?.customConditions
+					) {
 						return false;
 					}
 
-					const value = originalContext.customConditions[condition.field];
+					const value = (originalContext?.context as any).customConditions[
+						condition.field
+					];
 					switch (condition.operator) {
 						case 'equals':
 							if (value !== condition.value) return false;
@@ -943,7 +949,7 @@ export class RBACService {
 							if (!value?.includes?.(condition.value)) return false;
 							break;
 						case 'in':
-							if (!condition.value?.includes?.(value)) return false;
+							if (!(condition.value as any)?.includes?.(value)) return false;
 							break;
 					}
 					break;

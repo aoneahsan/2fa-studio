@@ -347,16 +347,22 @@ export class ProvisioningAPIService {
 
 		const apiKey: ProvisioningApiKey = {
 			id: crypto.randomUUID(),
-			teamId,
 			name,
 			key:
 				typeof encryptedKey === 'string'
 					? encryptedKey
 					: JSON.stringify(encryptedKey),
-			permissions,
+			keyHash: keyHash,
 			createdAt: new Date(),
-			updatedAt: new Date(),
-			lastUsedAt: new Date(),
+			createdBy: 'system',
+			permissions: [
+				'users:read',
+				'users:create',
+				'users:update',
+				'users:delete',
+			],
+			ipRestrictions: undefined,
+			expiresAt: undefined,
 			active: true,
 		};
 
@@ -645,10 +651,11 @@ export class ProvisioningAPIService {
 						primary: true,
 					},
 				],
-				active: !user.disabled,
+				active: !(user as any).disabled || true,
 				meta: {
 					resourceType: 'User',
-					created: user.metadata.creationTime!,
+					created:
+						(user as any).metadata?.creationTime || new Date().toISOString(),
 					modified: new Date().toISOString(),
 					location: `/scim/v2/Users/${user.uid}`,
 				},
@@ -741,18 +748,21 @@ export class ProvisioningAPIService {
 			await this.validateApiKey(teamId, apiKeyId, 'groups:create');
 
 			// Create vault as group representation
-			const vaultId = await TeamVaultService.createVault({
-				name: group.displayName,
-				description: group.description || '',
-				teamId: teamId,
-				createdBy: 'provisioning-system',
-				settings: {
-					requireApproval: false,
-					allowExport: true,
-					allowSharing: true,
-					accessLog: true,
+			const vaultId = await TeamVaultService.createVault(
+				{
+					name: group.displayName,
+					description: (group as any).description || '',
+					teamId,
+					createdBy: 'system',
+					settings: {
+						requireApproval: false,
+						allowExport: true,
+						allowSharing: true,
+						accessLog: true,
+					},
 				},
-			});
+				'system'
+			);
 
 			// Add members if specified
 			if (group.members) {
@@ -832,7 +842,7 @@ export class ProvisioningAPIService {
 				}),
 			};
 			const syncFunction = functions.httpsCallable('performProvisioningSync');
-			const result = await syncFunction({ teamId });
+			const result = await syncFunction.call({ teamId });
 
 			const syncResult = result.data as SyncStatus;
 
