@@ -1,5 +1,5 @@
 /**
- * Apple App Store and Apple Pay integration service
+ * Apple Pay Service
  * @module services/apple-pay
  */
 
@@ -12,6 +12,7 @@ import {
 	PaymentProvider,
 } from '@src/types/subscription';
 import { FirestoreService } from './firestore.service';
+import { ApplePayNotification, ReceiptInfo } from '@src/types/payment';
 
 export interface AppleProduct {
 	productIdentifier: string;
@@ -488,7 +489,9 @@ export class ApplePayService {
 	/**
 	 * Handle App Store Server Notifications
 	 */
-	static async handleServerNotification(notification: unknown): Promise<void> {
+	static async handleServerNotification(
+		notification: ApplePayNotification
+	): Promise<void> {
 		try {
 			const { notificationType, latestReceiptInfo, password } = notification;
 
@@ -546,7 +549,7 @@ export class ApplePayService {
 	 * Handle initial purchase notification
 	 */
 	private static async handleInitialPurchase(
-		receiptInfo: unknown
+		receiptInfo: ReceiptInfo
 	): Promise<void> {
 		// Implementation for initial purchase
 		console.log('Handling initial purchase:', receiptInfo);
@@ -555,7 +558,9 @@ export class ApplePayService {
 	/**
 	 * Handle cancellation notification
 	 */
-	private static async handleCancellation(receiptInfo: unknown): Promise<void> {
+	private static async handleCancellation(
+		receiptInfo: ReceiptInfo
+	): Promise<void> {
 		try {
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
@@ -587,9 +592,9 @@ export class ApplePayService {
 	/**
 	 * Handle renewal notification
 	 */
-	private static async handleRenewal(receiptInfo: unknown): Promise<void> {
+	private static async handleRenewal(receiptInfo: ReceiptInfo): Promise<void> {
 		try {
-			const receipt = receiptInfo as any;
+			const receipt = receiptInfo as ReceiptInfo;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
@@ -621,7 +626,7 @@ export class ApplePayService {
 	 * Handle interactive renewal notification
 	 */
 	private static async handleInteractiveRenewal(
-		receiptInfo: unknown
+		receiptInfo: ReceiptInfo
 	): Promise<void> {
 		// Similar to regular renewal but triggered by user action
 		await this.handleRenewal(receiptInfo);
@@ -631,7 +636,7 @@ export class ApplePayService {
 	 * Handle renewal preference change notification
 	 */
 	private static async handleRenewalPreferenceChange(
-		receiptInfo: unknown
+		receiptInfo: ReceiptInfo
 	): Promise<void> {
 		// Handle subscription preference changes
 		console.log('Handling renewal preference change:', receiptInfo);
@@ -641,10 +646,10 @@ export class ApplePayService {
 	 * Handle renewal status change notification
 	 */
 	private static async handleRenewalStatusChange(
-		receiptInfo: unknown
+		receiptInfo: ReceiptInfo
 	): Promise<void> {
 		try {
-			const receipt = receiptInfo as any;
+			const receipt = receiptInfo as ReceiptInfo;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
@@ -675,10 +680,10 @@ export class ApplePayService {
 	 * Handle renewal failure notification
 	 */
 	private static async handleRenewalFailure(
-		receiptInfo: unknown
+		receiptInfo: ReceiptInfo
 	): Promise<void> {
 		try {
-			const receipt = receiptInfo as any;
+			const receipt = receiptInfo as ReceiptInfo;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
@@ -708,9 +713,9 @@ export class ApplePayService {
 	/**
 	 * Handle recovery notification
 	 */
-	private static async handleRecovery(receiptInfo: unknown): Promise<void> {
+	private static async handleRecovery(receiptInfo: ReceiptInfo): Promise<void> {
 		try {
-			const receipt = receiptInfo as any;
+			const receipt = receiptInfo as ReceiptInfo;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[
@@ -740,9 +745,9 @@ export class ApplePayService {
 	/**
 	 * Handle refund notification
 	 */
-	private static async handleRefund(receiptInfo: unknown): Promise<void> {
+	private static async handleRefund(receiptInfo: ReceiptInfo): Promise<void> {
 		try {
-			const receipt = receiptInfo as any;
+			const receipt = receiptInfo as ReceiptInfo;
 			const firestoreResult = await FirestoreService.getCollection(
 				'subscriptions',
 				[

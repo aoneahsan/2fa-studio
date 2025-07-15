@@ -61,9 +61,11 @@ export class GoogleDriveBackupService {
 
 			// Set access token
 			const authClient = await auth.getClient();
-			(authClient as any).setCredentials({ access_token: accessToken });
+			if (authClient && 'setCredentials' in authClient) {
+				(authClient as any).setCredentials({ access_token: accessToken });
+			}
 
-			this.drive = google.drive({ version: 'v3', auth: authClient });
+			this.drive = google.drive({ version: 'v3', auth: authClient as any });
 			this.isInitialized = true;
 
 			// Ensure app folder exists
@@ -112,10 +114,11 @@ export class GoogleDriveBackupService {
 			// Encrypt data if password provided or if on mobile
 			if (options.password || Capacitor.isNativePlatform()) {
 				if (options.password) {
-					processedData = await EncryptionService.encrypt({
+					const encryptedResult = await EncryptionService.encrypt({
 						data: processedData,
 						password: options.password,
 					});
+					processedData = JSON.stringify(encryptedResult);
 				} else {
 					// Use device encryption on mobile
 					processedData =
@@ -515,5 +518,38 @@ export class GoogleDriveBackupService {
 			console.error('Failed to get user info:', error);
 			throw error;
 		}
+	}
+
+	private static async parseBackupFile(file: any): Promise<BackupFile> {
+		try {
+			const metadata = JSON.parse(file.description || '{}');
+
+			const backupMetadata = {
+				version: metadata.version || '1.0',
+				createdAt: file.createdTime,
+				size: parseInt(file.size || '0'),
+				accountCount: parseInt(file.appProperties?.accountCount || '0'),
+				encrypted: file.appProperties?.encrypted === 'true',
+				checksum: file.appProperties?.checksum || '',
+			};
+
+			return {
+				...backupMetadata,
+				id: file.id,
+				name: file.name,
+				createdTime: file.createdTime,
+				size: parseInt(file.size || '0'),
+			};
+		} catch (error) {
+			throw new Error(`Failed to parse backup file: ${error}`);
+		}
+	}
+
+	private static async prepareAccountForRestore(account: any): Promise<any> {
+		return {
+			...account,
+			// Convert timestamps if needed
+			createdAt: account.createdAt ? new Date(account.createdAt) : new Date(),
+		};
 	}
 }

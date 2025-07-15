@@ -1,5 +1,5 @@
 /**
- * Google Play Billing service for in-app purchases
+ * Google Play Billing Service
  * @module services/google-play-billing
  */
 
@@ -12,6 +12,10 @@ import {
 	PaymentProvider,
 } from '@src/types/subscription';
 import { FirestoreService } from './firestore.service';
+import {
+	GooglePlayNotification,
+	GooglePlaySubscriptionNotification,
+} from '@src/types/payment';
 
 export interface GooglePlayProduct {
 	productId: string;
@@ -434,79 +438,80 @@ export class GooglePlayBillingService {
 	}
 
 	/**
+	 * Handle Google Play Developer Notification
+	 */
+	static async handleDeveloperNotification(
+		notification: GooglePlayNotification
+	): Promise<void> {
+		try {
+			const { subscriptionNotification, testNotification } = notification;
+
+			if (testNotification) {
+				console.log('Received Google Play test notification');
+				return;
+			}
+
+			if (subscriptionNotification) {
+				await this.handleSubscriptionNotification(subscriptionNotification);
+			}
+		} catch (error) {
+			console.error('Error handling Google Play webhook:', error);
+		}
+	}
+
+	/**
 	 * Handle subscription notification
 	 */
 	private static async handleSubscriptionNotification(
-		notification: unknown
+		notification: GooglePlaySubscriptionNotification
 	): Promise<void> {
 		const { subscriptionId, purchaseToken, notificationType } = notification;
 
 		try {
-			// Update subscription based on notification type
-			const firestoreResult = await FirestoreService.getCollection(
-				'subscriptions',
-				[
-					{
-						field: 'providerSubscriptionId',
-						operator: '==',
-						value: purchaseToken,
-					},
-				]
-			);
+			let updateData: Partial<UserSubscription> = {};
 
-			if (firestoreResult.success && firestoreResult.data.length > 0) {
-				const updateData: unknown = { updatedAt: new Date() };
-
-				switch (notificationType) {
-					case 1: // SUBSCRIPTION_RECOVERED
-						updateData.status = 'active';
-						break;
-					case 2: // SUBSCRIPTION_RENEWED
-						updateData.status = 'active';
-						// Update period end time (would need to call Play Console API)
-						break;
-					case 3: // SUBSCRIPTION_CANCELED
-						updateData.status = 'canceled';
-						updateData.canceledAt = new Date();
-						break;
-					case 4: // SUBSCRIPTION_PURCHASED
-						updateData.status = 'active';
-						break;
-					case 5: // SUBSCRIPTION_ON_HOLD
-						updateData.status = 'paused';
-						break;
-					case 6: // SUBSCRIPTION_IN_GRACE_PERIOD
-						updateData.status = 'past_due';
-						break;
-					case 7: // SUBSCRIPTION_RESTARTED
-						updateData.status = 'active';
-						break;
-					case 8: // SUBSCRIPTION_PRICE_CHANGE_CONFIRMED
-						// Handle price change
-						break;
-					case 9: // SUBSCRIPTION_DEFERRED
-						// Handle deferral
-						break;
-					case 10: // SUBSCRIPTION_PAUSED
-						updateData.status = 'paused';
-						break;
-					case 11: // SUBSCRIPTION_PAUSE_SCHEDULE_CHANGED
-						// Handle pause schedule change
-						break;
-					case 12: // SUBSCRIPTION_REVOKED
-						updateData.status = 'canceled';
-						break;
-					case 13: // SUBSCRIPTION_EXPIRED
-						updateData.status = 'canceled';
-						break;
-				}
-
-				await FirestoreService.updateDocument(
-					'subscriptions',
-					firestoreResult.data[0].id,
-					updateData
-				);
+			switch (notificationType) {
+				case 1: // SUBSCRIPTION_RECOVERED
+					updateData.status = 'active';
+					break;
+				case 2: // SUBSCRIPTION_RENEWED
+					updateData.status = 'active';
+					break;
+				case 3: // SUBSCRIPTION_CANCELED
+					updateData.status = 'canceled';
+					updateData.canceledAt = new Date();
+					break;
+				case 4: // SUBSCRIPTION_PURCHASED
+					updateData.status = 'active';
+					break;
+				case 5: // SUBSCRIPTION_ON_HOLD
+					updateData.status = 'paused';
+					break;
+				case 6: // SUBSCRIPTION_IN_GRACE_PERIOD
+					updateData.status = 'past_due';
+					break;
+				case 7: // SUBSCRIPTION_RESTARTED
+					updateData.status = 'active';
+					break;
+				case 8: // SUBSCRIPTION_PRICE_CHANGE_CONFIRMED
+					// Handle price change
+					break;
+				case 9: // SUBSCRIPTION_DEFERRED
+					updateData.status = 'paused';
+					break;
+				case 12: // SUBSCRIPTION_REVOKED
+					updateData.status = 'canceled';
+					break;
+				case 13: // SUBSCRIPTION_EXPIRED
+					updateData.status = 'canceled';
+					break;
 			}
+
+			await FirestoreService.updateDocument(
+				'subscriptions',
+				subscriptionId,
+				updateData
+			);
 		} catch (error) {
 			console.error('Error handling subscription notification:', error);
 		}

@@ -202,7 +202,7 @@ export class TeamVaultService {
 			// Check if user has permission to update vault
 			const hasPermission = await RBACService.checkPermission(
 				userId,
-				Resource.VAULT,
+				Resource.VAULTS,
 				Action.UPDATE,
 				{ teamId: vault.teamId, resourceId: vaultId }
 			);
@@ -254,7 +254,7 @@ export class TeamVaultService {
 			// Check if user has permission to add accounts
 			const hasPermission = await RBACService.checkPermission(
 				userId,
-				Resource.VAULT,
+				Resource.VAULTS,
 				Action.UPDATE,
 				{ teamId: vault.teamId, resourceId: vaultId }
 			);
