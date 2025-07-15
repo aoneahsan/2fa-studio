@@ -125,12 +125,12 @@ export class SSOService {
 			this.ssoConfigs.set(configId, ssoConfig);
 
 			return configId;
-		} catch (error) {
-			console.error('Failed to create SSO _config:', error);
-			await ErrorMonitoringService.reportError(error, {
+		} catch (error: unknown) {
+			console.error('Failed to create SSO config:', error);
+			await ErrorMonitoringService.reportError(error as Error, {
 				category: 'auth',
 				severity: 'high',
-				_context: { operation: 'create_sso_config', organizationId },
+				context: { operation: 'create_sso_config', organizationId },
 			});
 			throw error;
 		}
@@ -162,11 +162,14 @@ export class SSOService {
 				redirectUrl: `${samlConfig.ssoUrl}?SAMLRequest=${encodeURIComponent(samlRequest)}&RelayState=${encodeURIComponent(relayState || '')}`,
 			};
 		} catch (error: unknown) {
-			await ErrorMonitoringService.reportError(error as Error, {
-				context: 'sso_saml_authentication',
-				userId: 'unknown',
-				samlRequest: 'sanitized',
-			});
+			await ErrorMonitoringService.reportError(
+				error as Error,
+				{
+					context: 'sso_saml_authentication',
+					userId: 'unknown',
+					samlRequest: 'sanitized',
+				} as Record<string, any>
+			);
 
 			throw new Error(
 				error instanceof Error ? error.message : 'SAML authentication failed'
@@ -214,17 +217,17 @@ export class SSOService {
 				success: true,
 				user,
 			};
-		} catch (error) {
+		} catch (error: unknown) {
 			console.error('Failed to handle SAML response:', error);
-			await ErrorMonitoringService.reportError(error, {
+			await ErrorMonitoringService.reportError(error as Error, {
 				category: 'auth',
 				severity: 'high',
-				_context: { operation: 'saml_response_handling' },
+				context: { operation: 'saml_response_handling' },
 			});
 
 			return {
 				success: false,
-				error: error.message,
+				error: error instanceof Error ? error.message : 'SAML response failed',
 			};
 		}
 	}
@@ -251,17 +254,17 @@ export class SSOService {
 				success: true,
 				redirectUrl: authUrl,
 			};
-		} catch (error) {
+		} catch (error: unknown) {
 			console.error('Failed to initiate OIDC login:', error);
-			await ErrorMonitoringService.reportError(error, {
+			await ErrorMonitoringService.reportError(error as Error, {
 				category: 'auth',
 				severity: 'high',
-				_context: { operation: 'oidc_login_initiation', organizationId },
+				context: { operation: 'oidc_login_initiation', organizationId },
 			});
 
 			return {
 				success: false,
-				error: error.message,
+				error: error instanceof Error ? error.message : 'OIDC login failed',
 			};
 		}
 	}
@@ -301,17 +304,17 @@ export class SSOService {
 				success: true,
 				user,
 			};
-		} catch (error) {
+		} catch (error: unknown) {
 			console.error('Failed to handle OIDC callback:', error);
-			await ErrorMonitoringService.reportError(error, {
+			await ErrorMonitoringService.reportError(error as Error, {
 				category: 'auth',
 				severity: 'high',
-				_context: { operation: 'oidc_callback_handling', organizationId },
+				context: { operation: 'oidc_callback_handling', organizationId },
 			});
 
 			return {
 				success: false,
-				error: error.message,
+				error: error instanceof Error ? error.message : 'OIDC callback failed',
 			};
 		}
 	}
@@ -561,8 +564,8 @@ export class SSOService {
 	private static mapUserAttributes(
 		attributes: Record<string, any>,
 		mappings: UserAttributeMappings
-	): unknown {
-		const mappedUser: unknown = {};
+	): Record<string, any> {
+		const mappedUser: Record<string, any> = {};
 
 		Object.entries(mappings).forEach(([userField, attributePath]) => {
 			if (attributePath && attributes[attributePath]) {
@@ -574,7 +577,7 @@ export class SSOService {
 	}
 
 	private static async createOrUpdateSSOUser(
-		userAttributes: unknown,
+		userAttributes: Record<string, any>,
 		organizationId: string
 	): Promise<any> {
 		try {

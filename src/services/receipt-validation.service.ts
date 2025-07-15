@@ -598,17 +598,22 @@ export class ReceiptValidationService {
 	 * Map App Store purchase to subscription status
 	 */
 	private static mapAppStoreStatus(purchase: unknown): SubscriptionStatus {
-		if (purchase.cancellationDate) {
+		const purchaseData = purchase as any;
+
+		if (purchaseData.cancellationDate) {
 			return 'canceled';
 		}
+
 		if (
-			purchase.subscriptionExpirationDate &&
-			purchase.subscriptionExpirationDate < Date.now()
+			purchaseData.subscriptionExpirationDate &&
+			purchaseData.subscriptionExpirationDate < Date.now()
 		) {
 			return 'canceled';
 		}
-		if (purchase.subscriptionInGracePeriod) {
-			return 'past_due';
+
+		if (purchaseData.subscriptionInGracePeriod) {
+			// Still valid during grace period
+			return 'active';
 		}
 		return 'active';
 	}

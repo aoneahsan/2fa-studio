@@ -82,13 +82,13 @@ export class StripeService {
 	 */
 	static createElements(options?: {
 		clientSecret?: string;
-		appearance?: unknown;
+		appearance?: any;
 	}): StripeElements {
 		if (!this.stripe) {
 			throw new Error('Stripe not initialized');
 		}
 
-		this.elements = this.stripe.elements(options);
+		this.elements = this.stripe.elements(options as any);
 		return this.elements;
 	}
 
@@ -101,9 +101,9 @@ export class StripeService {
 			name?: string;
 			email?: string;
 			phone?: string;
-			address?: unknown;
+			address?: any;
 		}
-	): Promise<{ paymentMethod?: unknown; error?: unknown }> {
+	): Promise<{ paymentMethod?: any; error?: any }> {
 		if (!this.stripe) {
 			throw new Error('Stripe not initialized');
 		}
@@ -111,8 +111,8 @@ export class StripeService {
 		return await this.stripe.createPaymentMethod({
 			type: 'card',
 			card: cardElement,
-			billing_details: billingDetails,
-		});
+			billing_details: billingDetails as any,
+		} as any);
 	}
 
 	/**
@@ -120,19 +120,27 @@ export class StripeService {
 	 */
 	static async confirmPayment(
 		clientSecret: string,
-		options?: {
+		options: {
 			payment_method?: string;
 			return_url?: string;
 		}
-	): Promise<{ paymentIntent?: unknown; error?: unknown }> {
+	): Promise<{ paymentIntent?: any; error?: any }> {
 		if (!this.stripe) {
 			throw new Error('Stripe not initialized');
 		}
 
 		return await this.stripe.confirmPayment({
+			elements: this.elements,
 			clientSecret,
-			...options,
-		});
+			confirmParams: {
+				return_url: options.return_url || window.location.origin,
+				payment_method_data: options.payment_method
+					? {
+							type: 'card',
+						}
+					: undefined,
+			},
+		} as any);
 	}
 
 	/**
@@ -570,21 +578,25 @@ export class StripeService {
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: subscription.id,
+						value: (subscription as any).id,
 					},
 				]
 			);
 
 			const subscriptionData = {
-				status: subscription.status,
-				currentPeriodStart: new Date(subscription.current_period_start * 1000),
-				currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-				cancelAtPeriodEnd: subscription.cancel_at_period_end,
-				canceledAt: subscription.canceled_at
-					? new Date(subscription.canceled_at * 1000)
-					: null,
+				status: (subscription as any).status,
+				currentPeriodStart: new Date(
+					(subscription as any).current_period_start * 1000
+				),
+				currentPeriodEnd: new Date(
+					(subscription as any).current_period_end * 1000
+				),
+				cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+				canceledAt: (subscription as any).canceled_at
+					? new Date((subscription as any).canceled_at * 1000)
+					: undefined,
 				updatedAt: new Date(),
-				metadata: subscription.metadata,
+				metadata: (subscription as any).metadata,
 			};
 
 			if (firestoreResult.success && firestoreResult.data.length > 0) {
@@ -612,7 +624,7 @@ export class StripeService {
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: subscription.id,
+						value: (subscription as any).id,
 					},
 				]
 			);
@@ -642,17 +654,17 @@ export class StripeService {
 		try {
 			// Store invoice in Firestore
 			await FirestoreService.createDocument('invoices', {
-				providerInvoiceId: invoice.id,
-				customerId: invoice.customer,
-				subscriptionId: invoice.subscription,
-				amount: invoice.amount_paid,
-				currency: invoice.currency,
+				providerInvoiceId: (invoice as any).id,
+				customerId: (invoice as any).customer,
+				subscriptionId: (invoice as any).subscription,
+				amount: (invoice as any).amount_paid,
+				currency: (invoice as any).currency,
 				status: 'paid',
-				periodStart: new Date(invoice.period_start * 1000),
-				periodEnd: new Date(invoice.period_end * 1000),
-				paidAt: new Date(invoice.status_transitions.paid_at * 1000),
-				hostedInvoiceUrl: invoice.hosted_invoice_url,
-				invoicePdf: invoice.invoice_pdf,
+				periodStart: new Date((invoice as any).period_start * 1000),
+				periodEnd: new Date((invoice as any).period_end * 1000),
+				paidAt: new Date((invoice as any).status_transitions.paid_at * 1000),
+				hostedInvoiceUrl: (invoice as any).hosted_invoice_url,
+				invoicePdf: (invoice as any).invoice_pdf,
 				provider: 'stripe',
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -676,7 +688,7 @@ export class StripeService {
 					{
 						field: 'providerSubscriptionId',
 						operator: '==',
-						value: invoice.subscription,
+						value: (invoice as any).subscription,
 					},
 				]
 			);
@@ -708,19 +720,19 @@ export class StripeService {
 				{
 					field: 'providerPaymentMethodId',
 					operator: '==',
-					value: paymentMethod.id,
+					value: (paymentMethod as any).id,
 				},
 			]);
 
 			if (!existing.success || existing.data.length === 0) {
 				await FirestoreService.createDocument('payment_methods', {
-					providerPaymentMethodId: paymentMethod.id,
-					customerId: paymentMethod.customer,
-					type: paymentMethod.type,
-					last4: paymentMethod.card?.last4,
-					brand: paymentMethod.card?.brand,
-					expiryMonth: paymentMethod.card?.exp_month,
-					expiryYear: paymentMethod.card?.exp_year,
+					providerPaymentMethodId: (paymentMethod as any).id,
+					customerId: (paymentMethod as any).customer,
+					type: (paymentMethod as any).type,
+					last4: (paymentMethod as any).card?.last4,
+					brand: (paymentMethod as any).card?.brand,
+					expiryMonth: (paymentMethod as any).card?.exp_month,
+					expiryYear: (paymentMethod as any).card?.exp_year,
 					provider: 'stripe',
 					isDefault: false,
 					createdAt: new Date(),
@@ -730,5 +742,68 @@ export class StripeService {
 		} catch (error) {
 			console.error('Error handling payment method attached:', error);
 		}
+	}
+
+	private static convertStripeSubscription(
+		subscription: any
+	): UserSubscription {
+		return {
+			id: subscription.id,
+			userId: subscription.metadata?.userId || '',
+			planId: subscription.metadata?.planId || '',
+			tier: subscription.metadata?.tier || 'free',
+			status: subscription.status,
+			provider: 'stripe',
+			providerSubscriptionId: subscription.id,
+			currentPeriodStart: new Date(subscription.current_period_start * 1000),
+			currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+			cancelAtPeriodEnd: subscription.cancel_at_period_end,
+			canceledAt: subscription.canceled_at
+				? new Date(subscription.canceled_at * 1000)
+				: undefined,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			metadata: subscription.metadata,
+		};
+	}
+
+	private static convertStripeInvoice(invoice: any): Invoice {
+		return {
+			id: invoice.id,
+			userId: invoice.metadata?.userId || '',
+			subscriptionId: invoice.subscription || '',
+			provider: 'stripe',
+			providerInvoiceId: invoice.id,
+			customerId: invoice.customer,
+			subscriptionId: invoice.subscription,
+			amount: invoice.amount_paid,
+			currency: invoice.currency,
+			status: invoice.status,
+			periodStart: new Date(invoice.period_start * 1000),
+			periodEnd: new Date(invoice.period_end * 1000),
+			paidAt: new Date(invoice.status_transitions.paid_at * 1000),
+			hostedInvoiceUrl: invoice.hosted_invoice_url,
+			invoicePdf: invoice.invoice_pdf,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
+	}
+
+	private static convertStripePaymentMethod(paymentMethod: any): PaymentMethod {
+		return {
+			id: paymentMethod.id,
+			userId: paymentMethod.metadata?.userId || '',
+			provider: 'stripe',
+			providerPaymentMethodId: paymentMethod.id,
+			customerId: paymentMethod.customer,
+			type: paymentMethod.type,
+			last4: paymentMethod.card?.last4,
+			brand: paymentMethod.card?.brand,
+			expiryMonth: paymentMethod.card?.exp_month,
+			expiryYear: paymentMethod.card?.exp_year,
+			isDefault: false,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
 	}
 }
