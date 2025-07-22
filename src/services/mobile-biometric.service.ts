@@ -47,7 +47,7 @@ export class MobileBiometricService {
 		}
 
 		try {
-			const result = await BiometricAuth.checkBiometry();
+			const result = await (BiometricAuth as any).checkBiometry();
 			return {
 				available: result.available,
 				biometryType: result.biometryType,
@@ -132,7 +132,7 @@ export class MobileBiometricService {
 		}
 
 		try {
-			const result = await BiometricAuth.authenticate({
+			const result = await (BiometricAuth as any).authenticate({
 				reason,
 				title: '2FA Studio',
 				subtitle: 'Biometric Authentication',

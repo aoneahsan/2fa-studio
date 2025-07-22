@@ -3,12 +3,11 @@
  * @module services/google-drive-backup
  */
 
-import { GoogleAuth } from 'google-auth-library';
-import { google } from 'googleapis';
 import { OTPAccount } from './otp.service';
 import { EncryptionService } from './encryption.service';
 import { MobileEncryptionService } from './mobile-encryption.service';
 import { Capacitor } from '@capacitor/core';
+import { GoogleDriveAPI } from './google-drive-api.service';
 
 export interface BackupMetadata {
 	version: string;
@@ -41,7 +40,7 @@ export interface RestoreOptions {
 }
 
 export class GoogleDriveBackupService {
-	private static drive: unknown = null;
+	// Remove unused drive property
 	private static isInitialized = false;
 	private static readonly APP_FOLDER = '2FA Studio Backups';
 	private static readonly BACKUP_PREFIX = '2fa-backup-';
@@ -52,20 +51,8 @@ export class GoogleDriveBackupService {
 	 */
 	static async initialize(accessToken: string): Promise<void> {
 		try {
-			const auth = new GoogleAuth({
-				scopes: [
-					'https://www.googleapis.com/auth/drive.file',
-					'https://www.googleapis.com/auth/drive.appdata',
-				],
-			});
-
-			// Set access token
-			const authClient = await auth.getClient();
-			if (authClient && 'setCredentials' in authClient) {
-				(authClient as any).setCredentials({ access_token: accessToken });
-			}
-
-			this.drive = google.drive({ version: 'v3', auth: authClient as any });
+			// Set access token for API requests
+			GoogleDriveAPI.setAccessToken(accessToken);
 			this.isInitialized = true;
 
 			// Ensure app folder exists
@@ -148,8 +135,8 @@ export class GoogleDriveBackupService {
 			const folderId = await this.getAppFolderId();
 
 			// Upload to Google Drive
-			const response = await (this.drive as any).files.create({
-				requestBody: {
+			const response = await GoogleDriveAPI.createFile(
+				{
 					name: filename,
 					parents: [folderId],
 					description: JSON.stringify(metadata),
@@ -161,16 +148,13 @@ export class GoogleDriveBackupService {
 						checksum,
 					},
 				},
-				media: {
-					mimeType: 'application/json',
-					body: processedData,
-				},
-			});
+				processedData
+			);
 
 			// Cleanup old backups
 			await this.cleanupOldBackups();
 
-			return { success: true, fileId: response.data.id };
+			return { success: true, fileId: response.id };
 		} catch (error) {
 			console.error('Backup failed:', error);
 			return {
@@ -191,13 +175,11 @@ export class GoogleDriveBackupService {
 		try {
 			const folderId = await this.getAppFolderId();
 
-			const response = await (this.drive as any).files.list({
-				q: `'${folderId}' in parents and name contains '${this.BACKUP_PREFIX}' and trashed=false`,
-				fields: 'files(id,name,createdTime,size,description,appProperties)',
-				orderBy: 'createdTime desc',
-			});
+			const response = await GoogleDriveAPI.listFiles(
+				`'${folderId}' in parents and name contains '${this.BACKUP_PREFIX}' and trashed=false`
+			);
 
-			return response.data.files.map((file: any) => {
+			return response.files.map((file: any) => {
 				let metadata: BackupMetadata;
 				try {
 					metadata = JSON.parse(file.description || '{}');
@@ -239,22 +221,14 @@ export class GoogleDriveBackupService {
 
 		try {
 			// Get file metadata
-			const fileInfo = await (this.drive as any).files.get({
-				fileId,
-				fields: 'id,name,description,appProperties',
-			});
+			const fileInfo = await GoogleDriveAPI.getFile(fileId, true);
 
-			const appProperties = fileInfo.data.appProperties || {};
+			const appProperties = fileInfo.appProperties || {};
 			const encrypted = appProperties.encrypted === 'true';
 			const originalChecksum = appProperties.checksum;
 
 			// Download file content
-			const response = await (this.drive as any).files.get({
-				fileId,
-				alt: 'media',
-			});
-
-			let data = response.data;
+			let data = await GoogleDriveAPI.getFile(fileId, false);
 
 			// Validate checksum if requested
 			if (options.validateChecksum && originalChecksum) {
@@ -321,7 +295,7 @@ export class GoogleDriveBackupService {
 		}
 
 		try {
-			await (this.drive as any).files.delete({ fileId });
+			await GoogleDriveAPI.deleteFile(fileId);
 			return true;
 		} catch (error) {
 			console.error('Failed to delete backup:', error);
@@ -338,13 +312,10 @@ export class GoogleDriveBackupService {
 		}
 
 		try {
-			const response = await (this.drive as any).files.get({
-				fileId,
-				fields: 'description,appProperties',
-			});
+			const response = await GoogleDriveAPI.getFile(fileId, true);
 
-			const description = (response as any).data.description;
-			const appProperties = response.data.appProperties || {};
+			const description = response.description;
+			const appProperties = response.appProperties || {};
 
 			if (description) {
 				try {
@@ -382,11 +353,9 @@ export class GoogleDriveBackupService {
 		}
 
 		try {
-			const response = await (this.drive as any).about.get({
-				fields: 'storageQuota',
-			});
+			const response = await GoogleDriveAPI.getAbout();
 
-			const quota = (response as any).data.storageQuota;
+			const quota = response.storageQuota;
 			const limit = parseInt(quota.limit || '0');
 			const usage = parseInt(quota.usage || '0');
 
@@ -409,12 +378,13 @@ export class GoogleDriveBackupService {
 			await this.getAppFolderId();
 		} catch (error) {
 			// Folder doesn't exist, create it
-			await (this.drive as any).files.create({
-				requestBody: {
+			await GoogleDriveAPI.createFile(
+				{
 					name: this.APP_FOLDER,
 					mimeType: 'application/vnd.google-apps.folder',
 				},
-			});
+				''
+			);
 		}
 	}
 
@@ -422,16 +392,15 @@ export class GoogleDriveBackupService {
 	 * Get app folder ID
 	 */
 	private static async getAppFolderId(): Promise<string> {
-		const response = await (this.drive as any).files.list({
-			q: `name='${this.APP_FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-			fields: 'files(id)',
-		});
+		const response = await GoogleDriveAPI.listFiles(
+			`name='${this.APP_FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`
+		);
 
-		if (response.data.files.length === 0) {
+		if (response.files.length === 0) {
 			throw new Error('App folder not found');
 		}
 
-		return response.data.files[0].id;
+		return response.files[0].id;
 	}
 
 	/**
@@ -490,7 +459,7 @@ export class GoogleDriveBackupService {
 		}
 
 		try {
-			await (this.drive as any).about.get({ fields: 'user' });
+			await GoogleDriveAPI.getAbout();
 			return { success: true };
 		} catch (error) {
 			return {
@@ -507,10 +476,7 @@ export class GoogleDriveBackupService {
 		}
 
 		try {
-			const response = await (this.drive as any).about.get({
-				fields: 'user,storageQuota',
-			});
-			return response.data;
+			return await GoogleDriveAPI.getAbout();
 		} catch (error) {
 			console.error('Failed to get user info:', error);
 			throw error;

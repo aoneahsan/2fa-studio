@@ -410,7 +410,7 @@ export class AuthService {
 			}
 
 			// Create or update user in Firestore
-			const userId = result.user.uid || `${provider}_${result.user.id}`;
+			const userId = result.user.uid || `${provider}_${(result.user as any).id || Date.now()}`;
 			const userDoc = await getDoc(doc(db, 'users', userId));
 
 			if (userDoc.exists()) {
@@ -442,40 +442,44 @@ export class AuthService {
 				const userData: User = {
 					id: userId,
 					email: result.user.email || '',
-					displayName: result.user.name || result.user.email?.split('@')[0] || 'User',
-					photoURL: result.user.picture || null,
+					displayName: (result.user as any).name || result.user.email?.split('@')[0] || 'User',
+					photoURL: (result.user as any).picture || null,
 					createdAt: serverTimestamp() as any,
 					lastLogin: serverTimestamp() as any,
-					authProviders: [provider],
+					authProvider: provider as 'email' | 'google' | 'apple',
 					subscription: {
 						type: 'free',
+						tier: 'free',
 						status: 'active',
 						startDate: serverTimestamp() as any,
 						endDate: null,
 						accountLimit: 10,
+						features: {
+							cloudBackup: false,
+							browserExtension: false,
+							prioritySupport: false,
+							advancedSecurity: false,
+							noAds: false,
+						},
 					},
-					preferences: {
+					updatedAt: serverTimestamp() as any,
+					settings: {
 						theme: 'system',
 						language: 'en',
-						notifications: {
-							email: true,
-							push: true,
-							security: true,
-							updates: true,
-						},
-						twoFactorBackup: {
-							googleDrive: false,
-							icloud: false,
-						},
-						autoLock: {
-							enabled: true,
-							duration: 300,
-						},
-						biometric: {
-							enabled: false,
-							fallbackToPin: true,
-						},
+						showNotifications: true,
+						biometricAuth: false,
+						autoLock: true,
+						autoLockTimeout: 60,
+						showAccountIcons: true,
+						copyOnTap: true,
+						sortOrder: 'manual',
+						groupByIssuer: false,
+						hideTokens: false,
+						fontSize: 'medium',
 					},
+					lastBackup: null,
+					backupEnabled: false,
+					deviceCount: 1,
 				};
 
 				await setDoc(doc(db, 'users', userId), userData);
@@ -500,7 +504,7 @@ export class AuthService {
 			const authError = error as any;
 			await AuditLogService.log({
 				userId: 'unknown',
-				action: 'auth.provider_login',
+				action: 'auth.login',
 				resource: 'auth',
 				severity: 'warning',
 				success: false,
