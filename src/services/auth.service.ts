@@ -45,6 +45,7 @@ import { User, Device, Subscription } from '@src/types';
 import { Capacitor } from '@capacitor/core';
 import { authRateLimiter } from '@utils/rate-limiter';
 import { AuditLogService } from '@services/audit-log.service';
+import { CapacitorAuthManager } from 'capacitor-auth-manager';
 
 export interface AuthCredentials {
 	email: string;
@@ -384,6 +385,133 @@ export class AuthService {
 		} catch (error: unknown) {
 			const authError = error as any;
 			throw new Error(this.getErrorMessage(authError.code));
+		}
+	}
+
+	/**
+	 * Sign in with various providers using capacitor-auth-manager
+	 * Supports: Facebook, Twitter, GitHub, Microsoft, LinkedIn, Discord, etc.
+	 */
+	static async signInWithProvider(provider: string): Promise<User> {
+		try {
+			// Use capacitor-auth-manager for additional providers
+			const result = await CapacitorAuthManager.signIn({
+				provider: provider as any,
+			});
+
+			if (!result.user) {
+				throw new Error('No user data returned from provider');
+			}
+
+			// Get or create Firebase custom token
+			const token = result.credential?.idToken || result.credential?.accessToken;
+			if (!token) {
+				throw new Error('No authentication token received');
+			}
+
+			// Create or update user in Firestore
+			const userId = result.user.uid || `${provider}_${result.user.id}`;
+			const userDoc = await getDoc(doc(db, 'users', userId));
+
+			if (userDoc.exists()) {
+				// Existing user
+				const user = userDoc.data() as User;
+				await this.registerDevice(user.id);
+
+				// Update last login
+				await updateDoc(doc(db, 'users', user.id), {
+					lastLogin: serverTimestamp(),
+				});
+
+				// Log social login
+				await AuditLogService.log({
+					userId: user.id,
+					action: 'auth.login',
+					resource: 'auth',
+					severity: 'info',
+					success: true,
+					details: {
+						email: user.email,
+						authProvider: provider,
+					},
+				});
+
+				return user;
+			} else {
+				// New user - create profile
+				const userData: User = {
+					id: userId,
+					email: result.user.email || '',
+					displayName: result.user.name || result.user.email?.split('@')[0] || 'User',
+					photoURL: result.user.picture || null,
+					createdAt: serverTimestamp() as any,
+					lastLogin: serverTimestamp() as any,
+					authProviders: [provider],
+					subscription: {
+						type: 'free',
+						status: 'active',
+						startDate: serverTimestamp() as any,
+						endDate: null,
+						accountLimit: 10,
+					},
+					preferences: {
+						theme: 'system',
+						language: 'en',
+						notifications: {
+							email: true,
+							push: true,
+							security: true,
+							updates: true,
+						},
+						twoFactorBackup: {
+							googleDrive: false,
+							icloud: false,
+						},
+						autoLock: {
+							enabled: true,
+							duration: 300,
+						},
+						biometric: {
+							enabled: false,
+							fallbackToPin: true,
+						},
+					},
+				};
+
+				await setDoc(doc(db, 'users', userId), userData);
+				await this.registerDevice(userId);
+
+				// Log new user creation
+				await AuditLogService.log({
+					userId: userData.id,
+					action: 'auth.signup',
+					resource: 'auth',
+					severity: 'info',
+					success: true,
+					details: {
+						email: userData.email,
+						authProvider: provider,
+					},
+				});
+
+				return userData;
+			}
+		} catch (error: unknown) {
+			const authError = error as any;
+			await AuditLogService.log({
+				userId: 'unknown',
+				action: 'auth.provider_login',
+				resource: 'auth',
+				severity: 'warning',
+				success: false,
+				errorMessage: authError.message || authError.code,
+				details: {
+					provider,
+					errorCode: authError.code,
+				},
+			});
+
+			throw new Error(authError.message || this.getErrorMessage(authError.code));
 		}
 	}
 

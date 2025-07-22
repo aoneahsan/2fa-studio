@@ -47,16 +47,11 @@ export class MobileBiometricService {
 		}
 
 		try {
-			// const result = await BiometricAuth.checkBiometry();
-			// return {
-			//   available: result.available,
-			//   biometryType: result.biometryType,
-			//   reason: result.reason
-			// };
+			const result = await BiometricAuth.checkBiometry();
 			return {
-				available: false,
-				biometryType: 'none',
-				reason: 'Biometric authentication not available on web platform',
+				available: result.available,
+				biometryType: result.biometryType,
+				reason: result.reason
 			};
 		} catch (error) {
 			return {
@@ -137,27 +132,23 @@ export class MobileBiometricService {
 		}
 
 		try {
-			// const result = await BiometricAuth.authenticate({
-			//   reason,
-			//   title: '2FA Studio',
-			//   subtitle: 'Biometric Authentication',
-			//   description: 'Use your biometric to authenticate',
-			//   fallbackTitle: 'Use Password',
-			//   cancelTitle: 'Cancel'
-			// });
+			const result = await BiometricAuth.authenticate({
+				reason,
+				title: '2FA Studio',
+				subtitle: 'Biometric Authentication',
+				description: 'Use your biometric to authenticate',
+				fallbackTitle: 'Use Password',
+				cancelTitle: 'Cancel'
+			});
 
-			// if (result.authenticated) {
-			//   const config = await this.getConfig();
-			//   config.lastUsed = new Date().toISOString();
-			//   await this.saveConfig(config);
-			//   return { success: true };
-			// } else {
-			//   return { success: false, error: 'Authentication failed' };
-			// }
-			return {
-				success: false,
-				error: 'Biometric authentication not available on web platform',
-			};
+			if (result.authenticated) {
+				const config = await this.getConfig();
+				config.lastUsed = new Date().toISOString();
+				await this.saveConfig(config);
+				return { success: true };
+			} else {
+				return { success: false, error: 'Authentication failed' };
+			}
 		} catch (error) {
 			return {
 				success: false,

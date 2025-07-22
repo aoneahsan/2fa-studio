@@ -106,6 +106,20 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
+  const signInWithProvider = useCallback(async (provider: string) => {
+    try {
+      dispatch(setLoading(true) as any);
+      dispatch(clearError() as any);
+      const user = await AuthService.signInWithProvider(provider);
+      return user;
+    } catch (error: unknown) {
+      dispatch(setError((error as Error).message || `${provider} sign in failed`) as any);
+      throw error;
+    } finally {
+      dispatch(setLoading(false) as any);
+    }
+  }, [dispatch]);
+
   const signOut = useCallback(async () => {
     try {
       dispatch(setLoading(true) as any);
@@ -202,6 +216,7 @@ export const useAuth = () => {
     signUp,
     signInWithGoogle,
     signInWithApple,
+    signInWithProvider,
     signOut,
     resetPassword,
     updateProfile,
