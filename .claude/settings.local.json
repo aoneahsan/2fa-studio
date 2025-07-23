@@ -505,7 +505,8 @@
       "Bash(./fix-imports.sh)",
       "Bash(./revert-imports.sh:*)",
       "Bash(./gradlew:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
