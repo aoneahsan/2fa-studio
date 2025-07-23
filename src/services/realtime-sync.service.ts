@@ -73,6 +73,15 @@ export class RealtimeSyncService {
 	static async initialize(userId: string): Promise<void> {
 		this.userId = userId;
 
+		console.log({
+			m: 'RealtimeSyncService -> initialize, until we receive the user id, we will not start syncing',
+			userId,
+		});
+
+		if (!userId) {
+			return;
+		}
+
 		// Listen to network status
 		window.addEventListener('online', this.handleOnline.bind(this));
 		window.addEventListener('offline', this.handleOffline.bind(this));

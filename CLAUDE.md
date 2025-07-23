@@ -15,23 +15,27 @@ This is a 2FA (Two-Factor Authentication) service application similar to 2FAS Au
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: React + Capacitor.js (chosen over Flutter based on developer's existing packages)
 - **UI Library**: buildkit-ui (developer's NPM package)
 - **State Management**: TBD (consider Redux Toolkit or Zustand)
 - **Styling**: TBD (consider Tailwind CSS or styled-components)
 
 ### Backend
+
 - **Services**: Firebase (Authentication, Firestore, Cloud Functions, Storage)
 - **Database**: Firestore
 - **File Storage**: Firebase Storage (for encrypted backups)
 
 ### Browser Extension
+
 - **Framework**: Chrome Extension Manifest V3
 - **Communication**: WebSockets or Firebase Realtime Database for real-time sync
 
 ### Developer's Existing Packages
+
 - capacitor-auth-manager
-- capacitor-biometric-auth
+- capacitor-biometric-authentication
 - capacitor-firebase-kit
 - capacitor-native-update
 - buildkit-ui
@@ -48,7 +52,7 @@ yarn add @capacitor/core @capacitor/cli
 npx cap init
 
 # Install developer's packages
-yarn add capacitor-auth-manager capacitor-biometric-auth capacitor-firebase-kit capacitor-native-update buildkit-ui
+yarn add capacitor-auth-manager capacitor-biometric-authentication capacitor-firebase-kit capacitor-native-update buildkit-ui
 
 # Development
 yarn start              # Start React development server
@@ -67,12 +71,14 @@ npx cap open ios      # Open in Xcode
 ## Key Architecture Decisions
 
 ### Security Architecture
+
 1. **Encryption**: All 2FA secrets must be encrypted using AES-256-GCM before storage
-2. **Biometric Protection**: Use capacitor-biometric-auth for local device authentication
+2. **Biometric Protection**: Use capacitor-biometric-authentication for local device authentication
 3. **Zero-Knowledge**: Google Drive backups should be end-to-end encrypted - Firebase should never have access to decryption keys
 4. **Device Management**: Implement device fingerprinting and session management in Firestore
 
 ### Data Architecture
+
 ```
 Firestore Structure:
 - users/
@@ -93,6 +99,7 @@ Firestore Structure:
 ```
 
 ### Browser Extension Architecture
+
 - Background script handles authentication and sync
 - Content script for QR code detection
 - Popup for quick access to codes
@@ -101,6 +108,7 @@ Firestore Structure:
 ## Critical Implementation Guidelines
 
 ### Security Requirements
+
 1. Never store unencrypted 2FA secrets
 2. Implement rate limiting for code generation
 3. Use Firebase Security Rules to ensure users can only access their own data
@@ -108,18 +116,21 @@ Firestore Structure:
 5. Browser extension must validate all origins before injecting codes
 
 ### Offline Support
+
 1. Cache encrypted 2FA accounts locally using Capacitor Preferences API
 2. Generate TOTP codes offline
 3. Queue backup code usage for sync when online
 4. Show clear offline/online status indicators
 
 ### Google Drive Backup
+
 1. Use Google Drive API v3
 2. Store backups in app-specific folder
 3. Encrypt data client-side before upload
 4. Include metadata for version control
 
 ### Subscription & Monetization
+
 1. Free tier: Limited accounts (e.g., 10), ads
 2. Premium tiers: Unlimited accounts, no ads, priority support
 3. Implement receipt validation for in-app purchases

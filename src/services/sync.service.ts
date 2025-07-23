@@ -69,7 +69,6 @@ export class SyncService {
 	 */
 	static async initialize(userId: string): Promise<void> {
 		// Register device if not already registered
-		const deviceId = await DeviceService.getDeviceId();
 		await DeviceService.registerDevice(userId);
 
 		// Setup online/offline listeners

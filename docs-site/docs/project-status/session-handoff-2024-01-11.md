@@ -1,4 +1,5 @@
 # 2FA Studio Development Session Handoff
+
 **Date**: January 11, 2024
 **Last Working Session**: Evening
 
@@ -65,6 +66,7 @@ Today we made significant progress on the 2FA Studio project, completing major f
 ## 📋 What's Remaining
 
 ### High Priority
+
 1. **Testing Infrastructure**
    - [ ] Set up Vitest for unit tests
    - [ ] Set up Cypress for E2E tests
@@ -72,7 +74,7 @@ Today we made significant progress on the 2FA Studio project, completing major f
    - [ ] Test Chrome extension functionality
 
 2. **Biometric Auth Fix**
-   - [ ] Fix capacitor-biometric-auth compatibility
+   - [ ] Fix capacitor-biometric-authentication compatibility
    - [ ] Or find alternative biometric solution
    - [ ] Update useBiometric hook implementation
 
@@ -83,6 +85,7 @@ Today we made significant progress on the 2FA Studio project, completing major f
    - [ ] Test on real devices
 
 ### Medium Priority
+
 1. **Device Management**
    - [ ] Device listing page
    - [ ] Remote logout functionality
@@ -101,6 +104,7 @@ Today we made significant progress on the 2FA Studio project, completing major f
    - [ ] Ad integration for free tier
 
 ### Low Priority
+
 1. **Documentation**
    - [ ] Set up Docusaurus
    - [ ] Write user guides
@@ -116,13 +120,15 @@ Today we made significant progress on the 2FA Studio project, completing major f
 ## 🔄 Next Steps (Priority Order)
 
 1. **Complete Import/Export UI**
+
    ```typescript
    // Need to create:
-   - src/components/accounts/ImportAccountsModal.tsx
-   - src/components/accounts/ExportAccountsModal.tsx
+   -src / components / accounts / ImportAccountsModal.tsx -
+   	src / components / accounts / ExportAccountsModal.tsx;
    ```
 
 2. **Integrate Google Drive in UI**
+
    ```typescript
    // Update BackupSettings.tsx to include:
    import GoogleDriveBackup from '../backup/GoogleDriveBackup';
@@ -130,6 +136,7 @@ Today we made significant progress on the 2FA Studio project, completing major f
    ```
 
 3. **Add Testing**
+
    ```bash
    # Install dependencies
    yarn add -D vitest @testing-library/react @testing-library/jest-dom
@@ -143,19 +150,23 @@ Today we made significant progress on the 2FA Studio project, completing major f
 ## 💡 Important Notes for Tomorrow
 
 ### Environment Variables Needed
+
 Make sure `.env` file has:
+
 ```env
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
 VITE_GOOGLE_API_KEY=your-google-api-key
 ```
 
 ### Current State
+
 - App runs with `yarn dev`
 - All pages are accessible and functional
 - Chrome extension can be loaded unpacked from `chrome-extension/` directory
 - Some features show "coming soon" but structure is complete
 
 ### Known Issues
+
 1. Biometric auth is stubbed (not working)
 2. Google Drive needs API credentials
 3. Payment integration not connected
@@ -164,6 +175,7 @@ VITE_GOOGLE_API_KEY=your-google-api-key
 ## 📝 What to Tell Tomorrow
 
 When you continue tomorrow, just say:
+
 > "Continue with the 2FA Studio project. I need to complete the import/export UI modals and integrate Google Drive backup into the settings page."
 
 This will give enough context to continue exactly where we left off.

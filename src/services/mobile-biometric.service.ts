@@ -6,8 +6,7 @@
 
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
-import { BiometricAuth } from 'capacitor-biometric-auth';
-import { MobileEncryptionService } from './mobile-encryption.service';
+import { BiometricAuth } from 'capacitor-biometric-authentication';
 
 export interface BiometricConfig {
 	enabled: boolean;
@@ -51,7 +50,7 @@ export class MobileBiometricService {
 			return {
 				available: result.available,
 				biometryType: result.biometryType,
-				reason: result.reason
+				reason: result.reason,
 			};
 		} catch (error) {
 			return {
@@ -138,7 +137,7 @@ export class MobileBiometricService {
 				subtitle: 'Biometric Authentication',
 				description: 'Use your biometric to authenticate',
 				fallbackTitle: 'Use Password',
-				cancelTitle: 'Cancel'
+				cancelTitle: 'Cancel',
 			});
 
 			if (result.authenticated) {

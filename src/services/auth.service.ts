@@ -33,12 +33,7 @@ import {
 	getDoc,
 	updateDoc,
 	serverTimestamp,
-	collection,
-	query,
-	where,
-	getDocs,
 	deleteDoc,
-	Timestamp,
 } from 'firebase/firestore';
 import { auth, db } from '@src/config/firebase';
 import { User, Device, Subscription } from '@src/types';
@@ -404,13 +399,16 @@ export class AuthService {
 			}
 
 			// Get or create Firebase custom token
-			const token = result.credential?.idToken || result.credential?.accessToken;
+			const token =
+				result.credential?.idToken || result.credential?.accessToken;
 			if (!token) {
 				throw new Error('No authentication token received');
 			}
 
 			// Create or update user in Firestore
-			const userId = result.user.uid || `${provider}_${(result.user as any).id || Date.now()}`;
+			const userId =
+				result.user.uid ||
+				`${provider}_${(result.user as any).id || Date.now()}`;
 			const userDoc = await getDoc(doc(db, 'users', userId));
 
 			if (userDoc.exists()) {
@@ -442,7 +440,10 @@ export class AuthService {
 				const userData: User = {
 					id: userId,
 					email: result.user.email || '',
-					displayName: (result.user as any).name || result.user.email?.split('@')[0] || 'User',
+					displayName:
+						(result.user as any).name ||
+						result.user.email?.split('@')[0] ||
+						'User',
 					photoURL: (result.user as any).picture || null,
 					createdAt: serverTimestamp() as any,
 					lastLogin: serverTimestamp() as any,
@@ -515,7 +516,9 @@ export class AuthService {
 				},
 			});
 
-			throw new Error(authError.message || this.getErrorMessage(authError.code));
+			throw new Error(
+				authError.message || this.getErrorMessage(authError.code)
+			);
 		}
 	}
 
@@ -744,10 +747,74 @@ export class AuthService {
 	 * Get user data from Firestore
 	 */
 	private static async getUserData(firebaseUser: FirebaseUser): Promise<User> {
+		console.log({ firebaseUser });
 		const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
 
 		if (!userDoc.exists()) {
-			throw new Error('User data not found');
+			// Create user document if it doesn't exist
+			const userData: Partial<User> = {
+				email: firebaseUser.email!,
+				displayName: firebaseUser.displayName || '',
+				photoURL: firebaseUser.photoURL || '',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				subscription: {
+					tier: 'free',
+					status: 'active',
+					startDate: new Date(),
+					endDate: null,
+					accountLimit: 10,
+					features: {
+						cloudBackup: false,
+						browserExtension: false,
+						prioritySupport: false,
+						advancedSecurity: false,
+						noAds: false,
+					},
+				},
+				settings: {
+					theme: 'system',
+					language: 'en',
+					autoLock: true,
+					autoLockTimeout: 60,
+					biometricAuth: false,
+					showAccountIcons: true,
+					copyOnTap: true,
+					sortOrder: 'manual',
+					groupByIssuer: false,
+					hideTokens: false,
+					fontSize: 'medium',
+				},
+				lastBackup: null,
+				backupEnabled: false,
+				deviceCount: 1,
+			};
+
+			await setDoc(doc(db, 'users', firebaseUser.uid), {
+				...userData,
+				createdAt: serverTimestamp(),
+				updatedAt: serverTimestamp(),
+			});
+
+			// Log user creation
+			await this.logAuditEvent({
+				userId: firebaseUser.uid,
+				action: 'auth.user_created',
+				resource: 'user',
+				severity: 'info',
+				success: true,
+				details: { 
+					email: firebaseUser.email,
+					provider: firebaseUser.providerData[0]?.providerId || 'email',
+					timestamp: new Date() 
+				},
+			});
+
+			// Return the newly created user data
+			return {
+				id: firebaseUser.uid,
+				...userData,
+			} as User;
 		}
 
 		const data = userDoc.data();

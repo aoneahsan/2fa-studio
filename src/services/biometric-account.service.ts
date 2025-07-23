@@ -14,7 +14,7 @@ import {
 // Try to import biometric auth, fallback to mock if not available
 let BiometricAuth: any = null;
 try {
-	BiometricAuth = require('@capacitor-community/biometric-auth').BiometricAuth;
+	BiometricAuth = require('capacitor-biometric-authentication').BiometricAuth;
 } catch (error) {
 	console.warn('Biometric auth not available, using mock implementation');
 	BiometricAuth = {

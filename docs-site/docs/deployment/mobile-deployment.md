@@ -24,12 +24,14 @@ npm install -g @capacitor/cli
 ### Platform Requirements
 
 #### Android
+
 - Android Studio Arctic Fox or newer
 - Android SDK 31+
 - Gradle 7.0+
 - Google Play Console account
 
 #### iOS
+
 - macOS 12.0+
 - Xcode 14+
 - CocoaPods 1.11+
@@ -64,7 +66,7 @@ yarn add @capacitor/status-bar
 
 # Developer's custom plugins
 yarn add capacitor-auth-manager
-yarn add capacitor-biometric-auth
+yarn add capacitor-biometric-authentication
 yarn add capacitor-firebase-kit
 yarn add capacitor-native-update
 
@@ -81,40 +83,40 @@ yarn add @capacitor/share
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.twofastudio.app',
-  appName: '2FA Studio',
-  webDir: 'build',
-  bundledWebRuntime: false,
-  backgroundColor: '#ffffff',
-  android: {
-    backgroundColor: '#ffffff',
-    allowMixedContent: false,
-    captureInput: true,
-    webContentsDebuggingEnabled: false,
-  },
-  ios: {
-    backgroundColor: '#ffffff',
-    contentInset: 'automatic',
-    limitsNavigationsToAppBoundDomains: true,
-    preferredContentMode: 'mobile',
-  },
-  plugins: {
-    SplashScreen: {
-      launchShowDuration: 2000,
-      launchAutoHide: true,
-      androidScaleType: 'CENTER_CROP',
-      showSpinner: false,
-      backgroundColor: '#ffffff',
-    },
-    Keyboard: {
-      resize: 'body',
-      style: 'dark',
-      resizeOnFullScreen: true,
-    },
-    PushNotifications: {
-      presentationOptions: ['badge', 'sound', 'alert'],
-    },
-  },
+	appId: 'com.twofastudio.app',
+	appName: '2FA Studio',
+	webDir: 'build',
+	bundledWebRuntime: false,
+	backgroundColor: '#ffffff',
+	android: {
+		backgroundColor: '#ffffff',
+		allowMixedContent: false,
+		captureInput: true,
+		webContentsDebuggingEnabled: false,
+	},
+	ios: {
+		backgroundColor: '#ffffff',
+		contentInset: 'automatic',
+		limitsNavigationsToAppBoundDomains: true,
+		preferredContentMode: 'mobile',
+	},
+	plugins: {
+		SplashScreen: {
+			launchShowDuration: 2000,
+			launchAutoHide: true,
+			androidScaleType: 'CENTER_CROP',
+			showSpinner: false,
+			backgroundColor: '#ffffff',
+		},
+		Keyboard: {
+			resize: 'body',
+			style: 'dark',
+			resizeOnFullScreen: true,
+		},
+		PushNotifications: {
+			presentationOptions: ['badge', 'sound', 'alert'],
+		},
+	},
 };
 
 export default config;
@@ -129,17 +131,17 @@ export default config;
 ```gradle
 android {
     compileSdkVersion 33
-    
+
     defaultConfig {
         applicationId "com.twofastudio.app"
         minSdkVersion 24
         targetSdkVersion 33
         versionCode 1
         versionName "1.0.0"
-        
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    
+
     signingConfigs {
         release {
             storeFile file(System.getenv("ANDROID_KEYSTORE_PATH") ?: "keystore.jks")
@@ -148,7 +150,7 @@ android {
             keyPassword System.getenv("ANDROID_KEY_PASSWORD")
         }
     }
-    
+
     buildTypes {
         release {
             minifyEnabled true
@@ -157,7 +159,7 @@ android {
             signingConfig signingConfigs.release
         }
     }
-    
+
     bundle {
         language {
             enableSplit = true
@@ -175,7 +177,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'com.google.android.material:material:1.9.0'
-    
+
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
     implementation 'com.google.firebase:firebase-analytics'
@@ -196,7 +198,7 @@ dependencies {
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    
+
     <!-- Features -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
@@ -270,6 +272,7 @@ cd android
 #### Prepare Store Listing
 
 Required assets:
+
 - App icon: 512x512 PNG
 - Feature graphic: 1024x500 PNG
 - Screenshots: Min 2, Max 8 (per device type)
@@ -373,7 +376,7 @@ pod 'OpenSSL-Universal', :modular_headers => true
 
 target 'App' do
   capacitor_pods
-  
+
   # Add your Pods here
   pod 'Firebase/Analytics'
   pod 'Firebase/Crashlytics'
@@ -478,25 +481,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'yarn'
-      
+
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'temurin'
-      
+
       - name: Install dependencies
         run: |
           yarn install --frozen-lockfile
           yarn build
           npx cap sync android
-      
+
       - name: Build Android release
         run: |
           cd android
@@ -506,7 +509,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-      
+
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -520,25 +523,25 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'yarn'
-      
+
       - name: Install dependencies
         run: |
           yarn install --frozen-lockfile
           yarn build
           npx cap sync ios
-      
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0'
           bundler-cache: true
-      
+
       - name: Install certificates
         run: |
           cd ios
@@ -546,7 +549,7 @@ jobs:
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-      
+
       - name: Build and upload to TestFlight
         run: |
           cd ios
@@ -567,42 +570,42 @@ import { NativeUpdate } from 'capacitor-native-update';
 import { Dialog } from '@capacitor/dialog';
 
 export class UpdateService {
-  async checkForUpdates() {
-    try {
-      const update = await NativeUpdate.checkForUpdate();
-      
-      if (update.available) {
-        const { value } = await Dialog.confirm({
-          title: 'Update Available',
-          message: `Version ${update.version} is available. Download now?`,
-          okButtonTitle: 'Update',
-          cancelButtonTitle: 'Later'
-        });
-        
-        if (value) {
-          await this.downloadUpdate(update);
-        }
-      }
-    } catch (error) {
-      console.error('Update check failed:', error);
-    }
-  }
-  
-  private async downloadUpdate(update: any) {
-    const progress = await NativeUpdate.downloadUpdate({
-      url: update.url,
-      version: update.version
-    });
-    
-    progress.subscribe({
-      next: (percentage) => {
-        console.log(`Download progress: ${percentage}%`);
-      },
-      complete: async () => {
-        await NativeUpdate.installUpdate();
-      }
-    });
-  }
+	async checkForUpdates() {
+		try {
+			const update = await NativeUpdate.checkForUpdate();
+
+			if (update.available) {
+				const { value } = await Dialog.confirm({
+					title: 'Update Available',
+					message: `Version ${update.version} is available. Download now?`,
+					okButtonTitle: 'Update',
+					cancelButtonTitle: 'Later',
+				});
+
+				if (value) {
+					await this.downloadUpdate(update);
+				}
+			}
+		} catch (error) {
+			console.error('Update check failed:', error);
+		}
+	}
+
+	private async downloadUpdate(update: any) {
+		const progress = await NativeUpdate.downloadUpdate({
+			url: update.url,
+			version: update.version,
+		});
+
+		progress.subscribe({
+			next: (percentage) => {
+				console.log(`Download progress: ${percentage}%`);
+			},
+			complete: async () => {
+				await NativeUpdate.installUpdate();
+			},
+		});
+	}
 }
 ```
 
@@ -613,15 +616,15 @@ export class UpdateService {
 ```json
 // android/fastlane/metadata/android/en-US/
 {
-  "title": "2FA Studio - Authenticator App",
-  "short_description": "Secure 2FA codes with cloud backup",
-  "full_description": "2FA Studio is a secure two-factor authentication app...",
-  "keywords": "2fa, authenticator, totp, security, backup",
-  "category": "PRODUCTIVITY",
-  "content_rating": "Everyone",
-  "website": "https://2fastudio.app",
-  "email": "support@2fastudio.app",
-  "privacy_policy": "https://2fastudio.app/privacy"
+	"title": "2FA Studio - Authenticator App",
+	"short_description": "Secure 2FA codes with cloud backup",
+	"full_description": "2FA Studio is a secure two-factor authentication app...",
+	"keywords": "2fa, authenticator, totp, security, backup",
+	"category": "PRODUCTIVITY",
+	"content_rating": "Everyone",
+	"website": "https://2fastudio.app",
+	"email": "support@2fastudio.app",
+	"privacy_policy": "https://2fastudio.app/privacy"
 }
 ```
 
@@ -630,14 +633,14 @@ export class UpdateService {
 ```json
 // ios/fastlane/metadata/en-US/
 {
-  "name": "2FA Studio",
-  "subtitle": "Secure Authentication",
-  "keywords": "2fa,authenticator,totp,security,backup,passwords",
-  "promotional_text": "New: Browser extension support!",
-  "description": "2FA Studio provides secure two-factor authentication...",
-  "release_notes": "- Bug fixes and improvements\n- Enhanced security",
-  "support_url": "https://help.2fastudio.app",
-  "marketing_url": "https://2fastudio.app"
+	"name": "2FA Studio",
+	"subtitle": "Secure Authentication",
+	"keywords": "2fa,authenticator,totp,security,backup,passwords",
+	"promotional_text": "New: Browser extension support!",
+	"description": "2FA Studio provides secure two-factor authentication...",
+	"release_notes": "- Bug fixes and improvements\n- Enhanced security",
+	"support_url": "https://help.2fastudio.app",
+	"marketing_url": "https://2fastudio.app"
 }
 ```
 
@@ -653,13 +656,13 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            
+
             ndk {
                 debugSymbolLevel 'FULL'
             }
         }
     }
-    
+
     packagingOptions {
         // Exclude unnecessary files
         exclude 'META-INF/DEPENDENCIES'
@@ -681,17 +684,17 @@ import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Configure Firebase
         FirebaseApp.configure()
-        
+
         // Performance optimizations
         if #available(iOS 13.0, *) {
             // Optimize for iOS 13+
             UITextView.appearance().backgroundColor = .clear
         }
-        
+
         return true
     }
 }
@@ -707,27 +710,27 @@ import { FirebaseAnalytics } from 'capacitor-firebase-kit';
 import { Device } from '@capacitor/device';
 
 export class AnalyticsService {
-  async initialize() {
-    const info = await Device.getInfo();
-    
-    await FirebaseAnalytics.setUserId({
-      userId: await this.getAnonymousId()
-    });
-    
-    await FirebaseAnalytics.setUserProperty({
-      name: 'platform',
-      value: info.platform
-    });
-    
-    await FirebaseAnalytics.setUserProperty({
-      name: 'app_version',
-      value: info.appVersion
-    });
-  }
-  
-  async logEvent(name: string, params?: any) {
-    await FirebaseAnalytics.logEvent({ name, params });
-  }
+	async initialize() {
+		const info = await Device.getInfo();
+
+		await FirebaseAnalytics.setUserId({
+			userId: await this.getAnonymousId(),
+		});
+
+		await FirebaseAnalytics.setUserProperty({
+			name: 'platform',
+			value: info.platform,
+		});
+
+		await FirebaseAnalytics.setUserProperty({
+			name: 'app_version',
+			value: info.appVersion,
+		});
+	}
+
+	async logEvent(name: string, params?: any) {
+		await FirebaseAnalytics.logEvent({ name, params });
+	}
 }
 ```
 
@@ -738,14 +741,14 @@ export class AnalyticsService {
 ```javascript
 // version.config.js
 module.exports = {
-  android: {
-    versionCode: (major, minor, patch) => major * 10000 + minor * 100 + patch,
-    versionName: (version) => version
-  },
-  ios: {
-    CFBundleVersion: (major, minor, patch) => `${major}.${minor}.${patch}`,
-    CFBundleShortVersionString: (version) => version
-  }
+	android: {
+		versionCode: (major, minor, patch) => major * 10000 + minor * 100 + patch,
+		versionName: (version) => version,
+	},
+	ios: {
+		CFBundleVersion: (major, minor, patch) => `${major}.${minor}.${patch}`,
+		CFBundleShortVersionString: (version) => version,
+	},
 };
 ```
 
@@ -755,18 +758,22 @@ module.exports = {
 ## Version X.Y.Z
 
 ### What's New
+
 - Feature 1
 - Feature 2
 
 ### Improvements
+
 - Performance enhancement
 - UI improvements
 
 ### Bug Fixes
+
 - Fixed issue with...
 - Resolved problem where...
 
 ### Technical
+
 - Updated dependencies
 - Security improvements
 ```
@@ -776,6 +783,7 @@ module.exports = {
 ### Common Build Issues
 
 1. **Android Build Fails**
+
    ```bash
    # Clean and rebuild
    cd android
@@ -784,6 +792,7 @@ module.exports = {
    ```
 
 2. **iOS Build Fails**
+
    ```bash
    # Update pods
    cd ios/App

@@ -12,25 +12,37 @@ import tagsReducer from '@store/slices/tagsSlice';
 import foldersReducer from '@store/slices/foldersSlice';
 
 export const store = configureStore({
-  reducer: {
-    _auth: authReducer,
-    accounts: accountsReducer,
-    settings: settingsReducer,
-    ui: uiReducer,
-    tags: tagsReducer,
-    folders: foldersReducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore these action types
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
-        // Ignore these field paths in all actions
-        ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
-        // Ignore these paths in the state
-        ignoredPaths: ['auth.user.createdAt', 'auth.user.updatedAt'],
-      },
-    }),
+	reducer: {
+		_auth: authReducer,
+		accounts: accountsReducer,
+		settings: settingsReducer,
+		ui: uiReducer,
+		tags: tagsReducer,
+		folders: foldersReducer,
+	},
+	middleware: (getDefaultMiddleware) =>
+		getDefaultMiddleware({
+			serializableCheck: {
+				// Ignore these action types
+				ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+				// Ignore these field paths in all actions
+				ignoredActionPaths: [
+					'meta.arg',
+					'payload.timestamp',
+					'payload.createdAt',
+					'payload.updatedAt',
+					'payload.subscription.startDate',
+				],
+				// Ignore these paths in the state
+				ignoredPaths: [
+					'auth.user.createdAt',
+					'auth.user.updatedAt',
+					'_auth.user.createdAt',
+					'_auth.user.updatedAt',
+					'_auth.user.subscription.startDate',
+				],
+			},
+		}),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
