@@ -6,7 +6,8 @@ import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { Storage } from '@google-cloud/storage';
 
-const db = admin.firestore();
+// Lazy initialization to prevent calling before admin.initializeApp()
+const getDb = () => admin.firestore();
 const storage = new Storage();
 const bucket = storage.bucket(
 	process.env.STORAGE_BACKUP_BUCKET || '2fa-studio-backups'
@@ -35,7 +36,7 @@ export const scheduleAutoBackup = onCall(
 
 		try {
 			// Check if user has premium subscription
-			const userDoc = await db
+			const userDoc = await getDb()
 				.collection('users')
 				.doc(context.uid)
 				.get();
@@ -78,7 +79,7 @@ export const scheduleAutoBackup = onCall(
 export async function cleanupOldBackups() {
 	try {
 		// Get all users
-		const usersSnapshot = await db.collection('users').get();
+		const usersSnapshot = await getDb().collection('users').get();
 		let totalDeleted = 0;
 
 		for (const userDoc of usersSnapshot.docs) {
@@ -98,13 +99,13 @@ export async function cleanupOldBackups() {
 			cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
 			// Get old backups
-			const oldBackupsSnapshot = await db
+			const oldBackupsSnapshot = await getDb()
 				.collection('backups')
 				.where('userId', '==', userDoc.id)
 				.where('createdAt', '<', cutoffDate)
 				.get();
 
-			const batch = db.batch();
+			const batch = getDb().batch();
 			const filesToDelete: string[] = [];
 
 			oldBackupsSnapshot.forEach((doc) => {
@@ -168,13 +169,13 @@ export const exportUserData = onCall(
 			};
 
 			// Get user data
-			const userDoc = await db.collection('users').doc(userId).get();
+			const userDoc = await getDb().collection('users').doc(userId).get();
 			if (userDoc.exists) {
 				(exportData as any).user = userDoc.data();
 			}
 
 			// Get accounts
-			const accountsSnapshot = await db
+			const accountsSnapshot = await getDb()
 				.collection('accounts')
 				.where('userId', '==', userId)
 				.get();
@@ -188,7 +189,7 @@ export const exportUserData = onCall(
 			});
 
 			// Get backups metadata
-			const backupsSnapshot = await db
+			const backupsSnapshot = await getDb()
 				.collection('backups')
 				.where('userId', '==', userId)
 				.orderBy('createdAt', 'desc')
@@ -225,7 +226,7 @@ export const exportUserData = onCall(
 			});
 
 			// Log export
-			await db.collection('audit_logs').add({
+			await getDb().collection('audit_logs').add({
 				action: 'data_exported',
 				userId,
 				fileName,
@@ -273,7 +274,7 @@ export const validateBackup = onCall(
 
 		try {
 			// Get backup metadata
-			const backupDoc = await db.collection('backups').doc(backupId).get();
+			const backupDoc = await getDb().collection('backups').doc(backupId).get();
 
 			if (!backupDoc.exists) {
 				throw new HttpsError('not-found', 'Backup not found');
@@ -335,7 +336,7 @@ export const validateBackup = onCall(
 export async function runScheduledBackups() {
 	try {
 		// Get users with auto backup enabled
-		const usersSnapshot = await db
+		const usersSnapshot = await getDb()
 			.collection('users')
 			.where('settings.autoBackup', '==', true)
 			.get();
@@ -371,7 +372,7 @@ export async function runScheduledBackups() {
  */
 async function createAutomaticBackup(userId: string) {
 	// Get user's accounts
-	const accountsSnapshot = await db
+	const accountsSnapshot = await getDb()
 		.collection('accounts')
 		.where('userId', '==', userId)
 		.get();
@@ -408,7 +409,7 @@ async function createAutomaticBackup(userId: string) {
 	});
 
 	// Save backup metadata
-	await db.collection('backups').add({
+	await getDb().collection('backups').add({
 		userId,
 		fileName,
 		storageUrl: file.name,
@@ -419,7 +420,7 @@ async function createAutomaticBackup(userId: string) {
 	});
 
 	// Update user's last backup time
-	await db.collection('users').doc(userId).update({
+	await getDb().collection('users').doc(userId).update({
 		lastBackup: admin.firestore.FieldValue.serverTimestamp(),
 	});
 

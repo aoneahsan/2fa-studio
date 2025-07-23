@@ -7,12 +7,29 @@ import * as admin from 'firebase-admin';
 import Stripe from 'stripe';
 import {FirebaseAuthRequest} from './types';
 
-const db = admin.firestore();
+// Lazy initialization to prevent calling before admin.initializeApp()
+const getDb = () => admin.firestore();
 
-// Initialize Stripe with environment variable
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-	apiVersion: '2025-06-30.basil',
-});
+// Lazy initialization for Stripe to prevent errors when env vars are not set
+let stripeInstance: Stripe | null = null;
+const getStripe = () => {
+	if (!stripeInstance) {
+		const key = process.env.STRIPE_SECRET_KEY;
+		if (!key) {
+			console.warn('STRIPE_SECRET_KEY environment variable is not set. Stripe functionality will be limited.');
+			// Use a dummy key to prevent initialization errors during deployment
+			// This will fail at runtime if Stripe methods are actually called
+			stripeInstance = new Stripe('sk_test_dummy_key_for_deployment', {
+				apiVersion: '2025-06-30.basil',
+			});
+		} else {
+			stripeInstance = new Stripe(key, {
+				apiVersion: '2025-06-30.basil',
+			});
+		}
+	}
+	return stripeInstance;
+};
 
 // Subscription tiers and prices
 const SUBSCRIPTION_PRICES = {
@@ -54,7 +71,7 @@ export const createCheckoutSession = onCall(
 
 		try {
 			// Get or create Stripe customer
-			const userDoc = await db
+			const userDoc = await getDb()
 				.collection('users')
 				.doc(request.auth!.uid)
 				.get();
@@ -64,7 +81,7 @@ export const createCheckoutSession = onCall(
 
 			if (!customerId) {
 				// Create new Stripe customer
-				const customer = await stripe.customers.create({
+				const customer = await getStripe().customers.create({
 					email: userData?.email,
 					metadata: {
 						userId: request.auth!.uid,
@@ -80,7 +97,7 @@ export const createCheckoutSession = onCall(
 			}
 
 			// Create checkout session
-			const session = await stripe.checkout.sessions.create({
+			const session = await getStripe().checkout.sessions.create({
 				customer: customerId,
 				payment_method_types: ['card'],
 				line_items: [
@@ -130,7 +147,7 @@ export const createPortalSession = onCall(
 
 		try {
 			// Get user's Stripe customer ID
-			const userDoc = await db
+			const userDoc = await getDb()
 				.collection('users')
 				.doc(request.auth!.uid)
 				.get();
@@ -144,7 +161,7 @@ export const createPortalSession = onCall(
 			}
 
 			// Create portal session
-			const session = await stripe.billingPortal.sessions.create({
+			const session = await getStripe().billingPortal.sessions.create({
 				customer: customerId,
 				return_url:
 					returnUrl ||
@@ -183,7 +200,7 @@ export const handleStripeWebhook = onRequest(
 		let event: Stripe.Event;
 
 		try {
-			event = stripe.webhooks.constructEvent((req as any).rawBody || req.body, sig as string, endpointSecret);
+			event = getStripe().webhooks.constructEvent((req as any).rawBody || req.body, sig as string, endpointSecret);
 		} catch (err: any) {
 			console.error('Webhook signature verification failed:', err.message);
 			res.status(400).send(`Webhook Error: ${err.message}`);
@@ -246,7 +263,7 @@ export const checkAccountLimits = onCall(
 		}
 
 		try {
-			const userDoc = await db
+			const userDoc = await getDb()
 				.collection('users')
 				.doc(request.auth!.uid)
 				.get();
@@ -308,7 +325,7 @@ export const updateUsageStats = onCall(
 					break;
 			}
 
-			await db.collection('users').doc(request.auth!.uid).update(updates);
+			await getDb().collection('users').doc(request.auth!.uid).update(updates);
 
 			return { success: true };
 		} catch (error) {
@@ -327,8 +344,8 @@ export const updateUsageStats = onCall(
 export async function enforceUsageLimits() {
 	try {
 		// Check users exceeding limits
-		const usersSnapshot = await db.collection('users').get();
-		const batch = db.batch();
+		const usersSnapshot = await getDb().collection('users').get();
+		const batch = getDb().batch();
 		let violations = 0;
 
 		for (const doc of usersSnapshot.docs) {
@@ -378,7 +395,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 	const customerId = subscription.customer as string;
 
 	// Find user by Stripe customer ID
-	const usersSnapshot = await db
+	const usersSnapshot = await getDb()
 		.collection('users')
 		.where('stripeCustomerId', '==', customerId)
 		.limit(1)
@@ -423,7 +440,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 	const customerId = subscription.customer as string;
 
 	// Find user by Stripe customer ID
-	const usersSnapshot = await db
+	const usersSnapshot = await getDb()
 		.collection('users')
 		.where('stripeCustomerId', '==', customerId)
 		.limit(1)

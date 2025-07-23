@@ -7,7 +7,8 @@ import * as admin from 'firebase-admin';
 import * as crypto from 'crypto';
 import {FirebaseAuthRequest} from './types';
 
-const db = admin.firestore();
+// Lazy initialization to prevent calling before admin.initializeApp()
+const getDb = () => admin.firestore();
 
 /**
  * Handle OneSignal webhook
@@ -165,7 +166,7 @@ async function handleNotificationClicked(event: unknown) {
 		const { userId, notificationId, heading, content } = (event as any).data || {};
 
 		// Log the click
-		await db.collection('notification_events').add({
+		await getDb().collection('notification_events').add({
 			type: 'clicked',
 			userId,
 			notificationId,
@@ -176,7 +177,7 @@ async function handleNotificationClicked(event: unknown) {
 
 		// Update user engagement metrics
 		if (userId) {
-			await db
+			await getDb()
 				.collection('users')
 				.doc(userId)
 				.update({
@@ -199,7 +200,7 @@ async function handleNotificationViewed(event: unknown) {
 		const { userId, notificationId } = (event as any).data || {};
 
 		// Log the view
-		await db.collection('notification_events').add({
+		await getDb().collection('notification_events').add({
 			type: 'viewed',
 			userId,
 			notificationId,
@@ -228,7 +229,7 @@ async function handleSubscriptionChanged(event: unknown) {
 				(updates as any)['pushNotifications.subscriptionId'] = subscriptionId;
 			}
 
-			await db.collection('users').doc(userId).update(updates);
+			await getDb().collection('users').doc(userId).update(updates);
 		}
 	} catch (error) {
 		console.error('Error handling subscription change:', error);
@@ -246,7 +247,7 @@ async function handleDriveFileChange(data: any) {
 		if (!fileId || !userId) return;
 
 		// Check if this is a backup file
-		const backupSnapshot = await db
+		const backupSnapshot = await getDb()
 			.collection('backups')
 			.where('driveFileId', '==', fileId)
 			.where('userId', '==', userId)
@@ -279,7 +280,7 @@ async function handleDriveFileRemoval(data: any) {
 		if (!fileId || !userId) return;
 
 		// Find and mark backup as deleted
-		const backupSnapshot = await db
+		const backupSnapshot = await getDb()
 			.collection('backups')
 			.where('driveFileId', '==', fileId)
 			.where('userId', '==', userId)
@@ -295,7 +296,7 @@ async function handleDriveFileRemoval(data: any) {
 			});
 
 			// Notify user
-			await db.collection('users').doc(userId).collection('notifications').add({
+			await getDb().collection('users').doc(userId).collection('notifications').add({
 				title: 'Backup Deleted',
 				message: 'A backup file was deleted from your Google Drive',
 				type: 'warning',
@@ -320,7 +321,7 @@ export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{servi
 		);
 	}
 
-	const userDoc = await db.collection('users').doc(request.auth!.uid).get();
+	const userDoc = await getDb().collection('users').doc(request.auth!.uid).get();
 	if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
 		throw new HttpsError(
 			'permission-denied',
@@ -339,7 +340,7 @@ export const registerWebhook = onCall(async (request: FirebaseAuthRequest<{servi
 
 	try {
 		// Store webhook configuration
-		const webhookRef = await db.collection('webhooks').add({
+		const webhookRef = await getDb().collection('webhooks').add({
 			service,
 			url,
 			events,
@@ -378,7 +379,7 @@ export const listWebhooks = onCall(async (request: FirebaseAuthRequest) => {
 		);
 	}
 
-	const userDoc = await db.collection('users').doc(request.auth!.uid).get();
+	const userDoc = await getDb().collection('users').doc(request.auth!.uid).get();
 	if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
 		throw new HttpsError(
 			'permission-denied',
@@ -387,7 +388,7 @@ export const listWebhooks = onCall(async (request: FirebaseAuthRequest) => {
 	}
 
 	try {
-		const webhooksSnapshot = await db
+		const webhooksSnapshot = await getDb()
 			.collection('webhooks')
 			.orderBy('createdAt', 'desc')
 			.get();

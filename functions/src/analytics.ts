@@ -5,7 +5,8 @@
 import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 
-const db = admin.firestore();
+// Lazy initialization to prevent calling before admin.initializeApp()
+const getDb = () => admin.firestore();
 
 /**
  * Aggregate daily statistics
@@ -49,11 +50,11 @@ export async function aggregateDailyStats() {
 		};
 
 		// Count users
-		const usersSnapshot = await db.collection('users').get();
+		const usersSnapshot = await getDb().collection('users').get();
 		stats.users.total = usersSnapshot.size;
 
 		// Count active users (active today)
-		const activeUsersSnapshot = await db
+		const activeUsersSnapshot = await getDb()
 			.collection('users')
 			.where('lastActive', '>=', today)
 			.where('lastActive', '<', tomorrow)
@@ -61,7 +62,7 @@ export async function aggregateDailyStats() {
 		stats.users.active = activeUsersSnapshot.size;
 
 		// Count new users
-		const newUsersSnapshot = await db
+		const newUsersSnapshot = await getDb()
 			.collection('users')
 			.where('createdAt', '>=', today)
 			.where('createdAt', '<', tomorrow)
@@ -75,11 +76,11 @@ export async function aggregateDailyStats() {
 		});
 
 		// Count accounts
-		const accountsSnapshot = await db.collection('accounts').get();
+		const accountsSnapshot = await getDb().collection('accounts').get();
 		stats.accounts.total = accountsSnapshot.size;
 
 		// Count today's account activity
-		const accountActivitySnapshot = await db
+		const accountActivitySnapshot = await getDb()
 			.collection('audit_logs')
 			.where('timestamp', '>=', today)
 			.where('timestamp', '<', tomorrow)
@@ -96,7 +97,7 @@ export async function aggregateDailyStats() {
 		});
 
 		// Count backups
-		const backupsSnapshot = await db
+		const backupsSnapshot = await getDb()
 			.collection('backups')
 			.where('createdAt', '>=', today)
 			.where('createdAt', '<', tomorrow)
@@ -112,7 +113,7 @@ export async function aggregateDailyStats() {
 		});
 
 		// Save aggregated stats
-		await db
+		await getDb()
 			.collection('analytics')
 			.doc(today.toISOString().split('T')[0])
 			.set(stats);
@@ -145,7 +146,7 @@ export const generateReports = onCall(
 			);
 		}
 
-		const userDoc = await db.collection('users').doc(context.uid).get();
+		const userDoc = await getDb().collection('users').doc(context.uid).get();
 		if (!['admin', 'super_admin'].includes(userDoc.data()?.role)) {
 			throw new HttpsError(
 				'permission-denied',
@@ -183,7 +184,7 @@ export const generateReports = onCall(
 			}
 
 			// Get analytics data for period
-			const analyticsSnapshot = await db
+			const analyticsSnapshot = await getDb()
 				.collection('analytics')
 				.where('date', '>=', start)
 				.where('date', '<=', end)
@@ -231,7 +232,7 @@ export const trackEvent = onCall(
 		}
 
 		try {
-			await db.collection('events').add({
+			await getDb().collection('events').add({
 				event,
 				properties,
 				userId: context?.uid || null,
@@ -257,12 +258,12 @@ export async function cleanupOldAnalytics() {
 		cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
 
 		// Delete old analytics
-		const oldAnalyticsSnapshot = await db
+		const oldAnalyticsSnapshot = await getDb()
 			.collection('analytics')
 			.where('date', '<', cutoffDate)
 			.get();
 
-		const batch = db.batch();
+		const batch = getDb().batch();
 		oldAnalyticsSnapshot.forEach((doc) => {
 			batch.delete(doc.ref);
 		});
@@ -271,7 +272,7 @@ export async function cleanupOldAnalytics() {
 		const eventCutoffDate = new Date();
 		eventCutoffDate.setDate(eventCutoffDate.getDate() - 90);
 
-		const oldEventsSnapshot = await db
+		const oldEventsSnapshot = await getDb()
 			.collection('events')
 			.where('timestamp', '<', eventCutoffDate)
 			.get();

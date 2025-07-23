@@ -7,7 +7,8 @@ import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import * as crypto from 'crypto';
 
-const db = admin.firestore();
+// Lazy initialization to prevent calling before admin.initializeApp()
+const getDb = () => admin.firestore();
 
 // Rate limiting configuration
 const RATE_LIMITS = {
@@ -41,7 +42,7 @@ export const monitorSuspiciousActivity = onDocumentCreated(
 		try {
 			// Check for patterns
 			const userId = log.userId || log.ip;
-			const recentLogsSnapshot = await db
+			const recentLogsSnapshot = await getDb()
 				.collection('audit_logs')
 				.where('userId', '==', userId)
 				.where('action', 'in', suspiciousActions)
@@ -77,7 +78,7 @@ export const enforceRateLimit = onCall(
 
 		try {
 			// Get current count
-			const doc = await db.collection('rate_limits').doc(key).get();
+			const doc = await getDb().collection('rate_limits').doc(key).get();
 			const now = Date.now();
 			const windowStart = now - limit.window * 1000;
 
@@ -94,7 +95,7 @@ export const enforceRateLimit = onCall(
 
 			if (count >= limit.max) {
 				// Rate limit exceeded
-				await db.collection('audit_logs').add({
+				await getDb().collection('audit_logs').add({
 					action: 'rate_limit_exceeded',
 					userId: context?.uid,
 					ip: (request.rawRequest as any)?.ip,
@@ -110,7 +111,7 @@ export const enforceRateLimit = onCall(
 
 			// Add current request
 			requests.push(now);
-			await db.collection('rate_limits').doc(key).set({
+			await getDb().collection('rate_limits').doc(key).set({
 				requests,
 				lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
 			});
@@ -170,7 +171,7 @@ export const validateRequest = onCall(
 			.digest('hex');
 
 		if (signature !== expectedSignature) {
-			await db.collection('audit_logs').add({
+			await getDb().collection('audit_logs').add({
 				action: 'invalid_signature',
 				userId: context?.uid,
 				ip: (request.rawRequest as any)?.ip,
@@ -216,7 +217,7 @@ export const createAuditLog = onCall(
 				timestamp: admin.firestore.FieldValue.serverTimestamp(),
 			};
 
-			await db.collection('audit_logs').add(log);
+			await getDb().collection('audit_logs').add(log);
 
 			// Alert on critical actions
 			if (severity === 'critical') {
@@ -243,12 +244,12 @@ export async function cleanupOldAuditLogs() {
 		const cutoffDate = new Date();
 		cutoffDate.setFullYear(cutoffDate.getFullYear() - 1);
 
-		const oldLogsSnapshot = await db
+		const oldLogsSnapshot = await getDb()
 			.collection('audit_logs')
 			.where('timestamp', '<', cutoffDate)
 			.get();
 
-		const batch = db.batch();
+		const batch = getDb().batch();
 		oldLogsSnapshot.forEach((doc) => {
 			batch.delete(doc.ref);
 		});
@@ -262,12 +263,12 @@ export async function cleanupOldAuditLogs() {
 		const rateLimitCutoff = new Date();
 		rateLimitCutoff.setDate(rateLimitCutoff.getDate() - 1);
 
-		const oldRateLimitsSnapshot = await db
+		const oldRateLimitsSnapshot = await getDb()
 			.collection('rate_limits')
 			.where('lastUpdated', '<', rateLimitCutoff)
 			.get();
 
-		const rateLimitBatch = db.batch();
+		const rateLimitBatch = getDb().batch();
 		oldRateLimitsSnapshot.forEach((doc) => {
 			rateLimitBatch.delete(doc.ref);
 		});
@@ -298,7 +299,7 @@ async function handleSuspiciousUser(
 ) {
 	try {
 		// Create security alert
-		await db.collection('security_alerts').add({
+		await getDb().collection('security_alerts').add({
 			userId,
 			type: 'suspicious_activity',
 			severity: 'high',
@@ -315,7 +316,7 @@ async function handleSuspiciousUser(
 		// If it's a user ID, temporarily lock the account
 		if (userId.includes('-')) {
 			// Firebase UIDs contain hyphens
-			await db.collection('users').doc(userId).update({
+			await getDb().collection('users').doc(userId).update({
 				accountLocked: true,
 				lockedAt: admin.firestore.FieldValue.serverTimestamp(),
 				lockedReason: 'Suspicious activity detected',
@@ -341,15 +342,15 @@ async function handleSuspiciousUser(
 async function alertAdmins(alert: unknown) {
 	try {
 		// Get admin users
-		const adminsSnapshot = await db
+		const adminsSnapshot = await getDb()
 			.collection('users')
 			.where('role', 'in', ['admin', 'super_admin'])
 			.get();
 
-		const batch = db.batch();
+		const batch = getDb().batch();
 
 		adminsSnapshot.forEach((doc) => {
-			const notificationRef = db
+			const notificationRef = getDb()
 				.collection('users')
 				.doc(doc.id)
 				.collection('notifications')
@@ -389,7 +390,7 @@ export const checkIPReputation = onCall(
 
 		try {
 			// Check if IP is in blocklist
-			const blocklistDoc = await db.collection('ip_blocklist').doc(ip).get();
+			const blocklistDoc = await getDb().collection('ip_blocklist').doc(ip).get();
 
 			if (blocklistDoc.exists) {
 				return {
@@ -400,7 +401,7 @@ export const checkIPReputation = onCall(
 			}
 
 			// Check recent suspicious activity from this IP
-			const recentActivitySnapshot = await db
+			const recentActivitySnapshot = await getDb()
 				.collection('audit_logs')
 				.where('ip', '==', ip)
 				.where('action', 'in', ['failed_login', 'rate_limit_exceeded'])

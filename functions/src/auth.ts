@@ -7,7 +7,8 @@ import * as admin from 'firebase-admin';
 import {FirebaseAuthRequest} from './types';
 import {beforeUserCreated} from 'firebase-functions/v2/identity';
 
-const db = admin.firestore();
+// Lazy initialization to prevent calling before admin.initializeApp()
+const getDb = () => admin.firestore();
 
 /**
  * Trigger when a new user is created
@@ -22,7 +23,7 @@ export const onUserCreate = beforeUserCreated(async (event) => {
 	
 	try {
 		// Create user document in Firestore
-		await db
+		await getDb()
 			.collection('users')
 			.doc(user.uid)
 			.set({
@@ -64,10 +65,10 @@ export const onUserCreate = beforeUserCreated(async (event) => {
  */
 export async function onUserDelete(userId: string) {
 	try {
-		const batch = db.batch();
+		const batch = getDb().batch();
 
 		// Delete user's accounts
-		const accountsSnapshot = await db
+		const accountsSnapshot = await getDb()
 			.collection('accounts')
 			.where('userId', '==', userId)
 			.get();
@@ -77,7 +78,7 @@ export async function onUserDelete(userId: string) {
 		});
 
 		// Delete user's sessions
-		const sessionsSnapshot = await db
+		const sessionsSnapshot = await getDb()
 			.collection('sessions')
 			.where('userId', '==', userId)
 			.get();
@@ -87,7 +88,7 @@ export async function onUserDelete(userId: string) {
 		});
 
 		// Delete user's backups
-		const backupsSnapshot = await db
+		const backupsSnapshot = await getDb()
 			.collection('backups')
 			.where('userId', '==', userId)
 			.get();
@@ -97,7 +98,7 @@ export async function onUserDelete(userId: string) {
 		});
 
 		// Delete user document
-		batch.delete(db.collection('users').doc(userId));
+		batch.delete(getDb().collection('users').doc(userId));
 
 		await batch.commit();
 
@@ -119,7 +120,7 @@ export const validateAdmin = onCall(async (request: FirebaseAuthRequest) => {
 	}
 
 	try {
-		const userDoc = await db.collection('users').doc(request.auth.uid).get();
+		const userDoc = await getDb().collection('users').doc(request.auth.uid).get();
 		const userData = userDoc.data();
 
 		const isAdmin =
@@ -147,7 +148,7 @@ export const cleanupSessions = onCall(async (request: FirebaseAuthRequest) => {
 	// This can be called by scheduled function or admin
 	if (request.auth) {
 		// Check if admin
-		const userDoc = await db.collection('users').doc(request.auth.uid).get();
+		const userDoc = await getDb().collection('users').doc(request.auth.uid).get();
 		if (
 			userDoc.data()?.role !== 'admin' &&
 			userDoc.data()?.role !== 'super_admin'
@@ -168,12 +169,12 @@ export const cleanupSessions = onCall(async (request: FirebaseAuthRequest) => {
 export async function cleanupExpiredSessions() {
 	try {
 		const now = new Date();
-		const expiredSessionsSnapshot = await db
+		const expiredSessionsSnapshot = await getDb()
 			.collection('sessions')
 			.where('expiresAt', '<', now)
 			.get();
 
-		const batch = db.batch();
+		const batch = getDb().batch();
 		let count = 0;
 
 		expiredSessionsSnapshot.forEach((doc) => {
@@ -202,7 +203,7 @@ export async function cleanupExpiredSessions() {
 async function sendWelcomeNotification(user: unknown) {
 	try {
 		// Add welcome notification to user's notifications
-		await db.collection('users').doc((user as any).uid).collection('notifications').add({
+		await getDb().collection('users').doc((user as any).uid).collection('notifications').add({
 			title: 'Welcome to 2FA Studio!',
 			message:
 				'Your account has been created successfully. Start adding your 2FA accounts to keep them secure.',
@@ -238,7 +239,7 @@ export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceI
 		expiresAt.setHours(expiresAt.getHours() + expirationHours);
 
 		// Create session
-		const sessionRef = await db.collection('sessions').add({
+		const sessionRef = await getDb().collection('sessions').add({
 			userId: request.auth.uid,
 			deviceInfo: {
 				userAgent: (deviceInfo as any)?.userAgent || 'Unknown',
@@ -253,7 +254,7 @@ export const createSession = onCall(async (request: FirebaseAuthRequest<{deviceI
 		});
 
 		// Update user's last active
-		await db.collection('users').doc(request.auth.uid).update({
+		await getDb().collection('users').doc(request.auth.uid).update({
 			lastActive: admin.firestore.FieldValue.serverTimestamp(),
 		});
 
@@ -292,7 +293,7 @@ export const revokeSession = onCall(async (request: FirebaseAuthRequest<{session
 
 	try {
 		// Get session
-		const sessionDoc = await db.collection('sessions').doc(sessionId).get();
+		const sessionDoc = await getDb().collection('sessions').doc(sessionId).get();
 
 		if (!sessionDoc.exists) {
 			throw new HttpsError('not-found', 'Session not found');
@@ -331,7 +332,7 @@ export const getUserSessions = onCall(async (request: FirebaseAuthRequest) => {
 	}
 
 	try {
-		const sessionsSnapshot = await db
+		const sessionsSnapshot = await getDb()
 			.collection('sessions')
 			.where('userId', '==', request.auth.uid)
 			.orderBy('lastActiveAt', 'desc')

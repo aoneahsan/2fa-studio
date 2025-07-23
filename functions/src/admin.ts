@@ -6,15 +6,16 @@ import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { Request, Response } from 'express';
 
-const db = admin.firestore();
-const auth = admin.auth();
+// Lazy initialization to avoid accessing admin before initialization
+const getDb = () => admin.firestore();
+const getAuth = () => admin.auth();
 
 /**
  * Check if user is admin
  */
 async function isAdmin(uid: string): Promise<boolean> {
 	try {
-		const userDoc = await db.collection('users').doc(uid).get();
+		const userDoc = await getDb().collection('users').doc(uid).get();
 		const userData = userDoc.data();
 		return userData?.role === 'admin' || userData?.role === 'super_admin';
 	} catch (error) {
@@ -51,7 +52,7 @@ export const getUserStats = onCall(
 
 		try {
 			// Get total users count
-			const usersSnapshot = await db.collection('users').get();
+			const usersSnapshot = await getDb().collection('users').get();
 			const totalUsers = usersSnapshot.size;
 
 			// Get subscription stats
@@ -62,7 +63,7 @@ export const getUserStats = onCall(
 				business: 0,
 			};
 
-			usersSnapshot.forEach((doc) => {
+			usersSnapshot.forEach((doc: any) => {
 				const user = doc.data();
 				const tier = user.subscription?.tier || 'free';
 				subscriptionStats[tier as keyof typeof subscriptionStats]++;
@@ -72,21 +73,21 @@ export const getUserStats = onCall(
 			const thirtyDaysAgo = new Date();
 			thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-			const activeUsersSnapshot = await db
+			const activeUsersSnapshot = await getDb()
 				.collection('users')
 				.where('lastActive', '>', thirtyDaysAgo)
 				.get();
 			const activeUsers = activeUsersSnapshot.size;
 
 			// Get total accounts
-			const accountsSnapshot = await db.collection('accounts').get();
+			const accountsSnapshot = await getDb().collection('accounts').get();
 			const totalAccounts = accountsSnapshot.size;
 
 			// Get recent signups (last 7 days)
 			const sevenDaysAgo = new Date();
 			sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-			const recentSignupsSnapshot = await db
+			const recentSignupsSnapshot = await getDb()
 				.collection('users')
 				.where('createdAt', '>', sevenDaysAgo)
 				.get();
@@ -149,7 +150,7 @@ export const updateUserSubscription = onCall(
 
 		try {
 			// Update user subscription
-			await db
+			await getDb()
 				.collection('users')
 				.doc(userId)
 				.update({
@@ -164,7 +165,7 @@ export const updateUserSubscription = onCall(
 				});
 
 			// Create audit log
-			await db.collection('audit_logs').add({
+			await getDb().collection('audit_logs').add({
 				action: 'subscription_updated',
 				targetUserId: userId,
 				performedBy: context.uid,
@@ -205,7 +206,7 @@ export const deleteUser = onCall(
 		}
 
 		// Check super admin privileges
-		const userDoc = await db.collection('users').doc(context.uid).get();
+		const userDoc = await getDb().collection('users').doc(context.uid).get();
 		if (userDoc.data()?.role !== 'super_admin') {
 			throw new HttpsError(
 				'permission-denied',
@@ -224,36 +225,36 @@ export const deleteUser = onCall(
 
 		try {
 			// Delete user accounts
-			const accountsSnapshot = await db
+			const accountsSnapshot = await getDb()
 				.collection('accounts')
 				.where('userId', '==', userId)
 				.get();
 
-			const batch = db.batch();
-			accountsSnapshot.forEach((doc) => {
+			const batch = getDb().batch();
+			accountsSnapshot.forEach((doc: any) => {
 				batch.delete(doc.ref);
 			});
 
 			// Delete user document
-			batch.delete(db.collection('users').doc(userId));
+			batch.delete(getDb().collection('users').doc(userId));
 
 			// Delete user sessions
-			const sessionsSnapshot = await db
+			const sessionsSnapshot = await getDb()
 				.collection('sessions')
 				.where('userId', '==', userId)
 				.get();
 
-			sessionsSnapshot.forEach((doc) => {
+			sessionsSnapshot.forEach((doc: any) => {
 				batch.delete(doc.ref);
 			});
 
 			await batch.commit();
 
 			// Delete from Firebase Auth
-			await auth.deleteUser(userId);
+			await getAuth().deleteUser(userId);
 
 			// Create audit log
-			await db.collection('audit_logs').add({
+			await getDb().collection('audit_logs').add({
 				action: 'user_deleted',
 				targetUserId: userId,
 				performedBy: context.uid,
@@ -298,9 +299,9 @@ export const getSystemStats = onCall(
 
 		try {
 			// Get storage usage
-			const backupsSnapshot = await db.collection('backups').get();
+			const backupsSnapshot = await getDb().collection('backups').get();
 			let totalBackupSize = 0;
-			backupsSnapshot.forEach((doc) => {
+			backupsSnapshot.forEach((doc: any) => {
 				totalBackupSize += doc.data().size || 0;
 			});
 
@@ -308,20 +309,20 @@ export const getSystemStats = onCall(
 			const oneDayAgo = new Date();
 			oneDayAgo.setDate(oneDayAgo.getDate() - 1);
 
-			const errorLogsSnapshot = await db
+			const errorLogsSnapshot = await getDb()
 				.collection('error_logs')
 				.where('timestamp', '>', oneDayAgo)
 				.get();
 			const recentErrors = errorLogsSnapshot.size;
 
 			// Get API usage
-			const apiUsageSnapshot = await db
+			const apiUsageSnapshot = await getDb()
 				.collection('api_usage')
 				.where('timestamp', '>', oneDayAgo)
 				.get();
 
 			let totalApiCalls = 0;
-			apiUsageSnapshot.forEach((doc) => {
+			apiUsageSnapshot.forEach((doc: any) => {
 				totalApiCalls += doc.data().count || 0;
 			});
 
@@ -395,7 +396,7 @@ export const sendNotification = onCall(
 
 		try {
 			// Create notifications
-			const batch = db.batch();
+			const batch = getDb().batch();
 			const notificationData = {
 				title,
 				message,
@@ -406,7 +407,7 @@ export const sendNotification = onCall(
 			};
 
 			for (const userId of userIds) {
-				const notificationRef = db
+				const notificationRef = getDb()
 					.collection('users')
 					.doc(userId)
 					.collection('notifications')
@@ -450,7 +451,7 @@ export const exportUsers = onCall(
 		}
 
 		// Check super admin privileges
-		const userDoc = await db.collection('users').doc(context.uid).get();
+		const userDoc = await getDb().collection('users').doc(context.uid).get();
 		if (userDoc.data()?.role !== 'super_admin') {
 			throw new HttpsError(
 				'permission-denied',
@@ -459,10 +460,10 @@ export const exportUsers = onCall(
 		}
 
 		try {
-			const usersSnapshot = await db.collection('users').get();
+			const usersSnapshot = await getDb().collection('users').get();
 			const users: unknown[] = [];
 
-			usersSnapshot.forEach((doc) => {
+			usersSnapshot.forEach((doc: any) => {
 				const userData = doc.data();
 				users.push({
 					id: doc.id,
@@ -476,7 +477,7 @@ export const exportUsers = onCall(
 			});
 
 			// Create audit log
-			await db.collection('audit_logs').add({
+			await getDb().collection('audit_logs').add({
 				action: 'users_exported',
 				performedBy: context.uid,
 				count: users.length,
@@ -509,7 +510,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
 	}
 
 	try {
-		const decodedToken = await auth.verifyIdToken(token);
+		const decodedToken = await getAuth().verifyIdToken(token);
 		const isUserAdmin = await isAdmin(decodedToken.uid);
 
 		if (!isUserAdmin) {
@@ -524,7 +525,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
 			const limit = parseInt(req.query.limit as string) || 50;
 			const offset = (page - 1) * limit;
 
-			const usersSnapshot = await db
+			const usersSnapshot = await getDb()
 				.collection('users')
 				.orderBy('createdAt', 'desc')
 				.limit(limit)
@@ -532,7 +533,7 @@ export async function handleAdminAPI(req: Request, res: Response) {
 				.get();
 
 			const users: unknown[] = [];
-			usersSnapshot.forEach((doc) => {
+			usersSnapshot.forEach((doc: any) => {
 				users.push({ id: doc.id, ...doc.data() });
 			});
 
