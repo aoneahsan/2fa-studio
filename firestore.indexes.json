@@ -5,34 +5,6 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "issuer",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "accounts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "tags",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "accounts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
           "fieldPath": "category",
           "order": "ASCENDING"
         },
@@ -71,25 +43,11 @@
       ]
     },
     {
-      "collectionGroup": "devices",
+      "collectionGroup": "accounts",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "trusted",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "lastSeen",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "backups",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "provider",
+          "fieldPath": "issuer",
           "order": "ASCENDING"
         },
         {
@@ -99,29 +57,15 @@
       ]
     },
     {
-      "collectionGroup": "sessions",
+      "collectionGroup": "accounts",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "deviceId",
-          "order": "ASCENDING"
+          "fieldPath": "tags",
+          "arrayConfig": "CONTAINS"
         },
         {
-          "fieldPath": "expiresAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "audit",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "timestamp",
+          "fieldPath": "createdAt",
           "order": "DESCENDING"
         }
       ]
@@ -141,57 +85,29 @@
       ]
     },
     {
-      "collectionGroup": "folders",
-      "queryScope": "COLLECTION",
+      "collectionGroup": "audit",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
         {
-          "fieldPath": "parentId",
+          "fieldPath": "userId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "name",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "subscription.tier",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
+          "fieldPath": "timestamp",
           "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "users",
+      "collectionGroup": "backups",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "role",
+          "fieldPath": "provider",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "email",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "usage",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "accountId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "timestamp",
+          "fieldPath": "createdAt",
           "order": "DESCENDING"
         }
       ]
@@ -207,6 +123,94 @@
         {
           "fieldPath": "nextRun",
           "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "backupVersions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "version",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "devices",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "trusted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastSeen",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "folders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "parentId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "name",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "migrationRecords",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "fromVersion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "toVersion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "migratedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "migrationRecords",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "success",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "migratedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deviceId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "expiresAt",
+          "order": "DESCENDING"
         }
       ]
     },
@@ -239,47 +243,15 @@
       ]
     },
     {
-      "collectionGroup": "migrationRecords",
+      "collectionGroup": "usage",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "success",
+          "fieldPath": "accountId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "migratedAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "migrationRecords",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "fromVersion",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "toVersion",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "migratedAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "backupVersions",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "version",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
+          "fieldPath": "timestamp",
           "order": "DESCENDING"
         }
       ]
@@ -311,12 +283,41 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "role",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "email",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "subscription.tier",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [
     {
       "collectionGroup": "users",
       "fieldPath": "email",
+      "ttl": false,
       "indexes": [
         {
           "order": "ASCENDING",
