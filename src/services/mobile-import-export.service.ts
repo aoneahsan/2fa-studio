@@ -11,7 +11,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Encoding } from '@capacitor/filesystem';
 import { OTPAccount } from './otp.service';
 import { MobileEncryptionService } from './mobile-encryption.service';
-import { Preferences } from '@capacitor/preferences';
+import { StorageService, StorageKeys } from './storage.service';
 import {
 	ImportExportService,
 	ExportFormat,

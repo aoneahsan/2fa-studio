@@ -5,8 +5,8 @@
  */
 
 import { Capacitor } from '@capacitor/core';
-import { Preferences } from '@capacitor/preferences';
-import { BiometricAuth } from 'capacitor-biometric-authentication';
+import BiometricAuth from 'capacitor-biometric-authentication';
+import { StorageService, StorageKeys } from './storage.service';
 
 export interface BiometricConfig {
 	enabled: boolean;
@@ -46,10 +46,10 @@ export class MobileBiometricService {
 		}
 
 		try {
-			const result = await (BiometricAuth as any).checkBiometry();
+			const result = await BiometricAuth.isAvailable();
 			return {
-				available: result.available,
-				biometryType: result.biometryType,
+				available: result.isAvailable,
+				biometryType: result.biometryType || 'unknown',
 				reason: result.reason,
 			};
 		} catch (error) {
@@ -66,12 +66,12 @@ export class MobileBiometricService {
 	 */
 	static async getConfig(): Promise<BiometricConfig> {
 		try {
-			const { value } = await Preferences.get({ key: this.CONFIG_KEY });
-			if (value) {
-				return JSON.parse(value);
+			const config = await StorageService.get<BiometricConfig>(this.CONFIG_KEY);
+			if (config) {
+				return config;
 			}
 		} catch (error) {
-			console.error('Failed to get biometric _config:', error);
+			console.error('Failed to get biometric config:', error);
 		}
 
 		return {
@@ -85,10 +85,9 @@ export class MobileBiometricService {
 	/**
 	 * Save biometric configuration
 	 */
-	static async saveConfig(_config: BiometricConfig): Promise<void> {
-		await Preferences.set({
-			key: this.CONFIG_KEY,
-			value: JSON.stringify(_config),
+	static async saveConfig(config: BiometricConfig): Promise<void> {
+		await StorageService.set(this.CONFIG_KEY, config, {
+			secure: true, // Use secure storage for biometric config
 		});
 	}
 
@@ -131,16 +130,26 @@ export class MobileBiometricService {
 		}
 
 		try {
-			const result = await (BiometricAuth as any).authenticate({
+			const result = await BiometricAuth.authenticate({
 				reason,
-				title: '2FA Studio',
-				subtitle: 'Biometric Authentication',
-				description: 'Use your biometric to authenticate',
-				fallbackTitle: 'Use Password',
-				cancelTitle: 'Cancel',
+				maxAttempts: 3,
+				platform: {
+					android: {
+						title: '2FA Studio',
+						subtitle: 'Biometric Authentication',
+						description: 'Use your biometric to authenticate',
+						fallbackTitle: 'Use Password',
+						cancelTitle: 'Cancel',
+						confirmationRequired: true
+					},
+					ios: {
+						fallbackTitle: 'Use Passcode',
+						cancelTitle: 'Cancel'
+					}
+				}
 			});
 
-			if (result.authenticated) {
+			if (result.success) {
 				const config = await this.getConfig();
 				config.lastUsed = new Date().toISOString();
 				await this.saveConfig(config);

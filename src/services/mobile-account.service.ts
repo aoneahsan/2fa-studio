@@ -11,7 +11,7 @@ import { Capacitor } from '@capacitor/core';
 import { EncryptionService } from './encryption.service';
 // import { BiometricAccountService } from './biometric-account.service';
 import { MobileEncryptionService } from './mobile-encryption.service';
-import { Preferences } from '@capacitor/preferences';
+import { StorageService, StorageKeys } from './storage.service';
 
 export class MobileAccountService {
 	private static readonly ACCOUNTS_KEY = 'encrypted_accounts';
@@ -44,22 +44,22 @@ export class MobileAccountService {
 			// 	JSON.stringify(value)
 			// );
 			const encrypted = JSON.stringify(value); // Placeholder
-			await Preferences.set({ key, value: encrypted });
+			await StorageService.set(key, encrypted, { secure: true });
 		} else {
 			// Use regular storage for web
-			await Preferences.set({ key, value: JSON.stringify(value) });
+			await StorageService.set(key, value);
 		}
 	}
 
 	static async getFromSecureStorage(key: string): Promise<any> {
-		const result = await Preferences.get({ key });
-		if (result.value) {
+		const value = await StorageService.get<string>(key);
+		if (value) {
 			if (Capacitor.isNativePlatform()) {
 				// const decrypted = await EncryptionService.decryptData(value);
-				const decrypted = result.value; // Placeholder
-				return JSON.parse(decrypted);
+				const decrypted = value; // Placeholder
+				return typeof decrypted === 'string' ? JSON.parse(decrypted) : decrypted;
 			} else {
-				return JSON.parse(result.value);
+				return typeof value === 'string' ? JSON.parse(value) : value;
 			}
 		}
 		return null;
@@ -114,11 +114,11 @@ export class MobileAccountService {
 				password: 'default',
 			});
 
-			await Preferences.set({
-				key: this.ACCOUNTS_KEY,
-				value:
-					typeof encrypted === 'string' ? encrypted : JSON.stringify(encrypted),
-			});
+			await StorageService.set(
+				this.ACCOUNTS_KEY,
+				typeof encrypted === 'string' ? encrypted : JSON.stringify(encrypted),
+				{ secure: true }
+			);
 		} catch (error) {
 			console.error('Failed to save accounts:', error);
 			throw new Error('Failed to save accounts securely');
@@ -130,7 +130,7 @@ export class MobileAccountService {
 	 */
 	static async loadAccounts(): Promise<OTPAccount[]> {
 		try {
-			const { value } = await Preferences.get({ key: this.ACCOUNTS_KEY });
+			const value = await StorageService.get<string>(this.ACCOUNTS_KEY);
 
 			if (!value) {
 				return [];

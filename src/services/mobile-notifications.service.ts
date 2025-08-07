@@ -8,7 +8,7 @@
 // import { LocalNotifications, ScheduleOptions } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
 import { Device } from '@capacitor/device';
-import { Preferences } from '@capacitor/preferences';
+import { StorageService, StorageKeys } from './storage.service';
 import { MobileEncryptionService } from './mobile-encryption.service';
 import { NotificationService } from './notification-service';
 
@@ -105,9 +105,9 @@ export class MobileNotificationsService {
 		// 	const platform = deviceInfo.platform;
 		// 	// Store token based on platform
 		// 	if (platform === 'ios') {
-		// 		await Preferences.set({ key: this.APNS_TOKEN_KEY, value: token.value });
+		// 		await StorageService.set(this.APNS_TOKEN_KEY, token.value, { secure: true });
 		// 	} else if (platform === 'android') {
-		// 		await Preferences.set({ key: this.FCM_TOKEN_KEY, value: token.value });
+		// 		await StorageService.set(this.FCM_TOKEN_KEY, token.value, { secure: true });
 		// 	}
 		// 	// Send token to server
 		// 	await this.sendTokenToServer(token.value, platform);
@@ -279,9 +279,9 @@ export class MobileNotificationsService {
 	 */
 	static async getNotificationSettings(): Promise<NotificationSettings> {
 		try {
-			const { value } = await Preferences.get({ key: this.SETTINGS_KEY });
+			const value = await StorageService.get<NotificationSettings>(this.SETTINGS_KEY);
 			if (value) {
-				return JSON.parse(value);
+				return value;
 			}
 		} catch (error) {
 			console.error('Failed to get notification settings:', error);
@@ -316,10 +316,7 @@ export class MobileNotificationsService {
 		settings: NotificationSettings
 	): Promise<void> {
 		try {
-			await Preferences.set({
-				key: this.SETTINGS_KEY,
-				value: JSON.stringify(settings),
-			});
+			await StorageService.set(this.SETTINGS_KEY, settings);
 		} catch (error) {
 			console.error('Failed to save notification settings:', error);
 		}
@@ -349,10 +346,7 @@ export class MobileNotificationsService {
 	 */
 	private static async saveDeviceToken(token: string): Promise<void> {
 		try {
-			await Preferences.set({
-				key: 'device_token',
-				value: token,
-			});
+			await StorageService.set('device_token', token, { secure: true });
 		} catch (error) {
 			console.error('Failed to save device token:', error);
 		}
@@ -362,10 +356,7 @@ export class MobileNotificationsService {
 	 * Update notification settings
 	 */
 	static async updateSettings(settings: NotificationSettings): Promise<void> {
-		await Preferences.set({
-			key: this.SETTINGS_KEY,
-			value: JSON.stringify(settings),
-		});
+		await StorageService.set(this.SETTINGS_KEY, settings);
 	}
 
 	/**

@@ -5,7 +5,7 @@
 
 import { AuthService } from './auth.service';
 import { FirestoreService } from './firestore.service';
-import { ErrorMonitoringService } from './error-monitoring.service';
+import { UnifiedErrorService } from './unified-error.service';
 
 export interface SSOConfig {
 	id: string;

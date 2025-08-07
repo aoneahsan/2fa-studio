@@ -20,7 +20,7 @@ import { OTPAccount } from '@services/otp.service';
 import { FirestoreService } from '@services/firestore.service';
 import { MobileEncryptionService } from '@services/mobile-encryption.service';
 import { RealtimeSyncService } from '@services/realtime-sync.service';
-import { Preferences } from '@capacitor/preferences';
+import { StorageService, StorageKeys } from '@services/storage.service';
 import { AuditLogService } from '@services/audit-log.service';
 import { Tag } from '@app-types/tag';
 

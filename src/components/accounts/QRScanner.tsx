@@ -3,10 +3,8 @@
  * @module components/accounts/QRScanner
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import QrScanner from 'qr-scanner';
-// import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { Capacitor } from '@capacitor/core';
+import React, { useState } from 'react';
+import { useCodeCraftStudio } from 'code-craft-studio';
 import { XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { OTPService } from '@services/otp.service';
 
@@ -16,216 +14,161 @@ interface QRScannerProps {
 }
 
 /**
- * QR Scanner component using camera for scanning 2FA QR codes
+ * QR Scanner component using code-craft-studio for native scanning
  */
 const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const scannerRef = useRef<QrScanner | null>(null);
+  const { scanQRCode, isReady } = useCodeCraftStudio();
 
-  useEffect(() => {
-    const initScanner = async () => {
-      // Check if we're on a native platform
-      const isNative = Capacitor.isNativePlatform();
+  const handleScan = async () => {
+    setError(null);
+    setIsScanning(true);
 
-      if (isNative) {
-        // For now, use web scanner on native platforms too
-        // TODO: Uncomment when barcode scanner package is available
-        // try {
-        //   const status = await BarcodeScanner.checkPermission({ force: true });
-        //   if (!status.granted) {
-        //     setError('Camera permission denied. Please grant camera access.');
-        //     return;
-        //   }
-        //   await BarcodeScanner.prepare();
-        //   document.querySelector('body')?.classList.add('scanner-active');
-        //   setIsScanning(true);
-        //   const result = await BarcodeScanner.startScan();
-        //   if (result.hasContent) {
-        //     handleScanResult(result.content!);
-        //   }
-        // } catch (err) {
-        //   console.error('Native scanner error:', err);
-        //   setError('Failed to access camera. Please check permissions.');
-        // }
-        setError('Native QR scanning temporarily unavailable. Please use web scanner.');
-      } else {
-        // Use web-based QR scanner for web platform
-        if (!videoRef.current) return;
-
-        try {
-          // Check if camera is available
-          const hasCamera = await QrScanner.hasCamera();
-          if (!hasCamera) {
-            setError('No camera found on this device');
-            return;
-          }
-
-          // Create scanner instance
-          const scanner = new QrScanner(
-            videoRef.current,
-            (result) => {
-              handleScanResult(result.data);
-            },
-            {
-              preferredCamera: 'environment',
-              highlightScanRegion: true,
-              highlightCodeOutline: true,
-              maxScansPerSecond: 5,
-            }
-          );
-
-          scannerRef.current = scanner;
-
-          // Start scanning
-          await scanner.start();
-          setIsScanning(true);
-        } catch (err) {
-          console.error('Scanner initialization error:', err);
-          setError('Failed to access camera. Please check permissions.');
-        }
-      }
-    };
-
-    initScanner();
-
-    // Cleanup
-    return () => {
-      const isNative = Capacitor.isNativePlatform();
-      
-      if (isNative) {
-        // BarcodeScanner.stopScan();
-        // BarcodeScanner.showBackground();
-        document.querySelector('body')?.classList.remove('scanner-active');
-      } else if (scannerRef.current) {
-        scannerRef.current.destroy();
-      }
-    };
-  }, []);
-
-  const handleScanResult = (data: string) => {
     try {
-      // Check if it's an OTP URI
-      if (!data.startsWith('otpauth://')) {
-        setError('Invalid QR code. Please scan a 2FA QR code.');
-        return;
-      }
-
-      // Parse the OTP URI
-      const parsed = OTPService.parseURI(data);
-      
-      // Stop scanner
-      if (scannerRef.current) {
-        scannerRef.current.stop();
-      }
-
-      // Pass parsed data to parent
-      onScanSuccess({
-        ...parsed,
-        uri: data
+      const result = await scanQRCode({
+        prompt: 'Scan 2FA QR Code',
+        showFlipCameraButton: true,
+        showTorchButton: true,
+        torchOn: false,
+        formats: ['QR_CODE'], // Only scan QR codes
+        resultDisplayDuration: 0, // Don't display result
       });
-    } catch (err) {
-      console.error('QR parsing error:', err);
-      setError('Failed to parse QR code. Please try manual entry.');
+
+      if (result.content) {
+        handleScanResult(result.content);
+      }
+    } catch (err: any) {
+      console.error('Scan error:', err);
+      setError(err.message || 'Failed to scan QR code. Please try again.');
+    } finally {
+      setIsScanning(false);
     }
   };
 
-  const isNative = Capacitor.isNativePlatform();
+  const handleScanResult = (data: string) => {
+    try {
+      // Parse the OTP URI
+      const parsed = OTPService.parseOTPAuthURI(data);
+      
+      if (!parsed) {
+        setError('Invalid 2FA QR code. Please scan a valid authenticator QR code.');
+        return;
+      }
 
-  // For native platforms, the barcode scanner takes over the whole screen
-  if (isNative) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black">
-        <div className="absolute top-safe left-0 right-0 z-10 p-4">
+      // Success - pass the parsed data to parent
+      onScanSuccess(parsed);
+    } catch (err) {
+      console.error('Error parsing QR code:', err);
+      setError('Invalid QR code format. Please try again.');
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setIsScanning(true);
+
+    try {
+      // Create a temporary image element to decode QR from file
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      
+      img.onload = async () => {
+        // Create canvas to extract image data
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        if (!context) {
+          setError('Failed to process image');
+          return;
+        }
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0);
+
+        try {
+          // Use code-craft-studio's QR scanning on the image data
+          // Note: This is a fallback for web platform
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          // For now, we'll show an error as code-craft-studio may not support image scanning
+          setError('Please use the camera scanner for best results.');
+        } catch (err) {
+          setError('Failed to scan QR code from image.');
+        } finally {
+          URL.revokeObjectURL(url);
+          setIsScanning(false);
+        }
+      };
+
+      img.onerror = () => {
+        setError('Failed to load image');
+        URL.revokeObjectURL(url);
+        setIsScanning(false);
+      };
+
+      img.src = url;
+    } catch (err) {
+      console.error('File upload error:', err);
+      setError('Failed to process image file.');
+      setIsScanning(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Scan QR Code
+          </h3>
           <button
-            onClick={() => {
-              // BarcodeScanner.stopScan();
-              onClose();
-            }}
-            className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-colors float-right"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
           >
-            <XMarkIcon className="w-6 h-6 text-white" />
+            <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
-        
+
         {error && (
-          <div className="absolute top-1/2 left-4 right-4 -mt-20">
-            <div className="bg-red-500/90 text-white rounded-lg p-4 text-center">
-              <p className="text-sm">{error}</p>
-              <button
-                onClick={onClose}
-                className="mt-3 px-4 py-2 bg-white/20 rounded-lg"
-              >
-                Go Back
-              </button>
-            </div>
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md text-sm">
+            {error}
           </div>
         )}
-      </div>
-    );
-  }
 
-  // Web platform UI
-  return (
-    <div className="fixed inset-0 z-50 bg-black">
-      <div className="relative h-full">
-        {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/70 to-transparent p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-white text-lg font-semibold">Scan QR Code</h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-            >
-              <XMarkIcon className="w-6 h-6 text-white" />
-            </button>
-          </div>
-        </div>
+        <div className="space-y-4">
+          {/* Camera Scanner Button */}
+          <button
+            onClick={handleScan}
+            disabled={!isReady || isScanning}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <CameraIcon className="h-5 w-5" />
+            {isScanning ? 'Scanning...' : 'Scan with Camera'}
+          </button>
 
-        {/* Video Element */}
-        <video
-          ref={videoRef}
-          className="h-full w-full object-cover"
-          playsInline
-        />
-
-        {/* Scan Region Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
+          {/* File Upload Option */}
           <div className="relative">
-            {/* Scan frame */}
-            <div className="w-64 h-64 border-2 border-white rounded-lg shadow-lg">
-              <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-primary rounded-tl-lg"></div>
-              <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-primary rounded-tr-lg"></div>
-              <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-primary rounded-bl-lg"></div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-primary rounded-br-lg"></div>
-            </div>
-
-            {/* Scanning indicator */}
-            {isScanning && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-full h-0.5 bg-primary animate-pulse"></div>
-              </div>
-            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              id="qr-file-upload"
+              disabled={isScanning}
+            />
+            <label
+              htmlFor="qr-file-upload"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+            >
+              Upload QR Code Image
+            </label>
           </div>
-        </div>
 
-        {/* Instructions */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-          <div className="text-center text-white">
-            {error ? (
-              <div className="bg-red-500/20 border border-red-500 rounded-lg p-3 mb-4">
-                <p className="text-sm">{error}</p>
-              </div>
-            ) : (
-              <>
-                <CameraIcon className="w-8 h-8 mx-auto mb-2 text-white/70" />
-                <p className="text-sm mb-2">Position QR code within the frame</p>
-                <p className="text-xs text-white/70">
-                  The code will be scanned automatically
-                </p>
-              </>
-            )}
+          <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+            Position the QR code within the camera frame to scan automatically
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@
 import { Device } from '@capacitor/device';
 import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
 import { Capacitor } from '@capacitor/core';
-import { Preferences } from '@capacitor/preferences';
+import { StorageService, StorageKeys } from './storage.service';
 import { EncryptionService } from './encryption.service';
 
 export interface SecureData {
@@ -60,15 +60,12 @@ export class MobileEncryptionService extends EncryptionService {
 				});
 				return newKey;
 			} else {
-				// Fallback to Preferences for web
-				const { value } = await Preferences.get({ key: this.DEVICE_KEY_NAME });
+				// Fallback to StorageService for web
+				const value = await StorageService.get<string>(this.DEVICE_KEY_NAME);
 				if (value) return value;
 
 				const newKey = this.generateDeviceKey();
-				await Preferences.set({
-					key: this.DEVICE_KEY_NAME,
-					value: newKey,
-				});
+				await StorageService.set(this.DEVICE_KEY_NAME, newKey, { secure: true });
 				return newKey;
 			}
 		} catch (error) {
@@ -172,9 +169,9 @@ export class MobileEncryptionService extends EncryptionService {
 		if (this.SECURE_STORAGE_AVAILABLE) {
 			await SecureStoragePlugin.set({ key, value });
 		} else {
-			// Fallback to encrypted preferences
+			// Fallback to encrypted storage
 			const encrypted = await this.encryptData(value);
-			await Preferences.set({ key, value: encrypted });
+			await StorageService.set(key, encrypted, { secure: true });
 		}
 	}
 
@@ -187,8 +184,8 @@ export class MobileEncryptionService extends EncryptionService {
 				const { value } = await SecureStoragePlugin.get({ key });
 				return value || null;
 			} else {
-				// Fallback to encrypted preferences
-				const { value } = await Preferences.get({ key });
+				// Fallback to encrypted storage
+				const value = await StorageService.get<string>(key);
 				if (!value) return null;
 				return await this.decryptData(value);
 			}
@@ -204,7 +201,7 @@ export class MobileEncryptionService extends EncryptionService {
 		if (this.SECURE_STORAGE_AVAILABLE) {
 			await SecureStoragePlugin.remove({ key });
 		} else {
-			await Preferences.remove({ key });
+			await StorageService.remove(key);
 		}
 	}
 
@@ -250,8 +247,7 @@ export class MobileEncryptionService extends EncryptionService {
 	 * Get last key rotation timestamp
 	 */
 	private static async getLastKeyRotation(): Promise<string | undefined> {
-		const result = await Preferences.get({ key: 'last_key_rotation' });
-		return result.value || undefined;
+		return await StorageService.get<string>('last_key_rotation') || undefined;
 	}
 
 	/**
@@ -262,18 +258,13 @@ export class MobileEncryptionService extends EncryptionService {
 		const newKey = this.generateDeviceKey();
 
 		// Store new key
-		await Preferences.set({
-			key: this.DEVICE_KEY_NAME,
-			value: newKey,
-		});
+		await StorageService.set(this.DEVICE_KEY_NAME, newKey, { secure: true });
 
 		// Update in memory
 		this.deviceKey = newKey;
 
 		// Record rotation timestamp
-		await Preferences.set({
-			key: 'last_key_rotation',
-			value: new Date().toISOString(),
+		await StorageService.set('last_key_rotation', new Date().toISOString(), { secure: true
 		});
 
 		// Note: Caller must re-encrypt all data with the new key

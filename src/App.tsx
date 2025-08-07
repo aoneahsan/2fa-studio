@@ -15,6 +15,7 @@ import { store } from '@store/index';
 import { useAuth } from '@hooks/useAuth';
 import { useBiometric } from '@hooks/useBiometric';
 import { NotificationService } from '@services/notification-service';
+import { UnifiedErrorService } from '@services/unified-error.service';
 
 // Components (loaded immediately)
 import Layout from '@components/common/Layout';
@@ -47,6 +48,9 @@ const AppContent: React.FC = () => {
 
 	// Apply theme and initialize services
 	useEffect(() => {
+		// Initialize error handling
+		UnifiedErrorService.initialize().catch(console.error);
+		
 		const theme = store.getState().settings.theme;
 		if (
 			theme === 'dark' ||

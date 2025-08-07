@@ -5,7 +5,7 @@
 
 import { Capacitor } from '@capacitor/core';
 import { App, AppInfo } from '@capacitor/app';
-import { Preferences } from '@capacitor/preferences';
+import { StorageService, StorageKeys } from './storage.service';
 import { OTPService, OTPAccount } from './otp.service';
 import { MobileAccountService } from './mobile-account.service';
 
@@ -54,9 +54,9 @@ export class AppShortcutsService {
 	 */
 	static async getShortcuts(): Promise<AppShortcut[]> {
 		try {
-			const { value } = await Preferences.get({ key: this.SHORTCUTS_KEY });
+			const value = await StorageService.get<AppShortcut[]>(this.SHORTCUTS_KEY);
 			if (value) {
-				return JSON.parse(value);
+				return value;
 			}
 		} catch (error) {
 			console.error('Failed to get shortcuts:', error);
@@ -176,11 +176,9 @@ export class AppShortcutsService {
 	 */
 	static async getWidgetAccounts(): Promise<string[]> {
 		try {
-			const { value } = await Preferences.get({
-				key: this.WIDGET_ACCOUNTS_KEY,
-			});
+			const value = await StorageService.get<string[]>(this.WIDGET_ACCOUNTS_KEY);
 			if (value) {
-				return JSON.parse(value);
+				return value;
 			}
 		} catch (error) {
 			console.error('Failed to get widget accounts:', error);
@@ -196,10 +194,7 @@ export class AppShortcutsService {
 			// Limit to maximum
 			const limited = accountIds.slice(0, this.MAX_WIDGET_ACCOUNTS);
 
-			await Preferences.set({
-				key: this.WIDGET_ACCOUNTS_KEY,
-				value: JSON.stringify(limited),
-			});
+			await StorageService.set(this.WIDGET_ACCOUNTS_KEY, limited);
 
 			// Update widget data
 			await this.updateWidgetData();
@@ -255,10 +250,7 @@ export class AppShortcutsService {
 	 * Save shortcuts to storage
 	 */
 	private static async saveShortcuts(shortcuts: AppShortcut[]): Promise<void> {
-		await Preferences.set({
-			key: this.SHORTCUTS_KEY,
-			value: JSON.stringify(shortcuts),
-		});
+		await StorageService.set(this.SHORTCUTS_KEY, shortcuts);
 	}
 
 	/**

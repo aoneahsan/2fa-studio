@@ -25,7 +25,7 @@ import {
 import type { Account } from '../../types/account';
 import { RBACService, Resource, Action } from './rbac.service';
 import { AuditLogService } from '../audit-log.service';
-import { ErrorMonitoringService } from '../error-monitoring.service';
+import { UnifiedErrorService } from '../unified-error.service';
 import { MobileEncryptionService } from '../mobile-encryption.service';
 import { AuthService } from '../auth.service';
 import { auth } from '../../config/firebase';

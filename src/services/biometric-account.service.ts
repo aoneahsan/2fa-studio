@@ -11,22 +11,12 @@ import {
 	getFirestore,
 } from 'firebase/firestore';
 
-// Try to import biometric auth, fallback to mock if not available
-let BiometricAuth: any = null;
-try {
-	BiometricAuth = require('capacitor-biometric-authentication').BiometricAuth;
-} catch (error) {
-	console.warn('Biometric auth not available, using mock implementation');
-	BiometricAuth = {
-		isAvailable: () => Promise.resolve({ isAvailable: false }),
-		authenticate: () =>
-			Promise.reject(new Error('Biometric auth not available')),
-	};
-}
+// Import biometric auth with proper v2.0.0 API
+import BiometricAuth from 'capacitor-biometric-authentication';
 
 import { auth } from '../config/firebase';
 import { AuditLogService } from './audit-log.service';
-import { ErrorMonitoringService } from './error-monitoring.service';
+import { UnifiedErrorService } from './unified-error.service';
 
 interface BiometricAuthResult {
 	success: boolean;
@@ -97,13 +87,28 @@ export class BiometricAccountService {
 			}
 
 			// Perform biometric authentication
-			await BiometricAuth.authenticate({
+			const result = await BiometricAuth.authenticate({
 				reason: reason || `Access ${account.label}`,
-				title: 'Authentication Required',
-				subtitle: 'Please authenticate to continue',
-				description: 'Use biometric authentication to access your account',
-				negativeButtonText: 'Cancel',
+				maxAttempts: 3,
+				platform: {
+					android: {
+						title: 'Authentication Required',
+						subtitle: 'Please authenticate to continue',
+						description: 'Use biometric authentication to access your account',
+						fallbackTitle: 'Use Password',
+						cancelTitle: 'Cancel',
+						confirmationRequired: true
+					},
+					ios: {
+						fallbackTitle: 'Use Passcode',
+						cancelTitle: 'Cancel'
+					}
+				}
 			});
+
+			if (!result.success) {
+				throw new Error('Authentication failed');
+			}
 
 			// Update authentication timestamp
 			this.authenticatedAccounts.set(account.id, new Date());
@@ -170,14 +175,28 @@ export class BiometricAccountService {
 			}
 
 			// Perform initial biometric authentication to confirm setup
-			await BiometricAuth.authenticate({
+			const result = await BiometricAuth.authenticate({
 				reason: 'Confirm biometric setup',
-				title: 'Enable Biometric Authentication',
-				subtitle: 'Authenticate to enable biometric protection',
-				description:
-					'This will enable biometric authentication for this account',
-				negativeButtonText: 'Cancel',
+				maxAttempts: 3,
+				platform: {
+					android: {
+						title: 'Enable Biometric Authentication',
+						subtitle: 'Authenticate to enable biometric protection',
+						description: 'This will enable biometric authentication for this account',
+						fallbackTitle: 'Use Password',
+						cancelTitle: 'Cancel',
+						confirmationRequired: true
+					},
+					ios: {
+						fallbackTitle: 'Use Passcode',
+						cancelTitle: 'Cancel'
+					}
+				}
 			});
+
+			if (!result.success) {
+				throw new Error('Authentication failed');
+			}
 
 			// Update account in database
 			const accountRef = doc(db, 'accounts', accountId);
@@ -217,14 +236,28 @@ export class BiometricAccountService {
 	): Promise<void> {
 		try {
 			// Perform biometric authentication to confirm disabling
-			await BiometricAuth.authenticate({
+			const result = await BiometricAuth.authenticate({
 				reason: 'Confirm biometric disable',
-				title: 'Disable Biometric Authentication',
-				subtitle: 'Authenticate to disable biometric protection',
-				description:
-					'This will disable biometric authentication for this account',
-				negativeButtonText: 'Cancel',
+				maxAttempts: 3,
+				platform: {
+					android: {
+						title: 'Disable Biometric Authentication',
+						subtitle: 'Authenticate to disable biometric protection',
+						description: 'This will disable biometric authentication for this account',
+						fallbackTitle: 'Use Password',
+						cancelTitle: 'Cancel',
+						confirmationRequired: true
+					},
+					ios: {
+						fallbackTitle: 'Use Passcode',
+						cancelTitle: 'Cancel'
+					}
+				}
 			});
+
+			if (!result.success) {
+				throw new Error('Authentication failed');
+			}
 
 			// Update account in database
 			const accountRef = doc(db, 'accounts', accountId);
