@@ -15,7 +15,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000); // Wait for any async operations
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -28,7 +28,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
   });
@@ -55,7 +55,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -68,7 +68,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -81,7 +81,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -94,7 +94,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
   });
@@ -123,7 +123,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -136,7 +136,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -149,7 +149,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -162,7 +162,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -175,7 +175,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
 
@@ -188,7 +188,7 @@ describe('All Pages Health Check', () => {
       });
       cy.wait(1000);
       cy.window().then((win) => {
-        expect(win.console.error).to.not.have.been.called;
+        expect(win.console.error).to.not.have.been.called;;
       });
     });
   });

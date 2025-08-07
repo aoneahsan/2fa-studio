@@ -471,7 +471,7 @@ export class GooglePlayBillingService {
 		const { subscriptionId, purchaseToken, notificationType } = notification;
 
 		try {
-			let updateData: Partial<UserSubscription> = {};
+			const updateData: Partial<UserSubscription> = {};
 
 			switch (notificationType) {
 				case 1: // SUBSCRIPTION_RECOVERED

@@ -35,7 +35,8 @@
 			"@store/*": ["src/store/*"],
 			"@app-types/*": ["src/types/*"],
 			"@constants/*": ["src/constants/*"],
-			"@assets/*": ["src/assets/*"]
+			"@assets/*": ["src/assets/*"],
+			"unified-tracking": ["node_modules/unified-tracking/dist/esm/src/index.js"]
 		}
 	},
 	"include": ["src"],

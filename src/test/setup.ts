@@ -45,7 +45,15 @@ vi.mock('@capacitor/core', () => ({
 	Capacitor: {
 		isNativePlatform: () => false,
 		getPlatform: () => 'web',
+		isPluginAvailable: () => false,
 	},
+	registerPlugin: vi.fn((name: string) => ({
+		name,
+		// Add default methods that might be called
+		echo: vi.fn(),
+		checkPermissions: vi.fn(),
+		requestPermissions: vi.fn(),
+	})),
 }));
 
 // Mock Firebase
@@ -110,7 +118,7 @@ vi.mock('firebase/performance', () => ({
 
 // Mock OTPAuth
 vi.mock('otpauth', () => ({
-	TOTP: vi.fn().mockImplementation((_config) => ({
+	TOTP: vi.fn().mockImplementation((config) => ({
 		generate: vi.fn(() => '123456'),
 		period: 30,
 		digits: 6,
@@ -118,7 +126,7 @@ vi.mock('otpauth', () => ({
 		issuer: config.issuer,
 		label: config.label,
 	})),
-	HOTP: vi.fn().mockImplementation((_config) => ({
+	HOTP: vi.fn().mockImplementation((config) => ({
 		generate: vi.fn(() => '123456'),
 		counter: 0,
 		digits: 6,

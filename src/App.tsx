@@ -16,6 +16,10 @@ import { useAuth } from '@hooks/useAuth';
 import { useBiometric } from '@hooks/useBiometric';
 import { NotificationService } from '@services/notification-service';
 import { UnifiedErrorService } from '@services/unified-error.service';
+import { NotificationKitService } from '@services/notification-kit.service';
+import { NativeUpdateService } from '@services/native-update.service';
+import { AuthManagerService } from '@services/auth-manager.service';
+import { FirebaseKitService } from '@services/firebase-kit.service';
 
 // Components (loaded immediately)
 import Layout from '@components/common/Layout';
@@ -50,6 +54,18 @@ const AppContent: React.FC = () => {
 	useEffect(() => {
 		// Initialize error handling
 		UnifiedErrorService.initialize().catch(console.error);
+		
+		// Initialize notifications
+		NotificationKitService.initialize().catch(console.error);
+		
+		// Initialize native updates
+		NativeUpdateService.initialize().catch(console.error);
+		
+		// Initialize auth manager
+		AuthManagerService.initialize().catch(console.error);
+		
+		// Initialize Firebase Kit
+		FirebaseKitService.initialize().catch(console.error);
 		
 		const theme = store.getState().settings.theme;
 		if (
