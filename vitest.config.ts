@@ -39,6 +39,7 @@ export default defineConfig({
       'unified-tracking': path.resolve(__dirname, './src/tests/__mocks__/unified-tracking.ts'),
       'capacitor-native-update': path.resolve(__dirname, './src/tests/__mocks__/capacitor-native-update.ts'),
       'capacitor-firebase-kit': path.resolve(__dirname, './src/tests/__mocks__/capacitor-firebase-kit.ts'),
+      'buildkit-ui': path.resolve(__dirname, './src/tests/__mocks__/buildkit-ui.tsx'),
     },
   },
 });
