@@ -62,6 +62,14 @@ export class MobileBiometricService {
 	}
 
 	/**
+	 * Check if biometric authentication is available (alias)
+	 */
+	static async checkAvailability(): Promise<boolean> {
+		const result = await this.checkBiometricAvailability();
+		return result.available;
+	}
+
+	/**
 	 * Get biometric configuration
 	 */
 	static async getConfig(): Promise<BiometricConfig> {

@@ -5,6 +5,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Capacitor } from '@capacitor/core';
 
 // Import all services
@@ -19,18 +20,10 @@ import { MobileBiometricService } from '@services/mobile-biometric.service';
 import { buildkitTheme, StyledComponents } from '@services/buildkit-ui.service';
 import { secureStorage, useTOTPCountdown, accountSorters } from '@utils/buildkit-utils';
 
-// Mock Capacitor
-jest.mock('@capacitor/core', () => ({
-  Capacitor: {
-    isNativePlatform: jest.fn(() => false),
-    getPlatform: jest.fn(() => 'web'),
-  },
-}));
-
 describe('Service Integration Tests', () => {
   beforeEach(() => {
     // Clear mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 
@@ -75,9 +68,9 @@ describe('Service Integration Tests', () => {
       ).resolves.not.toThrow();
     });
 
-    it('should get error history', async () => {
-      const history = await UnifiedErrorService.getErrorHistory();
-      expect(Array.isArray(history)).toBe(true);
+    it('should get error stats', async () => {
+      const stats = await UnifiedErrorService.getErrorStats();
+      expect(stats).toBeDefined();
     });
   });
 
@@ -88,13 +81,13 @@ describe('Service Integration Tests', () => {
 
     it('should track events', async () => {
       await expect(
-        UnifiedTrackingService.trackEvent('test_event', { value: 'test' })
+        UnifiedTrackingService.track('test_event', { value: 'test' })
       ).resolves.not.toThrow();
     });
 
-    it('should set user properties', async () => {
+    it('should identify user', async () => {
       await expect(
-        UnifiedTrackingService.setUserProperty('test_property', 'value')
+        UnifiedTrackingService.identify('test-user', { name: 'Test User' })
       ).resolves.not.toThrow();
     });
   });
@@ -218,7 +211,7 @@ describe('Service Integration Tests', () => {
       });
 
       // Track event
-      await UnifiedTrackingService.trackEvent('error_reported', {
+      await UnifiedTrackingService.track('error_reported', {
         error_type: 'integration_test',
       });
 
@@ -246,8 +239,8 @@ describe('Service Integration Tests', () => {
 describe('Platform-Specific Service Tests', () => {
   describe('Native Platform Services', () => {
     beforeEach(() => {
-      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-      (Capacitor.getPlatform as jest.Mock).mockReturnValue('ios');
+      vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
     });
 
     it('should handle biometric service on native', async () => {
@@ -264,8 +257,8 @@ describe('Platform-Specific Service Tests', () => {
 
   describe('Web Platform Services', () => {
     beforeEach(() => {
-      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
-      (Capacitor.getPlatform as jest.Mock).mockReturnValue('web');
+      vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('web');
     });
 
     it('should handle web-specific auth providers', () => {

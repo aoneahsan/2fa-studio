@@ -80,7 +80,7 @@ export class UnifiedTrackingService {
   }
 
   // Generic track method
-  private static async track(event: string, properties?: EventProperties): Promise<void> {
+  static async track(event: string, properties?: EventProperties): Promise<void> {
     if (!this.isInitialized) await this.initialize();
     await this.tracker.track(event, properties);
   }

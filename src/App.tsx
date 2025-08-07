@@ -28,6 +28,7 @@ import LockScreen from '@components/auth/LockScreen';
 import LoadingScreen from '@components/common/LoadingScreen';
 import ToastContainer from '@components/common/ToastContainer';
 import InstallBanner from '@components/common/InstallBanner';
+import AutoUpdateManager from '@components/updates/AutoUpdateManager';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('@pages/LoginPage'));
@@ -152,6 +153,7 @@ const AppContent: React.FC = () => {
 			<LockScreen />
 			<ToastContainer />
 			<InstallBanner />
+			<AutoUpdateManager />
 		</>
 	);
 };

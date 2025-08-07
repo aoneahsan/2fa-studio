@@ -40,6 +40,9 @@ export default defineConfig({
       'capacitor-native-update': path.resolve(__dirname, './src/tests/__mocks__/capacitor-native-update.ts'),
       'capacitor-firebase-kit': path.resolve(__dirname, './src/tests/__mocks__/capacitor-firebase-kit.ts'),
       'buildkit-ui': path.resolve(__dirname, './src/tests/__mocks__/buildkit-ui.tsx'),
+      'react-buildkit': path.resolve(__dirname, './src/tests/__mocks__/react-buildkit.tsx'),
+      'ts-buildkit': path.resolve(__dirname, './src/tests/__mocks__/ts-buildkit.ts'),
+      'unified-error-handling': path.resolve(__dirname, './src/tests/__mocks__/unified-error-handling.ts'),
     },
   },
 });

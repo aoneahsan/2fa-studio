@@ -1,200 +1,131 @@
 # BuildKit UI Migration Guide
 
+This guide outlines the migration from custom UI components to buildkit-ui components.
+
 ## Overview
-This guide helps migrate existing UI components to use buildkit-ui v1.3.0 components.
 
-## Component Mapping
+buildkit-ui v1.3.0 provides a comprehensive set of pre-built, accessible, and customizable components that can replace our custom implementations.
 
-### Buttons
-- Replace `<button className="...">` with `<Button variant="primary|secondary|ghost">`
-- Replace icon buttons with `<IconButton icon="..." />`
+## Migration Strategy
 
-### Forms
-- Replace `<input>` with `<Input type="..." placeholder="..." />`
-- Replace `<select>` with `<Dropdown options={[...]} />`
-- Replace checkboxes with `<Switch checked={...} onChange={...} />`
+1. **Phase 1**: Create wrapper components that use buildkit-ui internally
+2. **Phase 2**: Update imports across the codebase
+3. **Phase 3**: Remove old implementations
 
-### Layout Components
-- Replace custom cards with `<Card padding="sm|md|lg">`
-- Replace custom modals with `<Modal isOpen={...} onClose={...}>`
-- Replace tab implementations with `<Tabs items={[...]} />`
+## Components to Migrate
 
-### Feedback Components
-- Replace custom alerts with `<Alert type="info|warning|error|success">`
-- Replace loading spinners with `<Spinner size="sm|md|lg" />`
-- Replace progress bars with `<Progress value={...} max={...} />`
+### ✅ Completed
 
-## Migration Steps
+1. **Button** (`src/components/ui/button.tsx`)
+   - Created `button-buildkit.tsx` wrapper
+   - Maps existing props to buildkit-ui Button
+   - Maintains backward compatibility
 
-### 1. Update LoadingSpinner.tsx
+### 🔄 In Progress
+
+2. **Card** (`src/components/ui/card.tsx`)
+3. **Switch** (`src/components/ui/switch.tsx`)
+
+### 📋 Pending
+
+4. **Modal Components**
+   - AddAccountModal
+   - EditAccountModal
+   - DeleteAccountDialog
+   - ImportAccountsModal
+   - ExportAccountsModal
+
+5. **Form Components**
+   - Input fields
+   - Select dropdowns
+   - Checkboxes
+   - Radio buttons
+
+6. **Layout Components**
+   - Layout
+   - LoadingScreen
+   - LoadingSpinner
+
+7. **Data Display**
+   - AccountCard
+   - TagPill
+   - ToastContainer
+
+## Migration Examples
+
+### Button Migration
+
+**Before:**
 ```tsx
-// Before
-export const LoadingSpinner = () => (
-  <div className="spinner">...</div>
-);
+import { Button } from '@components/ui/button';
 
-// After
-import { Spinner } from '@services/buildkit-ui.service';
-
-export const LoadingSpinner = () => (
-  <Spinner size="md" />
-);
+<Button variant="primary" size="lg" loading>
+  Submit
+</Button>
 ```
 
-### 2. Update ToastContainer.tsx
+**After:**
 ```tsx
-// Before
-export const ToastContainer = () => {
-  // Custom toast implementation
-};
+import { Button } from '@components/ui/button-buildkit';
 
-// After
-import { Toast, useToast } from '@services/buildkit-ui.service';
-
-export const ToastContainer = () => {
-  const { toasts } = useToast();
-  return <Toast.Container toasts={toasts} />;
-};
+<Button variant="primary" size="lg" loading>
+  Submit
+</Button>
 ```
 
-### 3. Update Form Components
+### Using BuildKit Theme
+
 ```tsx
-// Before
-<input 
-  type="email" 
-  className="form-input" 
-  value={email} 
-  onChange={(e) => setEmail(e.target.value)}
-/>
+import { buildkitTheme } from '@services/buildkit-ui.service';
 
-// After
-import { Input } from '@services/buildkit-ui.service';
-
-<Input
-  type="email"
-  value={email}
-  onChange={setEmail}
-  placeholder="Enter email"
-  error={emailError}
-/>
+// Access theme values
+const primaryColor = buildkitTheme.colors.primary;
+const spacing = buildkitTheme.spacing.md;
 ```
 
-### 4. Update Card Components
-```tsx
-// Before
-<div className="card">
-  <h3>{title}</h3>
-  <p>{content}</p>
-</div>
+### Using BuildKit Styled Components
 
-// After
-import { Card } from '@services/buildkit-ui.service';
-
-<Card padding="md">
-  <Card.Header>{title}</Card.Header>
-  <Card.Body>{content}</Card.Body>
-</Card>
-```
-
-## Theme Integration
-
-### 1. Wrap App with ThemeProvider
-```tsx
-import { ThemeProvider, buildkitTheme } from '@services/buildkit-ui.service';
-
-function App() {
-  return (
-    <ThemeProvider theme={buildkitTheme}>
-      {/* Your app content */}
-    </ThemeProvider>
-  );
-}
-```
-
-### 2. Use Theme Hook
-```tsx
-import { useTheme } from '@services/buildkit-ui.service';
-
-function MyComponent() {
-  const { theme, toggleTheme } = useTheme();
-  // Use theme values
-}
-```
-
-## Animation Presets
-
-### Fade In Animation
-```tsx
-import { animationPresets } from '@services/buildkit-ui.service';
-
-<div className={animationPresets.fadeIn}>
-  Content that fades in
-</div>
-```
-
-### Slide In Animation
-```tsx
-<Modal 
-  isOpen={isOpen}
-  animation={animationPresets.slideIn}
->
-  Modal content
-</Modal>
-```
-
-## Best Practices
-
-1. **Consistent Spacing**: Use theme spacing values (xs, sm, md, lg, xl)
-2. **Color Palette**: Use theme colors for consistency
-3. **Typography**: Use theme font sizes and families
-4. **Animations**: Use provided animation presets
-5. **Form Validation**: Use built-in validation utilities
-6. **Accessibility**: BuildKit UI components are ARIA-compliant by default
-
-## Common Patterns
-
-### Loading States
 ```tsx
 import { StyledComponents } from '@services/buildkit-ui.service';
 
-{isLoading ? (
-  <StyledComponents.LoadingState message="Loading accounts..." />
-) : (
-  // Your content
-)}
+const { AccountCard, PrimaryButton, SecurityAlert } = StyledComponents;
+
+// Use in components
+<AccountCard>
+  <h3>Account Name</h3>
+  <PrimaryButton>Copy Code</PrimaryButton>
+</AccountCard>
 ```
 
-### Security Alerts
-```tsx
-<StyledComponents.SecurityAlert type="warning">
-  Your account requires additional verification
-</StyledComponents.SecurityAlert>
-```
+## Benefits
 
-### Account Cards
-```tsx
-<StyledComponents.AccountCard>
-  <Badge color="primary">{account.issuer}</Badge>
-  <StyledComponents.CodeDisplay code={totpCode} />
-</StyledComponents.AccountCard>
-```
+1. **Consistency**: Unified design system across the app
+2. **Accessibility**: Built-in ARIA support and keyboard navigation
+3. **Performance**: Optimized components with minimal re-renders
+4. **Customization**: Easy theming and style overrides
+5. **Maintenance**: Regular updates from buildkit-ui
 
-## Performance Tips
+## Testing
 
-1. Import only needed components
-2. Use lazy loading for heavy components
-3. Leverage built-in memoization
-4. Use CSS-in-JS optimization
+After migrating each component:
 
-## Migration Checklist
+1. Run visual regression tests
+2. Test all interactive features
+3. Verify accessibility with screen readers
+4. Check responsive behavior
+5. Test theme switching (light/dark mode)
 
-- [ ] Install buildkit-ui service
-- [ ] Update LoadingSpinner component
-- [ ] Update ToastContainer component
-- [ ] Migrate form inputs
-- [ ] Migrate buttons
-- [ ] Migrate cards
-- [ ] Add ThemeProvider
-- [ ] Update color scheme
-- [ ] Test responsive behavior
-- [ ] Verify accessibility
+## Rollback Plan
+
+If issues arise:
+
+1. Components are created as new files (e.g., `button-buildkit.tsx`)
+2. Original components remain unchanged
+3. Can revert by changing imports back to original files
+
+## Next Steps
+
+1. Migrate Card component
+2. Update AccountCard to use buildkit-ui styled components
+3. Implement toast notifications with buildkit-ui Toast
+4. Replace custom modals with buildkit-ui Dialog components
