@@ -158,6 +158,19 @@
 		}
 	}
 
+	@keyframes indeterminate-progress {
+		0% {
+			transform: translateX(-100%);
+		}
+		100% {
+			transform: translateX(400%);
+		}
+	}
+
+	.animate-indeterminate-progress {
+		animation: indeterminate-progress 1.5s infinite linear;
+	}
+
 	/* Custom scrollbar */
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 8px;

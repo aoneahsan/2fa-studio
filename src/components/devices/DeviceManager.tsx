@@ -18,6 +18,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
+import { ListItemSkeleton } from '@components/common/SkeletonLoaders';
 
 interface DeviceManagerProps {
   isOpen: boolean;
@@ -131,10 +132,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ isOpen, onClose }) => {
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {isLoading ? (
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-2 text-muted-foreground">Loading devices...</p>
-            </div>
+            <ListItemSkeleton count={4} />
           ) : devices.length === 0 ? (
             <div className="text-center py-8">
               <ComputerDesktopIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4" />

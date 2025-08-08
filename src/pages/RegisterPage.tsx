@@ -11,6 +11,7 @@ import { signUp } from '@store/slices/authSlice';
 import { setEncryptionKey } from '@store/slices/authSlice';
 import { addToast } from '@store/slices/uiSlice';
 import { EncryptionService } from '@services/encryption.service';
+import { PasswordStrengthIndicator } from '@components/common/PasswordStrengthIndicator';
 import {
 	UserPlusIcon,
 	EnvelopeIcon,
@@ -152,19 +153,6 @@ const RegisterPage: React.FC = () => {
 		}
 	};
 
-	const getStrengthColor = (score: number) => {
-		if (score < 3) return 'text-red-500';
-		if (score < 5) return 'text-yellow-500';
-		if (score < 7) return 'text-blue-500';
-		return 'text-green-500';
-	};
-
-	const getStrengthText = (score: number) => {
-		if (score < 3) return 'Weak';
-		if (score < 5) return 'Fair';
-		if (score < 7) return 'Good';
-		return 'Strong';
-	};
 
 	return (
 		<div className='min-h-screen flex items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8'>
@@ -239,11 +227,7 @@ const RegisterPage: React.FC = () => {
 							</div>
 							{password && (
 								<div className='mt-2'>
-									<p
-										className={`text-xs ${getStrengthColor(passwordStrength.score)}`}
-									>
-										Password strength: {getStrengthText(passwordStrength.score)}
-									</p>
+									<PasswordStrengthIndicator password={password} />
 									{passwordStrength.feedback.length > 0 && (
 										<ul className='mt-1 text-xs text-muted-foreground'>
 											{passwordStrength.feedback.map((item, index) => (

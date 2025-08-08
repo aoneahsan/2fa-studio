@@ -17,6 +17,7 @@ import {
   ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
 import { format, formatDistanceToNow } from 'date-fns';
+import { ListItemSkeleton } from '@components/common/SkeletonLoaders';
 
 /**
  * Component for displaying backup history
@@ -87,7 +88,12 @@ const BackupHistory: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading backup history...</div>;
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Backup History</h3>
+        <ListItemSkeleton count={5} />
+      </div>
+    );
   }
 
   return (

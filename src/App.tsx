@@ -29,6 +29,9 @@ import LoadingScreen from '@components/common/LoadingScreen';
 import ToastContainer from '@components/common/ToastContainer';
 import InstallBanner from '@components/common/InstallBanner';
 import AutoUpdateManager from '@components/updates/AutoUpdateManager';
+import { SessionTimeoutWarning } from '@components/common/SessionTimeoutWarning';
+import { NetworkStatusIndicator } from '@components/common/NetworkError';
+import { OfflineModeIndicator } from '@components/common/OfflineModeIndicator';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('@pages/LoginPage'));
@@ -46,6 +49,8 @@ const AdminUsers = lazy(() => import('@pages/admin/AdminUsers'));
 const AdminSubscriptions = lazy(() => import('@pages/admin/AdminSubscriptions'));
 const AdminAnalytics = lazy(() => import('@pages/admin/AdminAnalytics'));
 const AdminSecurity = lazy(() => import('@pages/admin/AdminSecurity'));
+const AdminSupport = lazy(() => import('@pages/admin/AdminSupport'));
+const AdminSettings = lazy(() => import('@pages/admin/AdminSettings'));
 
 /**
  * App content component (wrapped with Redux)
@@ -142,7 +147,8 @@ const AppContent: React.FC = () => {
 							<Route path='/admin/subscriptions' element={<AdminSubscriptions />} />
 							<Route path='/admin/analytics' element={<AdminAnalytics />} />
 							<Route path='/admin/security' element={<AdminSecurity />} />
-							<Route path='/admin/settings' element={<AdminDashboard />} />
+							<Route path='/admin/support' element={<AdminSupport />} />
+							<Route path='/admin/settings' element={<AdminSettings />} />
 						</Route>
 					</Route>
 
@@ -157,6 +163,9 @@ const AppContent: React.FC = () => {
 			<ToastContainer />
 			<InstallBanner />
 			<AutoUpdateManager />
+			{isAuthenticated && <SessionTimeoutWarning />}
+			<NetworkStatusIndicator />
+			<OfflineModeIndicator showBanner={false} />
 		</>
 	);
 };

@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import UserDetailsModal from '@components/admin/UserDetailsModal';
+import { TableSkeleton } from '@components/common/SkeletonLoaders';
 import UpdateSubscriptionModal from '@components/admin/UpdateSubscriptionModal';
 import { DocumentSnapshot } from 'firebase/firestore';
 
@@ -200,9 +201,7 @@ const AdminUsers: React.FC = () => {
         </CardHeader>
         <CardContent>
           {loading && users.length === 0 ? (
-            <div className="flex justify-center py-8">
-              <LoadingSpinner size="lg" />
-            </div>
+            <TableSkeleton columns={6} rows={10} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">

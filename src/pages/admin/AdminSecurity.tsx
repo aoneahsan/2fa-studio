@@ -3,6 +3,7 @@ import { AdminLayout } from '@components/admin/AdminLayout';
 import { Card } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { ShieldAlertIcon, LockIcon, AlertTriangleIcon, ActivityIcon } from 'lucide-react';
+import AuditLogViewer from '@components/admin/AuditLogViewer';
 
 interface SecurityEvent {
   id: string;
@@ -13,7 +14,7 @@ interface SecurityEvent {
   userId?: string;
 }
 
-export const AdminSecurity: React.FC = () => {
+const AdminSecurity: React.FC = () => {
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [stats, setStats] = useState({
     failedLogins: 0,
@@ -124,7 +125,20 @@ export const AdminSecurity: React.FC = () => {
             <Button variant="outline">Configure Alerts</Button>
           </div>
         </Card>
+
+        {/* Audit Log */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Audit Log</h2>
+          <AuditLogViewer 
+            onLogClick={(log) => {
+              console.log('Log clicked:', log);
+              // Could open a modal with more details
+            }}
+          />
+        </Card>
       </div>
     </AdminLayout>
   );
 };
+
+export default AdminSecurity;

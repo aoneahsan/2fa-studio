@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { AuditLogService, AuditLogSearchParams, AuditAction } from '@services/audit-log.service';
 import { AuditLog } from '@src/types';
+import { TableSkeleton } from '@components/common/SkeletonLoaders';
 
 interface AuditLogViewerProps {
   userId?: string;
@@ -279,9 +280,7 @@ const AuditLogViewer: React.FC<AuditLogViewerProps> = ({
       {/* Logs Table */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         {loading ? (
-          <div className="flex justify-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+          <TableSkeleton columns={6} rows={10} />
         ) : (
           <>
             <div className="overflow-x-auto">
