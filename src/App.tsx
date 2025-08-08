@@ -43,6 +43,9 @@ const AdminLayout = lazy(() => import('@components/admin/AdminLayout'));
 const AdminRoute = lazy(() => import('@components/admin/AdminRoute'));
 const AdminDashboard = lazy(() => import('@pages/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('@pages/admin/AdminUsers'));
+const AdminSubscriptions = lazy(() => import('@pages/admin/AdminSubscriptions'));
+const AdminAnalytics = lazy(() => import('@pages/admin/AdminAnalytics'));
+const AdminSecurity = lazy(() => import('@pages/admin/AdminSecurity'));
 
 /**
  * App content component (wrapped with Redux)
@@ -136,9 +139,9 @@ const AppContent: React.FC = () => {
 						<Route element={<AdminLayout />}>
 							<Route path='/admin' element={<AdminDashboard />} />
 							<Route path='/admin/users' element={<AdminUsers />} />
-							<Route path='/admin/subscriptions' element={<AdminUsers />} />
-							<Route path='/admin/analytics' element={<AdminDashboard />} />
-							<Route path='/admin/security' element={<AdminDashboard />} />
+							<Route path='/admin/subscriptions' element={<AdminSubscriptions />} />
+							<Route path='/admin/analytics' element={<AdminAnalytics />} />
+							<Route path='/admin/security' element={<AdminSecurity />} />
 							<Route path='/admin/settings' element={<AdminDashboard />} />
 						</Route>
 					</Route>
