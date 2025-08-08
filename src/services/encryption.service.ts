@@ -1,287 +1,195 @@
 /**
- * Encryption service for secure data handling
+ * Encryption Service
+ * Handles encryption and decryption of sensitive data
  * @module services/encryption
  */
 
-import bcrypt from 'bcryptjs';
+import { UnifiedErrorHandling } from 'unified-error-handling';
 
-interface EncryptionParams {
-	data: string;
-	password: string;
-	iterations?: number;
+export interface EncryptedData {
+  data: string;
+  salt: string;
+  iv: string;
 }
 
-interface DecryptionParams {
-	encryptedData: string;
-	password: string;
-}
-
-interface EncryptedData {
-	data: string;
-	salt: string;
-	iv: string;
-	iterations: number;
-}
-
-/**
- * Service for handling encryption and decryption of sensitive data
- * Uses AES-256-GCM for encryption with PBKDF2 key derivation
- */
 export class EncryptionService {
-	private static readonly ALGORITHM = 'AES-GCM';
-	private static readonly KEY_LENGTH = 256;
-	private static readonly SALT_LENGTH = 16;
-	private static readonly IV_LENGTH = 12;
-	private static readonly TAG_LENGTH = 16;
-	private static readonly DEFAULT_ITERATIONS = 100000;
+  private static readonly ALGORITHM = 'AES-GCM';
+  private static readonly KEY_LENGTH = 256;
+  private static readonly SALT_LENGTH = 16;
+  private static readonly IV_LENGTH = 12;
+  private static readonly PBKDF2_ITERATIONS = 100000;
 
-	/**
-	 * Generates a cryptographically secure random salt
-	 */
-	private static generateSalt(): Uint8Array {
-		return crypto.getRandomValues(new Uint8Array(this.SALT_LENGTH));
-	}
+  /**
+   * Initialize encryption service
+   */
+  static async initialize(): Promise<void> {
+    // Check if Web Crypto API is available
+    if (!window.crypto || !window.crypto.subtle) {
+      throw new Error('Web Crypto API not available');
+    }
+  }
 
-	/**
-	 * Generates a cryptographically secure random initialization vector
-	 */
-	private static generateIV(): Uint8Array {
-		return crypto.getRandomValues(new Uint8Array(this.IV_LENGTH));
-	}
+  /**
+   * Encrypt data with password
+   */
+  static async encryptWithPassword(
+    data: string,
+    password: string
+  ): Promise<EncryptedData> {
+    return UnifiedErrorHandling.withTryCatch(
+      async () => {
+        // Generate salt and IV
+        const salt = crypto.getRandomValues(new Uint8Array(this.SALT_LENGTH));
+        const iv = crypto.getRandomValues(new Uint8Array(this.IV_LENGTH));
 
-	/**
-	 * Derives a cryptographic key from a password using PBKDF2
-	 */
-	private static async deriveKey({
-		password,
-		salt,
-		iterations = this.DEFAULT_ITERATIONS,
-	}: {
-		password: string;
-		salt: Uint8Array;
-		iterations?: number;
-	}): Promise<CryptoKey> {
-		const encoder = new TextEncoder();
-		const passwordBuffer = encoder.encode(password);
+        // Derive key from password
+        const key = await this.deriveKeyFromPassword(password, salt);
 
-		const keyMaterial = await crypto.subtle.importKey(
-			'raw',
-			passwordBuffer,
-			'PBKDF2',
-			false,
-			['deriveBits', 'deriveKey']
-		);
+        // Encode data as UTF-8
+        const encoder = new TextEncoder();
+        const encodedData = encoder.encode(data);
 
-		return crypto.subtle.deriveKey(
-			{
-				name: 'PBKDF2',
-				salt,
-				iterations,
-				hash: 'SHA-256',
-			},
-			keyMaterial,
-			{ name: this.ALGORITHM, length: this.KEY_LENGTH },
-			false,
-			['encrypt', 'decrypt']
-		);
-	}
+        // Encrypt data
+        const encryptedData = await crypto.subtle.encrypt(
+          {
+            name: this.ALGORITHM,
+            iv
+          },
+          key,
+          encodedData
+        );
 
-	/**
-	 * Encrypts data using AES-256-GCM
-	 */
-	static async encrypt({
-		data,
-		password,
-		iterations = this.DEFAULT_ITERATIONS,
-	}: EncryptionParams): Promise<EncryptedData> {
-		try {
-			const salt = this.generateSalt();
-			const iv = this.generateIV();
-			const key = await this.deriveKey({ password, salt, iterations });
+        // Convert to base64 for storage
+        return {
+          data: this.arrayBufferToBase64(encryptedData),
+          salt: this.arrayBufferToBase64(salt),
+          iv: this.arrayBufferToBase64(iv)
+        };
+      },
+      {
+        operation: 'EncryptionService.encryptWithPassword',
+        metadata: { dataLength: data.length }
+      }
+    );
+  }
 
-			const encoder = new TextEncoder();
-			const dataBuffer = encoder.encode(data);
+  /**
+   * Decrypt data with password
+   */
+  static async decryptWithPassword(
+    encryptedData: string,
+    password: string,
+    params: {
+      salt: string;
+      iv: string;
+    }
+  ): Promise<string> {
+    return UnifiedErrorHandling.withTryCatch(
+      async () => {
+        // Convert from base64
+        const salt = this.base64ToArrayBuffer(params.salt);
+        const iv = this.base64ToArrayBuffer(params.iv);
+        const data = this.base64ToArrayBuffer(encryptedData);
 
-			const encryptedBuffer = await crypto.subtle.encrypt(
-				{
-					name: this.ALGORITHM,
-					iv,
-				},
-				key,
-				dataBuffer
-			);
+        // Derive key from password
+        const key = await this.deriveKeyFromPassword(password, new Uint8Array(salt));
 
-			// Convert to base64 for storage
-			const encryptedData = btoa(
-				String.fromCharCode(...new Uint8Array(encryptedBuffer))
-			);
-			const saltBase64 = btoa(String.fromCharCode(...salt));
-			const ivBase64 = btoa(String.fromCharCode(...iv));
+        // Decrypt data
+        const decryptedData = await crypto.subtle.decrypt(
+          {
+            name: this.ALGORITHM,
+            iv: new Uint8Array(iv)
+          },
+          key,
+          data
+        );
 
-			return {
-				data: encryptedData,
-				salt: saltBase64,
-				iv: ivBase64,
-				iterations,
-			};
-		} catch (error) {
-			console.error('Encryption failed:', error);
-			throw new Error('Failed to encrypt data');
-		}
-	}
+        // Decode from UTF-8
+        const decoder = new TextDecoder();
+        return decoder.decode(decryptedData);
+      },
+      {
+        operation: 'EncryptionService.decryptWithPassword',
+        metadata: { hasPassword: !!password }
+      }
+    );
+  }
 
-	/**
-	 * Decrypts data encrypted with AES-256-GCM
-	 */
-	static async decrypt({
-		encryptedData,
-		password,
-	}: DecryptionParams): Promise<string> {
-		try {
-			const parsedData: EncryptedData = JSON.parse(encryptedData);
-			const { data, salt, iv, iterations } = parsedData;
+  /**
+   * Derive encryption key from password
+   */
+  private static async deriveKeyFromPassword(
+    password: string,
+    salt: Uint8Array
+  ): Promise<CryptoKey> {
+    // Import password as key material
+    const encoder = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(password),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
 
-			// Convert from base64
-			const encryptedBuffer = Uint8Array.from(atob(data), (c) =>
-				c.charCodeAt(0)
-			);
-			const saltBuffer = Uint8Array.from(atob(salt), (c) => c.charCodeAt(0));
-			const ivBuffer = Uint8Array.from(atob(iv), (c) => c.charCodeAt(0));
+    // Derive key using PBKDF2
+    return crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt,
+        iterations: this.PBKDF2_ITERATIONS,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      {
+        name: this.ALGORITHM,
+        length: this.KEY_LENGTH
+      },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
 
-			const key = await this.deriveKey({
-				password,
-				salt: saltBuffer,
-				iterations,
-			});
+  /**
+   * Convert ArrayBuffer to base64 string
+   */
+  private static arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
 
-			const decryptedBuffer = await crypto.subtle.decrypt(
-				{
-					name: this.ALGORITHM,
-					iv: ivBuffer,
-				},
-				key,
-				encryptedBuffer
-			);
+  /**
+   * Convert base64 string to ArrayBuffer
+   */
+  private static base64ToArrayBuffer(base64: string): ArrayBuffer {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
 
-			const decoder = new TextDecoder();
-			return decoder.decode(decryptedBuffer);
-		} catch (error) {
-			console.error('Decryption failed:', error);
-			throw new Error(
-				'Failed to decrypt data - invalid password or corrupted data'
-			);
-		}
-	}
+  /**
+   * Generate secure random key
+   */
+  static generateRandomKey(length: number = 32): string {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return this.arrayBufferToBase64(array.buffer);
+  }
 
-	/**
-	 * Generates a secure random password
-	 */
-	static generatePassword(length: number = 32): string {
-		const charset =
-			'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
-		const randomValues = crypto.getRandomValues(new Uint8Array(length));
-		return Array.from(randomValues)
-			.map((value: any) => charset[value % charset.length])
-			.join('');
-	}
-
-	/**
-	 * Hashes a password using bcrypt
-	 */
-	static async hashPassword(password: string): Promise<string> {
-		const saltRounds = 10;
-		return bcrypt.hash(password, saltRounds);
-	}
-
-	/**
-	 * Verifies a password against a hash
-	 */
-	static async verifyPassword(
-		password: string,
-		hash: string
-	): Promise<boolean> {
-		return bcrypt.compare(password, hash);
-	}
-
-	/**
-	 * Generates a secure random key for encryption
-	 */
-	static async generateKey(): Promise<string> {
-		return this.generatePassword(32);
-	}
-
-	/**
-	 * Encrypts data with a provided key
-	 */
-	static async encryptWithKey(data: any, key: string): Promise<string> {
-		const jsonData = typeof data === 'string' ? data : JSON.stringify(data);
-		const encrypted = await this.encrypt({
-			data: jsonData,
-			password: key,
-		});
-		return JSON.stringify(encrypted);
-	}
-
-	/**
-	 * Decrypts data with a provided key
-	 */
-	static async decryptWithKey(
-		encryptedData: string,
-		key: string
-	): Promise<any> {
-		const decrypted = await this.decrypt({
-			encryptedData,
-			password: key,
-		});
-		try {
-			return JSON.parse(decrypted);
-		} catch {
-			return decrypted;
-		}
-	}
-
-	/**
-	 * Validates password strength
-	 */
-	static validatePasswordStrength(password: string): {
-		isValid: boolean;
-		score: number;
-		feedback: string[];
-	} {
-		const feedback: string[] = [];
-		let score = 0;
-
-		if (password.length >= 8) score++;
-		if (password.length >= 12) score++;
-		if (password.length >= 16) score++;
-
-		if (/[a-z]/.test(password)) score++;
-		if (/[A-Z]/.test(password)) score++;
-		if (/[0-9]/.test(password)) score++;
-		if (/[^A-Za-z0-9]/.test(password)) score++;
-
-		if (password.length < 8) {
-			feedback.push('Password should be at least 8 characters long');
-		}
-		if (!/[a-z]/.test(password)) {
-			feedback.push('Include lowercase letters');
-		}
-		if (!/[A-Z]/.test(password)) {
-			feedback.push('Include uppercase letters');
-		}
-		if (!/[0-9]/.test(password)) {
-			feedback.push('Include numbers');
-		}
-		if (!/[^A-Za-z0-9]/.test(password)) {
-			feedback.push('Include special characters');
-		}
-
-		return {
-			isValid: score >= 5,
-			score: Math.min(score, 10),
-			feedback,
-		};
-	}
+  /**
+   * Hash data using SHA-256
+   */
+  static async hash(data: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(data);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+    return this.arrayBufferToBase64(hashBuffer);
+  }
 }
-
-export default EncryptionService;

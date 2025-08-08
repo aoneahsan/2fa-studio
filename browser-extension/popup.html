@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2FA Studio</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">2FA Studio</h1>
+      <button id="settingsBtn" class="icon-btn" title="Settings">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 3.75V1.25M10 18.75V16.25M16.25 10H18.75M1.25 10H3.75M14.5 5.5L16.25 3.75M3.75 16.25L5.5 14.5M14.5 14.5L16.25 16.25M3.75 3.75L5.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen hidden">
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 8C15.163 8 8 15.163 8 24C8 32.837 15.163 40 24 40C32.837 40 40 32.837 40 24C40 15.163 32.837 8 24 8Z" stroke="currentColor" stroke-width="2"/>
+          <path d="M24 16V24L28 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h2>Welcome to 2FA Studio</h2>
+        <p>Connect your account to access your 2FA codes</p>
+        <button id="loginBtn" class="primary-btn">Connect Account</button>
+      </div>
+    </div>
+
+    <!-- Main Screen -->
+    <div id="mainScreen" class="screen hidden">
+      <!-- Search -->
+      <div class="search-container">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Search accounts..."
+        >
+      </div>
+
+      <!-- Accounts List -->
+      <div id="accountsList" class="accounts-list">
+        <!-- Accounts will be inserted here -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state hidden">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 8C15.163 8 8 15.163 8 24C8 32.837 15.163 40 24 40C32.837 40 40 32.837 40 24C40 15.163 32.837 8 24 8Z" stroke="currentColor" stroke-width="2"/>
+          <path d="M24 16V32M16 24H32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h2>No accounts found</h2>
+        <p>Add accounts in the mobile app</p>
+      </div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settingsScreen" class="screen hidden">
+      <div class="settings-header">
+        <button id="backBtn" class="icon-btn">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <h2>Settings</h2>
+      </div>
+      
+      <div class="settings-content">
+        <div class="setting-item">
+          <label class="toggle-label">
+            <input type="checkbox" id="autoFillToggle">
+            <span>Auto-fill codes</span>
+          </label>
+          <p class="setting-description">Automatically fill 2FA codes when detected</p>
+        </div>
+        
+        <div class="setting-item">
+          <label class="toggle-label">
+            <input type="checkbox" id="notificationsToggle">
+            <span>Show notifications</span>
+          </label>
+          <p class="setting-description">Show notifications when codes are filled</p>
+        </div>
+        
+        <div class="setting-item">
+          <button id="logoutBtn" class="secondary-btn">Disconnect Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

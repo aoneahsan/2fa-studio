@@ -1,430 +1,232 @@
 /**
- * Subscription Service for managing Stripe subscriptions
+ * Subscription Service
+ * Handles subscription management and in-app purchases
  * @module services/subscription
  */
 
-import { loadStripe, Stripe } from '@stripe/stripe-js';
-import {
-	doc,
-	updateDoc,
-	getDoc,
-	collection,
-	query,
-	where,
-	getDocs,
-	addDoc,
-	serverTimestamp,
-} from 'firebase/firestore';
-import { db, auth } from '@src/config/firebase';
-import { User, SubscriptionTier, SubscriptionStatus } from '@src/types';
+import { UnifiedErrorHandling } from 'unified-error-handling';
+import { FirebaseService } from './firebase.service';
 
-// Initialize Stripe
-let stripePromise: Promise<Stripe | null>;
-
-export interface PriceOption {
-	id: string;
-	priceId: string;
-	name: string;
-	description: string;
-	price: number;
-	currency: string;
-	interval: 'month' | 'year';
-	features: string[];
+export interface SubscriptionTier {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  features: string[];
+  limits: {
+    maxAccounts: number;
+    maxDevices: number;
+    backupEnabled: boolean;
+    browserExtension: boolean;
+    apiAccess: boolean;
+  };
 }
 
-export interface CreateCheckoutSessionParams {
-	priceId: string;
-	userId: string;
-	email: string;
-	successUrl: string;
-	cancelUrl: string;
-}
-
-export interface SubscriptionUpdate {
-	tier: SubscriptionTier;
-	status: SubscriptionStatus;
-	stripeCustomerId?: string;
-	stripeSubscriptionId?: string;
-	stripePriceId?: string;
-	currentPeriodStart?: Date;
-	currentPeriodEnd?: Date;
-	cancelAtPeriodEnd?: boolean;
+export interface UserSubscription {
+  userId: string;
+  tierId: string;
+  status: 'active' | 'canceled' | 'expired' | 'trial';
+  startDate: Date;
+  endDate?: Date;
+  trialEndDate?: Date;
+  paymentMethod?: string;
+  receiptData?: any;
 }
 
 export class SubscriptionService {
-	private static prices: PriceOption[] = [
-		{
-			id: 'premium_monthly',
-			priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM_MONTHLY || '',
-			name: 'Premium Monthly',
-			description: 'Unlimited accounts, no ads, automatic backups',
-			price: 299, // in cents
-			currency: 'usd',
-			interval: 'month',
-			features: [
-				'Unlimited accounts',
-				'No advertisements',
-				'Automatic cloud backup',
-				'Priority support',
-				'Browser extension',
-				'Advanced security features',
-			],
-		},
-		{
-			id: 'premium_yearly',
-			priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM_YEARLY || '',
-			name: 'Premium Yearly',
-			description: 'Save 20% with annual billing',
-			price: 2399, // in cents (20% off)
-			currency: 'usd',
-			interval: 'year',
-			features: [
-				'Everything in Premium Monthly',
-				'Save $7.20 per year',
-				'2 months free',
-			],
-		},
-		{
-			id: 'family_monthly',
-			priceId: import.meta.env.VITE_STRIPE_PRICE_FAMILY_MONTHLY || '',
-			name: 'Family Monthly',
-			description: 'Share with up to 5 family members',
-			price: 499, // in cents
-			currency: 'usd',
-			interval: 'month',
-			features: [
-				'Everything in Premium',
-				'Up to 5 family members',
-				'Family vault sharing',
-				'Centralized billing',
-				'Family management tools',
-			],
-		},
-		{
-			id: 'family_yearly',
-			priceId: import.meta.env.VITE_STRIPE_PRICE_FAMILY_YEARLY || '',
-			name: 'Family Yearly',
-			description: 'Best value for families',
-			price: 3999, // in cents (33% off)
-			currency: 'usd',
-			interval: 'year',
-			features: [
-				'Everything in Family Monthly',
-				'Save $19.89 per year',
-				'2.5 months free',
-			],
-		},
-	];
+  static readonly TIERS: SubscriptionTier[] = [
+    {
+      id: 'free',
+      name: 'Free',
+      price: 0,
+      currency: 'USD',
+      features: [
+        'Up to 10 accounts',
+        '1 device',
+        'Local backups only',
+        'Basic support'
+      ],
+      limits: {
+        maxAccounts: 10,
+        maxDevices: 1,
+        backupEnabled: false,
+        browserExtension: false,
+        apiAccess: false
+      }
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      price: 4.99,
+      currency: 'USD',
+      features: [
+        'Unlimited accounts',
+        'Up to 5 devices',
+        'Cloud backups',
+        'Browser extension',
+        'Priority support'
+      ],
+      limits: {
+        maxAccounts: -1,
+        maxDevices: 5,
+        backupEnabled: true,
+        browserExtension: true,
+        apiAccess: false
+      }
+    },
+    {
+      id: 'business',
+      name: 'Business',
+      price: 9.99,
+      currency: 'USD',
+      features: [
+        'Unlimited accounts',
+        'Unlimited devices',
+        'Cloud backups',
+        'Browser extension',
+        'API access',
+        'Premium support'
+      ],
+      limits: {
+        maxAccounts: -1,
+        maxDevices: -1,
+        backupEnabled: true,
+        browserExtension: true,
+        apiAccess: true
+      }
+    }
+  ];
 
-	/**
-	 * Initialize Stripe
-	 */
-	static async initializeStripe(): Promise<Stripe | null> {
-		if (!stripePromise) {
-			const publishableKey = (import.meta as any).env
-				.VITE_STRIPE_PUBLISHABLE_KEY;
-			if (!publishableKey) {
-				console.error('Stripe publishable key not configured');
-				return null;
-			}
-			stripePromise = loadStripe(publishableKey);
-		}
-		return stripePromise;
-	}
+  /**
+   * Get user's current subscription
+   */
+  static async getUserSubscription(userId: string): Promise<UserSubscription | null> {
+    return UnifiedErrorHandling.withTryCatch(
+      async () => {
+        const doc = await FirebaseService.firestore
+          .collection('subscriptions')
+          .doc(userId)
+          .get();
 
-	/**
-	 * Get available subscription plans
-	 */
-	static getAvailablePlans(): PriceOption[] {
-		return this.prices.filter((price: any) => price.priceId);
-	}
+        if (!doc.exists) {
+          return null;
+        }
 
-	/**
-	 * Create a Stripe checkout session
-	 */
-	static async createCheckoutSession(
-		params: CreateCheckoutSessionParams
-	): Promise<string> {
-		try {
-			const response = await fetch('/api/create-checkout-session', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
-				},
-				body: JSON.stringify({
-					priceId: params.priceId,
-					userId: params.userId,
-					email: params.email,
-					successUrl: params.successUrl,
-					cancelUrl: params.cancelUrl,
-				}),
-			});
+        return doc.data() as UserSubscription;
+      },
+      {
+        operation: 'SubscriptionService.getUserSubscription',
+        metadata: { userId }
+      }
+    );
+  }
 
-			if (!response.ok) {
-				throw new Error('Failed to create checkout session');
-			}
+  /**
+   * Check if user has access to feature
+   */
+  static async checkFeatureAccess(
+    userId: string,
+    feature: keyof SubscriptionTier['limits']
+  ): Promise<boolean> {
+    const subscription = await this.getUserSubscription(userId);
+    
+    if (!subscription || subscription.status !== 'active') {
+      // Check free tier
+      const freeTier = this.TIERS.find(t => t.id === 'free');
+      return freeTier?.limits[feature] === true;
+    }
 
-			const { sessionId } = await response.json();
-			return sessionId;
-		} catch (error) {
-			console.error('Error creating checkout session:', error);
-			throw error;
-		}
-	}
+    const tier = this.TIERS.find(t => t.id === subscription.tierId);
+    return tier?.limits[feature] === true;
+  }
 
-	/**
-	 * Redirect to Stripe checkout
-	 */
-	static async redirectToCheckout(sessionId: string): Promise<void> {
-		const stripe = await this.initializeStripe();
-		if (!stripe) {
-			throw new Error('Stripe not initialized');
-		}
+  /**
+   * Check account limit
+   */
+  static async checkAccountLimit(userId: string, currentCount: number): Promise<boolean> {
+    const subscription = await this.getUserSubscription(userId);
+    const tierId = subscription?.tierId || 'free';
+    const tier = this.TIERS.find(t => t.id === tierId);
+    
+    if (!tier) return false;
+    
+    return tier.limits.maxAccounts === -1 || currentCount < tier.limits.maxAccounts;
+  }
 
-		const { error } = await stripe.redirectToCheckout({ sessionId });
-		if (error) {
-			throw error;
-		}
-	}
+  /**
+   * Start trial
+   */
+  static async startTrial(userId: string, tierId: string): Promise<void> {
+    return UnifiedErrorHandling.withTryCatch(
+      async () => {
+        const trialDays = 7;
+        const now = new Date();
+        const trialEndDate = new Date(now);
+        trialEndDate.setDate(trialEndDate.getDate() + trialDays);
 
-	/**
-	 * Create billing portal session
-	 */
-	static async createBillingPortalSession(customerId: string): Promise<string> {
-		try {
-			const response = await fetch('/api/create-billing-portal-session', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
-				},
-				body: JSON.stringify({ customerId }),
-			});
+        const subscription: UserSubscription = {
+          userId,
+          tierId,
+          status: 'trial',
+          startDate: now,
+          trialEndDate
+        };
 
-			if (!response.ok) {
-				throw new Error('Failed to create billing portal session');
-			}
+        await FirebaseService.firestore
+          .collection('subscriptions')
+          .doc(userId)
+          .set(subscription);
+      },
+      {
+        operation: 'SubscriptionService.startTrial',
+        metadata: { userId, tierId }
+      }
+    );
+  }
 
-			const { url } = await response.json();
-			return url;
-		} catch (error) {
-			console.error('Error creating billing portal session:', error);
-			throw error;
-		}
-	}
+  /**
+   * Process purchase
+   */
+  static async processPurchase(
+    userId: string,
+    tierId: string,
+    receiptData: any
+  ): Promise<void> {
+    return UnifiedErrorHandling.withTryCatch(
+      async () => {
+        // Validate receipt (platform-specific)
+        const isValid = await this.validateReceipt(receiptData);
+        
+        if (!isValid) {
+          throw new Error('Invalid receipt');
+        }
 
-	/**
-	 * Update user subscription in Firestore
-	 */
-	static async updateUserSubscription(
-		userId: string,
-		update: SubscriptionUpdate
-	): Promise<void> {
-		try {
-			const userRef = doc(db, 'users', userId);
+        const subscription: UserSubscription = {
+          userId,
+          tierId,
+          status: 'active',
+          startDate: new Date(),
+          receiptData
+        };
 
-			// Calculate account limit based on tier
-			let accountLimit = 10; // Free tier
-			if (update.tier === 'premium' || update.tier === 'family') {
-				accountLimit = -1; // Unlimited
-			}
+        await FirebaseService.firestore
+          .collection('subscriptions')
+          .doc(userId)
+          .set(subscription);
+      },
+      {
+        operation: 'SubscriptionService.processPurchase',
+        metadata: { userId, tierId }
+      }
+    );
+  }
 
-			// Update user document
-			await updateDoc(userRef, {
-				'subscription.tier': update.tier,
-				'subscription.status': update.status,
-				'subscription.accountLimit': accountLimit,
-				'subscription.stripeCustomerId': update.stripeCustomerId || null,
-				'subscription.stripeSubscriptionId':
-					update.stripeSubscriptionId || null,
-				'subscription.stripePriceId': update.stripePriceId || null,
-				'subscription.currentPeriodStart': update.currentPeriodStart || null,
-				'subscription.currentPeriodEnd': update.currentPeriodEnd || null,
-				'subscription.cancelAtPeriodEnd': update.cancelAtPeriodEnd || false,
-				'subscription.features': this.getFeaturesByTier(update.tier),
-				updatedAt: serverTimestamp(),
-			});
-
-			// Log subscription change
-			await this.logSubscriptionEvent(userId, 'subscription_updated', {
-				tier: update.tier,
-				status: update.status,
-			});
-		} catch (error) {
-			console.error('Error updating user subscription:', error);
-			throw error;
-		}
-	}
-
-	/**
-	 * Get features by subscription tier
-	 */
-	private static getFeaturesByTier(
-		tier: SubscriptionTier
-	): Record<string, boolean> {
-		const baseFeatures = {
-			cloudBackup: false,
-			browserExtension: false,
-			prioritySupport: false,
-			advancedSecurity: false,
-			noAds: false,
-			familySharing: false,
-		};
-
-		switch (tier) {
-			case 'premium':
-				return {
-					...baseFeatures,
-					cloudBackup: true,
-					browserExtension: true,
-					prioritySupport: true,
-					advancedSecurity: true,
-					noAds: true,
-				};
-			case 'family':
-				return {
-					...baseFeatures,
-					cloudBackup: true,
-					browserExtension: true,
-					prioritySupport: true,
-					advancedSecurity: true,
-					noAds: true,
-					familySharing: true,
-				};
-			default:
-				return baseFeatures;
-		}
-	}
-
-	/**
-	 * Check if user has active subscription
-	 */
-	static async hasActiveSubscription(userId: string): Promise<boolean> {
-		try {
-			const userDoc = await getDoc(doc(db, 'users', userId));
-			if (!userDoc.exists()) {
-				return false;
-			}
-
-			const user = userDoc.data() as User;
-			return (
-				user.subscription?.status === 'active' &&
-				user.subscription?.tier !== 'free'
-			);
-		} catch (error) {
-			console.error('Error checking subscription:', error);
-			return false;
-		}
-	}
-
-	/**
-	 * Get subscription usage stats
-	 */
-	static async getUsageStats(userId: string): Promise<{
-		accountCount: number;
-		accountLimit: number | null;
-		storageUsed: number;
-		lastBackup: Date | null;
-	}> {
-		try {
-			// Get user data
-			const userDoc = await getDoc(doc(db, 'users', userId));
-			if (!userDoc.exists()) {
-				throw new Error('User not found');
-			}
-
-			const user = userDoc.data() as User;
-
-			// Count accounts
-			const accountsQuery = query(
-				collection(db, 'accounts'),
-				where('userId', '==', userId)
-			);
-			const accountsSnapshot = await getDocs(accountsQuery);
-			const accountCount = accountsSnapshot.size;
-
-			return {
-				accountCount,
-				accountLimit: user.subscription?.accountLimit || 10,
-				storageUsed: user.storageUsed || 0,
-				lastBackup: user.lastBackup
-					? (user.lastBackup as any).toDate
-						? (user.lastBackup as any).toDate()
-						: user.lastBackup
-					: null,
-			};
-		} catch (error) {
-			console.error('Error getting usage stats:', error);
-			throw error;
-		}
-	}
-
-	/**
-	 * Log subscription events
-	 */
-	private static async logSubscriptionEvent(
-		userId: string,
-		event: string,
-		metadata: Record<string, any>
-	): Promise<void> {
-		try {
-			await addDoc(collection(db, 'subscriptionEvents'), {
-				userId,
-				event,
-				metadata,
-				timestamp: serverTimestamp(),
-			});
-		} catch (error) {
-			console.error('Error logging subscription event:', error);
-		}
-	}
-
-	/**
-	 * Cancel subscription
-	 */
-	static async cancelSubscription(subscriptionId: string): Promise<void> {
-		try {
-			const response = await fetch('/api/cancel-subscription', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
-				},
-				body: JSON.stringify({ subscriptionId }),
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to cancel subscription');
-			}
-		} catch (error) {
-			console.error('Error canceling subscription:', error);
-			throw error;
-		}
-	}
-
-	/**
-	 * Resume subscription (remove cancel at period end)
-	 */
-	static async resumeSubscription(subscriptionId: string): Promise<void> {
-		try {
-			const response = await fetch('/api/resume-subscription', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
-				},
-				body: JSON.stringify({ subscriptionId }),
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to resume subscription');
-			}
-		} catch (error) {
-			console.error('Error resuming subscription:', error);
-			throw error;
-		}
-	}
+  /**
+   * Validate receipt
+   */
+  private static async validateReceipt(receiptData: any): Promise<boolean> {
+    // This would validate with Apple/Google servers
+    // For now, return true
+    return true;
+  }
 }
-
-export const subscriptionService = SubscriptionService;

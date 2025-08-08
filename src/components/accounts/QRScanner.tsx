@@ -49,9 +49,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
   const handleScanResult = (data: string) => {
     try {
       // Parse the OTP URI
-      const parsed = OTPService.parseOTPAuthURI(data);
+      const parsed = OTPService.parseURI(data);
       
-      if (!parsed) {
+      if (!parsed || !parsed.secret) {
         setError('Invalid 2FA QR code. Please scan a valid authenticator QR code.');
         return;
       }
