@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { TOTPService, TOTPAccount } from '@services/totp.service';
-import { Card } from '@components/ui/Card';
+import { Card } from '@components/ui/card';
 
 interface AccountItemProps {
   account: TOTPAccount;
