@@ -192,4 +192,133 @@ export class EncryptionService {
     const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
     return this.arrayBufferToBase64(hashBuffer);
   }
+
+  /**
+   * Hash password using SHA-256
+   */
+  static async hashPassword(password: string): Promise<string> {
+    return this.hash(password);
+  }
+
+  /**
+   * Validate password strength
+   */
+  static validatePasswordStrength(password: string): {
+    score: number;
+    feedback: string[];
+    isValid: boolean;
+  } {
+    const feedback: string[] = [];
+    let score = 0;
+
+    // Length check
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (password.length < 8) feedback.push('Password should be at least 8 characters');
+
+    // Character variety checks
+    if (/[a-z]/.test(password)) score++;
+    else feedback.push('Add lowercase letters');
+
+    if (/[A-Z]/.test(password)) score++;
+    else feedback.push('Add uppercase letters');
+
+    if (/\d/.test(password)) score++;
+    else feedback.push('Add numbers');
+
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+    else feedback.push('Add special characters');
+
+    // Common patterns check
+    if (!/(.)\1{2,}/.test(password)) score++; // No repeated characters
+    if (!/^(password|123456|qwerty)/i.test(password)) score++; // Not common passwords
+
+    return {
+      score: Math.min(score, 5),
+      feedback,
+      isValid: score >= 3
+    };
+  }
+
+  /**
+   * Generate a secure encryption key
+   */
+  static async generateKey(): Promise<CryptoKey> {
+    return crypto.subtle.generateKey(
+      {
+        name: this.ALGORITHM,
+        length: this.KEY_LENGTH
+      },
+      true,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  /**
+   * Encrypt data with a CryptoKey
+   */
+  static async encryptWithKey(
+    data: string,
+    key: CryptoKey
+  ): Promise<EncryptedData> {
+    const iv = crypto.getRandomValues(new Uint8Array(this.IV_LENGTH));
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(data);
+
+    const encryptedData = await crypto.subtle.encrypt(
+      {
+        name: this.ALGORITHM,
+        iv
+      },
+      key,
+      encodedData
+    );
+
+    return {
+      data: this.arrayBufferToBase64(encryptedData),
+      salt: '', // No salt needed with direct key
+      iv: this.arrayBufferToBase64(iv)
+    };
+  }
+
+  /**
+   * Decrypt data with a CryptoKey
+   */
+  static async decryptWithKey(
+    encryptedData: string,
+    key: CryptoKey,
+    iv: string
+  ): Promise<string> {
+    const data = this.base64ToArrayBuffer(encryptedData);
+    const ivBuffer = this.base64ToArrayBuffer(iv);
+
+    const decryptedData = await crypto.subtle.decrypt(
+      {
+        name: this.ALGORITHM,
+        iv: new Uint8Array(ivBuffer)
+      },
+      key,
+      data
+    );
+
+    const decoder = new TextDecoder();
+    return decoder.decode(decryptedData);
+  }
+
+  /**
+   * Simple decrypt method (wrapper for decryptWithPassword)
+   */
+  static async decrypt(
+    encryptedData: EncryptedData,
+    password: string
+  ): Promise<string> {
+    return this.decryptWithPassword(
+      encryptedData.data,
+      password,
+      {
+        salt: encryptedData.salt,
+        iv: encryptedData.iv
+      }
+    );
+  }
 }

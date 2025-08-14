@@ -6,6 +6,7 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch, store } from '@src/store';
+import { Preferences } from '@capacitor/preferences';
 import {
 	setAccounts,
 	addAccount as addAccountAction,
@@ -107,18 +108,31 @@ export const useAccounts = () => {
 					dispatch(setAccounts(decryptedAccounts) as any);
 
 					// Cache accounts locally for offline access
-					await Preferences.set({
-						key: 'cached_accounts',
-						value: JSON.stringify(decryptedAccounts),
-					});
+					try {
+						await Preferences.set({
+							key: 'cached_accounts',
+							value: JSON.stringify(decryptedAccounts),
+						});
+					} catch (e) {
+						// Preferences might not be available in web, use localStorage
+						localStorage.setItem('cached_accounts', JSON.stringify(decryptedAccounts));
+					}
 				} catch (error) {
 					console.error('Error loading accounts:', error);
 					dispatch(setError('Failed to load accounts') as any);
 
 					// Try to load from cache
-					const cached = await Preferences.get({ key: 'cached_accounts' });
-					if (cached.value) {
-						dispatch(setAccounts(JSON.parse(cached.value) as any));
+					try {
+						const cached = await Preferences.get({ key: 'cached_accounts' });
+						if (cached.value) {
+							dispatch(setAccounts(JSON.parse(cached.value) as any));
+						}
+					} catch (e) {
+						// Fallback to localStorage
+						const cached = localStorage.getItem('cached_accounts');
+						if (cached) {
+							dispatch(setAccounts(JSON.parse(cached) as any));
+						}
 					}
 				} finally {
 					dispatch(setLoading(false) as any);

@@ -59,14 +59,9 @@ export function useAutoUpdate(options: UseAutoUpdateOptions = {}) {
         
         if (showNotifications) {
           dispatch(addToast({
-            id: `update-available-${Date.now()}`,
             type: 'info',
             message: `Update ${info.version} is available!`,
-            duration: 10000,
-            action: {
-              label: 'Update',
-              onClick: () => downloadUpdate()
-            }
+            duration: 10000
           }));
         }
         
@@ -89,7 +84,6 @@ export function useAutoUpdate(options: UseAutoUpdateOptions = {}) {
       
       if (showNotifications) {
         dispatch(addToast({
-          id: `update-downloading-${Date.now()}`,
           type: 'info',
           message: 'Downloading update...',
           duration: 5000
@@ -100,7 +94,6 @@ export function useAutoUpdate(options: UseAutoUpdateOptions = {}) {
       
       if (showNotifications) {
         dispatch(addToast({
-          id: `update-error-${Date.now()}`,
           type: 'error',
           message: 'Failed to download update'
         }));
@@ -117,7 +110,6 @@ export function useAutoUpdate(options: UseAutoUpdateOptions = {}) {
       
       if (showNotifications) {
         dispatch(addToast({
-          id: `install-error-${Date.now()}`,
           type: 'error',
           message: 'Failed to install update'
         }));

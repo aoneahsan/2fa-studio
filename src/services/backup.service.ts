@@ -5,7 +5,7 @@
  */
 
 import { UnifiedErrorHandling } from 'unified-error-handling';
-import { StrataStorage } from 'strata-storage';
+import StrataStorage from 'strata-storage';
 import { FirebaseService } from './firebase.service';
 import { OTPAccount } from './otp.service';
 import { EncryptionService } from './encryption.service';

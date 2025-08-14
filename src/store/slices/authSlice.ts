@@ -141,4 +141,7 @@ const authSlice = createSlice({
 
 export const { setUser, setLoading, setError, clearError, setEncryptionKey, clearAuth, updateUserSubscription } = authSlice.actions;
 
+// Alias for signOut to match expected 'logout' export
+export const logout = signOut;
+
 export default authSlice.reducer;

@@ -35,7 +35,6 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
 
       if (result.success && result.user) {
         dispatch(addToast({
-          id: `login-success-${Date.now()}`,
           type: 'success',
           message: `Successfully signed in with ${AuthManagerService.getProviderDisplayName(provider)}!`
         }));
@@ -46,7 +45,6 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
     } catch (error) {
       console.error(`${provider} login error:`, error);
       dispatch(addToast({
-        id: `login-error-${Date.now()}`,
         type: 'error',
         message: `Failed to sign in with ${AuthManagerService.getProviderDisplayName(provider)}`
       }));

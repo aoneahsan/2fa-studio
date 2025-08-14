@@ -7,6 +7,21 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
+	optimizeDeps: {
+		exclude: [
+			'react-native',
+			'@react-native-firebase/app',
+			'@react-native-firebase/auth',
+			'@react-native-firebase/firestore',
+			'@react-native-firebase/storage',
+			'@react-native-firebase/crashlytics',
+			'@react-native-firebase/analytics',
+			'@react-native-firebase/perf',
+			'@react-native-firebase/app-check',
+			'react-native-google-mobile-ads',
+			'capacitor-firebase-kit'
+		]
+	},
 	resolve: {
 		alias: {
 			'@': path.resolve(__dirname, '.'),
