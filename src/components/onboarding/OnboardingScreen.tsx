@@ -12,7 +12,7 @@ import {
   CloudArrowUpIcon,
   ChevronRightIcon 
 } from '@heroicons/react/24/outline';
-import { setOnboardingComplete } from '@store/slices/userSlice';
+import { setOnboardingCompleted } from '@store/slices/userSlice';
 import StrataStorage from 'strata-storage';
 
 interface OnboardingStep {
@@ -58,10 +58,10 @@ export const OnboardingScreen: React.FC = () => {
 
   const completeOnboarding = async () => {
     // Mark onboarding as complete
-    dispatch(setOnboardingComplete());
+    dispatch(setOnboardingCompleted());
     
     // Save to storage
-    const storage = StrataStorage.getInstance();
+    const storage = new StrataStorage();
     await storage.set('onboardingComplete', true);
     
     // Navigate to main screen

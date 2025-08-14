@@ -4,7 +4,7 @@
  * @module services/encryption
  */
 
-import { UnifiedErrorHandling } from 'unified-error-handling';
+// Unified error handling is handled by UnifiedErrorService
 
 export interface EncryptedData {
   data: string;

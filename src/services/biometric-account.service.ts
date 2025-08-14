@@ -79,7 +79,7 @@ export class BiometricAccountService {
 
 			// Check if biometric is available
 			const available = await BiometricAuth.isAvailable();
-			if (!available.isAvailable) {
+			if (!available) {
 				return {
 					success: false,
 					error: 'Biometric authentication not available',
@@ -95,12 +95,10 @@ export class BiometricAccountService {
 						title: 'Authentication Required',
 						subtitle: 'Please authenticate to continue',
 						description: 'Use biometric authentication to access your account',
-						fallbackTitle: 'Use Password',
 						cancelTitle: 'Cancel',
 						confirmationRequired: true
 					},
 					ios: {
-						fallbackTitle: 'Use Passcode',
 						cancelTitle: 'Cancel'
 					}
 				}
@@ -168,7 +166,7 @@ export class BiometricAccountService {
 		try {
 			// Check if biometric is available
 			const available = await BiometricAuth.isAvailable();
-			if (!available.isAvailable) {
+			if (!available) {
 				throw new Error(
 					'Biometric authentication not available on this device'
 				);
@@ -183,12 +181,10 @@ export class BiometricAccountService {
 						title: 'Enable Biometric Authentication',
 						subtitle: 'Authenticate to enable biometric protection',
 						description: 'This will enable biometric authentication for this account',
-						fallbackTitle: 'Use Password',
 						cancelTitle: 'Cancel',
 						confirmationRequired: true
 					},
 					ios: {
-						fallbackTitle: 'Use Passcode',
 						cancelTitle: 'Cancel'
 					}
 				}
@@ -244,12 +240,10 @@ export class BiometricAccountService {
 						title: 'Disable Biometric Authentication',
 						subtitle: 'Authenticate to disable biometric protection',
 						description: 'This will disable biometric authentication for this account',
-						fallbackTitle: 'Use Password',
 						cancelTitle: 'Cancel',
 						confirmationRequired: true
 					},
 					ios: {
-						fallbackTitle: 'Use Passcode',
 						cancelTitle: 'Cancel'
 					}
 				}

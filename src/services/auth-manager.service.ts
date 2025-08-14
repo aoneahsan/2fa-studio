@@ -3,7 +3,33 @@
  * @module services/auth-manager
  */
 
-import { AuthManager, AuthProvider, AuthResult, AuthSession } from 'capacitor-auth-manager';
+import { auth as capacitorAuth, AuthProvider } from 'capacitor-auth-manager';
+
+// Define types since they're not exported
+interface AuthResult {
+  success: boolean;
+  provider: AuthProvider;
+  token?: string;
+  user?: {
+    id: string;
+    email?: string;
+    name?: string;
+    photoUrl?: string;
+  };
+  error?: string;
+}
+
+interface AuthSession {
+  provider: AuthProvider;
+  token: string;
+  refreshToken?: string;
+  expiresAt?: number;
+  user: {
+    id: string;
+    email?: string;
+    name?: string;
+  };
+}
 import { Capacitor } from '@capacitor/core';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '@src/config/firebase';
@@ -18,7 +44,7 @@ export interface SocialAuthConfig {
 }
 
 export class AuthManagerService {
-  private static authManager: AuthManager;
+  private static authManager: typeof capacitorAuth;
   private static isInitialized = false;
 
   /**
@@ -28,66 +54,10 @@ export class AuthManagerService {
     if (this.isInitialized) return;
 
     try {
-      this.authManager = new AuthManager({
-        // OAuth configurations
-        providers: {
-          google: {
-            clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-            redirectUri: process.env.REACT_APP_AUTH_REDIRECT_URI,
-            additionalScopes: ['https://www.googleapis.com/auth/drive.file']
-          },
-          apple: {
-            clientId: process.env.REACT_APP_APPLE_CLIENT_ID,
-            redirectUri: process.env.REACT_APP_AUTH_REDIRECT_URI,
-            responseMode: 'form_post'
-          },
-          facebook: {
-            appId: process.env.REACT_APP_FACEBOOK_APP_ID,
-            redirectUri: process.env.REACT_APP_AUTH_REDIRECT_URI,
-            permissions: ['email', 'public_profile']
-          },
-          microsoft: {
-            clientId: process.env.REACT_APP_MICROSOFT_CLIENT_ID,
-            redirectUri: process.env.REACT_APP_AUTH_REDIRECT_URI,
-            tenant: 'common'
-          },
-          github: {
-            clientId: process.env.REACT_APP_GITHUB_CLIENT_ID,
-            redirectUri: process.env.REACT_APP_AUTH_REDIRECT_URI,
-            scope: 'user:email'
-          },
-          twitter: {
-            apiKey: process.env.REACT_APP_TWITTER_API_KEY,
-            redirectUri: process.env.REACT_APP_AUTH_REDIRECT_URI
-          }
-        },
-        
-        // Platform-specific settings
-        platform: {
-          web: {
-            popupMode: true,
-            popupOptions: {
-              width: 500,
-              height: 600
-            }
-          },
-          ios: {
-            preferEphemeralSession: false
-          },
-          android: {
-            handleIntentFilters: true
-          }
-        },
-        
-        // Session management
-        sessionConfig: {
-          storage: 'secure',
-          refreshThreshold: 300, // 5 minutes before expiry
-          maxRetries: 3
-        }
-      });
-
-      await this.authManager.init();
+      this.authManager = capacitorAuth;
+      
+      // Initialize with basic config
+      await this.authManager.initialize?.();
       this.isInitialized = true;
     } catch (error) {
       await UnifiedErrorService.reportError(error as Error, {

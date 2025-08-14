@@ -26,6 +26,23 @@ interface PasswordStrength {
 	feedback: string[];
 }
 
+// Helper functions for password strength
+const getStrengthColor = (score: number): string => {
+	if (score <= 1) return 'text-red-500';
+	if (score <= 2) return 'text-orange-500';
+	if (score <= 3) return 'text-yellow-500';
+	if (score <= 4) return 'text-green-500';
+	return 'text-green-600';
+};
+
+const getStrengthText = (score: number): string => {
+	if (score <= 1) return 'Very Weak';
+	if (score <= 2) return 'Weak';
+	if (score <= 3) return 'Fair';
+	if (score <= 4) return 'Strong';
+	return 'Very Strong';
+};
+
 /**
  * Registration page for new users
  */

@@ -106,6 +106,10 @@ export class AuthService {
 	 * Initialize auth state listener
 	 */
 	static initialize(onUserChange: (user: User | null) => void): () => void {
+		if (!auth) {
+			console.warn('Firebase Auth not initialized');
+			return () => {};
+		}
 		return onAuthStateChanged(auth, async (firebaseUser) => {
 			if (firebaseUser) {
 				const user = await this.getUserData(firebaseUser);
@@ -122,6 +126,10 @@ export class AuthService {
 	 * Set auth persistence
 	 */
 	static async setPersistence(rememberMe: boolean): Promise<void> {
+		if (!auth) {
+			console.warn('Firebase Auth not initialized');
+			return;
+		}
 		const persistence = rememberMe
 			? browserLocalPersistence
 			: browserSessionPersistence;

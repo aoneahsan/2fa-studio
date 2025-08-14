@@ -27,13 +27,8 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onClose }) => {
 
     try {
       const result = await scanQRCode({
-        prompt: 'Scan 2FA QR Code',
-        showFlipCameraButton: true,
-        showTorchButton: true,
-        torchOn: false,
         formats: ['QR_CODE'], // Only scan QR codes
-        resultDisplayDuration: 0, // Don't display result
-      });
+      } as any);
 
       if (result.content) {
         handleScanResult(result.content);

@@ -92,6 +92,14 @@ export default defineConfig({
 		},
 		// Output configuration
 		rollupOptions: {
+			external: [
+				'react-native',
+				/^react-native\/.*/,
+				/^@react-native-firebase\/.*/,
+				'react-native-google-mobile-ads',
+				'firebase-admin',
+				'@google-cloud/firestore'
+			],
 			output: {
 				// Manual chunking for better caching
 				manualChunks: {

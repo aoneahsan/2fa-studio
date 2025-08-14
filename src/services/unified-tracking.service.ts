@@ -94,4 +94,9 @@ export class UnifiedTrackingService {
     if (!this.isInitialized) await this.initialize();
     await this.tracker.page(name, properties);
   }
+
+  static async trackEvent(event: string, properties?: any): Promise<void> {
+    if (!this.isInitialized) await this.initialize();
+    await this.tracker.track(event, properties);
+  }
 }

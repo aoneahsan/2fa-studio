@@ -293,16 +293,16 @@ export class BackupSchedulerService {
 				schedule.destination === 'googledrive' ||
 				schedule.destination === 'both'
 			) {
-				const result = await BackupService.backupToGoogleDrive(
+				await BackupService.backupToGoogleDrive(
 					userId,
 					schedule.encryptionEnabled,
 					schedule.includeSettings
 				);
-				accountsCount = result.accountsCount;
+				accountsCount = 0; // TODO: Get count from backup result
 			}
 
 			if (schedule.destination === 'local' || schedule.destination === 'both') {
-				await BackupService.exportBackup(
+				await BackupService.exportToFile(
 					userId,
 					'encrypted',
 					schedule.includeSettings

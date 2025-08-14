@@ -4,9 +4,9 @@
  * @module services/backup
  */
 
-import { UnifiedErrorHandling } from 'unified-error-handling';
+// Unified error handling is handled by UnifiedErrorService
 import StrataStorage from 'strata-storage';
-import { FirebaseService } from './firebase.service';
+import FirebaseService from './firebase.service';
 import { OTPAccount } from './otp.service';
 import { EncryptionService } from './encryption.service';
 
@@ -373,7 +373,7 @@ export class BackupService {
    * Store backup metadata locally
    */
   private static async storeBackupMetadata(metadata: BackupMetadata): Promise<void> {
-    const storage = StrataStorage.getInstance();
+    const storage = new StrataStorage();
     const existingMetadata = await storage.get<BackupMetadata[]>('backup_metadata') || [];
     
     existingMetadata.push(metadata);

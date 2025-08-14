@@ -4,8 +4,8 @@
  * @module services/api
  */
 
-import { UnifiedErrorHandling } from 'unified-error-handling';
-import { FirebaseService } from './firebase.service';
+// Unified error handling is handled by UnifiedErrorService
+import FirebaseService from './firebase.service';
 import { OTPService } from './otp.service';
 import { EncryptionService } from './encryption.service';
 

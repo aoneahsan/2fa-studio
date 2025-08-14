@@ -29,7 +29,13 @@ const ThemeProvider = ({ children }: any) => children;
 const useTheme = () => ({});
 const useToast = () => ({ show: () => {} });
 const useModal = () => ({ open: () => {}, close: () => {} });
-const animations = {};
+const animations = {
+  fadeIn: 'fadeIn',
+  slideIn: 'slideIn',
+  scaleIn: 'scaleIn',
+  bounce: 'bounce',
+  shake: 'shake'
+};
 
 // Re-export commonly used components for easy access
 export {

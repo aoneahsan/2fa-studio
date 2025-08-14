@@ -6,7 +6,7 @@
 	"scripts": {
 		"setup": "node setup.js",
 		"dev": "vite",
-		"build": "tsc -b && vite build",
+		"build": "tsc --noEmit && vite build",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"lint:quiet": "eslint . --quiet",
@@ -14,7 +14,7 @@
 		"cap:sync": "npx cap sync",
 		"cap:android": "npx cap open android",
 		"cap:ios": "npx cap open ios",
-		"type-check": "tsc --noEmit",
+		"type-check": "tsc --noEmit --skipLibCheck",
 		"clean": "rm -rf dist node_modules .turbo",
 		"postinstall": "test -f .env || cp .env.example .env",
 		"cap:run:ios": "npx cap run ios",

@@ -33,7 +33,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         scopes: provider === 'google' ? ['email', 'profile'] : [],
       });
 
-      if (result.success && result.user) {
+      if (result && result.user) {
         dispatch(addToast({
           type: 'success',
           message: `Successfully signed in with ${AuthManagerService.getProviderDisplayName(provider)}!`

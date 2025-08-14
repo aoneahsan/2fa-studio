@@ -3,14 +3,30 @@
  * @module services/native-update
  */
 
-import { NativeUpdate, UpdateConfig, UpdateInfo } from 'capacitor-native-update';
+import { CapacitorNativeUpdate } from 'capacitor-native-update';
+
+// Define types since they're not exported
+interface UpdateConfig {
+  appId?: string;
+  channel?: string;
+  autoUpdate?: boolean;
+  updateUrl?: string;
+}
+
+interface UpdateInfo {
+  version: string;
+  buildNumber: string;
+  releaseNotes?: string;
+  updateUrl: string;
+  mandatory: boolean;
+}
 import { Capacitor } from '@capacitor/core';
 import { StorageService } from './storage.service';
 import { NotificationKitService } from './notification-kit.service';
 import { UnifiedErrorService } from './unified-error.service';
 
 export class NativeUpdateService {
-  private static nativeUpdate: NativeUpdate;
+  private static nativeUpdate: typeof CapacitorNativeUpdate;
   private static isInitialized = false;
   private static readonly UPDATE_CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
   private static readonly LAST_CHECK_KEY = 'last_update_check';
@@ -50,7 +66,7 @@ export class NativeUpdateService {
         }
       };
 
-      this.nativeUpdate = new NativeUpdate(config);
+      this.nativeUpdate = CapacitorNativeUpdate;
       await this.nativeUpdate.init();
       
       // Set up automatic checks

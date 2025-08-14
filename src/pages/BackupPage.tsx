@@ -102,7 +102,7 @@ const BackupPage: React.FC = () => {
 		setIsBackingUp(true);
 
 		try {
-			const result = await BackupService.backupToGoogleDrive(
+			await BackupService.backupToGoogleDrive(
 				user.id,
 				true, // encrypted
 				true // include settings
@@ -111,7 +111,7 @@ const BackupPage: React.FC = () => {
 			dispatch(
 				addToast({
 					type: 'success',
-					message: `Successfully backed up ${result.accountsCount} accounts`,
+					message: `Successfully backed up accounts`,
 				}) as any
 			);
 		} catch (error) {

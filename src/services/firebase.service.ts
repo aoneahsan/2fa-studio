@@ -185,6 +185,8 @@ export type {
   FirebaseApp
 } from 'firebase/app';
 
+import { serverTimestamp } from 'firebase/firestore';
+
 // Initialize Firebase on module load if config is available
 if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your_api_key_here') {
   initializeFirebase().catch(console.error);
@@ -199,5 +201,7 @@ export default {
   getFirebaseFunctions,
   getFirebaseAnalytics,
   onAuthStateChange,
-  isFirebaseInitialized
+  isFirebaseInitialized,
+  firestore: db,
+  timestamp: serverTimestamp
 };

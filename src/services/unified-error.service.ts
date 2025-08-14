@@ -3,7 +3,45 @@
  * @module services/unified-error
  */
 
-import { ErrorHandler, ErrorHandlerConfig, ErrorContext, ErrorCategory, ErrorSeverity } from 'unified-error-handling';
+import * as UnifiedErrorHandling from 'unified-error-handling';
+
+// Define types locally since they're not exported from the package
+interface ErrorHandlerConfig {
+  environment?: string;
+  userId?: string;
+  metadata?: Record<string, any>;
+}
+
+interface ErrorContext {
+  component?: string;
+  action?: string;
+  metadata?: Record<string, any>;
+}
+
+type ErrorCategory = 'critical' | 'warning' | 'info';
+type ErrorSeverity = 'high' | 'medium' | 'low';
+
+// Create a wrapper class for UnifiedErrorHandler functionality
+class UnifiedErrorHandler {
+  constructor(config: any) {
+    // Store config for later use
+    this.config = config;
+  }
+  
+  private config: any;
+  
+  async init() {
+    await UnifiedErrorHandling.initialize(this.config);
+  }
+  
+  handleError(error: Error, context?: string) {
+    UnifiedErrorHandling.captureError(error as any);
+  }
+  
+  logError(error: Error, level?: string) {
+    UnifiedErrorHandling.captureMessage(error.message, level as any);
+  }
+}
 import { FirestoreService } from './firestore.service';
 import { StorageService, StorageKeys } from './storage.service';
 import { Capacitor } from '@capacitor/core';
@@ -13,7 +51,7 @@ import { Capacitor } from '@capacitor/core';
  * Centralizes error handling using unified-error-handling package
  */
 export class UnifiedErrorService {
-  private static errorHandler: ErrorHandler;
+  private static errorHandler: UnifiedErrorHandler;
   private static isInitialized = false;
 
   /**
@@ -133,7 +171,7 @@ export class UnifiedErrorService {
     };
 
     // Create error handler instance
-    this.errorHandler = new ErrorHandler(config);
+    this.errorHandler = new UnifiedErrorHandler(config as any);
     
     // Initialize the error handler
     await this.errorHandler.init();

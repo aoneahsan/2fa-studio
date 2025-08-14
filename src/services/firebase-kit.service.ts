@@ -3,7 +3,22 @@
  * @module services/firebase-kit
  */
 
-import { FirebaseKit, FirebaseConfig, RemoteConfigValue } from 'capacitor-firebase-kit';
+import { firebaseKit } from 'capacitor-firebase-kit';
+
+// Define types since they're not exported with the expected names
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+}
+
+interface RemoteConfigValue {
+  value: string;
+  source: 'default' | 'remote' | 'static';
+}
 import { Capacitor } from '@capacitor/core';
 import { auth, db, analytics, performance } from '@src/config/firebase';
 import { UnifiedErrorService } from './unified-error.service';
@@ -17,7 +32,7 @@ export interface FirebaseKitConfig extends FirebaseConfig {
 }
 
 export class FirebaseKitService {
-  private static firebaseKit: FirebaseKit;
+  private static kit: typeof firebaseKit;
   private static isInitialized = false;
   private static remoteConfigDefaults: Record<string, any> = {
     // Feature flags
@@ -66,8 +81,8 @@ export class FirebaseKitService {
         enableRemoteConfig: true
       };
 
-      this.firebaseKit = new FirebaseKit(config);
-      await this.firebaseKit.init();
+      this.kit = firebaseKit;
+      await this.kit.initialize?.();
       
       // Initialize Remote Config
       if (config.enableRemoteConfig) {

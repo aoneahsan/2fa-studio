@@ -25,19 +25,27 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ''
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Check if Firebase config is valid
+const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your_api_key_here';
 
-// Initialize Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export const functions = getFunctions(app);
+// Initialize Firebase only if configured
+const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+
+// Initialize Firebase services conditionally
+export const auth = app ? getAuth(app) : null as any;
+export const db = app ? getFirestore(app) : null as any;
+export const storage = app ? getStorage(app) : null as any;
+export const functions = app ? getFunctions(app) : null as any;
 
 // Initialize Analytics conditionally (only in browser and when supported)
-export const analytics = isSupported().then(yes => yes ? getAnalytics(app) : null);
+export const analytics = app ? isSupported().then(yes => yes ? getAnalytics(app) : null) : Promise.resolve(null);
 
 // Initialize Performance Monitoring
-export const performance = typeof window !== 'undefined' ? getPerformance(app) : null;
+export const performance = app && typeof window !== 'undefined' ? getPerformance(app) : null;
+
+// Log warning if Firebase is not configured
+if (!isFirebaseConfigured) {
+  console.warn('Firebase is not configured. Please add your Firebase configuration to the .env file.');
+}
 
 export default app;
