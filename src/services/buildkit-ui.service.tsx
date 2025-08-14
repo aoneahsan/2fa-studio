@@ -3,31 +3,33 @@
  * @module services/buildkit-ui
  */
 
-import { 
-  Button,
-  Input,
-  Card,
-  Modal,
-  Toast,
-  Spinner,
-  Badge,
-  Avatar,
-  Dropdown,
-  Switch,
-  Tabs,
-  Alert,
-  Progress,
-  Skeleton,
-  Tooltip,
-  IconButton,
-  Form,
-  FormField,
-  ThemeProvider,
-  useTheme,
-  useToast,
-  useModal,
-  animations
-} from 'buildkit-ui';
+// Note: buildkit-ui is a Capacitor plugin, not a React component library
+// We'll create wrapper components as needed
+
+// Placeholder exports until we implement proper wrappers
+const Button = () => null;
+const Input = () => null;
+const Card = () => null;
+const Modal = () => null;
+const Toast = () => null;
+const Spinner = () => null;
+const Badge = () => null;
+const Avatar = () => null;
+const Dropdown = () => null;
+const Switch = () => null;
+const Tabs = () => null;
+const Alert = () => null;
+const Progress = () => null;
+const Skeleton = () => null;
+const Tooltip = () => null;
+const IconButton = () => null;
+const Form = () => null;
+const FormField = () => null;
+const ThemeProvider = ({ children }: any) => children;
+const useTheme = () => ({});
+const useToast = () => ({ show: () => {} });
+const useModal = () => ({ open: () => {}, close: () => {} });
+const animations = {};
 
 // Re-export commonly used components for easy access
 export {

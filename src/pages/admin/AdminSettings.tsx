@@ -19,7 +19,7 @@ interface SettingSection {
   icon: React.ReactNode;
 }
 
-export const AdminSettings: React.FC = () => {
+const AdminSettings: React.FC = () => {
   const [activeSection, setActiveSection] = useState('general');
   const [settings, setSettings] = useState({
     // General
@@ -319,3 +319,5 @@ export const AdminSettings: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminSettings;

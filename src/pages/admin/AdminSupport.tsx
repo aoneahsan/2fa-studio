@@ -16,7 +16,7 @@ interface Ticket {
   lastUpdated: Date;
 }
 
-export const AdminSupport: React.FC = () => {
+const AdminSupport: React.FC = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,3 +155,5 @@ export const AdminSupport: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminSupport;

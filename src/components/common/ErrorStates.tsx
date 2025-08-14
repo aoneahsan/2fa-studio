@@ -19,7 +19,7 @@ interface ErrorStateProps {
   actions?: Array<{
     label: string;
     onClick: () => void;
-    variant?: 'default' | 'outline';
+    variant?: 'primary' | 'outline';
   }>;
   className?: string;
 }
@@ -103,7 +103,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       
       <div className="flex items-center gap-2">
         {onRetry && (
-          <Button onClick={onRetry} variant="default">
+          <Button onClick={onRetry} variant="primary">
             <ArrowPathIcon className="w-4 h-4 mr-2" />
             Try Again
           </Button>

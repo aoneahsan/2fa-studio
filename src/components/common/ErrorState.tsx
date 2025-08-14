@@ -85,7 +85,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       
       <div className="flex gap-3">
         {onRetry && (
-          <Button onClick={onRetry} variant="default">
+          <Button onClick={onRetry} variant="primary">
             <ArrowPathIcon className="w-4 h-4 mr-2" />
             Try Again
           </Button>
@@ -94,7 +94,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         {showHomeButton && (
           <Button 
             onClick={() => window.location.href = '/'} 
-            variant={onRetry ? 'outline' : 'default'}
+            variant={onRetry ? 'outline' : 'primary'}
           >
             <HomeIcon className="w-4 h-4 mr-2" />
             Go Home

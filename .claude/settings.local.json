@@ -529,7 +529,7 @@
       "Bash(firebase projects:list:*)",
       "Bash(firebase use:*)",
       "Bash(firebase emulators:exec:*)",
-      "Bash(firebase functions:shell:*)",	
+      "Bash(firebase functions:shell:*)",
       "Bash(kill:*)",
       "Bash(do sed -i '' 's/\\buser\\./currentUser./g' \"$file\")",
       "WebFetch(domain:www.npmjs.com)",
@@ -545,7 +545,9 @@
       "Bash(nvm use:*)",
       "Bash(git commit:*)",
       "Bash(pod deintegrate:*)",
-      "Bash(export:*)"
+      "Bash(export:*)",
+      "Bash(do echo \"=== $file.tsx ===\")",
+      "Bash(tail:*)"
     ],
     "deny": []
   }

@@ -5,7 +5,7 @@ import { Button } from '@components/ui/button';
 import { AdminSubscriptionManagementService } from '@services/admin-subscription-management.service';
 import { RefreshCwIcon, TrendingUpIcon, UsersIcon, DollarSignIcon } from 'lucide-react';
 
-export const AdminSubscriptions: React.FC = () => {
+const AdminSubscriptions: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -99,3 +99,5 @@ export const AdminSubscriptions: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminSubscriptions;

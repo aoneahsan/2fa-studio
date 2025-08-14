@@ -44,9 +44,9 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   const getConfirmButtonVariant = () => {
     switch (type) {
       case 'danger':
-        return 'destructive';
+        return 'danger';
       default:
-        return 'default';
+        return 'primary';
     }
   };
 

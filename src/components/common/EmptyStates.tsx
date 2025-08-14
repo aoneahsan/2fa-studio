@@ -96,7 +96,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </p>
       
       {(action || config.actionLabel) && (
-        <Button onClick={action?.onClick} variant="default">
+        <Button onClick={action?.onClick} variant="primary">
           <PlusIcon className="w-4 h-4 mr-2" />
           {action?.label || config.actionLabel}
         </Button>

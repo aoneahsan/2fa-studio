@@ -4,7 +4,7 @@ import { Card } from '@components/ui/card';
 import { AdminAnalyticsService } from '@services/admin-analytics.service';
 import { BarChart3Icon, TrendingUpIcon, CalendarIcon } from 'lucide-react';
 
-export const AdminAnalytics: React.FC = () => {
+const AdminAnalytics: React.FC = () => {
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -104,3 +104,5 @@ export const AdminAnalytics: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminAnalytics;
