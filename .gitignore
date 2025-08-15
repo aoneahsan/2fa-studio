@@ -40,3 +40,5 @@ android/
 Thumbs.db
 
 *.ignore.*
+
+cypress/screenshots
