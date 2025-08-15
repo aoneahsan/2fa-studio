@@ -42,3 +42,6 @@ Thumbs.db
 *.ignore.*
 
 cypress/screenshots
+
+
+2fa-studio-chrome-extension*.zip

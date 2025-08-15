@@ -553,7 +553,11 @@
       "Bash(nvm list:*)",
       "Bash([ -s \"$NVM_DIR/nvm.sh\" ])",
       "Bash(. \"$NVM_DIR/nvm.sh\")",
-      "Bash(nvm install:*)"
+      "Bash(nvm install:*)",
+      "Bash(sudo apt:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(echo $PATH)",
+      "Bash(command:*)"
     ],
     "deny": []
   }
