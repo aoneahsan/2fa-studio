@@ -5,7 +5,7 @@
  */
 
 import { Capacitor } from '@capacitor/core';
-import BiometricAuth from 'capacitor-biometric-authentication';
+import { BiometricAuth } from 'capacitor-biometric-authentication';
 import { StorageService, StorageKeys } from './storage.service';
 
 export interface BiometricConfig {
@@ -148,13 +148,13 @@ export class MobileBiometricService {
 						description: 'Use your biometric to authenticate',
 						fallbackTitle: 'Use Password',
 						cancelTitle: 'Cancel',
-						confirmationRequired: true
+						confirmationRequired: true,
 					},
 					ios: {
 						fallbackTitle: 'Use Passcode',
-						cancelTitle: 'Cancel'
-					}
-				}
+						cancelTitle: 'Cancel',
+					},
+				},
 			});
 
 			if (result.success) {

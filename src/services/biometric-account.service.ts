@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 
 // Import biometric auth with proper v2.0.0 API
-import BiometricAuth from 'capacitor-biometric-authentication';
+import { BiometricAuth } from 'capacitor-biometric-authentication';
 
 import { auth } from '../config/firebase';
 import { AuditLogService } from './audit-log.service';
@@ -96,12 +96,12 @@ export class BiometricAccountService {
 						subtitle: 'Please authenticate to continue',
 						description: 'Use biometric authentication to access your account',
 						cancelTitle: 'Cancel',
-						confirmationRequired: true
+						confirmationRequired: true,
 					},
 					ios: {
-						cancelTitle: 'Cancel'
-					}
-				}
+						cancelTitle: 'Cancel',
+					},
+				},
 			});
 
 			if (!result.success) {
@@ -180,14 +180,15 @@ export class BiometricAccountService {
 					android: {
 						title: 'Enable Biometric Authentication',
 						subtitle: 'Authenticate to enable biometric protection',
-						description: 'This will enable biometric authentication for this account',
+						description:
+							'This will enable biometric authentication for this account',
 						cancelTitle: 'Cancel',
-						confirmationRequired: true
+						confirmationRequired: true,
 					},
 					ios: {
-						cancelTitle: 'Cancel'
-					}
-				}
+						cancelTitle: 'Cancel',
+					},
+				},
 			});
 
 			if (!result.success) {
@@ -239,14 +240,15 @@ export class BiometricAccountService {
 					android: {
 						title: 'Disable Biometric Authentication',
 						subtitle: 'Authenticate to disable biometric protection',
-						description: 'This will disable biometric authentication for this account',
+						description:
+							'This will disable biometric authentication for this account',
 						cancelTitle: 'Cancel',
-						confirmationRequired: true
+						confirmationRequired: true,
 					},
 					ios: {
-						cancelTitle: 'Cancel'
-					}
-				}
+						cancelTitle: 'Cancel',
+					},
+				},
 			});
 
 			if (!result.success) {
