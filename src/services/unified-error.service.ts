@@ -108,7 +108,7 @@ export class UnifiedErrorService {
       // Custom metadata
       metadata: {
         platform: Capacitor.getPlatform(),
-        appVersion: process.env.REACT_APP_VERSION || '1.0.0',
+        appVersion: import.meta.env.VITE_APP_VERSION || '1.0.0',
         deviceInfo: await this.getDeviceInfo()
       },
       

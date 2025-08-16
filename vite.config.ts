@@ -7,6 +7,11 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
+	define: {
+		'process.env': {},
+		'process.platform': '"web"',
+		'process.version': '"v1.0.0"',
+	},
 	optimizeDeps: {
 		exclude: [
 			'react-native',

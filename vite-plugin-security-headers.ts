@@ -15,11 +15,11 @@ export function securityHeaders(): Plugin {
           'Content-Security-Policy',
           [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://www.googletagmanager.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://www.googletagmanager.com https://cdn.onesignal.com https://www.google-analytics.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: https: blob:",
-            "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://onesignal.com https://*.onesignal.com",
+            "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://onesignal.com https://*.onesignal.com https://www.google-analytics.com https://firebaseinstallations.googleapis.com",
             "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
             "object-src 'none'",
             "base-uri 'self'",

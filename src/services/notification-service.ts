@@ -29,6 +29,12 @@ class NotificationService {
 			return;
 		}
 
+		// Skip OneSignal initialization if in test environment
+		if (!this.APP_ID || this.APP_ID.includes('test') || this.APP_ID === 'your_onesignal_app_id_here') {
+			console.info('OneSignal initialization skipped: No valid app ID configured');
+			return;
+		}
+
 		try {
 			await OneSignal.init({
 				appId: this.APP_ID,

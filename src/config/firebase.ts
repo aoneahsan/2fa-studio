@@ -10,6 +10,7 @@ import { getStorage } from 'firebase/storage';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getFunctions } from 'firebase/functions';
 import { getPerformance } from 'firebase/performance';
+import { createMockFirebaseApp, isMockFirebase } from './firebase-mock';
 
 /**
  * Firebase configuration object
@@ -25,27 +26,58 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ''
 };
 
+// Check if we should use mock Firebase
+const useMockFirebase = isMockFirebase();
+
 // Check if Firebase config is valid
-const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your_api_key_here';
+const isFirebaseConfigured = firebaseConfig.apiKey && 
+  firebaseConfig.apiKey !== 'your_api_key_here' && 
+  !useMockFirebase;
 
-// Initialize Firebase only if configured
-const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+// Initialize Firebase or use mock
+let app: any = null;
+let auth: any = null;
+let db: any = null;
+let storage: any = null;
+let functions: any = null;
+let analytics: any = Promise.resolve(null);
+let performance: any = null;
 
-// Initialize Firebase services conditionally
-export const auth = app ? getAuth(app) : null as any;
-export const db = app ? getFirestore(app) : null as any;
-export const storage = app ? getStorage(app) : null as any;
-export const functions = app ? getFunctions(app) : null as any;
-
-// Initialize Analytics conditionally (only in browser and when supported)
-export const analytics = app ? isSupported().then(yes => yes ? getAnalytics(app) : null) : Promise.resolve(null);
-
-// Initialize Performance Monitoring
-export const performance = app && typeof window !== 'undefined' ? getPerformance(app) : null;
-
-// Log warning if Firebase is not configured
-if (!isFirebaseConfigured) {
+if (isFirebaseConfigured) {
+  // Real Firebase initialization
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+    functions = getFunctions(app);
+    
+    // Initialize Analytics conditionally (only in browser and when supported)
+    analytics = isSupported().then(yes => yes ? getAnalytics(app) : null).catch(() => null);
+    
+    // Initialize Performance Monitoring
+    performance = typeof window !== 'undefined' ? getPerformance(app) : null;
+  } catch (error) {
+    console.error('Failed to initialize Firebase:', error);
+    // Fall back to mock
+    const mockApp = createMockFirebaseApp();
+    auth = mockApp.auth();
+    db = mockApp.firestore();
+    storage = mockApp.storage();
+    analytics = Promise.resolve(mockApp.analytics());
+  }
+} else if (useMockFirebase) {
+  // Use mock Firebase for testing
+  console.info('Using mock Firebase for testing/development');
+  const mockApp = createMockFirebaseApp();
+  auth = mockApp.auth();
+  db = mockApp.firestore();
+  storage = mockApp.storage();
+  analytics = Promise.resolve(mockApp.analytics());
+} else {
   console.warn('Firebase is not configured. Please add your Firebase configuration to the .env file.');
 }
+
+export { auth, db, storage, functions, analytics, performance };
 
 export default app;
