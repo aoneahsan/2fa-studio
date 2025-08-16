@@ -557,7 +557,10 @@
       "Bash(sudo apt:*)",
       "Bash(sudo apt install:*)",
       "Bash(echo $PATH)",
-      "Bash(command:*)"
+      "Bash(command:*)",
+      "Bash(tsc --noEmit)",
+      "Bash(./node_modules/.bin/vite build:*)",
+      "Bash(env)"
     ],
     "deny": []
   }

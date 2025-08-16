@@ -36,6 +36,7 @@ export default defineConfig({
 			'@constants': path.resolve(__dirname, './src/constants'),
 			'@assets': path.resolve(__dirname, './src/assets'),
 			'unified-tracking': path.resolve(__dirname, './node_modules/unified-tracking/dist/esm/src/index.js'),
+			'react-native': path.resolve(__dirname, './src/utils/react-native-mock.ts'),
 		},
 	},
 	plugins: [

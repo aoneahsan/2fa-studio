@@ -282,7 +282,7 @@ export class UnifiedErrorService {
     operation: string
   ): Promise<void> {
     await this.reportError(error, {
-      category: 'biometric',ErrorHandler, ErrorContext, ErrorCategory, ErrorSeverity
+      category: 'biometric',
       severity: 'medium',
       tags: ['biometric', 'security', operation],
       metadata: { operation }
