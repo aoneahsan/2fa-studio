@@ -145,13 +145,17 @@ export default tseslint.config(
   
   // Chrome extension configuration
   {
-    files: ['chrome-extension/**/*.js'],
+    files: ['chrome-extension/**/*.js', 'browser-extension/**/*.js', 'extension/**/*.js'],
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',
       globals: {
         ...globals.browser,
         chrome: 'readonly',
+        console: 'readonly',
+        clearInterval: 'readonly',
+        setInterval: 'readonly',
+        setTimeout: 'readonly',
         require: 'readonly',
         module: 'readonly',
         exports: 'readonly',
@@ -173,7 +177,17 @@ export default tseslint.config(
         }
       ],
       'no-undef': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      'no-case-declarations': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          ignoreRestSiblings: true
+        }
+      ],
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-var-requires': 'off',
     }

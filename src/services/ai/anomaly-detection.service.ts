@@ -414,7 +414,7 @@ export class AnomalyDetectionService {
     // This would require storing and analyzing recent event frequency
     // For now, we'll do basic checks
     const anomalyReasons: string[] = [];
-    let score = 0;
+    const score = 0;
 
     // In production, you would:
     // 1. Count events from same IP/device in last hour

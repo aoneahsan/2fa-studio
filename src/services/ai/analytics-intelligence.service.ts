@@ -151,7 +151,7 @@ export class AnalyticsIntelligenceService {
       const characteristics: string[] = [];
       let userType: BehaviorAnalysis['userType'] = 'casual';
       let riskProfile: BehaviorAnalysis['riskProfile'] = 'low';
-      let confidence = 0.7;
+      const confidence = 0.7;
 
       // Analyze account count
       if (accounts.length > 20) {
