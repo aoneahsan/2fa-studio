@@ -1,150 +1,296 @@
 #!/usr/bin/env node
 
 /**
- * Splash Screen Generator Script for 2FA Studio
- * Generates all required splash screen sizes for iOS and Android
+ * Comprehensive Splash Screen Generator Script for 2FA Studio
+ * Generates all required splash screen sizes for iOS and Android platforms
+ * 
+ * Features:
+ * - iOS splash screens for all devices and orientations
+ * - Android splash screens for all densities and orientations  
+ * - Adaptive splash screens with safe areas
+ * - Brand-consistent design with 2FA Studio branding
  */
 
-import sharp from 'sharp';
-import { promises as fs } from 'fs';
-import path from 'path';
+const sharp = require('sharp');
+const fs = require('fs').promises;
+const path = require('path');
 
-// Define splash screen sizes
+// Comprehensive splash screen dimensions for all platforms
 const splashSizes = {
-  ios: [
-    // iPhone
-    { width: 640, height: 1136, name: 'Default-568h@2x~iphone.png' }, // iPhone 5
-    { width: 750, height: 1334, name: 'Default-667h.png' }, // iPhone 6/7/8
-    { width: 1242, height: 2208, name: 'Default-736h.png' }, // iPhone 6+/7+/8+
-    { width: 1125, height: 2436, name: 'Default-2436h.png' }, // iPhone X/XS
-    { width: 1242, height: 2688, name: 'Default-2688h.png' }, // iPhone XS Max
-    { width: 828, height: 1792, name: 'Default-1792h.png' }, // iPhone XR
-    { width: 1170, height: 2532, name: 'Default-2532h.png' }, // iPhone 12/13 Pro
-    { width: 1284, height: 2778, name: 'Default-2778h.png' }, // iPhone 12/13 Pro Max
-    { width: 1179, height: 2556, name: 'Default-2556h.png' }, // iPhone 14/15
-    { width: 1290, height: 2796, name: 'Default-2796h.png' }, // iPhone 14/15 Plus
-    // iPad
-    { width: 1536, height: 2048, name: 'Default-Portrait@2x~ipad.png' }, // iPad Portrait
-    { width: 2048, height: 1536, name: 'Default-Landscape@2x~ipad.png' }, // iPad Landscape
-    { width: 2048, height: 2732, name: 'Default-Portrait@2x~ipadpro.png' }, // iPad Pro Portrait
-    { width: 2732, height: 2048, name: 'Default-Landscape@2x~ipadpro.png' } // iPad Pro Landscape
-  ],
-  android: [
-    { width: 320, height: 480, name: 'drawable-ldpi/splash.png' },
-    { width: 480, height: 800, name: 'drawable-mdpi/splash.png' },
-    { width: 720, height: 1280, name: 'drawable-hdpi/splash.png' },
-    { width: 960, height: 1600, name: 'drawable-xhdpi/splash.png' },
-    { width: 1280, height: 1920, name: 'drawable-xxhdpi/splash.png' },
-    { width: 1920, height: 2880, name: 'drawable-xxxhdpi/splash.png' }
-  ]
+  android: {
+    portrait: [
+      { width: 320, height: 480, folder: 'drawable-port-mdpi', filename: 'splash.png' },
+      { width: 480, height: 800, folder: 'drawable-port-hdpi', filename: 'splash.png' },
+      { width: 720, height: 1280, folder: 'drawable-port-xhdpi', filename: 'splash.png' },
+      { width: 960, height: 1600, folder: 'drawable-port-xxhdpi', filename: 'splash.png' },
+      { width: 1280, height: 1920, folder: 'drawable-port-xxxhdpi', filename: 'splash.png' }
+    ],
+    landscape: [
+      { width: 480, height: 320, folder: 'drawable-land-mdpi', filename: 'splash.png' },
+      { width: 800, height: 480, folder: 'drawable-land-hdpi', filename: 'splash.png' },
+      { width: 1280, height: 720, folder: 'drawable-land-xhdpi', filename: 'splash.png' },
+      { width: 1600, height: 960, folder: 'drawable-land-xxhdpi', filename: 'splash.png' },
+      { width: 1920, height: 1280, folder: 'drawable-land-xxxhdpi', filename: 'splash.png' }
+    ],
+    // Default splash (square-ish for adaptive)
+    default: [
+      { width: 2732, height: 2732, folder: 'drawable', filename: 'splash.png' }
+    ]
+  },
+  ios: {
+    universal: [
+      { width: 2732, height: 2732, filename: 'splash-2732x2732.png' },
+      { width: 2732, height: 2732, filename: 'splash-2732x2732-1.png' },
+      { width: 2732, height: 2732, filename: 'splash-2732x2732-2.png' }
+    ]
+  }
 };
 
-// Create splash screen SVG
-const createSplashSVG = (width, height) => {
-  const iconSize = Math.min(width, height) * 0.25;
-  const shieldSize = iconSize * 0.7;
+// Create comprehensive 2FA Studio splash screen SVG
+const createSplashSVG = (width, height, options = {}) => {
+  const { darkMode = false } = options;
+  
+  // Color scheme
+  const backgroundColor = darkMode ? '#1F2937' : '#FFFFFF';
+  const primaryColor = '#0EA5E9';
+  const textColor = darkMode ? '#FFFFFF' : '#1F2937';
+  const subtleColor = darkMode ? '#9CA3AF' : '#6B7280';
+  
+  // Calculate responsive dimensions
+  const minDimension = Math.min(width, height);
+  const isLandscape = width > height;
+  
+  // Logo and text sizing
+  const logoSize = Math.min(minDimension * 0.25, 150);
+  const titleFontSize = Math.min(minDimension * 0.08, 48);
+  const subtitleFontSize = Math.min(minDimension * 0.04, 24);
+  const taglineFontSize = Math.min(minDimension * 0.025, 16);
+  
+  // Layout positioning
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const logoY = centerY - logoSize * 0.6;
+  const titleY = logoY + logoSize * 1.2;
+  const subtitleY = titleY + titleFontSize * 1.2;
+  const taglineY = subtitleY + subtitleFontSize * 1.5;
+  
+  // Safe area considerations for notched devices
+  const safeAreaBottom = isLandscape ? 21 : 34;
   
   return `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-      <!-- Background gradient -->
-      <defs>
-        <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#0284C7;stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <rect width="${width}" height="${height}" fill="url(#bg-gradient)"/>
+      <!-- Background -->
+      <rect width="${width}" height="${height}" fill="${backgroundColor}"/>
       
-      <!-- Shield Icon -->
-      <g transform="translate(${width/2}, ${height/2})">
-        <!-- Shield -->
-        <path d="M 0 ${-iconSize * 0.35}
-                 L ${-shieldSize/2} ${-iconSize * 0.25}
-                 L ${-shieldSize/2} ${iconSize * 0}
-                 C ${-shieldSize/2} ${iconSize * 0.25}
-                   0 ${iconSize * 0.35}
-                   0 ${iconSize * 0.35}
-                 C 0 ${iconSize * 0.35}
-                   ${shieldSize/2} ${iconSize * 0.25}
-                   ${shieldSize/2} ${iconSize * 0}
-                 L ${shieldSize/2} ${-iconSize * 0.25}
+      <!-- Subtle background pattern -->
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="${subtleColor}" stroke-width="0.5" opacity="0.1"/>
+        </pattern>
+      </defs>
+      <rect width="${width}" height="${height}" fill="url(#grid)" opacity="0.3"/>
+      
+      <!-- Main logo/brand container -->
+      <g transform="translate(${centerX}, ${logoY})">
+        <!-- Shield background -->
+        <path d="M 0 ${-logoSize * 0.4}
+                 L ${-logoSize * 0.35} ${-logoSize * 0.25}
+                 L ${-logoSize * 0.35} ${logoSize * 0.1}
+                 C ${-logoSize * 0.35} ${logoSize * 0.35}
+                   0 ${logoSize * 0.5}
+                   0 ${logoSize * 0.5}
+                 C 0 ${logoSize * 0.5}
+                   ${logoSize * 0.35} ${logoSize * 0.35}
+                   ${logoSize * 0.35} ${logoSize * 0.1}
+                 L ${logoSize * 0.35} ${-logoSize * 0.25}
                  Z"
-              fill="white" opacity="0.95"/>
+              fill="${primaryColor}"
+              opacity="0.9"/>
         
-        <!-- Key inside shield -->
-        <circle cx="0" cy="${-iconSize * 0.05}" r="${iconSize * 0.12}" fill="#0EA5E9"/>
-        <rect x="-${iconSize * 0.02}" y="${-iconSize * 0.05}" width="${iconSize * 0.04}" height="${iconSize * 0.2}" fill="#0EA5E9"/>
-        <rect x="${iconSize * 0.08}" y="${iconSize * 0.08}" width="${iconSize * 0.06}" height="${iconSize * 0.04}" fill="#0EA5E9"/>
-        <rect x="${iconSize * 0.08}" y="${iconSize * 0.13}" width="${iconSize * 0.04}" height="${iconSize * 0.04}" fill="#0EA5E9"/>
+        <!-- Lock/Security symbol -->
+        <g transform="translate(0, ${logoSize * 0.05})">
+          <!-- Lock body -->
+          <rect x="${-logoSize * 0.12}" y="${-logoSize * 0.08}" 
+                width="${logoSize * 0.24}" height="${logoSize * 0.16}" 
+                rx="${logoSize * 0.03}" 
+                fill="white"/>
+          
+          <!-- Lock shackle -->
+          <path d="M ${-logoSize * 0.08} ${-logoSize * 0.08}
+                   L ${-logoSize * 0.08} ${-logoSize * 0.18}
+                   C ${-logoSize * 0.08} ${-logoSize * 0.24}
+                     ${-logoSize * 0.04} ${-logoSize * 0.28}
+                     0 ${-logoSize * 0.28}
+                   C ${logoSize * 0.04} ${-logoSize * 0.28}
+                     ${logoSize * 0.08} ${-logoSize * 0.24}
+                     ${logoSize * 0.08} ${-logoSize * 0.18}
+                   L ${logoSize * 0.08} ${-logoSize * 0.08}"
+                stroke="white" 
+                stroke-width="${logoSize * 0.02}" 
+                fill="none"/>
+          
+          <!-- Key hole -->
+          <circle r="${logoSize * 0.025}" fill="${primaryColor}"/>
+        </g>
       </g>
       
-      <!-- App Name -->
-      <text x="${width/2}" y="${height/2 + iconSize * 0.7}" 
-            font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
-            font-size="${iconSize * 0.3}" 
-            font-weight="600" 
-            fill="white" 
+      <!-- Brand text -->
+      <text x="${centerX}" y="${titleY}" 
+            font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+            font-size="${titleFontSize}" 
+            font-weight="700" 
+            fill="${textColor}" 
             text-anchor="middle">2FA Studio</text>
       
+      <!-- Subtitle -->
+      <text x="${centerX}" y="${subtitleY}" 
+            font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+            font-size="${subtitleFontSize}" 
+            font-weight="500" 
+            fill="${subtleColor}" 
+            text-anchor="middle">Secure Authentication</text>
+      
       <!-- Tagline -->
-      <text x="${width/2}" y="${height/2 + iconSize * 0.9}" 
-            font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
-            font-size="${iconSize * 0.12}" 
+      <text x="${centerX}" y="${taglineY}" 
+            font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+            font-size="${taglineFontSize}" 
             font-weight="400" 
-            fill="white" 
-            opacity="0.8"
-            text-anchor="middle">Secure Two-Factor Authentication</text>
+            fill="${subtleColor}" 
+            text-anchor="middle" 
+            opacity="0.8">Your trusted two-factor authentication companion</text>
+      
+      <!-- Loading indicator -->
+      <g transform="translate(${centerX}, ${height - safeAreaBottom - 60})">
+        <circle r="3" fill="${primaryColor}" opacity="0.3"/>
+        <circle r="3" fill="${primaryColor}" opacity="0.3" cx="12"/>
+        <circle r="3" fill="${primaryColor}" opacity="0.3" cx="24"/>
+      </g>
+      
+      <!-- Version indicator -->
+      <text x="${width - 20}" y="${height - safeAreaBottom - 10}" 
+            font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+            font-size="10" 
+            fill="${subtleColor}" 
+            text-anchor="end" 
+            opacity="0.5">v1.0.0</text>
     </svg>
   `;
 };
 
-async function generateSplashScreens() {
-  console.log('🎨 Generating splash screens for 2FA Studio...\n');
-  
-  // Create output directories
-  const dirs = [
-    'public/splash',
-    'public/splash/ios',
-    'public/splash/android/drawable-ldpi',
-    'public/splash/android/drawable-mdpi',
-    'public/splash/android/drawable-hdpi',
-    'public/splash/android/drawable-xhdpi',
-    'public/splash/android/drawable-xxhdpi',
-    'public/splash/android/drawable-xxxhdpi'
-  ];
-  
-  for (const dir of dirs) {
-    await fs.mkdir(path.join(process.cwd(), dir), { recursive: true });
+async function ensureDirectoryExists(dirPath) {
+  try {
+    await fs.access(dirPath);
+  } catch {
+    await fs.mkdir(dirPath, { recursive: true });
   }
+}
+
+async function generateSplashSet(splashes, basePath, platform, category) {
+  console.log(`\n🎨 Generating ${platform} ${category} splash screens...`);
   
-  // Generate splash screens for each platform
-  for (const platform of ['ios', 'android']) {
-    console.log(`\n📱 Generating ${platform.toUpperCase()} splash screens...`);
+  for (const splash of splashes) {
+    const outputDir = path.join(basePath, splash.folder || '');
+    await ensureDirectoryExists(outputDir);
     
-    for (const splash of splashSizes[platform]) {
-      const svg = createSplashSVG(splash.width, splash.height);
-      const outputPath = path.join(
-        process.cwd(),
-        'public/splash',
-        platform,
-        splash.name
-      );
+    const outputPath = path.join(outputDir, splash.filename);
+    
+    // Create SVG for this splash screen
+    const isLandscape = splash.width > splash.height;
+    const isDarkMode = splash.filename.includes('dark') || splash.filename.includes('Dark');
+    
+    const svg = createSplashSVG(splash.width, splash.height, {
+      darkMode: isDarkMode
+    });
+    
+    try {
+      await sharp(Buffer.from(svg), { density: 300 })
+        .resize(splash.width, splash.height)
+        .png()
+        .toFile(outputPath);
       
-      try {
-        await sharp(Buffer.from(svg), { density: 300 })
-          .resize(splash.width, splash.height)
-          .png()
-          .toFile(outputPath);
-          
-        console.log(`  ✅ ${splash.name} (${splash.width}x${splash.height})`);
-      } catch (error) {
-        console.error(`  ❌ Failed to generate ${splash.name}: ${error.message}`);
-      }
+      console.log(`  ✅ ${splash.filename} (${splash.width}x${splash.height}) ${isLandscape ? 'landscape' : 'portrait'}`);
+    } catch (error) {
+      console.error(`  ❌ Failed to generate ${splash.filename}: ${error.message}`);
     }
   }
+}
+
+async function generateSplashScreens() {
+  console.log('🌟 Generating comprehensive splash screens for 2FA Studio...\n');
   
-  console.log('\n✨ Splash screen generation complete!');
+  const projectRoot = path.join(__dirname, '..');
+  
+  // Generate Android splash screens
+  const androidResPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'res');
+  
+  for (const [orientation, splashes] of Object.entries(splashSizes.android)) {
+    await generateSplashSet(splashes, androidResPath, 'Android', orientation);
+  }
+
+  // Generate iOS splash screens
+  const iosImagesDir = path.join(projectRoot, 'ios', 'App', 'App', 'Assets.xcassets', 'Splash.imageset');
+  await ensureDirectoryExists(iosImagesDir);
+  
+  await generateSplashSet(splashSizes.ios.universal, iosImagesDir, 'iOS', 'Universal');
+
+  // Create Contents.json for iOS splash screens
+  const iosContentsJson = {
+    images: [
+      {
+        idiom: "universal",
+        filename: "splash-2732x2732.png",
+        scale: "1x"
+      },
+      {
+        idiom: "universal",
+        filename: "splash-2732x2732-1.png",
+        scale: "2x"
+      },
+      {
+        idiom: "universal",
+        filename: "splash-2732x2732-2.png",
+        scale: "3x"
+      }
+    ],
+    info: {
+      version: 1,
+      author: "xcode"
+    }
+  };
+  
+  await fs.writeFile(
+    path.join(iosImagesDir, 'Contents.json'),
+    JSON.stringify(iosContentsJson, null, 2)
+  );
+  console.log('  ✅ iOS Contents.json created');
+
+  // Generate web splash screen for PWA
+  console.log('\n🌐 Generating web splash screen...');
+  const webSplashDir = path.join(projectRoot, 'public');
+  const webSplashSvg = createSplashSVG(1920, 1080);
+  
+  await sharp(Buffer.from(webSplashSvg), { density: 300 })
+    .resize(1920, 1080)
+    .png()
+    .toFile(path.join(webSplashDir, 'splash-screen.png'));
+  
+  console.log('  ✅ Web splash screen generated (1920x1080)');
+
+  console.log('\n✅ All splash screens generated successfully!');
+  console.log('\n📋 Generated assets:');
+  console.log('   • Android: Portrait and landscape for all densities');
+  console.log('   • iOS: Universal splash with multiple scales');
+  console.log('   • Web: PWA splash screen');
+  console.log('\n💡 Next steps:');
+  console.log('   1. Review splash screens in android/app/src/main/res/drawable-*');
+  console.log('   2. Review iOS splash in ios/App/App/Assets.xcassets/Splash.imageset/');
+  console.log('   3. Test splash screens on different devices and orientations');
+  console.log('   4. Customize colors and branding as needed');
 }
 
 // Run the generator
-generateSplashScreens().catch(console.error);
+if (require.main === module) {
+  generateSplashScreens().catch(console.error);
+}
+
+module.exports = { generateSplashScreens };

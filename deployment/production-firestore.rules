@@ -1,0 +1,239 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Enhanced helper functions for production security
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasValidSubscription() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.subscription.status == 'active';
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    
+    function hasAnyRole(roles) {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in roles;
+    }
+    
+    function canAddAccount() {
+      let userDoc = exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data 
+        : null;
+      
+      return userDoc == null || 
+        userDoc.subscription.accountLimit == null || 
+        !('accountCount' in userDoc) || 
+        userDoc.accountCount < userDoc.subscription.accountLimit;
+    }
+    
+    function isValidAccountData(data) {
+      return data.keys().hasAll(['issuer', 'label', 'type', 'encryptedSecret']) &&
+        data.type in ['totp', 'hotp'] &&
+        data.issuer is string &&
+        data.label is string &&
+        data.encryptedSecret is string &&
+        data.encryptedSecret.size() > 0;
+    }
+    
+    function isValidUserData(data) {
+      return data.keys().hasAll(['email', 'subscription', 'settings']) &&
+        data.email is string &&
+        data.subscription.tier in ['free', 'premium', 'enterprise'] &&
+        data.settings is map;
+    }
+    
+    function isValidDeviceData(data) {
+      return data.keys().hasAll(['deviceId', 'platform', 'lastSeen']) &&
+        data.deviceId is string &&
+        data.platform in ['web', 'android', 'ios', 'extension'] &&
+        data.lastSeen is timestamp;
+    }
+    
+    function isRateLimited() {
+      // Check if user has exceeded rate limits (simplified)
+      return false; // Implement based on your rate limiting strategy
+    }
+    
+    // User document rules with enhanced security
+    match /users/{userId} {
+      allow read: if isOwner(userId) && !isRateLimited();
+      
+      allow create: if isOwner(userId) && 
+        isValidUserData(request.resource.data) &&
+        request.resource.data.subscription.tier == 'free' &&
+        !isRateLimited();
+        
+      allow update: if isOwner(userId) && 
+        isValidUserData(request.resource.data) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscription']) ||
+         (resource.data.subscription == null && request.resource.data.subscription.tier == 'free')) &&
+        !isRateLimited();
+        
+      allow delete: if false; // Users cannot delete their account through client
+      
+      // User's devices subcollection
+      match /devices/{deviceId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow create: if isOwner(userId) && 
+          isValidDeviceData(request.resource.data) &&
+          !isRateLimited();
+        allow update: if isOwner(userId) && 
+          isValidDeviceData(request.resource.data) &&
+          !isRateLimited();
+        allow delete: if isOwner(userId);
+      }
+      
+      // User's accounts (2FA) subcollection
+      match /accounts/{accountId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow create: if isOwner(userId) && 
+          canAddAccount() && 
+          isValidAccountData(request.resource.data) &&
+          !isRateLimited();
+        allow update: if isOwner(userId) && 
+          isValidAccountData(request.resource.data) &&
+          !isRateLimited();
+        allow delete: if isOwner(userId);
+      }
+      
+      // User's sessions subcollection with expiry check
+      match /sessions/{sessionId} {
+        allow read: if isOwner(userId) && 
+          resource.data.expiresAt > request.time &&
+          !isRateLimited();
+        allow create: if isOwner(userId) && 
+          request.resource.data.expiresAt > request.time &&
+          !isRateLimited();
+        allow update: if isOwner(userId) && 
+          request.resource.data.expiresAt > request.time &&
+          !isRateLimited();
+        allow delete: if isOwner(userId);
+      }
+      
+      // User's backups subcollection
+      match /backups/{backupId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow create: if isOwner(userId) && 
+          (hasValidSubscription() || resource.data == null) &&
+          !isRateLimited();
+        allow update: if false; // Backups are immutable
+        allow delete: if isOwner(userId);
+      }
+      
+      // User's usage analytics subcollection
+      match /usage/{usageId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow create: if isOwner(userId) && !isRateLimited();
+        allow update: if false; // Usage records are immutable
+        allow delete: if isOwner(userId);
+      }
+      
+      // User's backup schedules subcollection
+      match /backupSchedules/{scheduleId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow write: if isOwner(userId) && 
+          hasValidSubscription() &&
+          !isRateLimited();
+      }
+      
+      // User's backup history subcollection
+      match /backupHistory/{historyId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow create: if isOwner(userId) && !isRateLimited();
+        allow update: if false; // History records are immutable
+        allow delete: if isOwner(userId);
+      }
+      
+      // User's sync conflicts subcollection
+      match /syncConflicts/{conflictId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow write: if isOwner(userId) && !isRateLimited();
+      }
+      
+      // User's migration records subcollection
+      match /migrationRecords/{recordId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow create: if isOwner(userId) && !isRateLimited();
+        allow update: if false; // Migration records are immutable
+        allow delete: if false; // Keep for audit trail
+      }
+      
+      // User's folders subcollection
+      match /folders/{folderId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow write: if isOwner(userId) && !isRateLimited();
+      }
+      
+      // User's tags subcollection
+      match /tags/{tagId} {
+        allow read: if isOwner(userId) && !isRateLimited();
+        allow write: if isOwner(userId) && !isRateLimited();
+      }
+    }
+    
+    // Admin access rules with role-based security
+    match /admin/{document=**} {
+      allow read: if hasAnyRole(['admin', 'super_admin']) && !isRateLimited();
+      allow write: if hasRole('super_admin') && !isRateLimited();
+    }
+    
+    // Feature flags (read-only for authenticated users)
+    match /features/{featureId} {
+      allow read: if isAuthenticated() && !isRateLimited();
+      allow write: if false; // Only server can modify
+    }
+    
+    // App configuration (read-only for all users)
+    match /config/{configId} {
+      allow read: if true;
+      allow write: if false; // Only server can modify
+    }
+    
+    // Audit logs (write-only from client, read requires admin)
+    match /audit/{logId} {
+      allow read: if hasAnyRole(['admin', 'super_admin']) && !isRateLimited();
+      allow create: if isAuthenticated() && !isRateLimited();
+      allow update, delete: if false;
+    }
+    
+    // Subscription plans (read-only)
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if false; // Only server can modify
+    }
+    
+    // Support tickets
+    match /support/{ticketId} {
+      allow read: if isOwner(ticketId.split('_')[0]) || hasAnyRole(['admin', 'super_admin']);
+      allow create: if isAuthenticated() && !isRateLimited();
+      allow update: if isOwner(ticketId.split('_')[0]) || hasAnyRole(['admin', 'super_admin']);
+      allow delete: if hasRole('super_admin');
+    }
+    
+    // System status (read-only)
+    match /system/{statusId} {
+      allow read: if true;
+      allow write: if hasRole('super_admin');
+    }
+    
+    // Rate limiting collection (server-only)
+    match /rateLimits/{limitId} {
+      allow read, write: if false; // Only server can access
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

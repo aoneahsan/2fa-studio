@@ -1,7 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@src/index.css';
+import '@src/styles/rtl.css';
 import App from '@src/App.tsx';
+import I18nProvider from '@src/components/common/I18nProvider';
 
 // Register service worker for PWA functionality
 if ('serviceWorker' in navigator && (import.meta as any).env.PROD) {
@@ -65,6 +67,8 @@ window.addEventListener('appinstalled', () => {
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<App />
+		<I18nProvider>
+			<App />
+		</I18nProvider>
 	</StrictMode>
 );

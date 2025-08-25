@@ -1,0 +1,370 @@
+{
+  "title": "Settings",
+  "subtitle": "Customize your 2FA Studio experience",
+  "sections": {
+    "profile": "Profile",
+    "security": "Security",
+    "appearance": "Appearance",
+    "notifications": "Notifications",
+    "backup": "Backup & Sync",
+    "privacy": "Privacy",
+    "advanced": "Advanced",
+    "about": "About"
+  },
+  "profile": {
+    "title": "Profile settings",
+    "subtitle": "Manage your account information",
+    "avatar": "Profile picture",
+    "changeAvatar": "Change avatar",
+    "removeAvatar": "Remove avatar",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "phone": "Phone number",
+    "timezone": "Timezone",
+    "language": "Language",
+    "save": "Save changes",
+    "cancel": "Cancel changes",
+    "success": "Profile updated successfully",
+    "changeEmail": "Change email",
+    "verifyEmail": "Verify new email"
+  },
+  "security": {
+    "title": "Security settings",
+    "subtitle": "Protect your account and data",
+    "password": {
+      "title": "Password",
+      "change": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "strength": "Password strength",
+      "requirements": "Password requirements",
+      "minLength": "At least 8 characters",
+      "uppercase": "At least one uppercase letter",
+      "lowercase": "At least one lowercase letter",
+      "number": "At least one number",
+      "special": "At least one special character",
+      "success": "Password changed successfully"
+    },
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "subtitle": "Add an extra layer of security to your account",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable 2FA",
+      "disable": "Disable 2FA",
+      "methods": {
+        "authenticator": "Authenticator app",
+        "sms": "SMS",
+        "email": "Email",
+        "backup": "Backup codes"
+      },
+      "setup": "Set up two-factor authentication",
+      "recoveryCodes": "Recovery codes",
+      "generateCodes": "Generate new codes"
+    },
+    "biometric": {
+      "title": "Biometric authentication",
+      "subtitle": "Use fingerprint or face recognition",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable biometric authentication",
+      "disable": "Disable biometric authentication",
+      "notSupported": "Not supported on this device",
+      "setup": "Set up biometric authentication"
+    },
+    "sessions": {
+      "title": "Active sessions",
+      "subtitle": "Manage your logged-in devices",
+      "current": "Current session",
+      "device": "Device",
+      "location": "Location",
+      "lastActive": "Last active",
+      "signOut": "Sign out",
+      "signOutAll": "Sign out all other sessions",
+      "signOutAllConfirm": "Sign out of all other devices?"
+    },
+    "appLock": {
+      "title": "App lock",
+      "subtitle": "Lock the app when not in use",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable app lock",
+      "disable": "Disable app lock",
+      "timeout": "Lock timeout",
+      "timeouts": {
+        "immediate": "Immediately",
+        "1min": "1 minute",
+        "5min": "5 minutes",
+        "15min": "15 minutes",
+        "30min": "30 minutes",
+        "never": "Never"
+      },
+      "method": "Lock method",
+      "methods": {
+        "biometric": "Biometric",
+        "password": "Password",
+        "pin": "PIN"
+      }
+    }
+  },
+  "appearance": {
+    "title": "Appearance settings",
+    "subtitle": "Customize how the app looks",
+    "theme": {
+      "title": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "auto": "Auto (follows system)"
+    },
+    "colorScheme": {
+      "title": "Color scheme",
+      "blue": "Blue",
+      "green": "Green",
+      "purple": "Purple",
+      "red": "Red",
+      "orange": "Orange",
+      "pink": "Pink",
+      "custom": "Custom"
+    },
+    "layout": {
+      "title": "Layout",
+      "compact": "Compact",
+      "comfortable": "Comfortable",
+      "spacious": "Spacious"
+    },
+    "fontSize": {
+      "title": "Font size",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "extraLarge": "Extra large"
+    },
+    "animations": {
+      "title": "Animations",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "reduced": "Reduced motion"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "Choose your preferred language",
+      "current": "Current language",
+      "available": "Available languages",
+      "change": "Change language",
+      "success": "Language changed successfully",
+      "restart": "Please restart the app for full language support"
+    }
+  },
+  "notifications": {
+    "title": "Notification settings",
+    "subtitle": "Choose what notifications you receive",
+    "push": {
+      "title": "Push notifications",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable push notifications",
+      "disable": "Disable push notifications",
+      "notSupported": "Not supported on this device"
+    },
+    "types": {
+      "security": {
+        "title": "Security alerts",
+        "description": "Important security notifications",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "backup": {
+        "title": "Backup reminders",
+        "description": "Reminders to backup your accounts",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "updates": {
+        "title": "App updates",
+        "description": "Notifications about new features and updates",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "sync": {
+        "title": "Sync status",
+        "description": "Notifications about sync operations",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      }
+    },
+    "schedule": {
+      "title": "Quiet hours",
+      "subtitle": "Disable notifications during these hours",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "start": "Start time",
+      "end": "End time",
+      "days": "Days",
+      "everyday": "Everyday",
+      "weekdays": "Weekdays",
+      "weekends": "Weekends",
+      "custom": "Custom"
+    }
+  },
+  "backup": {
+    "title": "Backup & sync settings",
+    "subtitle": "Keep your accounts safe and synchronized",
+    "cloud": {
+      "title": "Cloud backup",
+      "subtitle": "Automatically backup your accounts to the cloud",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable cloud backup",
+      "disable": "Disable cloud backup",
+      "provider": "Cloud provider",
+      "providers": {
+        "google": "Google Drive",
+        "icloud": "iCloud",
+        "dropbox": "Dropbox",
+        "onedrive": "OneDrive"
+      },
+      "frequency": "Backup frequency",
+      "frequencies": {
+        "realtime": "Real-time",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "manual": "Manual only"
+      },
+      "lastBackup": "Last backup",
+      "nextBackup": "Next backup",
+      "backupNow": "Backup now",
+      "encryption": {
+        "title": "Encryption",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "password": "Encryption password",
+        "changePassword": "Change password"
+      }
+    },
+    "local": {
+      "title": "Local backup",
+      "subtitle": "Create local backup files",
+      "export": "Export backup",
+      "import": "Import backup",
+      "location": "Backup location",
+      "autoExport": "Auto-export",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "sync": {
+      "title": "Device sync",
+      "subtitle": "Sync accounts across your devices",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable sync",
+      "disable": "Disable sync",
+      "devices": "Connected devices",
+      "lastSync": "Last sync",
+      "syncNow": "Sync now",
+      "conflicts": "Sync conflicts",
+      "resolveConflicts": "Resolve conflicts"
+    }
+  },
+  "privacy": {
+    "title": "Privacy settings",
+    "subtitle": "Control your privacy and data",
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Help improve the app by sharing anonymous usage data",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable analytics",
+      "disable": "Disable analytics"
+    },
+    "crashReports": {
+      "title": "Crash reports",
+      "subtitle": "Automatically send crash reports to help fix issues",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable crash reports",
+      "disable": "Disable crash reports"
+    },
+    "dataCollection": {
+      "title": "Data collection",
+      "subtitle": "What data we collect and why",
+      "viewPolicy": "View privacy policy",
+      "downloadData": "Download my data",
+      "deleteData": "Delete my data"
+    },
+    "cookies": {
+      "title": "Cookies",
+      "subtitle": "Manage cookie preferences",
+      "essential": "Essential cookies",
+      "analytics": "Analytics cookies",
+      "advertising": "Advertising cookies",
+      "manage": "Manage cookies"
+    }
+  },
+  "advanced": {
+    "title": "Advanced settings",
+    "subtitle": "Advanced configuration options",
+    "developer": {
+      "title": "Developer options",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable developer options",
+      "disable": "Disable developer options",
+      "debugMode": "Debug mode",
+      "logging": "Enable logging",
+      "clearLogs": "Clear logs",
+      "exportLogs": "Export logs"
+    },
+    "experimental": {
+      "title": "Experimental features",
+      "subtitle": "Try new features before they're released",
+      "warning": "These features are experimental and may not work as expected",
+      "betaFeatures": "Beta features",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "performance": {
+      "title": "Performance",
+      "subtitle": "Optimize app performance",
+      "animations": "Hardware acceleration",
+      "preloading": "Preload content",
+      "caching": "Enable caching",
+      "clearCache": "Clear cache"
+    },
+    "reset": {
+      "title": "Reset",
+      "subtitle": "Reset app settings and data",
+      "resetSettings": "Reset settings",
+      "resetData": "Reset all data",
+      "warning": "This action cannot be undone",
+      "confirm": "I understand the consequences"
+    }
+  },
+  "about": {
+    "title": "About 2FA Studio",
+    "version": "Version {{version}}",
+    "build": "Build {{build}}",
+    "developer": "Developed by {{developer}}",
+    "website": "Visit website",
+    "support": "Contact support",
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "licenses": "Open source licenses",
+    "changelog": "What's new",
+    "rate": "Rate the app",
+    "feedback": "Send feedback",
+    "share": "Share with friends"
+  },
+  "success": {
+    "settingsSaved": "Settings saved successfully",
+    "passwordChanged": "Password changed successfully",
+    "emailChanged": "Email changed successfully",
+    "profileUpdated": "Profile updated successfully",
+    "backupCreated": "Backup created successfully",
+    "syncCompleted": "Sync completed successfully",
+    "languageChanged": "Language changed successfully"
+  }
+}

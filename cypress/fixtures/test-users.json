@@ -1,0 +1,70 @@
+{
+  "validUser": {
+    "email": "testuser@2fastudio.app",
+    "password": "TestPassword123!",
+    "encryptionPassword": "EncryptionKey123!",
+    "encryptionHint": "Test encryption hint for valid user",
+    "name": "Test User",
+    "displayName": "Test User"
+  },
+  "adminUser": {
+    "email": "admin@2fastudio.app",
+    "password": "AdminPassword123!",
+    "encryptionPassword": "AdminEncryption123!",
+    "encryptionHint": "Admin encryption hint",
+    "name": "Admin User",
+    "displayName": "Admin User"
+  },
+  "premiumUser": {
+    "email": "premium@2fastudio.app",
+    "password": "PremiumPass123!",
+    "encryptionPassword": "PremiumEnc123!",
+    "encryptionHint": "Premium user encryption",
+    "name": "Premium User",
+    "displayName": "Premium User",
+    "subscriptionPlan": "premium"
+  },
+  "freeUser": {
+    "email": "freeuser@2fastudio.app",
+    "password": "FreeUserPass123!",
+    "encryptionPassword": "FreeEnc123!",
+    "encryptionHint": "Free user encryption",
+    "name": "Free User",
+    "displayName": "Free User",
+    "subscriptionPlan": "free"
+  },
+  "weakPassUser": {
+    "email": "weakpass@2fastudio.app",
+    "password": "weak",
+    "encryptionPassword": "123",
+    "encryptionHint": "weak",
+    "name": "Weak Password User",
+    "displayName": "Weak User"
+  },
+  "socialLoginUser": {
+    "email": "socialuser@gmail.com",
+    "name": "Social User",
+    "displayName": "Social User",
+    "provider": "google"
+  },
+  "testBatch": [
+    {
+      "email": "batch1@2fastudio.app",
+      "password": "BatchPass123!",
+      "encryptionPassword": "BatchEnc123!",
+      "name": "Batch User 1"
+    },
+    {
+      "email": "batch2@2fastudio.app",
+      "password": "BatchPass456!",
+      "encryptionPassword": "BatchEnc456!",
+      "name": "Batch User 2"
+    },
+    {
+      "email": "batch3@2fastudio.app",
+      "password": "BatchPass789!",
+      "encryptionPassword": "BatchEnc789!",
+      "name": "Batch User 3"
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+{
+  "title": "Backup & Restore",
+  "subtitle": "Keep your accounts safe with secure backups",
+  "overview": {
+    "title": "Backup overview",
+    "lastBackup": "Last backup",
+    "nextBackup": "Next backup scheduled",
+    "totalAccounts": "{{count}} accounts backed up",
+    "status": {
+      "upToDate": "All backed up",
+      "pending": "Backup pending",
+      "inProgress": "Backing up...",
+      "failed": "Backup failed",
+      "never": "Never backed up"
+    },
+    "backupNow": "Backup now",
+    "scheduleBackup": "Schedule backup",
+    "viewHistory": "View backup history"
+  },
+  "create": {
+    "title": "Create backup",
+    "subtitle": "Create a secure backup of your accounts",
+    "method": {
+      "title": "Backup method",
+      "local": "Local file",
+      "cloud": "Cloud storage",
+      "both": "Both local and cloud"
+    },
+    "options": {
+      "title": "Backup options",
+      "includeSettings": "Include app settings",
+      "includeFolders": "Include folders and organization",
+      "includeTags": "Include tags",
+      "includeUsageStats": "Include usage statistics",
+      "encryption": {
+        "title": "Encryption",
+        "enabled": "Encrypt backup",
+        "password": "Encryption password",
+        "confirmPassword": "Confirm password",
+        "strength": "Password strength",
+        "hint": "Password hint (optional)",
+        "warning": "Without the password, you won't be able to restore your backup"
+      }
+    },
+    "destination": {
+      "title": "Backup destination",
+      "local": {
+        "title": "Local backup",
+        "description": "Save backup file to device",
+        "filename": "Backup filename",
+        "location": "Save location"
+      },
+      "cloud": {
+        "title": "Cloud backup",
+        "description": "Save to cloud storage",
+        "provider": "Cloud provider",
+        "account": "Account",
+        "folder": "Folder",
+        "signIn": "Sign in to {{provider}}",
+        "signOut": "Sign out"
+      }
+    },
+    "progress": {
+      "preparing": "Preparing backup...",
+      "encrypting": "Encrypting data...",
+      "uploading": "Uploading to cloud...",
+      "saving": "Saving backup...",
+      "completed": "Backup completed successfully",
+      "failed": "Backup failed"
+    },
+    "create": "Create backup",
+    "cancel": "Cancel backup"
+  },
+  "restore": {
+    "title": "Restore backup",
+    "subtitle": "Restore accounts from a backup file",
+    "source": {
+      "title": "Backup source",
+      "local": "Local file",
+      "cloud": "Cloud storage",
+      "url": "URL"
+    },
+    "file": {
+      "select": "Select backup file",
+      "dragDrop": "Drag and drop backup file here",
+      "supported": "Supported formats: .2fa, .json, .zip",
+      "invalid": "Invalid backup file",
+      "corrupted": "Backup file is corrupted",
+      "version": "Backup version: {{version}}",
+      "created": "Created: {{date}}",
+      "accounts": "{{count}} accounts found"
+    },
+    "decryption": {
+      "title": "Decrypt backup",
+      "password": "Backup password",
+      "hint": "Password hint: {{hint}}",
+      "incorrect": "Incorrect password",
+      "decrypt": "Decrypt"
+    },
+    "preview": {
+      "title": "Backup preview",
+      "accounts": "Accounts ({{count}})",
+      "settings": "App settings",
+      "folders": "Folders ({{count}})",
+      "tags": "Tags ({{count}})",
+      "conflicts": "Conflicts detected",
+      "duplicates": "{{count}} duplicate accounts found"
+    },
+    "options": {
+      "title": "Restore options",
+      "restoreAccounts": "Restore accounts",
+      "restoreSettings": "Restore app settings",
+      "restoreFolders": "Restore folders",
+      "restoreTags": "Restore tags",
+      "handleDuplicates": {
+        "title": "Handle duplicates",
+        "skip": "Skip duplicates",
+        "replace": "Replace existing",
+        "merge": "Merge accounts",
+        "keepBoth": "Keep both versions"
+      },
+      "clearExisting": "Clear existing data before restore"
+    },
+    "progress": {
+      "decrypting": "Decrypting backup...",
+      "analyzing": "Analyzing backup...",
+      "restoring": "Restoring accounts...",
+      "completed": "Restore completed successfully",
+      "failed": "Restore failed"
+    },
+    "restore": "Restore backup",
+    "cancel": "Cancel restore"
+  },
+  "cloud": {
+    "title": "Cloud backup",
+    "subtitle": "Automatically backup to cloud storage",
+    "providers": {
+      "google": {
+        "name": "Google Drive",
+        "description": "Backup to your Google Drive",
+        "status": "Connected as {{email}}",
+        "connect": "Connect Google Drive",
+        "disconnect": "Disconnect"
+      },
+      "icloud": {
+        "name": "iCloud",
+        "description": "Backup to iCloud (iOS only)",
+        "status": "Connected",
+        "connect": "Enable iCloud backup",
+        "disconnect": "Disable iCloud backup"
+      },
+      "dropbox": {
+        "name": "Dropbox",
+        "description": "Backup to Dropbox",
+        "status": "Connected as {{email}}",
+        "connect": "Connect Dropbox",
+        "disconnect": "Disconnect"
+      }
+    },
+    "settings": {
+      "autoBackup": "Automatic backup",
+      "frequency": "Backup frequency",
+      "frequencies": {
+        "realtime": "Real-time (after each change)",
+        "hourly": "Every hour",
+        "daily": "Daily at {{time}}",
+        "weekly": "Weekly on {{day}}",
+        "manual": "Manual only"
+      },
+      "retention": "Keep backups for",
+      "retentions": {
+        "1week": "1 week",
+        "1month": "1 month",
+        "3months": "3 months",
+        "6months": "6 months",
+        "1year": "1 year",
+        "forever": "Forever"
+      },
+      "encryption": "Always encrypt backups",
+      "compression": "Compress backups"
+    },
+    "status": {
+      "connected": "Connected",
+      "disconnected": "Not connected",
+      "syncing": "Syncing...",
+      "upToDate": "Up to date",
+      "error": "Sync error",
+      "quotaFull": "Storage quota full"
+    }
+  },
+  "schedule": {
+    "title": "Backup schedule",
+    "subtitle": "Automatically backup your accounts",
+    "enabled": "Scheduled backup enabled",
+    "disabled": "Scheduled backup disabled",
+    "enable": "Enable scheduled backup",
+    "disable": "Disable scheduled backup",
+    "frequency": "Backup frequency",
+    "time": "Backup time",
+    "days": "Backup days",
+    "notification": "Notify when backup completes",
+    "nextBackup": "Next backup: {{date}}",
+    "missedBackup": "Missed backup detected",
+    "save": "Save schedule"
+  },
+  "history": {
+    "title": "Backup history",
+    "subtitle": "View and manage previous backups",
+    "empty": "No backup history",
+    "item": {
+      "date": "{{date}}",
+      "size": "{{size}}",
+      "accounts": "{{count}} accounts",
+      "type": "{{type}} backup",
+      "status": "{{status}}",
+      "actions": {
+        "restore": "Restore",
+        "download": "Download",
+        "delete": "Delete",
+        "details": "View details"
+      }
+    },
+    "types": {
+      "manual": "Manual",
+      "scheduled": "Scheduled",
+      "auto": "Automatic"
+    },
+    "statuses": {
+      "completed": "Completed",
+      "failed": "Failed",
+      "partial": "Partial",
+      "corrupted": "Corrupted"
+    },
+    "details": {
+      "title": "Backup details",
+      "created": "Created",
+      "size": "Size",
+      "accounts": "Accounts",
+      "version": "Version",
+      "method": "Method",
+      "encryption": "Encryption",
+      "checksum": "Checksum",
+      "notes": "Notes"
+    },
+    "cleanup": {
+      "title": "Cleanup old backups",
+      "subtitle": "Remove old backups to free up space",
+      "older": "Delete backups older than",
+      "keep": "Keep at least",
+      "confirm": "Delete {{count}} old backups?",
+      "cleanup": "Cleanup now"
+    }
+  },
+  "security": {
+    "title": "Backup security",
+    "subtitle": "Keep your backups secure",
+    "encryption": {
+      "title": "Encryption",
+      "description": "All backups are encrypted with AES-256 encryption",
+      "enabled": "Encryption enabled",
+      "password": "Encryption password",
+      "changePassword": "Change password",
+      "strength": "Use strong passwords to protect your backups"
+    },
+    "verification": {
+      "title": "Backup verification",
+      "description": "Verify backup integrity before restoring",
+      "checksum": "Checksum verification",
+      "signature": "Digital signature",
+      "verify": "Verify backup"
+    },
+    "sharing": {
+      "title": "Sharing backups",
+      "warning": "Never share backup files containing secret keys",
+      "encrypted": "Only share encrypted backups",
+      "links": "Backup sharing links expire after 24 hours"
+    }
+  },
+  "import": {
+    "title": "Import from other apps",
+    "subtitle": "Import accounts from other authenticator apps",
+    "sources": {
+      "googleAuthenticator": "Google Authenticator",
+      "microsoftAuthenticator": "Microsoft Authenticator",
+      "authy": "Authy",
+      "lastpass": "LastPass Authenticator",
+      "onelogin": "OneLogin",
+      "file": "File import",
+      "qr": "QR code import"
+    },
+    "methods": {
+      "export": "Export from other app",
+      "transfer": "Transfer via QR codes",
+      "manual": "Manual import"
+    },
+    "instructions": {
+      "googleAuthenticator": [
+        "Open Google Authenticator",
+        "Tap the three dots menu",
+        "Select 'Transfer accounts'",
+        "Choose 'Export accounts'",
+        "Scan the generated QR codes with 2FA Studio"
+      ],
+      "microsoftAuthenticator": [
+        "Open Microsoft Authenticator",
+        "Tap the three dots menu",
+        "Select 'Settings'",
+        "Choose 'Backup'",
+        "Export your accounts"
+      ]
+    }
+  },
+  "export": {
+    "title": "Export accounts",
+    "subtitle": "Export your accounts to share or backup",
+    "formats": {
+      "json": "JSON file",
+      "csv": "CSV file",
+      "qr": "QR codes",
+      "uri": "URI list",
+      "encrypted": "Encrypted backup"
+    },
+    "options": {
+      "includeSecrets": "Include secret keys",
+      "includeFolders": "Include folder structure",
+      "includeTags": "Include tags",
+      "password": "Password protection"
+    },
+    "warning": "Exported files containing secret keys are sensitive. Keep them secure.",
+    "export": "Export accounts"
+  },
+  "errors": {
+    "backupFailed": "Backup failed: {{error}}",
+    "restoreFailed": "Restore failed: {{error}}",
+    "invalidFile": "Invalid backup file",
+    "wrongPassword": "Incorrect backup password",
+    "networkError": "Network error during backup",
+    "storageQuotaExceeded": "Storage quota exceeded",
+    "permissionDenied": "Permission denied",
+    "corruptedBackup": "Backup file is corrupted",
+    "unsupportedVersion": "Unsupported backup version",
+    "cloudNotConnected": "Cloud storage not connected"
+  },
+  "success": {
+    "backupCreated": "Backup created successfully",
+    "backupRestored": "Backup restored successfully",
+    "accountsImported": "{{count}} accounts imported successfully",
+    "settingsRestored": "Settings restored successfully",
+    "cloudConnected": "Cloud storage connected successfully",
+    "scheduleUpdated": "Backup schedule updated"
+  }
+}

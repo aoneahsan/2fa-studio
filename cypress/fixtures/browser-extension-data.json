@@ -1,0 +1,162 @@
+{
+  "extensionSettings": {
+    "autoFill": true,
+    "showNotifications": true,
+    "lockTimeout": 300,
+    "syncEnabled": true,
+    "shortcutEnabled": true,
+    "contextMenuEnabled": true,
+    "badgeEnabled": true,
+    "theme": "auto"
+  },
+  "connectedSites": [
+    {
+      "domain": "google.com",
+      "accountId": "acc-google-001",
+      "autoFillEnabled": true,
+      "lastUsed": "2024-01-15T10:30:00Z"
+    },
+    {
+      "domain": "github.com",
+      "accountId": "acc-github-001",
+      "autoFillEnabled": true,
+      "lastUsed": "2024-01-14T16:45:00Z"
+    },
+    {
+      "domain": "microsoft.com",
+      "accountId": "acc-microsoft-001",
+      "autoFillEnabled": false,
+      "lastUsed": "2024-01-13T09:20:00Z"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "toggle-extension",
+      "key": "Ctrl+Shift+A",
+      "description": "Toggle extension popup"
+    },
+    {
+      "name": "auto-fill-code",
+      "key": "Ctrl+Shift+V",
+      "description": "Auto-fill 2FA code"
+    },
+    {
+      "name": "copy-code",
+      "key": "Ctrl+Shift+C",
+      "description": "Copy current 2FA code"
+    }
+  ],
+  "syncData": {
+    "lastSyncTime": "2024-01-15T10:30:00Z",
+    "syncStatus": "success",
+    "conflictsCount": 0,
+    "accountsCount": 15,
+    "settingsHash": "abc123def456"
+  },
+  "notifications": [
+    {
+      "id": "notif-001",
+      "type": "code-copied",
+      "message": "Code copied for Google",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "read": false
+    },
+    {
+      "id": "notif-002",
+      "type": "auto-fill",
+      "message": "Code auto-filled for GitHub",
+      "timestamp": "2024-01-15T10:25:00Z",
+      "read": true
+    },
+    {
+      "id": "notif-003",
+      "type": "sync-conflict",
+      "message": "Sync conflict detected",
+      "timestamp": "2024-01-15T10:20:00Z",
+      "read": false,
+      "priority": "high"
+    }
+  ],
+  "contentScriptTargets": [
+    {
+      "domain": "accounts.google.com",
+      "selectors": {
+        "codeInput": "input[name='totpPin']",
+        "submitButton": "button[type='submit']"
+      },
+      "autoFillEnabled": true
+    },
+    {
+      "domain": "github.com",
+      "selectors": {
+        "codeInput": "input[name='otp']",
+        "submitButton": "button[type='submit']"
+      },
+      "autoFillEnabled": true
+    },
+    {
+      "domain": "login.microsoftonline.com",
+      "selectors": {
+        "codeInput": "input[name='otc']",
+        "submitButton": "input[type='submit']"
+      },
+      "autoFillEnabled": false
+    }
+  ],
+  "testPages": [
+    {
+      "name": "Google Login",
+      "url": "https://accounts.google.com/signin/v2/challenge/totp",
+      "expectedElements": ["input[name='totpPin']", "button[type='submit']"]
+    },
+    {
+      "name": "GitHub 2FA",
+      "url": "https://github.com/sessions/two-factor",
+      "expectedElements": ["input[name='otp']", "button[type='submit']"]
+    },
+    {
+      "name": "Microsoft 2FA",
+      "url": "https://login.microsoftonline.com/common/SAS/ProcessAuth",
+      "expectedElements": ["input[name='otc']", "input[type='submit']"]
+    }
+  ],
+  "permissions": [
+    {
+      "permission": "activeTab",
+      "required": true,
+      "description": "Required to detect 2FA input fields"
+    },
+    {
+      "permission": "storage",
+      "required": true,
+      "description": "Required to store extension settings"
+    },
+    {
+      "permission": "notifications",
+      "required": false,
+      "description": "Optional for showing notifications"
+    },
+    {
+      "permission": "contextMenus",
+      "required": false,
+      "description": "Optional for context menu integration"
+    }
+  ],
+  "errors": [
+    {
+      "type": "sync-error",
+      "message": "Failed to sync with mobile app",
+      "code": "SYNC_TIMEOUT"
+    },
+    {
+      "type": "permission-denied",
+      "message": "Permission denied for active tab",
+      "code": "PERMISSION_ERROR"
+    },
+    {
+      "type": "content-script-error",
+      "message": "Failed to inject content script",
+      "code": "CONTENT_SCRIPT_ERROR"
+    }
+  ]
+}

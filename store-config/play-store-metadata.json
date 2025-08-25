@@ -1,0 +1,238 @@
+{
+  "appDetails": {
+    "packageName": "com.aoneahsan.twofastudio",
+    "title": "2FA Studio - Secure Authenticator",
+    "shortDescription": "The most secure and user-friendly two-factor authentication app with biometric protection and cloud backup.",
+    
+    "fullDescription": "🔐 **2FA Studio** - Your Ultimate Security Companion\n\n**Protect Your Digital Life with Advanced Two-Factor Authentication**\n\n2FA Studio is the most comprehensive and secure two-factor authentication app designed for modern Android users who value security without compromising convenience.\n\n**🚀 Key Features:**\n\n• **Universal 2FA Support** - Compatible with all major services including Google, Microsoft, Facebook, Twitter, GitHub, and 500+ more\n• **Biometric Security** - Fingerprint and face unlock protection\n• **Smart QR Scanner** - Advanced QR code recognition with batch import\n• **Encrypted Cloud Backup** - Secure Google Drive backup with end-to-end encryption\n• **Cross-Platform Sync** - Seamless sync across all your devices\n• **Offline Mode** - Generate codes even without internet connection\n• **Wear OS Support** - Quick access to codes from your smartwatch\n• **Material You Design** - Beautiful interface that follows Android design guidelines\n• **Folders & Tags** - Organize your accounts with custom folders and tags\n• **Search & Filter** - Instantly find any account with smart search\n• **Export & Import** - Easy migration from other 2FA apps\n• **Browser Integration** - Auto-fill 2FA codes in Chrome and other browsers\n\n**🛡️ Advanced Security Features:**\n\n• **Zero-Knowledge Architecture** - Your data is encrypted before leaving your device\n• **Hardware Security Module** - Utilizes Android hardware-backed keystore\n• **Secure Vault** - Additional layer of protection for sensitive accounts\n• **Breach Monitoring** - Real-time security alerts and breach notifications\n• **Tamper Detection** - Detects and alerts about suspicious activities\n• **Emergency Access** - Secure account recovery options\n• **App Lock** - Multiple unlock methods including PIN, pattern, and biometric\n\n**✨ Premium Features:**\n\n• **Unlimited Accounts** - No restrictions on the number of 2FA accounts\n• **Priority Support** - 24/7 premium customer support\n• **Advanced Analytics** - Security insights and usage statistics\n• **Custom Themes** - Personalize your app appearance with Material You\n• **Widget Support** - Quick access widgets for your home screen\n• **Team Management** - Share accounts securely with team members\n• **API Access** - Integrate with your existing security tools\n• **Backup Scheduling** - Automatic cloud backups on your schedule\n\n**🌟 Why Choose 2FA Studio?**\n\n✓ **Privacy First** - No tracking, no ads, no data collection in premium version\n✓ **Open Source** - Transparent security with open-source components\n✓ **Regular Updates** - Continuous security improvements and new features\n✓ **Expert Support** - Built by cybersecurity professionals\n✓ **Compliance Ready** - Meets enterprise security standards\n✓ **Material You** - Perfect integration with Android 12+ theming\n\n**Perfect for:**\n• Individuals who want maximum security\n• Business professionals managing multiple accounts\n• IT administrators deploying enterprise 2FA\n• Security-conscious users migrating from other apps\n• Anyone who values privacy and data protection\n• Android power users who love customization\n\n**Migration Made Easy:**\nSwitch from Google Authenticator, Microsoft Authenticator, Authy, or any other 2FA app with our one-click import feature. Your accounts will be transferred securely with all settings preserved.\n\n**Enterprise Ready:**\n2FA Studio supports enterprise features including team management, centralized deployment, and integration with existing security infrastructure.\n\nDownload 2FA Studio today and experience the future of secure authentication on Android. Your digital security starts here.\n\n**Support:** help@2fastudio.com\n**Website:** https://2fastudio.com\n**Privacy Policy:** https://2fastudio.com/privacy\n\n**Permissions Explained:**\n• Camera: Only for QR code scanning\n• Storage: For local backups and exports\n• Internet: For cloud sync and updates\n• Biometric: For app security and authentication\n• Device Admin: For enhanced security features (optional)\n\nJoin thousands of users who trust 2FA Studio to protect their digital lives. Download now and secure your accounts in minutes!",
+    
+    "whatsNew": "🔥 **Version 1.0 - Launch Update**\n\n**Major Features:**\n🆕 Complete redesign with Material You design system\n🆕 Advanced biometric authentication with fingerprint and face unlock\n🆕 Smart QR code scanner with batch import capability\n🆕 End-to-end encrypted cloud backup via Google Drive\n🆕 Real-time sync across all Android devices\n🆕 Wear OS companion app for smartwatch access\n🆕 Browser integration for Chrome auto-fill\n🆕 Comprehensive folder and tag organization system\n🆕 Dynamic color theming with Android 12+\n🆕 Enhanced search and filtering capabilities\n🆕 Home screen widgets for quick access\n\n**Security Enhancements:**\n🔒 Zero-knowledge encryption architecture\n🔒 Hardware-backed keystore integration\n🔒 Tamper detection and security monitoring\n🔒 Breach alert system with real-time notifications\n🔒 Emergency access and account recovery options\n🔒 Advanced app lock with multiple unlock methods\n\n**Performance Improvements:**\n⚡ 3x faster code generation\n⚡ Optimized battery usage with Doze mode support\n⚡ Reduced app size by 40%\n⚡ Improved startup time\n⚡ Enhanced stability and reliability\n⚡ Background sync optimization\n\n**Android-Specific Features:**\n📱 Material You dynamic theming\n📱 Adaptive icons support\n📱 Edge-to-edge display optimization\n📱 Notification channels for better control\n📱 Quick settings tile integration\n📱 Accessibility improvements\n📱 Multi-window and split-screen support\n\n**Enterprise & Team Features:**\n👥 Team management and sharing capabilities\n👥 API access for third-party integrations\n👥 Compliance with enterprise security standards\n👥 Advanced analytics and reporting\n👥 Priority customer support\n👥 Bulk deployment tools\n\nThank you for choosing 2FA Studio. We're committed to keeping your digital life secure with the best Android experience!"
+  },
+  
+  "categoryInfo": {
+    "primaryCategory": "TOOLS",
+    "secondaryCategory": "PRODUCTIVITY",
+    "tags": [
+      "security",
+      "authentication", 
+      "privacy",
+      "productivity",
+      "business",
+      "utilities"
+    ]
+  },
+  
+  "contentRating": {
+    "rating": "Everyone",
+    "contentDescriptors": []
+  },
+  
+  "targetAudience": {
+    "ageGroups": [
+      "18-24",
+      "25-34", 
+      "35-44",
+      "45-54",
+      "55-64",
+      "65+"
+    ],
+    "interests": [
+      "Technology",
+      "Security",
+      "Privacy",
+      "Business",
+      "Finance",
+      "Cryptocurrency"
+    ]
+  },
+  
+  "screenshots": {
+    "phone": [
+      "screenshot_phone_1_main.png",
+      "screenshot_phone_2_scanner.png",
+      "screenshot_phone_3_codes.png", 
+      "screenshot_phone_4_folders.png",
+      "screenshot_phone_5_settings.png",
+      "screenshot_phone_6_backup.png",
+      "screenshot_phone_7_security.png",
+      "screenshot_phone_8_material_you.png"
+    ],
+    "tablet": [
+      "screenshot_tablet_1_main.png",
+      "screenshot_tablet_2_scanner.png",
+      "screenshot_tablet_3_management.png",
+      "screenshot_tablet_4_settings.png"
+    ],
+    "wearos": [
+      "screenshot_wear_1_codes.png",
+      "screenshot_wear_2_auth.png"
+    ]
+  },
+  
+  "featureGraphic": "feature_graphic_1024x500.png",
+  "iconHighRes": "icon_512x512.png",
+  
+  "promoVideo": "https://www.youtube.com/watch?v=YOUR_PROMO_VIDEO_ID",
+  
+  "storeListingExperiments": {
+    "enableCustomStoreListing": true,
+    "customStoreListings": [
+      {
+        "name": "Security Focused",
+        "title": "2FA Studio - Ultra Secure Authenticator",
+        "shortDescription": "Military-grade security for your 2FA codes with biometric protection and encrypted cloud backup.",
+        "featureGraphic": "feature_graphic_security_1024x500.png"
+      },
+      {
+        "name": "Business Professional", 
+        "title": "2FA Studio - Business Authenticator",
+        "shortDescription": "Professional 2FA management with team sharing, enterprise features, and priority support.",
+        "featureGraphic": "feature_graphic_business_1024x500.png"
+      }
+    ]
+  },
+  
+  "pricing": {
+    "model": "freemium",
+    "inAppProducts": [
+      {
+        "productId": "premium_monthly",
+        "type": "subscription",
+        "price": "$2.99",
+        "currency": "USD",
+        "period": "monthly",
+        "trialDays": 7
+      },
+      {
+        "productId": "premium_yearly", 
+        "type": "subscription",
+        "price": "$19.99",
+        "currency": "USD", 
+        "period": "yearly",
+        "trialDays": 14,
+        "savings": "44%"
+      },
+      {
+        "productId": "premium_lifetime",
+        "type": "one-time",
+        "price": "$49.99",
+        "currency": "USD"
+      }
+    ]
+  },
+  
+  "dataPrivacy": {
+    "dataCollected": [
+      {
+        "type": "Personal info",
+        "items": ["Email addresses"],
+        "purpose": "Account management",
+        "sharing": false
+      },
+      {
+        "type": "App activity",
+        "items": ["App interactions", "In-app search history"],
+        "purpose": "Analytics", 
+        "sharing": false,
+        "optional": true
+      }
+    ],
+    "dataNotCollected": [
+      "2FA secrets and codes",
+      "Biometric data",
+      "Personal messages",
+      "Location data",
+      "Device identifiers"
+    ],
+    "securityPractices": [
+      "Data is encrypted in transit",
+      "Data is encrypted at rest", 
+      "You can delete your data",
+      "You can export your data",
+      "Follows the families policy"
+    ]
+  },
+  
+  "technicalDetails": {
+    "minimumSDK": 21,
+    "targetSDK": 34,
+    "supportedAbis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86",
+      "x86_64"
+    ],
+    "permissions": [
+      {
+        "name": "CAMERA",
+        "reason": "Required for scanning QR codes to add new 2FA accounts"
+      },
+      {
+        "name": "WRITE_EXTERNAL_STORAGE",
+        "reason": "Required for creating local backups and exporting data"
+      },
+      {
+        "name": "USE_FINGERPRINT",
+        "reason": "Required for biometric authentication to protect your 2FA codes"
+      },
+      {
+        "name": "RECEIVE_BOOT_COMPLETED", 
+        "reason": "Required to restore app functionality after device restart"
+      },
+      {
+        "name": "VIBRATE",
+        "reason": "Required for haptic feedback during code generation"
+      }
+    ]
+  },
+  
+  "testing": {
+    "targetAudience": "Everyone",
+    "countries": [
+      "US",
+      "CA", 
+      "GB",
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "AU",
+      "JP",
+      "KR",
+      "BR",
+      "IN"
+    ],
+    "deviceCategories": [
+      "phone",
+      "tablet", 
+      "wearable"
+    ]
+  },
+  
+  "contactInfo": {
+    "website": "https://2fastudio.com",
+    "email": "support@2fastudio.com", 
+    "phone": "+1-555-2FA-STUDIO",
+    "privacyPolicy": "https://2fastudio.com/privacy",
+    "address": "2FA Studio Inc.\n123 Security Ave\nCyber City, CC 12345\nUnited States"
+  },
+  
+  "localization": {
+    "defaultLanguage": "en-US",
+    "supportedLanguages": [
+      "en-US",
+      "es-419",
+      "pt-BR", 
+      "fr-FR",
+      "de-DE",
+      "it-IT",
+      "ja-JP",
+      "ko-KR",
+      "zh-CN",
+      "zh-TW",
+      "hi-IN",
+      "ar",
+      "ru-RU"
+    ]
+  }
+}

@@ -38,7 +38,10 @@
 		"docs:deploy": "cd docs-site && yarn deploy",
 		"docs:clear": "cd docs-site && yarn clear",
 		"docs:write-translations": "cd docs-site && yarn write-translations",
-		"docs:write-heading-ids": "cd docs-site && yarn write-heading-ids"
+		"docs:write-heading-ids": "cd docs-site && yarn write-heading-ids",
+		"i18n:extract": "node src/scripts/extract-translations.js",
+		"i18n:validate": "node src/scripts/validate-translations.js",
+		"i18n:check": "yarn i18n:extract && yarn i18n:validate"
 	},
 	"dependencies": {
 		"@capacitor-community/admob": "^7.0.3",
@@ -91,6 +94,11 @@
 		"framer-motion": "^12.23.12",
 		"google-auth-library": "^10.2.1",
 		"googleapis": "^156.0.0",
+		"i18next": "^25.4.2",
+		"i18next-browser-languagedetector": "^8.2.0",
+		"i18next-http-backend": "^3.0.2",
+		"i18next-icu": "^2.4.0",
+		"intl-messageformat": "^10.7.16",
 		"lucide-react": "^0.539.0",
 		"notification-kit": "^2.0.5",
 		"onesignal-cordova-plugin": "^5.2.15",
@@ -103,6 +111,7 @@
 		"react-dom": "^19.1.1",
 		"react-dropzone": "^14.3.8",
 		"react-hook-form": "^7.62.0",
+		"react-i18next": "^15.7.2",
 		"react-intersection-observer": "^9.16.0",
 		"react-onesignal": "^3.2.3",
 		"react-redux": "^9.2.0",

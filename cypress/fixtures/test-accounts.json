@@ -1,0 +1,154 @@
+{
+  "validAccounts": [
+    {
+      "issuer": "Google",
+      "label": "john.doe@gmail.com",
+      "secret": "JBSWY3DPEHPK3PXP",
+      "type": "totp",
+      "algorithm": "SHA1",
+      "digits": 6,
+      "period": 30,
+      "icon": "google",
+      "category": "Email"
+    },
+    {
+      "issuer": "GitHub",
+      "label": "johndoe",
+      "secret": "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
+      "type": "totp",
+      "algorithm": "SHA1",
+      "digits": 6,
+      "period": 30,
+      "icon": "github",
+      "category": "Development"
+    },
+    {
+      "issuer": "Microsoft",
+      "label": "john.doe@outlook.com",
+      "secret": "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+      "type": "totp",
+      "algorithm": "SHA1",
+      "digits": 6,
+      "period": 30,
+      "icon": "microsoft",
+      "category": "Email"
+    },
+    {
+      "issuer": "Dropbox",
+      "label": "john.doe@example.com",
+      "secret": "MFRGG43FMJQWO2LTMRQXIZ3PN5XW6ZY=",
+      "type": "totp",
+      "algorithm": "SHA1",
+      "digits": 6,
+      "period": 30,
+      "icon": "dropbox",
+      "category": "Storage"
+    },
+    {
+      "issuer": "AWS",
+      "label": "MyAWSAccount",
+      "secret": "KRSXG5A=",
+      "type": "totp",
+      "algorithm": "SHA1",
+      "digits": 6,
+      "period": 30,
+      "icon": "aws",
+      "category": "Cloud"
+    }
+  ],
+  "hotpAccounts": [
+    {
+      "issuer": "Bank of America",
+      "label": "john.doe",
+      "secret": "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+      "type": "hotp",
+      "algorithm": "SHA1",
+      "digits": 6,
+      "counter": 0,
+      "icon": "bank",
+      "category": "Finance"
+    },
+    {
+      "issuer": "PayPal",
+      "label": "john.doe@paypal.com",
+      "secret": "MFRGG43FMJQWO2LTMRQXIZ3PN5XW6ZY=",
+      "type": "hotp",
+      "algorithm": "SHA1",
+      "digits": 6,
+      "counter": 5,
+      "icon": "paypal",
+      "category": "Finance"
+    }
+  ],
+  "steamAccounts": [
+    {
+      "issuer": "Steam",
+      "label": "johndoe_steam",
+      "secret": "JBSWY3DPEHPK3PXP",
+      "type": "steam",
+      "algorithm": "SHA1",
+      "digits": 5,
+      "period": 30,
+      "icon": "steam",
+      "category": "Gaming"
+    }
+  ],
+  "customAccounts": [
+    {
+      "issuer": "Custom Service",
+      "label": "custom@example.com",
+      "secret": "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
+      "type": "totp",
+      "algorithm": "SHA256",
+      "digits": 8,
+      "period": 60,
+      "icon": "custom",
+      "category": "Custom"
+    }
+  ],
+  "invalidAccounts": [
+    {
+      "issuer": "",
+      "label": "test@example.com",
+      "secret": "JBSWY3DPEHPK3PXP",
+      "type": "totp",
+      "error": "Issuer is required"
+    },
+    {
+      "issuer": "Invalid Secret",
+      "label": "test@example.com",
+      "secret": "INVALID_SECRET_123",
+      "type": "totp",
+      "error": "Invalid Base32 secret"
+    },
+    {
+      "issuer": "Duplicate Test",
+      "label": "duplicate@example.com",
+      "secret": "JBSWY3DPEHPK3PXP",
+      "type": "totp",
+      "duplicate": true,
+      "error": "Account already exists"
+    }
+  ],
+  "backupCodes": [
+    {
+      "issuer": "Google Backup",
+      "codes": [
+        "12345-67890",
+        "09876-54321",
+        "11111-22222",
+        "33333-44444",
+        "55555-66666",
+        "77777-88888",
+        "99999-00000",
+        "12121-34343"
+      ]
+    }
+  ],
+  "qrCodeUrls": [
+    "otpauth://totp/Google:test@gmail.com?secret=JBSWY3DPEHPK3PXP&issuer=Google",
+    "otpauth://totp/GitHub:testuser?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=GitHub",
+    "otpauth://hotp/BankExample:user?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=BankExample&counter=0",
+    "otpauth://totp/CustomService:user@example.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=CustomService&algorithm=SHA256&digits=8&period=60"
+  ]
+}

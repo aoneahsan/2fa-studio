@@ -1,0 +1,151 @@
+{
+  "validBackup": {
+    "version": "1.0.0",
+    "createdAt": "2024-01-15T10:30:00Z",
+    "encryptionMethod": "AES-256-GCM",
+    "accounts": [
+      {
+        "id": "acc-001",
+        "issuer": "Google",
+        "label": "backup.test@gmail.com",
+        "secret": "JBSWY3DPEHPK3PXP",
+        "type": "totp",
+        "algorithm": "SHA1",
+        "digits": 6,
+        "period": 30,
+        "createdAt": "2024-01-10T08:00:00Z",
+        "updatedAt": "2024-01-10T08:00:00Z"
+      },
+      {
+        "id": "acc-002",
+        "issuer": "GitHub",
+        "label": "backupuser",
+        "secret": "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
+        "type": "totp",
+        "algorithm": "SHA1",
+        "digits": 6,
+        "period": 30,
+        "createdAt": "2024-01-12T09:15:00Z",
+        "updatedAt": "2024-01-12T09:15:00Z"
+      }
+    ],
+    "folders": [
+      {
+        "id": "folder-001",
+        "name": "Work",
+        "color": "#3B82F6",
+        "accountIds": ["acc-001"]
+      },
+      {
+        "id": "folder-002",
+        "name": "Personal",
+        "color": "#10B981",
+        "accountIds": ["acc-002"]
+      }
+    ],
+    "tags": [
+      {
+        "id": "tag-001",
+        "name": "important",
+        "color": "#EF4444"
+      },
+      {
+        "id": "tag-002",
+        "name": "work",
+        "color": "#8B5CF6"
+      }
+    ],
+    "settings": {
+      "theme": "dark",
+      "autoLock": true,
+      "lockTimeout": 300,
+      "biometricEnabled": true
+    }
+  },
+  "invalidBackupVersions": [
+    {
+      "version": "0.9.0",
+      "error": "Unsupported backup version"
+    },
+    {
+      "version": "2.0.0",
+      "error": "Backup version too new"
+    }
+  ],
+  "corruptedBackup": {
+    "version": "1.0.0",
+    "createdAt": "2024-01-15T10:30:00Z",
+    "accounts": "CORRUPTED_DATA",
+    "error": "Invalid backup format"
+  },
+  "emptyBackup": {
+    "version": "1.0.0",
+    "createdAt": "2024-01-15T10:30:00Z",
+    "accounts": [],
+    "folders": [],
+    "tags": []
+  },
+  "largeBackup": {
+    "version": "1.0.0",
+    "createdAt": "2024-01-15T10:30:00Z",
+    "accounts": [],
+    "note": "This would contain 1000+ accounts for performance testing"
+  },
+  "legacyFormats": {
+    "aegisBackup": {
+      "version": 1,
+      "header": {
+        "slots": null,
+        "params": null
+      },
+      "db": {
+        "version": 2,
+        "entries": [
+          {
+            "type": "totp",
+            "uuid": "550e8400-e29b-41d4-a716-446655440000",
+            "name": "Legacy:user@example.com",
+            "issuer": "Legacy Service",
+            "note": "",
+            "icon": null,
+            "info": {
+              "secret": "JBSWY3DPEHPK3PXP",
+              "algo": "SHA1",
+              "digits": 6,
+              "period": 30
+            }
+          }
+        ]
+      }
+    },
+    "authyBackup": {
+      "accounts": [
+        {
+          "name": "Authy Legacy",
+          "originalName": "user@example.com",
+          "secret": "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
+          "type": "totp",
+          "digits": 6,
+          "period": 30,
+          "algorithm": "sha1"
+        }
+      ]
+    },
+    "googleAuthenticatorBackup": {
+      "otpauth-migration://offline?data=CjEKCkhleWRvQ2xvdWQSEm15YWNjb3VudEBnbWFpbC5jb20aBkdvb2dsZTABOAEQARgBIAA%3D"
+    }
+  },
+  "encryptedBackups": [
+    {
+      "filename": "2fa-backup-encrypted.json",
+      "encryptionPassword": "TestEncryption123!",
+      "data": "U2FsdGVkX1+vupppZksvRf5pq5g5XjFRlipRkwB0K1Y96Qsv2Lm+31CMzMuhfnr8"
+    },
+    {
+      "filename": "2fa-backup-wrong-password.json",
+      "encryptionPassword": "WrongPassword!",
+      "data": "U2FsdGVkX1+vupppZksvRf5pq5g5XjFRlipRkwB0K1Y96Qsv2Lm+31CMzMuhfnr8",
+      "error": "Invalid encryption password"
+    }
+  ]
+}

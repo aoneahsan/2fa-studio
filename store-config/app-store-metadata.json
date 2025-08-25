@@ -1,0 +1,193 @@
+{
+  "appInfo": {
+    "name": "2FA Studio",
+    "subtitle": "Secure Two-Factor Authentication",
+    "bundleId": "com.aoneahsan.twofastudio",
+    "sku": "2FASTUDIO2024",
+    "primaryLanguage": "en-US",
+    "category": "UTILITIES",
+    "secondaryCategory": "PRODUCTIVITY",
+    "contentRating": "4+"
+  },
+  
+  "appDescription": {
+    "shortDescription": "The most secure and user-friendly two-factor authentication app for protecting your digital accounts.",
+    
+    "fullDescription": "🔐 **2FA Studio** - Your Ultimate Security Companion\n\n**Protect Your Digital Life with Advanced Two-Factor Authentication**\n\n2FA Studio is the most comprehensive and secure two-factor authentication app designed for modern users who value security without compromising convenience.\n\n**🚀 Key Features:**\n\n• **Universal 2FA Support** - Compatible with all major services including Google, Microsoft, Facebook, Twitter, GitHub, and 500+ more\n• **Biometric Security** - Face ID, Touch ID, and fingerprint protection\n• **Smart QR Scanner** - Advanced QR code recognition with batch import\n• **Encrypted Cloud Backup** - Secure Google Drive backup with end-to-end encryption\n• **Cross-Platform Sync** - Seamless sync across all your devices\n• **Offline Mode** - Generate codes even without internet connection\n• **Apple Watch Support** - Quick access to codes from your wrist\n• **Dark Mode** - Beautiful interface that adapts to your preference\n• **Folders & Tags** - Organize your accounts with custom folders and tags\n• **Search & Filter** - Instantly find any account with smart search\n• **Export & Import** - Easy migration from other 2FA apps\n• **Browser Extension** - Auto-fill 2FA codes in Safari and Chrome\n\n**🛡️ Advanced Security Features:**\n\n• **Zero-Knowledge Architecture** - Your data is encrypted before leaving your device\n• **Hardware Security Module** - Utilizes device secure enclaves\n• **Secure Vault** - Additional layer of protection for sensitive accounts\n• **Breach Monitoring** - Real-time security alerts and breach notifications\n• **Tamper Detection** - Detects and alerts about suspicious activities\n• **Emergency Access** - Secure account recovery options\n\n**✨ Premium Features:**\n\n• **Unlimited Accounts** - No restrictions on the number of 2FA accounts\n• **Priority Support** - 24/7 premium customer support\n• **Advanced Analytics** - Security insights and usage statistics\n• **Custom Themes** - Personalize your app appearance\n• **Wear OS Support** - Access codes from Android smartwatches\n• **Team Management** - Share accounts securely with team members\n• **API Access** - Integrate with your existing security tools\n\n**🌟 Why Choose 2FA Studio?**\n\n✓ **Privacy First** - No tracking, no ads, no data collection in premium version\n✓ **Open Source** - Transparent security with open-source components\n✓ **Regular Updates** - Continuous security improvements and new features\n✓ **Expert Support** - Built by cybersecurity professionals\n✓ **Compliance Ready** - Meets enterprise security standards\n\n**Perfect for:**\n• Individuals who want maximum security\n• Business professionals managing multiple accounts\n• IT administrators deploying enterprise 2FA\n• Security-conscious users migrating from other apps\n• Anyone who values privacy and data protection\n\nDownload 2FA Studio today and experience the future of secure authentication. Your digital security starts here.\n\n**Support:** help@2fastudio.com\n**Website:** https://2fastudio.com\n**Privacy Policy:** https://2fastudio.com/privacy",
+    
+    "whatsNew": "🔥 **Version 1.0 - Launch Update**\n\n**New Features:**\n• Complete redesign with modern, intuitive interface\n• Advanced biometric authentication with Face ID and Touch ID\n• Smart QR code scanner with batch import capability\n• End-to-end encrypted cloud backup via Google Drive\n• Real-time sync across all devices\n• Apple Watch companion app for quick access\n• Browser extension for Safari and Chrome auto-fill\n• Comprehensive folder and tag organization system\n• Dark mode with multiple theme options\n• Enhanced search and filtering capabilities\n\n**Security Enhancements:**\n• Zero-knowledge encryption architecture\n• Hardware security module integration\n• Tamper detection and security monitoring\n• Breach alert system with real-time notifications\n• Emergency access and account recovery options\n\n**Performance Improvements:**\n• 3x faster code generation\n• Optimized battery usage\n• Reduced app size by 40%\n• Improved startup time\n• Enhanced stability and reliability\n\n**Enterprise Features:**\n• Team management and sharing capabilities\n• API access for third-party integrations\n• Compliance with enterprise security standards\n• Advanced analytics and reporting\n• Priority customer support\n\nThank you for choosing 2FA Studio. We're committed to keeping your digital life secure!"
+  },
+  
+  "keywords": [
+    "2FA",
+    "two factor authentication",
+    "authenticator",
+    "TOTP",
+    "security",
+    "password",
+    "OTP",
+    "biometric",
+    "Face ID",
+    "Touch ID",
+    "secure",
+    "encryption",
+    "privacy",
+    "backup",
+    "sync",
+    "Google Authenticator",
+    "Microsoft Authenticator",
+    "Authy",
+    "cybersecurity",
+    "protection"
+  ],
+  
+  "screenshots": {
+    "iPhone": {
+      "6.7": [
+        "screenshot_67_1_accounts_list.png",
+        "screenshot_67_2_qr_scanner.png", 
+        "screenshot_67_3_code_display.png",
+        "screenshot_67_4_settings.png",
+        "screenshot_67_5_backup.png",
+        "screenshot_67_6_folders.png",
+        "screenshot_67_7_search.png",
+        "screenshot_67_8_security.png",
+        "screenshot_67_9_apple_watch.png",
+        "screenshot_67_10_dark_mode.png"
+      ],
+      "6.5": [
+        "screenshot_65_1_accounts_list.png",
+        "screenshot_65_2_qr_scanner.png",
+        "screenshot_65_3_code_display.png", 
+        "screenshot_65_4_settings.png",
+        "screenshot_65_5_backup.png"
+      ],
+      "5.5": [
+        "screenshot_55_1_accounts_list.png",
+        "screenshot_55_2_qr_scanner.png",
+        "screenshot_55_3_code_display.png",
+        "screenshot_55_4_settings.png",
+        "screenshot_55_5_backup.png"
+      ]
+    },
+    "iPad": {
+      "12.9": [
+        "screenshot_ipad_129_1_main.png",
+        "screenshot_ipad_129_2_scanner.png",
+        "screenshot_ipad_129_3_management.png",
+        "screenshot_ipad_129_4_settings.png",
+        "screenshot_ipad_129_5_sync.png"
+      ]
+    }
+  },
+  
+  "appPreview": {
+    "iPhone": {
+      "6.7": "preview_iphone_67.mp4",
+      "6.5": "preview_iphone_65.mp4",
+      "5.5": "preview_iphone_55.mp4"
+    },
+    "iPad": {
+      "12.9": "preview_ipad_129.mp4"
+    }
+  },
+  
+  "supportURL": "https://2fastudio.com/support",
+  "marketingURL": "https://2fastudio.com",
+  "privacyPolicyURL": "https://2fastudio.com/privacy",
+  
+  "pricing": {
+    "free": {
+      "features": [
+        "Up to 10 accounts",
+        "Basic QR code scanning", 
+        "Local backup",
+        "Standard support",
+        "Ads supported"
+      ]
+    },
+    "premium": {
+      "monthly": {
+        "price": "$2.99",
+        "productId": "com.aoneahsan.twofastudio.premium.monthly"
+      },
+      "yearly": {
+        "price": "$19.99",
+        "productId": "com.aoneahsan.twofastudio.premium.yearly",
+        "discount": "44% off"
+      },
+      "lifetime": {
+        "price": "$49.99", 
+        "productId": "com.aoneahsan.twofastudio.premium.lifetime"
+      },
+      "features": [
+        "Unlimited accounts",
+        "Cloud backup & sync",
+        "Apple Watch support",
+        "Browser extension",
+        "Priority support",
+        "No ads",
+        "Advanced security features",
+        "Team management",
+        "Custom themes",
+        "Export/import tools"
+      ]
+    }
+  },
+  
+  "ageRating": {
+    "rating": "4+",
+    "advisories": []
+  },
+  
+  "contentRights": {
+    "copyright": "© 2024 2FA Studio. All rights reserved.",
+    "trademark": "2FA Studio™"
+  },
+  
+  "reviewInfo": {
+    "contact": {
+      "firstName": "2FA Studio",
+      "lastName": "Support Team", 
+      "phone": "+1-555-2FA-STUDIO",
+      "email": "appstore@2fastudio.com"
+    },
+    "demoAccount": {
+      "username": "reviewer@2fastudio.com",
+      "password": "AppStoreReview2024!",
+      "notes": "This is a demo account pre-loaded with sample 2FA accounts for review purposes. All codes are functional but point to test endpoints."
+    },
+    "notes": "This app uses camera permission only for QR code scanning. Biometric authentication is used solely for app security. No personal data is collected without explicit user consent. The app works offline and respects user privacy."
+  },
+  
+  "platforms": {
+    "iOS": {
+      "minimumVersion": "14.0",
+      "deviceSupport": [
+        "iPhone",
+        "iPad",
+        "iPod touch"
+      ]
+    },
+    "watchOS": {
+      "minimumVersion": "7.0",
+      "companionApp": true
+    }
+  },
+  
+  "localization": {
+    "supported": [
+      "en-US",
+      "es-ES", 
+      "fr-FR",
+      "de-DE",
+      "it-IT",
+      "pt-BR",
+      "ja-JP",
+      "ko-KR",
+      "zh-Hans",
+      "zh-Hant"
+    ],
+    "defaultLanguage": "en-US"
+  }
+}

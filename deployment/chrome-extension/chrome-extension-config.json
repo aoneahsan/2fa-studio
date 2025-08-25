@@ -1,0 +1,318 @@
+{
+  "chromeExtension": {
+    "metadata": {
+      "name": "2FA Studio",
+      "shortName": "2FA Studio",
+      "description": "Secure Two-Factor Authentication Manager for Chrome - Generate, manage, and auto-fill TOTP codes with biometric security.",
+      "category": "productivity",
+      "manifestVersion": 3,
+      "minimumChromeVersion": "88",
+      "homepageUrl": "https://2fastudio.com",
+      "supportUrl": "https://2fastudio.com/support"
+    },
+    "permissions": {
+      "required": [
+        "storage",
+        "activeTab",
+        "contextMenus",
+        "alarms"
+      ],
+      "optional": [
+        "tabs",
+        "clipboardWrite",
+        "notifications"
+      ],
+      "hostPermissions": [
+        "*://*/*"
+      ]
+    },
+    "contentSecurity": {
+      "policy": "script-src 'self'; object-src 'self'; worker-src 'self'",
+      "sandbox": false,
+      "trustedTypes": {
+        "policyNames": ["2fa-studio-policy"]
+      }
+    },
+    "ui": {
+      "popup": {
+        "default": "popup/popup.html",
+        "width": 400,
+        "height": 600
+      },
+      "options": {
+        "page": "options/options.html",
+        "openInTab": true
+      },
+      "sidePanel": {
+        "enabled": false
+      },
+      "devtools": {
+        "enabled": false
+      }
+    },
+    "background": {
+      "serviceWorker": "background/service-worker.js",
+      "type": "module"
+    },
+    "contentScripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["src/content-script.js"],
+        "css": ["src/content-styles.css"],
+        "runAt": "document_idle",
+        "allFrames": false
+      }
+    ],
+    "webAccessibleResources": [
+      {
+        "resources": [
+          "popup/*",
+          "options/*",
+          "assets/*"
+        ],
+        "matches": ["<all_urls>"]
+      }
+    ],
+    "icons": {
+      "16": "assets/icon-16.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    },
+    "features": {
+      "autoFill": {
+        "enabled": true,
+        "triggerKey": "Enter",
+        "confirmationRequired": true,
+        "timeoutSeconds": 30
+      },
+      "qrDetection": {
+        "enabled": true,
+        "autoDetect": true,
+        "confirmationRequired": true
+      },
+      "contextMenus": {
+        "enabled": true,
+        "items": [
+          {
+            "id": "generate-code",
+            "title": "Generate 2FA Code",
+            "contexts": ["page", "selection"]
+          },
+          {
+            "id": "scan-qr",
+            "title": "Scan QR Code",
+            "contexts": ["image"]
+          }
+        ]
+      },
+      "keyboardShortcuts": {
+        "enabled": true,
+        "commands": {
+          "open-popup": {
+            "suggested_key": {
+              "default": "Alt+2",
+              "windows": "Alt+2",
+              "mac": "MacCtrl+2",
+              "chromeos": "Alt+2",
+              "linux": "Alt+2"
+            },
+            "description": "Open 2FA Studio popup"
+          },
+          "quick-fill": {
+            "suggested_key": {
+              "default": "Alt+Shift+2",
+              "windows": "Alt+Shift+2",
+              "mac": "MacCtrl+Shift+2",
+              "chromeos": "Alt+Shift+2",
+              "linux": "Alt+Shift+2"
+            },
+            "description": "Quick fill 2FA code"
+          }
+        }
+      },
+      "sync": {
+        "enabled": true,
+        "mobileApp": true,
+        "realTime": true,
+        "conflictResolution": "manual"
+      },
+      "security": {
+        "biometricLock": true,
+        "sessionTimeout": 15,
+        "autoLock": true,
+        "encryptionRequired": true
+      }
+    },
+    "build": {
+      "sourceMaps": false,
+      "minification": true,
+      "bundleAnalysis": true,
+      "optimization": {
+        "removeConsole": true,
+        "removeDebugger": true,
+        "minifyCSS": true,
+        "minifyHTML": true
+      },
+      "assets": {
+        "copyFiles": [
+          "assets/**/*",
+          "popup/**/*.html",
+          "options/**/*.html"
+        ],
+        "excludeFiles": [
+          "**/*.ts",
+          "**/*.scss",
+          "**/test/**/*",
+          "**/*.test.js"
+        ]
+      }
+    },
+    "testing": {
+      "enabled": true,
+      "types": [
+        "unit",
+        "integration",
+        "e2e"
+      ],
+      "coverage": {
+        "threshold": 80,
+        "excludePaths": [
+          "test/**/*",
+          "**/*.test.js"
+        ]
+      },
+      "browsers": [
+        "chrome",
+        "edge",
+        "brave"
+      ]
+    },
+    "distribution": {
+      "chromeWebStore": {
+        "enabled": true,
+        "visibility": "public",
+        "categories": ["productivity"],
+        "ageRating": "everyone",
+        "regions": ["all"],
+        "pricing": "free",
+        "inAppPurchases": false,
+        "autoPublish": false,
+        "reviewNotes": "This extension provides secure two-factor authentication management with no data collection and full offline functionality.",
+        "screenshots": [
+          "screenshots/popup-main.png",
+          "screenshots/account-list.png",
+          "screenshots/qr-scanner.png",
+          "screenshots/settings.png",
+          "screenshots/security-dashboard.png"
+        ],
+        "promoImages": {
+          "small": "promo/promo-440x280.png",
+          "large": "promo/promo-1400x560.png"
+        }
+      },
+      "edgeAddOns": {
+        "enabled": true,
+        "visibility": "public",
+        "categories": ["productivity"]
+      },
+      "firefoxAddOns": {
+        "enabled": false,
+        "reason": "Manifest V3 compatibility pending"
+      }
+    },
+    "analytics": {
+      "enabled": true,
+      "privacyCompliant": true,
+      "events": [
+        "extension_installed",
+        "popup_opened",
+        "code_generated",
+        "qr_scanned",
+        "account_added",
+        "sync_completed"
+      ],
+      "metrics": [
+        "daily_active_users",
+        "accounts_managed",
+        "codes_generated",
+        "sync_success_rate"
+      ]
+    },
+    "privacy": {
+      "dataCollection": {
+        "personalData": false,
+        "usageAnalytics": true,
+        "crashReports": true,
+        "performanceMetrics": true
+      },
+      "dataStorage": {
+        "localOnly": true,
+        "encryption": "AES-256",
+        "retention": "indefinite",
+        "userControlled": true
+      },
+      "thirdPartyServices": {
+        "analytics": "Google Analytics (anonymized)",
+        "errorTracking": "Sentry (no PII)",
+        "none": "No data sharing with third parties"
+      }
+    },
+    "compliance": {
+      "gdpr": {
+        "compliant": true,
+        "dataProcessing": "local-only",
+        "userConsent": "not-required",
+        "dataExport": true,
+        "dataErasure": true
+      },
+      "accessibility": {
+        "wcag21": "AA",
+        "features": [
+          "keyboard-navigation",
+          "screen-reader",
+          "high-contrast",
+          "large-text"
+        ]
+      },
+      "security": {
+        "contentSecurityPolicy": true,
+        "noEval": true,
+        "noInlineScripts": true,
+        "httpsOnly": true
+      }
+    },
+    "localization": {
+      "enabled": true,
+      "defaultLocale": "en",
+      "supportedLocales": [
+        "en",
+        "es",
+        "fr",
+        "de",
+        "it",
+        "pt",
+        "ja",
+        "ko",
+        "zh"
+      ],
+      "translationFiles": {
+        "format": "chrome-i18n",
+        "location": "_locales/{{locale}}/messages.json"
+      }
+    },
+    "updates": {
+      "autoUpdate": true,
+      "updateCheck": "onDemand",
+      "rollbackEnabled": true,
+      "stagedRollout": {
+        "enabled": true,
+        "percentage": 10
+      },
+      "releaseNotes": {
+        "required": true,
+        "format": "markdown",
+        "maxLength": 500
+      }
+    }
+  }
+}

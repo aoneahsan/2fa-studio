@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Card } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { 
@@ -6,8 +6,18 @@ import {
   LinkIcon, 
   MagnifyingGlassIcon,
   ArrowUpTrayIcon,
-  XMarkIcon
+  XMarkIcon,
+  CubeIcon,
+  SparklesIcon,
+  CloudArrowUpIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { IconSearchComponent } from '@components/icons/IconSearchComponent';
+import { useServiceIcon, useCustomIcons, useIconTheme } from '@/hooks/useIcons';
+import { ServiceIcon, IconTheme } from '@/types/icon';
+import { iconService } from '@/services/icon.service';
+import { iconThemeService } from '@/services/icon-theme.service';
+import { IconValidator } from '@/utils/icon-utils';
 
 interface AccountIconManagerProps {
   currentIcon?: string;
@@ -245,7 +255,7 @@ export const AccountIconManager: React.FC<AccountIconManagerProps> = ({
             onClick={() => onClose?.()}
             disabled={!previewUrl}
           >
-            Apply Icon
+            Use Selected Icon
           </Button>
         </div>
       </Card>
@@ -253,17 +263,58 @@ export const AccountIconManager: React.FC<AccountIconManagerProps> = ({
   );
 };
 
-// Simple icon display component
+// Enhanced icon display component using the new icon system
 export const AccountIcon: React.FC<{
   icon?: string;
   issuer: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
-}> = ({ icon, issuer, size = 'md', className = '' }) => {
+  /** Enable automatic icon detection */
+  autoDetect?: boolean;
+  /** Enable theme application */
+  applyTheme?: boolean;
+  /** Theme override */
+  theme?: IconTheme;
+  /** Show loading state */
+  showLoading?: boolean;
+  /** Enable hover effects */
+  enableHover?: boolean;
+  /** Click handler */
+  onClick?: () => void;
+}> = ({ 
+  icon, 
+  issuer, 
+  size = 'md', 
+  className = '',
+  autoDetect = true,
+  applyTheme = true,
+  theme,
+  showLoading = false,
+  enableHover = false,
+  onClick
+}) => {
+  const { theme: currentTheme } = useIconTheme();
+  const effectiveTheme = theme || currentTheme;
+  
+  // Use auto-detection if no icon provided
+  const { iconUrl: detectedIcon, isLoading } = useServiceIcon(
+    issuer,
+    { 
+      enabled: autoDetect && !icon,
+      theme: effectiveTheme,
+      preferCustom: true
+    }
+  );
+  
+  const finalIcon = icon || detectedIcon;
+  const isClickable = !!onClick;
+  const isLoadingState = showLoading && isLoading;
+
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
-    lg: 'w-16 h-16'
+    lg: 'w-16 h-16',
+    xl: 'w-20 h-20'
   };
 
   const getInitials = (name: string) => {
@@ -280,32 +331,91 @@ export const AccountIcon: React.FC<{
     for (let i = 0; i < str.length; i++) {
       hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const hue = hash % 360;
-    return `hsl(${hue}, 70%, 50%)`;
+    const hue = Math.abs(hash) % 360;
+    const saturation = 65 + (Math.abs(hash) % 20); // 65-85%
+    const lightness = 45 + (Math.abs(hash) % 20);  // 45-65%
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   };
+
+  // Apply theme transformations if enabled
+  const themeResult = applyTheme && finalIcon 
+    ? iconThemeService.applyThemeToIcon(finalIcon, effectiveTheme)
+    : { url: finalIcon };
+
+  const baseClassName = `
+    ${sizeClasses[size]} 
+    rounded-lg 
+    flex 
+    items-center 
+    justify-center 
+    overflow-hidden 
+    transition-all 
+    duration-200
+    ${isClickable ? 'cursor-pointer' : ''}
+    ${enableHover ? 'hover:scale-105 hover:shadow-md' : ''}
+    ${className}
+  `.trim().replace(/\s+/g, ' ');
+
+  const backgroundStyle = finalIcon 
+    ? {} 
+    : { backgroundColor: getColorFromString(issuer) + '20' };
+
+  const combinedStyle = {
+    ...backgroundStyle,
+    ...themeResult.style
+  };
+
+  if (isLoadingState) {
+    return (
+      <div 
+        className={`${baseClassName} bg-muted animate-pulse`}
+        onClick={onClick}
+      >
+        <div className="w-1/2 h-1/2 bg-muted-foreground/20 rounded animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div 
-      className={`${sizeClasses[size]} rounded-lg flex items-center justify-center overflow-hidden ${className}`}
-      style={{ backgroundColor: icon ? 'transparent' : getColorFromString(issuer) + '20' }}
+      className={baseClassName}
+      style={combinedStyle}
+      onClick={onClick}
+      title={issuer}
     >
-      {icon ? (
+      {finalIcon ? (
         <img 
-          src={icon} 
+          src={themeResult.url}
           alt={issuer}
           className="w-full h-full object-contain"
+          style={themeResult.style}
           onError={(e) => {
-            e.currentTarget.style.display = 'none';
+            // Hide failed image and show fallback
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const parent = target.parentElement;
+            if (parent) {
+              const fallback = parent.querySelector('.fallback-content') as HTMLElement;
+              if (fallback) {
+                fallback.style.display = 'flex';
+              }
+            }
           }}
         />
-      ) : (
-        <span 
-          className="font-semibold"
-          style={{ color: getColorFromString(issuer) }}
-        >
+      ) : null}
+      
+      {/* Fallback content */}
+      <div 
+        className={`fallback-content w-full h-full flex items-center justify-center ${finalIcon ? 'hidden' : ''}`}
+        style={{ 
+          color: getColorFromString(issuer),
+          fontSize: size === 'sm' ? '12px' : size === 'md' ? '14px' : size === 'lg' ? '18px' : '22px'
+        }}
+      >
+        <span className="font-semibold">
           {getInitials(issuer)}
         </span>
-      )}
+      </div>
     </div>
   );
 };

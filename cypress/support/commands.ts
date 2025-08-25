@@ -139,4 +139,6 @@ Cypress.Commands.add('setupEmulator', () => {
   });
 });
 
+// Additional helper functions can be added here
+
 export {};

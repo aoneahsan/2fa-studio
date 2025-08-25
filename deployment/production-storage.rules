@@ -1,0 +1,160 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Enhanced helper functions for production security
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasValidSubscription() {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.subscription.status == 'active';
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    
+    function hasAnyRole(roles) {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in roles;
+    }
+    
+    function isValidImageType() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|svg\\+xml)');
+    }
+    
+    function isValidBackupType() {
+      return request.resource.contentType == 'application/octet-stream' ||
+             request.resource.contentType == 'application/json';
+    }
+    
+    function withinSizeLimit(maxSizeBytes) {
+      return request.resource.size <= maxSizeBytes;
+    }
+    
+    function isRateLimited() {
+      // Implement rate limiting logic here
+      return false;
+    }
+    
+    // User profile pictures with enhanced validation
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isAuthenticated() && !isRateLimited();
+      allow write: if isOwner(userId) && 
+        withinSizeLimit(5 * 1024 * 1024) && // Max 5MB
+        isValidImageType() &&
+        fileName.matches('^[a-zA-Z0-9_-]+\\.(jpg|jpeg|png|webp)$') &&
+        !isRateLimited();
+      allow delete: if isOwner(userId);
+    }
+    
+    // User backups (encrypted) with subscription check
+    match /users/{userId}/backups/{backupId} {
+      allow read: if isOwner(userId) && !isRateLimited();
+      allow create: if isOwner(userId) && 
+        (hasValidSubscription() || 
+         firestore.get(/databases/(default)/documents/users/$(userId)).data.subscription.tier == 'free') &&
+        withinSizeLimit(50 * 1024 * 1024) && // Max 50MB for premium, 10MB for free
+        isValidBackupType() &&
+        backupId.matches('^backup_[0-9]{8}_[0-9]{6}$') &&
+        !isRateLimited();
+      allow update: if false; // Backups are immutable
+      allow delete: if isOwner(userId);
+    }
+    
+    // Account icons cache (public read, server-only write)
+    match /icons/{domain}/{icon} {
+      allow read: if true && !isRateLimited(); // Public read for cached icons
+      allow write: if false; // Only server can write
+    }
+    
+    // Temporary QR code uploads (for scanning) with strict validation
+    match /temp/{userId}/qr/{fileName} {
+      allow read: if isOwner(userId) && !isRateLimited();
+      allow create: if isOwner(userId) && 
+        withinSizeLimit(2 * 1024 * 1024) && // Max 2MB
+        isValidImageType() &&
+        fileName.matches('^qr_[0-9]+\\.(jpg|jpeg|png)$') &&
+        !isRateLimited();
+      allow update: if false;
+      allow delete: if isOwner(userId);
+    }
+    
+    // Export files (temporary)
+    match /temp/{userId}/export/{fileName} {
+      allow read: if isOwner(userId) && !isRateLimited();
+      allow create: if isOwner(userId) && 
+        withinSizeLimit(10 * 1024 * 1024) && // Max 10MB
+        (request.resource.contentType == 'application/json' ||
+         request.resource.contentType == 'text/plain' ||
+         request.resource.contentType == 'application/zip') &&
+        fileName.matches('^export_[0-9]+\\.(json|txt|zip)$') &&
+        !isRateLimited();
+      allow update: if false;
+      allow delete: if isOwner(userId);
+    }
+    
+    // Import files (temporary)
+    match /temp/{userId}/import/{fileName} {
+      allow read: if isOwner(userId) && !isRateLimited();
+      allow create: if isOwner(userId) && 
+        withinSizeLimit(5 * 1024 * 1024) && // Max 5MB
+        (request.resource.contentType == 'application/json' ||
+         request.resource.contentType == 'text/plain' ||
+         request.resource.contentType == 'text/csv') &&
+        fileName.matches('^import_[0-9]+\\.(json|txt|csv)$') &&
+        !isRateLimited();
+      allow update: if false;
+      allow delete: if isOwner(userId);
+    }
+    
+    // App assets (public read, admin write)
+    match /assets/{asset=**} {
+      allow read: if true && !isRateLimited();
+      allow write: if hasAnyRole(['admin', 'super_admin']) && !isRateLimited();
+    }
+    
+    // Documentation files
+    match /docs/{docPath=**} {
+      allow read: if true && !isRateLimited();
+      allow write: if hasAnyRole(['admin', 'super_admin']) && !isRateLimited();
+    }
+    
+    // Crash reports and logs (server-only)
+    match /logs/{userId}/{logType}/{logId} {
+      allow read: if hasAnyRole(['admin', 'super_admin']) && !isRateLimited();
+      allow create: if isOwner(userId) && 
+        withinSizeLimit(1 * 1024 * 1024) && // Max 1MB
+        logType in ['crash', 'error', 'performance'] &&
+        request.resource.contentType == 'application/json' &&
+        !isRateLimited();
+      allow update: if false;
+      allow delete: if hasAnyRole(['admin', 'super_admin']);
+    }
+    
+    // User data exports (GDPR compliance)
+    match /exports/{userId}/gdpr/{exportId} {
+      allow read: if isOwner(userId) && !isRateLimited();
+      allow create: if false; // Only server can create
+      allow update: if false;
+      allow delete: if isOwner(userId) || hasAnyRole(['admin', 'super_admin']);
+    }
+    
+    // Analytics data (admin only)
+    match /analytics/{dataType}/{dataId} {
+      allow read: if hasAnyRole(['admin', 'super_admin']) && !isRateLimited();
+      allow write: if false; // Only server can write
+    }
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

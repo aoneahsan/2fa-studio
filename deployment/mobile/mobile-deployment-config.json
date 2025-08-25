@@ -1,0 +1,306 @@
+{
+  "mobileDeployment": {
+    "platforms": {
+      "android": {
+        "enabled": true,
+        "packageName": "com.twofastudio.app",
+        "minSdkVersion": 26,
+        "targetSdkVersion": 34,
+        "compileSdkVersion": 34,
+        "buildToolsVersion": "34.0.0",
+        "keystore": {
+          "alias": "2fa-studio-release",
+          "storeFile": "release.keystore",
+          "storeType": "PKCS12"
+        },
+        "playStore": {
+          "defaultTrack": "internal",
+          "tracks": ["internal", "alpha", "beta", "production"],
+          "rolloutPercentage": {
+            "alpha": 100,
+            "beta": 100,
+            "production": 10
+          }
+        },
+        "buildVariants": {
+          "debug": {
+            "applicationIdSuffix": ".debug",
+            "versionNameSuffix": "-debug",
+            "debuggable": true,
+            "minifyEnabled": false
+          },
+          "release": {
+            "debuggable": false,
+            "minifyEnabled": true,
+            "shrinkResources": true
+          }
+        },
+        "permissions": [
+          "android.permission.CAMERA",
+          "android.permission.VIBRATE",
+          "android.permission.USE_FINGERPRINT",
+          "android.permission.USE_BIOMETRIC",
+          "android.permission.INTERNET",
+          "android.permission.ACCESS_NETWORK_STATE"
+        ]
+      },
+      "ios": {
+        "enabled": true,
+        "bundleId": "com.twofastudio.app",
+        "deploymentTarget": "15.0",
+        "supportedDevices": "1,2",
+        "teamId": "${APPLE_TEAM_ID}",
+        "appStore": {
+          "categories": {
+            "primary": "PRODUCTIVITY",
+            "secondary": "UTILITIES"
+          },
+          "ageRating": "4+",
+          "contentRights": {
+            "containsThirdPartyContent": false,
+            "hasRights": true
+          }
+        },
+        "capabilities": [
+          "com.apple.developer.authentication-services.autofill-credential-provider",
+          "com.apple.developer.local-authentication",
+          "keychain-access-groups"
+        ],
+        "configurations": {
+          "Debug": {
+            "codeSignStyle": "Automatic",
+            "provisioningStyle": "Automatic"
+          },
+          "Release": {
+            "codeSignStyle": "Manual",
+            "provisioningStyle": "Manual"
+          }
+        }
+      }
+    },
+    "buildConfiguration": {
+      "environment": "production",
+      "optimization": {
+        "minifyJs": true,
+        "optimizeImages": true,
+        "compressAssets": true,
+        "treeshaking": true
+      },
+      "capacitor": {
+        "webDir": "dist",
+        "server": {
+          "androidScheme": "https",
+          "iosScheme": "https"
+        },
+        "plugins": {
+          "PushNotifications": {
+            "presentationOptions": ["badge", "sound", "alert"]
+          },
+          "LocalNotifications": {
+            "smallIcon": "ic_stat_icon_config_sample",
+            "iconColor": "#488AFF",
+            "sound": "beep.wav"
+          },
+          "SplashScreen": {
+            "launchShowDuration": 3000,
+            "backgroundColor": "#1e40af",
+            "showSpinner": true,
+            "androidSpinnerStyle": "large",
+            "iosSpinnerStyle": "small",
+            "spinnerColor": "#ffffff"
+          }
+        }
+      }
+    },
+    "testing": {
+      "enabled": true,
+      "platforms": {
+        "android": {
+          "emulators": [
+            {
+              "name": "Pixel_7_API_34",
+              "target": "android-34",
+              "abi": "x86_64"
+            },
+            {
+              "name": "Pixel_4a_API_33",
+              "target": "android-33",
+              "abi": "x86_64"
+            }
+          ],
+          "devices": [
+            {
+              "model": "Pixel 7",
+              "api": 34
+            }
+          ]
+        },
+        "ios": {
+          "simulators": [
+            {
+              "name": "iPhone 14 Pro",
+              "runtime": "iOS 17.0"
+            },
+            {
+              "name": "iPhone SE (3rd generation)",
+              "runtime": "iOS 17.0"
+            }
+          ],
+          "devices": [
+            {
+              "model": "iPhone 14 Pro",
+              "version": "17.0"
+            }
+          ]
+        }
+      },
+      "testTypes": [
+        "unit",
+        "integration",
+        "e2e"
+      ]
+    },
+    "distribution": {
+      "android": {
+        "playStore": {
+          "enabled": true,
+          "serviceAccountKeyPath": "google-play-service-account.json",
+          "defaultLanguage": "en-US",
+          "releaseNotes": {
+            "maxLength": 500,
+            "template": "Bug fixes and performance improvements in version {{version}}"
+          }
+        },
+        "firebaseDistribution": {
+          "enabled": true,
+          "groups": ["qa-team", "beta-testers"],
+          "releaseNotesFile": "RELEASE_NOTES.txt"
+        }
+      },
+      "ios": {
+        "appStore": {
+          "enabled": true,
+          "autoSubmitForReview": false,
+          "releaseType": "MANUAL",
+          "phasedRelease": true
+        },
+        "firebaseDistribution": {
+          "enabled": true,
+          "groups": ["qa-team", "beta-testers"],
+          "releaseNotesFile": "RELEASE_NOTES.txt"
+        },
+        "testFlight": {
+          "enabled": true,
+          "autoNotifyEnabled": false,
+          "betaGroups": ["Internal Testing", "External Testing"],
+          "betaReviewInfo": {
+            "contactEmail": "support@2fastudio.com",
+            "contactFirstName": "2FA Studio",
+            "contactLastName": "Team",
+            "contactPhone": "+1-555-0123"
+          }
+        }
+      }
+    },
+    "security": {
+      "codeObfuscation": {
+        "android": {
+          "enabled": true,
+          "proguardFiles": ["proguard-android-optimize.txt", "proguard-rules.pro"]
+        },
+        "ios": {
+          "enabled": true,
+          "stripSwiftSymbols": true
+        }
+      },
+      "antiTampering": {
+        "enabled": true,
+        "rootDetection": true,
+        "debuggerDetection": true,
+        "emulatorDetection": true
+      },
+      "certificatePinning": {
+        "enabled": true,
+        "domains": [
+          "*.firebaseapp.com",
+          "*.googleapis.com",
+          "api.stripe.com"
+        ]
+      }
+    },
+    "performance": {
+      "monitoring": {
+        "enabled": true,
+        "crashlytics": true,
+        "performance": true,
+        "customTraces": [
+          "account_creation",
+          "qr_scan",
+          "backup_operation"
+        ]
+      },
+      "optimization": {
+        "launchTime": {
+          "target": 3000,
+          "critical": 5000
+        },
+        "memoryUsage": {
+          "target": "150MB",
+          "critical": "200MB"
+        },
+        "batteryUsage": {
+          "backgroundRefresh": "minimal",
+          "locationUsage": "none"
+        }
+      }
+    },
+    "compliance": {
+      "dataProtection": {
+        "gdpr": true,
+        "ccpa": true,
+        "coppa": false
+      },
+      "accessibility": {
+        "enabled": true,
+        "features": [
+          "voice_over",
+          "large_text",
+          "high_contrast",
+          "reduced_motion"
+        ]
+      },
+      "localization": {
+        "enabled": true,
+        "languages": ["en", "es", "fr", "de", "it", "pt", "ja", "ko", "zh"],
+        "regions": ["US", "EU", "APAC"]
+      }
+    },
+    "analytics": {
+      "enabled": true,
+      "providers": [
+        {
+          "name": "firebase",
+          "events": [
+            "app_open",
+            "account_created",
+            "qr_scanned",
+            "backup_created"
+          ]
+        },
+        {
+          "name": "mixpanel",
+          "events": [
+            "user_signup",
+            "premium_upgrade",
+            "feature_usage"
+          ]
+        }
+      ],
+      "userPrivacy": {
+        "optOut": true,
+        "dataRetention": "26months",
+        "anonymizeData": true
+      }
+    }
+  }
+}

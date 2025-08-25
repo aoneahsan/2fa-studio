@@ -1,165 +1,335 @@
-import React, { useState } from 'react';
-import { Button } from '@components/ui/button';
-import { Card } from '@components/ui/card';
-import { OTPAccount } from '@services/otp.service';
+/**
+ * Advanced Sync Conflict Resolution Component
+ * Provides UI for resolving sync conflicts between devices with detailed comparison
+ */
+
+import React, { useState, useEffect } from 'react';
+import {
+  AdvancedSyncService,
+  SyncConflict,
+} from '@src/services/advanced-sync.service';
+import { Button } from '@src/components/ui/button';
+import { Card } from '@src/components/ui/card';
+import { Badge } from '@src/components/common/Badge';
+import { ConfirmationDialog } from '@src/components/common/ConfirmationDialog';
 import { CloudIcon, DevicePhoneMobileIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
-interface SyncConflict {
-  accountId: string;
-  localAccount: OTPAccount;
-  remoteAccount: OTPAccount;
-  localUpdated: Date;
-  remoteUpdated: Date;
-}
-
 interface SyncConflictResolverProps {
-  conflicts: SyncConflict[];
-  onResolve: (resolutions: { accountId: string; choice: 'local' | 'remote' | 'merge' }[]) => void;
-  onCancel: () => void;
+  conflicts?: SyncConflict[];
+  onConflictResolved?: (conflictId: string, resolution: 'local' | 'remote' | 'merge') => void;
+  className?: string;
 }
 
 export const SyncConflictResolver: React.FC<SyncConflictResolverProps> = ({
-  conflicts,
-  onResolve,
-  onCancel
+  conflicts: propConflicts,
+  onConflictResolved,
+  className = '',
 }) => {
-  const [resolutions, setResolutions] = useState<Record<string, 'local' | 'remote' | 'merge'>>({});
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [conflicts, setConflicts] = useState<SyncConflict[]>(
+    propConflicts || AdvancedSyncService.getUnresolvedConflicts()
+  );
+  const [selectedConflict, setSelectedConflict] = useState<SyncConflict | null>(null);
+  const [resolutionType, setResolutionType] = useState<'local' | 'remote' | 'merge' | null>(null);
+  const [customMergeData, setCustomMergeData] = useState<any>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
 
-  const currentConflict = conflicts[currentIndex];
+  useEffect(() => {
+    if (!propConflicts) {
+      // Subscribe to conflict updates
+      const unsubscribe = AdvancedSyncService.onSyncEvent('conflict_detected', () => {
+        setConflicts(AdvancedSyncService.getUnresolvedConflicts());
+      });
 
-  const handleChoice = (choice: 'local' | 'remote' | 'merge') => {
-    setResolutions(prev => ({
-      ...prev,
-      [currentConflict.accountId]: choice
-    }));
+      const resolveUnsubscribe = AdvancedSyncService.onSyncEvent('conflict_resolved', () => {
+        setConflicts(AdvancedSyncService.getUnresolvedConflicts());
+      });
 
-    if (currentIndex < conflicts.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      return () => {
+        unsubscribe();
+        resolveUnsubscribe();
+      };
+    }
+  }, [propConflicts]);
+
+  useEffect(() => {
+    if (propConflicts) {
+      setConflicts(propConflicts);
+    }
+  }, [propConflicts]);
+
+  const handleResolveConflict = (
+    conflict: SyncConflict,
+    resolution: 'local' | 'remote' | 'merge'
+  ) => {
+    setSelectedConflict(conflict);
+    setResolutionType(resolution);
+    
+    if (resolution === 'merge') {
+      // For merge, prepare initial merged data
+      const merged = mergeConflictData(conflict);
+      setCustomMergeData(merged);
+    }
+    
+    setShowConfirmDialog(true);
+  };
+
+  const confirmResolution = async () => {
+    if (!selectedConflict || !resolutionType) return;
+
+    setIsResolving(true);
+    try {
+      await AdvancedSyncService.resolveConflict(
+        selectedConflict.id,
+        resolutionType,
+        resolutionType === 'merge' ? customMergeData : undefined
+      );
+
+      // Update local conflicts list
+      setConflicts(prev => prev.filter(c => c.id !== selectedConflict.id));
+      
+      if (onConflictResolved) {
+        onConflictResolved(selectedConflict.id, resolutionType);
+      }
+    } catch (error) {
+      console.error('Error resolving conflict:', error);
+    } finally {
+      setIsResolving(false);
+      setShowConfirmDialog(false);
+      setSelectedConflict(null);
+      setResolutionType(null);
+      setCustomMergeData(null);
     }
   };
 
-  const handleResolveAll = () => {
-    const resolutionArray = conflicts.map(conflict => ({
-      accountId: conflict.accountId,
-      choice: resolutions[conflict.accountId] || 'remote'
-    }));
-    onResolve(resolutionArray);
+  const mergeConflictData = (conflict: SyncConflict): any => {
+    const { localData, remoteData } = conflict;
+    
+    switch (conflict.type) {
+      case 'account':
+        return {
+          ...remoteData,
+          label: remoteData.label || localData.label,
+          issuer: remoteData.issuer || localData.issuer,
+          notes: remoteData.notes || localData.notes,
+          tags: [...new Set([...(localData.tags || []), ...(remoteData.tags || [])])],
+          isFavorite: localData.isFavorite || remoteData.isFavorite,
+          category: remoteData.category || localData.category,
+          updatedAt: new Date(),
+        };
+      
+      case 'folder':
+        return {
+          ...remoteData,
+          name: remoteData.name || localData.name,
+          description: remoteData.description || localData.description,
+          accountIds: [...new Set([...(localData.accountIds || []), ...(remoteData.accountIds || [])])],
+          updatedAt: new Date(),
+        };
+      
+      case 'tag':
+        return {
+          ...remoteData,
+          name: remoteData.name || localData.name,
+          color: remoteData.color || localData.color,
+          accountIds: [...new Set([...(localData.accountIds || []), ...(remoteData.accountIds || [])])],
+          updatedAt: new Date(),
+        };
+      
+      default:
+        return { ...remoteData, ...localData, updatedAt: new Date() };
+    }
   };
 
-  const isComplete = Object.keys(resolutions).length === conflicts.length;
+  const formatTimestamp = (timestamp: Date) => {
+    return timestamp.toLocaleString();
+  };
+
+  const formatDataDifferences = (local: any, remote: any) => {
+    const differences = [];
+    const allKeys = new Set([...Object.keys(local), ...Object.keys(remote)]);
+    
+    for (const key of allKeys) {
+      if (key === 'updatedAt' || key === 'createdAt') continue;
+      
+      const localValue = local[key];
+      const remoteValue = remote[key];
+      
+      if (JSON.stringify(localValue) !== JSON.stringify(remoteValue)) {
+        differences.push({
+          field: key,
+          local: localValue,
+          remote: remoteValue,
+        });
+      }
+    }
+    
+    return differences;
+  };
+
+  const renderFieldValue = (value: any) => {
+    if (value === null || value === undefined) return <span className="text-gray-400">null</span>;
+    if (typeof value === 'boolean') return value.toString();
+    if (Array.isArray(value)) return `[${value.join(', ')}]`;
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
+  };
+
+  if (conflicts.length === 0) {
+    return (
+      <div className={`text-center py-8 text-gray-500 dark:text-gray-400 ${className}`}>
+        <div className="text-lg font-medium mb-2">No Conflicts</div>
+        <div className="text-sm">All changes have been synchronized successfully.</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <ExclamationTriangleIcon className="w-6 h-6 text-yellow-500" />
-          <div>
-            <h2 className="text-xl font-semibold">Sync Conflicts Detected</h2>
-            <p className="text-sm text-muted-foreground">
-              Conflict {currentIndex + 1} of {conflicts.length}
-            </p>
-          </div>
-        </div>
+    <div className={`space-y-4 ${className}`}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Sync Conflicts ({conflicts.length})
+        </h3>
+        <Badge variant="destructive">
+          Action Required
+        </Badge>
+      </div>
 
-        {currentConflict && (
-          <div className="space-y-4 mb-6">
-            <div className="text-center mb-4">
-              <h3 className="font-medium">{currentConflict.localAccount.issuer}</h3>
-              <p className="text-sm text-muted-foreground">{currentConflict.localAccount.label}</p>
+      {conflicts.map((conflict) => {
+        const differences = formatDataDifferences(conflict.localData, conflict.remoteData);
+        
+        return (
+          <Card key={conflict.id} className="p-6">
+            <div className="space-y-4">
+              {/* Conflict Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+                    {conflict.type.charAt(0).toUpperCase() + conflict.type.slice(1)} Conflict
+                  </h4>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Entity ID: {conflict.entityId}
+                  </div>
+                </div>
+                <Badge variant="outline" className="capitalize">
+                  {conflict.type}
+                </Badge>
+              </div>
+
+              {/* Conflict Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Local Version */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-medium text-blue-600 dark:text-blue-400">
+                      <DevicePhoneMobileIcon className="w-4 h-4 inline mr-1" />
+                      Local Version (This Device)
+                    </h5>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatTimestamp(conflict.localTimestamp)}
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                    {differences.map((diff, index) => (
+                      <div key={index} className="mb-2 last:mb-0">
+                        <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {diff.field}:
+                        </div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100 break-words">
+                          {renderFieldValue(diff.local)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Remote Version */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-medium text-green-600 dark:text-green-400">
+                      <CloudIcon className="w-4 h-4 inline mr-1" />
+                      Remote Version (Other Device)
+                    </h5>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatTimestamp(conflict.remoteTimestamp)}
+                    </div>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                    {differences.map((diff, index) => (
+                      <div key={index} className="mb-2 last:mb-0">
+                        <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {diff.field}:
+                        </div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100 break-words">
+                          {renderFieldValue(diff.remote)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Differences Summary */}
+              {differences.length > 0 && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                  <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                    <ExclamationTriangleIcon className="w-4 h-4 inline mr-1" />
+                    Fields with conflicts ({differences.length}):
+                  </div>
+                  <div className="text-xs text-yellow-700 dark:text-yellow-300">
+                    {differences.map(d => d.field).join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {/* Resolution Actions */}
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleResolveConflict(conflict, 'local')}
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  Keep Local Version
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleResolveConflict(conflict, 'remote')}
+                  className="text-green-600 border-green-200 hover:bg-green-50"
+                >
+                  Keep Remote Version
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleResolveConflict(conflict, 'merge')}
+                  className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                >
+                  Merge Both Versions
+                </Button>
+              </div>
             </div>
+          </Card>
+        );
+      })}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Local Version */}
-              <Card
-                className={`p-4 cursor-pointer transition-colors ${
-                  resolutions[currentConflict.accountId] === 'local' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'hover:border-muted-foreground'
-                }`}
-                onClick={() => handleChoice('local')}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <DevicePhoneMobileIcon className="w-5 h-5" />
-                  <h4 className="font-medium">Local Version</h4>
-                </div>
-                <div className="space-y-1 text-sm">
-                  <p>Updated: {currentConflict.localUpdated.toLocaleString()}</p>
-                  <p className="text-muted-foreground">
-                    Algorithm: {currentConflict.localAccount.algorithm}
-                  </p>
-                  <p className="text-muted-foreground">
-                    Digits: {currentConflict.localAccount.digits}
-                  </p>
-                </div>
-              </Card>
-
-              {/* Remote Version */}
-              <Card
-                className={`p-4 cursor-pointer transition-colors ${
-                  resolutions[currentConflict.accountId] === 'remote' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'hover:border-muted-foreground'
-                }`}
-                onClick={() => handleChoice('remote')}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <CloudIcon className="w-5 h-5" />
-                  <h4 className="font-medium">Cloud Version</h4>
-                </div>
-                <div className="space-y-1 text-sm">
-                  <p>Updated: {currentConflict.remoteUpdated.toLocaleString()}</p>
-                  <p className="text-muted-foreground">
-                    Algorithm: {currentConflict.remoteAccount.algorithm}
-                  </p>
-                  <p className="text-muted-foreground">
-                    Digits: {currentConflict.remoteAccount.digits}
-                  </p>
-                </div>
-              </Card>
-            </div>
-
-            {/* Progress indicator */}
-            <div className="flex justify-center gap-1 mt-4">
-              {conflicts.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-2 w-2 rounded-full transition-colors ${
-                    index === currentIndex
-                      ? 'bg-primary'
-                      : resolutions[conflicts[index].accountId]
-                      ? 'bg-primary/50'
-                      : 'bg-muted'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel Sync
-          </Button>
-          {currentIndex < conflicts.length - 1 ? (
-            <Button
-              onClick={() => setCurrentIndex(currentIndex + 1)}
-              disabled={!resolutions[currentConflict.accountId]}
-              className="flex-1"
-            >
-              Next Conflict
-            </Button>
-          ) : (
-            <Button
-              onClick={handleResolveAll}
-              disabled={!isComplete}
-              className="flex-1"
-            >
-              Apply Resolutions
-            </Button>
-          )}
-        </div>
-      </Card>
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showConfirmDialog}
+        title="Resolve Sync Conflict"
+        message={
+          selectedConflict && resolutionType
+            ? `Are you sure you want to resolve this ${selectedConflict.type} conflict using the ${resolutionType} version? This action cannot be undone.`
+            : ''
+        }
+        confirmText={isResolving ? 'Resolving...' : 'Resolve Conflict'}
+        cancelText="Cancel"
+        onConfirm={confirmResolution}
+        onCancel={() => setShowConfirmDialog(false)}
+        isDestructive={false}
+        isLoading={isResolving}
+      />
     </div>
   );
 };

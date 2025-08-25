@@ -30,6 +30,9 @@ export const authOnUserCreate = authFunctions.onUserCreate;
 export const authOnUserDelete = authFunctions.onUserDelete;
 export const authValidateAdmin = authFunctions.validateAdmin;
 export const authCleanupSessions = authFunctions.cleanupSessions;
+export const authCreateSession = authFunctions.createSession;
+export const authRevokeSession = authFunctions.revokeSession;
+export const authGetUserSessions = authFunctions.getUserSessions;
 
 // Subscription Functions
 export const subscriptionCreateCheckoutSession =
@@ -58,34 +61,67 @@ export const securityMonitorSuspiciousActivity =
 export const securityEnforceRateLimit = securityFunctions.enforceRateLimit;
 export const securityValidateRequest = securityFunctions.validateRequest;
 export const securityAuditLog = securityFunctions.createAuditLog;
+export const securityCheckIPReputation = securityFunctions.checkIPReputation;
 
 // Webhook Functions
 export const webhookOneSignal = webhookFunctions.handleOneSignalWebhook;
 export const webhookGoogleDrive = webhookFunctions.handleGoogleDriveWebhook;
+export const webhookRegister = webhookFunctions.registerWebhook;
+export const webhookList = webhookFunctions.listWebhooks;
 
 // Scheduled Functions
 export const scheduledCleanup = onSchedule('every 24 hours', async () => {
 	console.log('Running daily cleanup tasks');
 
-	// Cleanup tasks
-	await Promise.all([
-		authFunctions.cleanupExpiredSessions(),
-		backupFunctions.cleanupOldBackups(),
-		analyticsFunctions.cleanupOldAnalytics(),
-		securityFunctions.cleanupOldAuditLogs(),
-	]);
+	try {
+		// Cleanup tasks
+		await Promise.all([
+			authFunctions.cleanupExpiredSessions(),
+			backupFunctions.cleanupOldBackups(),
+			analyticsFunctions.cleanupOldAnalytics(),
+			securityFunctions.cleanupOldAuditLogs(),
+		]);
+		console.log('Daily cleanup completed successfully');
+	} catch (error) {
+		console.error('Error during daily cleanup:', error);
+	}
 });
 
 export const scheduledUsageCheck = onSchedule('every 1 hours', async () => {
 	console.log('Checking user usage limits');
 
-	await subscriptionFunctions.enforceUsageLimits();
+	try {
+		const result = await subscriptionFunctions.enforceUsageLimits();
+		console.log(`Usage check completed: ${result.violations} violations found`);
+	} catch (error) {
+		console.error('Error during usage check:', error);
+	}
 });
 
 export const scheduledBackup = onSchedule('every 12 hours', async () => {
 	console.log('Running scheduled backups');
 
-	await backupFunctions.runScheduledBackups();
+	try {
+		const result = await backupFunctions.runScheduledBackups();
+		console.log(`Scheduled backups completed: ${result.processed} processed`);
+	} catch (error) {
+		console.error('Error during scheduled backups:', error);
+	}
+});
+
+export const scheduledAnalytics = onSchedule('every 24 hours', async () => {
+	console.log('Running daily analytics aggregation');
+
+	try {
+		const stats = await analyticsFunctions.aggregateDailyStats();
+		console.log('Daily analytics aggregation completed', {
+			totalUsers: stats.users.total,
+			activeUsers: stats.users.active,
+			newUsers: stats.users.new
+		});
+	} catch (error) {
+		console.error('Error during analytics aggregation:', error);
+	}
 });
 
 // HTTP Functions for API
@@ -117,6 +153,6 @@ export const api = onRequest(async (req, res) => {
 		}
 	} catch (error) {
 		console.error('API Error:', error);
-		res.status(500).json({ _error: 'Internal server error' });
+		res.status(500).json({ error: 'Internal server error' });
 	}
 });

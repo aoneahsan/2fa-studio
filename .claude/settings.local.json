@@ -560,7 +560,8 @@
       "Bash(command:*)",
       "Bash(tsc --noEmit)",
       "Bash(./node_modules/.bin/vite build:*)",
-      "Bash(env)"
+      "Bash(env)",
+      "Bash(firebase init:*)"
     ],
     "deny": []
   }
